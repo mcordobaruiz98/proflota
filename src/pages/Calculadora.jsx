@@ -205,6 +205,10 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const [nuevoNom,    setNuevoNom]    = useState("");
   const [nuevoVal,    setNuevoVal]    = useState("");
   const [guardando,   setGuardando]   = useState(false);
+  const [modoFlete, setModoFlete] = useState("porTon");
+  const valorViaje = modoFlete === "porTon"
+  ? n(tonelaje) * n(fleteTon)
+  : n(fleteTon);
 
   const n   = (v) => parseFloat(v) || 0;
   const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
@@ -354,22 +358,66 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
             <input type="number" placeholder="100" value={kmVacio} onChange={e=>setKmVacio(e.target.value)} style={styles.input} />
           </div>
         </div>
-        <div style={styles.fila2}>
-          <div style={styles.campo}>
-            <label style={styles.label}>Toneladas</label>
-            <input type="number" placeholder="33.5" step="0.01" value={tonelaje} onChange={e=>setTonelaje(e.target.value)} style={styles.input} />
-          </div>
-          <div style={styles.campo}>
-            <label style={styles.label}>Flete ($/ton)</label>
-            <input type="number" placeholder="80000" value={fleteTon} onChange={e=>setFleteTon(e.target.value)} style={styles.input} />
-          </div>
+        {/* MODO DE FLETE */}
+<div style={styles.campo}>
+  <label style={styles.label}>Modo de pago del flete</label>
+  <select
+    value={modoFlete}
+    onChange={e => setModoFlete(e.target.value)}
+    style={styles.input}
+  >
+    <option value="porTon">Por tonelada ($/ton)</option>
+    <option value="porViaje">Por viaje (valor fijo)</option>
+  </select>
+</div>
+
+<div style={styles.fila2}>
+  <div style={styles.campo}>
+    <label style={styles.label}>Toneladas</label>
+    <input
+      type="number"
+      placeholder="33.5"
+      step="0.01"
+      value={tonelaje}
+      onChange={e => setTonelaje(e.target.value)}
+      style={styles.input}
+    />
+  </div>
+  {modoFlete === "porTon" ? (
+    <div style={styles.campo}>
+      <label style={styles.label}>Flete ($/ton)</label>
+      <input
+        type="number"
+        placeholder="80000"
+        value={fleteTon}
+        onChange={e => setFleteTon(e.target.value)}
+        style={styles.input}
+      />
+    </div>
+  ) : (
+    <div style={styles.campo}>
+      <label style={styles.label}>Valor del viaje ($)</label>
+      <input
+        type="number"
+        placeholder="2500000"
+        value={fleteTon}
+        onChange={e => setFleteTon(e.target.value)}
+        style={styles.input}
+      />
+    </div>
+  )}
+</div>
         </div>
 
         {/* VALOR VIAJE */}
         {valorViaje > 0 && (
           <div style={styles.valorViajeBox}>
-            <span style={styles.valorViajeLabel}>Valor del viaje</span>
-            <span style={styles.valorViajeNum}>{fmt(valorViaje)}</span>
+            <span style={styles.valorViajeLabel}>
+              {modoFlete === "porTon"
+              ? '${n(tonelaje)} ton x $${Math.round(n(fleteTon)).toLocaleString("es-CO")}/ton'
+            : "Valor fijo por viaje"}
+            </span>
+            <span style={styles.barraFondo.valorViajeNum}>{fmt(valorViaje)}</span>
           </div>
         )}
       </div>
