@@ -232,7 +232,7 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const costoAdbl = adblLt   * n(precioAdblue);
   const costoComb = costoAcpm + costoAdbl;
   const totPeajes = peajesRuta.reduce((s,p) => s + (p.t[categoria]||0) * (p.iv?2:1), 0);
-  const costoConduct = modoConductor === "porcentaje" ? (n(porcCond)/100) * valorViaje : n(pocCond);
+  const costoConduct = modoConductor === "porcentaje" ? (n(porcCond)/100) * valorViaje : n(porcCond);
   const totExtras = extras.reduce((s,e) => s + e.valor, 0);
   const totalGastos = costoComb + totPeajes + costoConduct + n(carpado) + n(gastosViaje) + totExtras;
   const gananciaNeta = valorViaje - totalGastos;
