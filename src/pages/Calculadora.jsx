@@ -206,7 +206,7 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const [nuevoVal,    setNuevoVal]    = useState("");
   const [guardando,   setGuardando]   = useState(false);
   const [modoFlete, setModoFlete] = useState("porTon");
-  const [modoConductor, SetModoConductor] = useState("porcentaje");
+  const [modoConductor, setModoConductor] = useState("porcentaje");
 
   const n   = (v) => parseFloat(v) || 0;
   const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
