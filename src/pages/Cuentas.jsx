@@ -148,8 +148,8 @@ function Cuentas({ vehiculos = [], viajes = [] }) {
               {label:"Adblue",    valor:adblMes,      color:"#8B5CF6"},
               {label:"Peajes",    valor:peajesMes,    color:t.colors.amber},
               {label:"Conductor", valor:conductorMes, color:t.colors.green},
+              {label:"Descuentos de ley", valor:descuentosMes, color:t.colors.red},
               {label:"Otros",     valor:otrosMes,     color:t.colors.textTertiary},
-              {label:"Descuentos de ley", valor:descuentosMes, color:t.colors.textTertiary},
             ].filter(item=>item.valor>0).map(item=>{
               const pct = Math.round((item.valor/gastosMes)*100);
               return (
