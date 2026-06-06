@@ -225,8 +225,8 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
     .toLocaleString("es-CO", { maximumFractionDigits: d });
   const conductoresFrecuentes = [...new Set(
     viajes
-    .map(v => vcondNom)
-    .filter(C => c && C.trim() !=="")
+    .map(v => v.condNom)
+    .filter(c => c && c.trim() !=="")
   )]
   const valorViaje = modoFlete === "porTon"
   ? n(tonelaje) * n(fleteTon)
