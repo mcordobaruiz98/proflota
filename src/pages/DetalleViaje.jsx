@@ -45,6 +45,10 @@ function DetalleViaje({ viajes = [], onEliminar }) {
     {label:"Carpado/Descarpado", valor:viaje.carp,      detalle:null,                                        color:"#06B6D4"},
     {label:"Gastos de viaje",    valor:viaje.gv2,       detalle:null,                                        color:"#EC4899"},
     {label:"Otros gastos",       valor:viaje.extras,    detalle:null,                                        color:t.colors.textTertiary},
+    {label:"Retencion en la fuente", valor:viaje.descuentos?.retefuente ||0, detalle:null, color:t.colors.red},
+    {label:"Reteica",            valor:viaje.descuentos?.reteica ||0, detalle:null, color:t.colors.red},
+    {label:"FOPAT",              valor:viaje.descuentos?.fopat ||0, detalle:null, color:t.colors.red},
+    {label:viaje.descuentos?.nombreOtro||"Otro descuento", valor:viaje.descuentos?.otro||0, detalle:null, color:t.colors.red},
   ].filter(g=>g.valor>0);
 
   return (
