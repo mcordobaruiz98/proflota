@@ -547,7 +547,10 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   <label style={styles.label}>Modo de pago conductor</label>
   <select
     value={modoConductor}
-    onChange={e => {setModoConductor(e.target.value);
+    onChange={e => {
+      console.log("Modo Conductor:", e.target.value);
+      console.log("porcCond antes:", pocCond);
+      setModoConductor(e.target.value);
       setPorcCond("");
     }}
     style={styles.input}
