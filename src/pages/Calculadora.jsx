@@ -216,6 +216,8 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const [descOtro,          setDescOtro]          = useState(false);
   const [pctOtro,           setPctOtro]           = useState(0);
   const [nombreOtro,        setNombreOtro]        = useState("");
+  const [contactoEmpresa,   setContactoEmpresa]   = useState("");
+  const [celularEmpresa,    setCelularEmpresa]    = useState("");
 
   const n   = (v) => parseFloat(v) || 0;
   const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
@@ -284,7 +286,7 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
     setGuardando(true);
     await onGuardar({
       fecha, mani, placa, tipoCarga, producto,
-      ruta: ruta.trim(), emp: empresa, condNom: conductor,
+      ruta: ruta.trim(), emp: empresa, condNom: conductor, contactoEmpresa, celularEmpresa,
       kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmT: kmTotal,
       ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
       gTot: galTotal, galCargado: galCarg, galVacio: galVac,
@@ -365,6 +367,14 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
           <div style={styles.campo}>
             <label style={styles.label}>Empresa</label>
             <input type="text" placeholder="TransABC" value={empresa} onChange={e=>setEmpresa(e.target.value)} style={styles.input} />
+          </div>
+          <div style={styles.campo}>
+          <label style={styles.label}>Contacto empresa</label>
+          <input type="text" placeholder="Nombre del contacto" value={contactoEmpresa} onChange={e=>setContactoEmpresa(e.target.value)} style={styles.input} />
+          </div>
+          <div style={styles.campo}>
+          <label style={styles.label}>Celular contacto</label>
+          <input type="tel" placeholder="+57 300 000 0000" value={celularEmpresa} onChange={e=>setCelularEmpresa(e.target.value)} style={styles.input} />
           </div>
         </div>
         <div style={styles.campo}>

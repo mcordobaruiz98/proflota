@@ -148,17 +148,19 @@ function DetalleViaje({ viajes = [], onEliminar }) {
         </div>
 
         {/* CARGA */}
-        {(viaje.carga||viaje.prod||viaje.condNom)&&(
-          <div style={styles.card}>
+        {(viaje.carga||viaje.prod||viaje.condNom||viaje.contactoEmpresa||viaje.celularEmpresa)&&(
+        <div style={styles.card}>
             <div style={styles.cardHeader}>
-              <Package size={16} color={t.colors.blue} strokeWidth={2} />
-              <p style={styles.cardTitulo}>Datos del viaje</p>
-            </div>
-            {viaje.carga&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Tipo de carga</span><span style={styles.filaValor}>{viaje.carga}</span></div>}
-            {viaje.prod&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Producto</span><span style={styles.filaValor}>{viaje.prod}</span></div>}
-            {viaje.condNom&&<div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Conductor</span><span style={styles.filaValor}>{viaje.condNom}</span></div>}
+             <Package size={16} color={t.colors.blue} strokeWidth={2} />
+            <p style={styles.cardTitulo}>Datos del viaje</p>
           </div>
-        )}
+          {viaje.carga&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Tipo de carga</span><span style={styles.filaValor}>{viaje.carga}</span></div>}
+          {viaje.prod&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Producto</span><span style={styles.filaValor}>{viaje.prod}</span></div>}
+          {viaje.condNom&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Conductor</span><span style={styles.filaValor}>{viaje.condNom}</span></div>}
+          {viaje.contactoEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Contacto empresa</span><span style={styles.filaValor}>{viaje.contactoEmpresa}</span></div>}
+          {viaje.celularEmpresa&&<div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Celular contacto</span><a href={`tel:${viaje.celularEmpresa}`} style={{...styles.filaValor,color:t.colors.blue,textDecoration:"none"}}>{viaje.celularEmpresa}</a></div>}
+        </div>
+      )}
 
         {/* PEAJES */}
         {viaje.peajesDetalle&&viaje.peajesDetalle.length>0&&(
