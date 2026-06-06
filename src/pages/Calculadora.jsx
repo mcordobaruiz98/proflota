@@ -547,7 +547,9 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   <label style={styles.label}>Modo de pago conductor</label>
   <select
     value={modoConductor}
-    onChange={e => setModoConductor(e.target.value)}
+    onChange={e => {setModoConductor(e.target.value);
+      setPorcCond("");
+    }}
     style={styles.input}
   >
     <option value="porcentaje">Porcentaje del viaje (%)</option>
