@@ -218,6 +218,11 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const [nombreOtro,        setNombreOtro]        = useState("");
   const [contactoEmpresa,   setContactoEmpresa]   = useState("");
   const [celularEmpresa,    setCelularEmpresa]    = useState("");
+  const [tieneRetorno,     setTieneRetorno]       = useState(false);
+  const [fleteRetorno,     setFleteRetorno]       = useState("");
+  const [tonelajeRetorno,  setTonelajeRetorno]    = useState("");
+  const [modoFleteRetorno, setModoFleteRetorno]   = useState("porTon");
+
 
   const n   = (v) => parseFloat(v) || 0;
   const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
@@ -228,9 +233,18 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
     .map(v => v.condNom)
     .filter(c => c && c.trim() !=="")
   )]
-  const valorViaje = modoFlete === "porTon"
-  ? n(tonelaje) * n(fleteTon)
-  : n(fleteTon);
+  const valorViajeIda = modoFlete === "porTon"
+    ?n(tonelaje) * n(fleteTon)
+    : n(fleteTon);
+
+  const valorViajeRetorno = tieneRetorno
+    ?modoFleteRetorno === "porTon"
+      ? n(tonelajeRetorno) * n(fleteRetorno)
+      : n(fleteRetorno)
+    : 0;
+
+  const valorViaje = valorViajeIda + valorViajeRetorno;
+
   const kmTotal    = n(kmCargado) + n(kmVacio);
 
   let galCarg = 0, galVac = 0, galTotal = 0;
@@ -293,6 +307,7 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
       ruta: ruta.trim(), emp: empresa, condNom: conductor, contactoEmpresa, celularEmpresa,
       kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmT: kmTotal,
       ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
+      tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(), fleteRetorno: n(fleteRetorno),
       gTot: galTotal, galCargado: galCarg, galVacio: galVac,
       adlt: adblLt, cAcpm: costoAcpm, cAdbl: costoAdbl, cComb: costoComb,
       peajes: totPeajes,
@@ -476,6 +491,63 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
           </div>
         )}
       </div>
+        
+        {/* RETORNO */}
+      <div style={{marginTop:"10px"}}>
+      <div style={{display:"flex", alignItems:"center", gap:"10px"}}>
+      <input
+        type="checkbox"
+        checked={tieneRetorno}
+        onChange={e=>setTieneRetorno(e.target.checked)}
+        style={{width:"18px",height:"18px",cursor:"pointer",accentColor:t.colors.blue}}
+      />
+        <label style={{...styles.label, textTransform:"none", letterSpacing:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightMedium}}>
+        ¿Regresa con carga? (flete de retorno)
+        </label>
+      </div>
+
+        {tieneRetorno && (
+        <div style={{marginTop:"12px", padding:"12px", background:t.colors.bgSection, borderRadius:t.radius.md}}>
+        <div style={styles.campo}>
+        <label style={styles.label}>Modo de pago retorno</label>
+        <select
+          value={modoFleteRetorno}
+          onChange={e=>setModoFleteRetorno(e.target.value)}
+          style={styles.input}
+        >
+          <option value="porTon">Por tonelada ($/ton)</option>
+          <option value="porViaje">Por viaje (valor fijo)</option>
+          </select>
+        </div>
+          <div style={styles.fila2}>
+          <div style={styles.campo}>
+          <label style={styles.label}>Toneladas retorno</label>
+          <input type="number" placeholder="30" step="0.01" value={tonelajeRetorno}
+            onChange={e=>setTonelajeRetorno(e.target.value)} style={styles.input} />
+        </div>
+        {modoFleteRetorno === "porTon" ? (
+          <div style={styles.campo}>
+            <label style={styles.label}>Flete retorno ($/ton)</label>
+            <input type="number" placeholder="60000" value={fleteRetorno}
+              onChange={e=>setFleteRetorno(e.target.value)} style={styles.input} />
+          </div>
+        ) : (
+          <div style={styles.campo}>
+            <label style={styles.label}>Valor retorno ($)</label>
+            <input type="number" placeholder="1500000" value={fleteRetorno}
+              onChange={e=>setFleteRetorno(e.target.value)} style={styles.input} />
+          </div>
+        )}
+      </div>
+      {valorViajeRetorno > 0 && (
+        <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", paddingTop:"8px", borderTop:`1px solid ${t.colors.border}`}}>
+          <span style={{fontSize:t.fonts.sizeSm, color:t.colors.textSecondary}}>Flete retorno</span>
+          <span style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.blue}}>{fmt(valorViajeRetorno)}</span>
+        </div>
+      )}
+    </div>
+  )}
+</div>
 
       {/* ── COMBUSTIBLE ── */}
       <div style={styles.seccionLabel}>Combustible / Adblue</div>
