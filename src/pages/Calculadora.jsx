@@ -223,7 +223,11 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
   const fnD = (v, d) => (Math.round(v * Math.pow(10,d)) / Math.pow(10,d))
     .toLocaleString("es-CO", { maximumFractionDigits: d });
-
+  const conductoresFrecuentes = [...new Set(
+    viajes
+    .map(v => vcondNom)
+    .filter(C => c && C.trim() !=="")
+  )]
   const valorViaje = modoFlete === "porTon"
   ? n(tonelaje) * n(fleteTon)
   : n(fleteTon);
@@ -378,9 +382,28 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
           </div>
         </div>
         <div style={styles.campo}>
-          <label style={styles.label}>Conductor</label>
-          <input type="text" placeholder="Nombre del conductor" value={conductor} onChange={e=>setConductor(e.target.value)} style={styles.input} />
-        </div>
+        <label style={styles.label}>Conductor</label>{conductoresFrecuentes.length > 0 ? (
+        <select value={conductor} onChange={e => setConductor(e.target.value)} 
+        style={{...styles.input, color: conductor ? t.colors.textPrimary : t.colors.textTertiary}}
+    >
+        <option value="">— Seleccionar conductor —</option>
+        {conductoresFrecuentes.map((c,i) => (
+        <option key={i} value={c}>{c}</option>
+      ))}
+        <option value="__nuevo__">+ Escribir nuevo conductor</option>
+      </select>
+      ) : null}
+      {(conductor === "__nuevo__" || conductoresFrecuentes.length === 0) && (
+      <input
+      type="text"
+      placeholder="Nombre del conductor"
+      value={conductor === "__nuevo__" ? "" : conductor}
+      onChange={e => setConductor(e.target.value)}
+      style={{...styles.input, marginTop: conductoresFrecuentes.length > 0 ? "6px" : "0"}}
+      autoFocus
+    />
+  )}
+</div>
         <div style={styles.fila2}>
           <div style={styles.campo}>
             <label style={styles.label}>Km cargado</label>
