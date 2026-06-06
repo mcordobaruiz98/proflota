@@ -206,16 +206,15 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const [nuevoVal,    setNuevoVal]    = useState("");
   const [guardando,   setGuardando]   = useState(false);
   const [modoFlete, setModoFlete] = useState("porTon");
-  const valorViaje = modoFlete === "porTon"
-  ? n(tonelaje) * n(fleteTon)
-  : n(fleteTon);
 
   const n   = (v) => parseFloat(v) || 0;
   const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
   const fnD = (v, d) => (Math.round(v * Math.pow(10,d)) / Math.pow(10,d))
     .toLocaleString("es-CO", { maximumFractionDigits: d });
 
-  const valorViaje = n(tonelaje) * n(fleteTon);
+  const valorViaje = modoFlete === "porTon"
+  ? n(tonelaje) * n(fleteTon)
+  : n(fleteTon);
   const kmTotal    = n(kmCargado) + n(kmVacio);
 
   let galCarg = 0, galVac = 0, galTotal = 0;
@@ -406,18 +405,17 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
       />
     </div>
   )}
-</div>
-        </div>
+    </div>
 
         {/* VALOR VIAJE */}
         {valorViaje > 0 && (
           <div style={styles.valorViajeBox}>
             <span style={styles.valorViajeLabel}>
               {modoFlete === "porTon"
-              ? '${n(tonelaje)} ton x $${Math.round(n(fleteTon)).toLocaleString("es-CO")}/ton'
-            : "Valor fijo por viaje"}
+                ? fnD(n(tonelaje),2) + " ton x $" + Math.round(n(fleteTon)).toLocaleString("es-CO") + "/ton"
+                : "Valor fijo por viaje"}
             </span>
-            <span style={styles.barraFondo.valorViajeNum}>{fmt(valorViaje)}</span>
+            <span style={styles.valorViajeNum}>{fmt(valorViaje)}</span>
           </div>
         )}
       </div>
