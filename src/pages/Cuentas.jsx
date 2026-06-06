@@ -1,0 +1,274 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, History, TrendingUp, TrendingDown } from "lucide-react";
+import { theme as t } from "../styles/theme";
+
+const MESES       = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const MESES_CORTO = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+
+function Cuentas({ vehiculos = [], viajes = [] }) {
+  const navigate = useNavigate();
+  const hoy = new Date();
+  const [mes,  setMes]  = useState(hoy.getMonth());
+  const [anio, setAnio] = useState(hoy.getFullYear());
+
+  const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
+  const fmtCorto = (n) => {
+    const abs = Math.abs(n);
+    if (abs >= 1000000) return (n/1000000).toFixed(1)+"M";
+    if (abs >= 1000)    return (n/1000).toFixed(0)+"K";
+    return Math.round(n).toLocaleString("es-CO");
+  };
+
+  const cambiarMes = (dir) => {
+    let m = mes + dir, a = anio;
+    if (m > 11) { m = 0;  a++; }
+    if (m < 0)  { m = 11; a--; }
+    setMes(m); setAnio(a);
+  };
+
+  const viajesMes    = viajes.filter(v => { const f=new Date(v.fecha); return f.getMonth()===mes && f.getFullYear()===anio; });
+  const ingresosMes  = viajesMes.reduce((s,v) => s+(v.vViaje||0), 0);
+  const gastosMes    = viajesMes.reduce((s,v) => s+(v.total||0),  0);
+  const netaMes      = viajesMes.reduce((s,v) => s+(v.neta||0),   0);
+  const rentabilidad = ingresosMes > 0 ? ((netaMes/ingresosMes)*100).toFixed(1) : "0.0";
+  const margenColor  = Number(rentabilidad)>=40 ? t.colors.green : Number(rentabilidad)>=20 ? t.colors.amber : t.colors.red;
+
+  const acpmMes      = viajesMes.reduce((s,v) => s+(v.cAcpm||0),     0);
+  const adblMes      = viajesMes.reduce((s,v) => s+(v.cAdbl||0),     0);
+  const peajesMes    = viajesMes.reduce((s,v) => s+(v.peajes||0),    0);
+  const conductorMes = viajesMes.reduce((s,v) => s+(v.conductor||0), 0);
+  const otrosMes     = viajesMes.reduce((s,v) => s+(v.carp||0)+(v.gv2||0)+(v.extras||0), 0);
+
+  const gananciaPorVeh = vehiculos.map(veh => {
+    const vt = viajesMes.filter(v => v.placa===veh.placa);
+    return { placa: veh.placa, tipo: veh.tipoVehiculo, neta: vt.reduce((s,v)=>s+(v.neta||0),0), viajes: vt.length };
+  }).sort((a,b) => b.neta - a.neta);
+  const maxNeta = Math.max(...gananciaPorVeh.map(v=>Math.abs(v.neta)), 1);
+
+  const ultimos6 = Array.from({length:6}, (_,i) => {
+    let m = mes-(5-i), a = anio;
+    if (m<0) { m+=12; a--; }
+    const vm = viajes.filter(v => { const f=new Date(v.fecha); return f.getMonth()===m && f.getFullYear()===a; });
+    return { mes: MESES_CORTO[m], neta: vm.reduce((s,v)=>s+(v.neta||0),0), activo: m===mes&&a===anio };
+  });
+  const maxGrafica = Math.max(...ultimos6.map(m=>Math.abs(m.neta)), 1);
+
+  return (
+    <div style={styles.pantalla}>
+
+      {/* HEADER */}
+      <div style={styles.header}>
+        <div>
+          <p style={styles.headerSub}>Resumen financiero</p>
+          <h1 style={styles.titulo}>Cuentas</h1>
+        </div>
+        <button style={styles.btnHistorial} onClick={() => navigate("/viajes")}>
+          <History size={16} color={t.colors.blue} strokeWidth={2} />
+          Historial
+        </button>
+      </div>
+
+      {/* NAV MES */}
+      <div style={styles.navMes}>
+        <button style={styles.btnMes} onClick={()=>cambiarMes(-1)}>‹</button>
+        <p style={styles.labelMes}>{MESES[mes]} {anio}</p>
+        <button style={styles.btnMes} onClick={()=>cambiarMes(1)}>›</button>
+      </div>
+
+      <div style={styles.contenido}>
+
+        {/* GANANCIA HERO */}
+        <div style={{
+          ...styles.gananciaHero,
+          background: netaMes>=0
+            ? `linear-gradient(135deg, #15803D 0%, ${t.colors.green} 100%)`
+            : `linear-gradient(135deg, #B91C1C 0%, ${t.colors.red} 100%)`,
+        }}>
+          <div>
+            <p style={styles.gananciaHeroLabel}>Ganancia neta del mes</p>
+            <p style={styles.gananciaHeroVal}>{fmt(netaMes)}</p>
+            <p style={styles.gananciaHeroSub}>
+              {viajesMes.length} viaje{viajesMes.length!==1?"s":""} · Rentabilidad{" "}
+              <span style={{fontWeight: t.fonts.weightBold, color:"#fff"}}>{rentabilidad}%</span>
+            </p>
+          </div>
+          <div style={styles.gananciaHeroBadge}>
+            {netaMes >= 0
+              ? <TrendingUp  size={28} color="rgba(255,255,255,0.9)" strokeWidth={2} />
+              : <TrendingDown size={28} color="rgba(255,255,255,0.9)" strokeWidth={2} />
+            }
+          </div>
+        </div>
+
+        {/* INGRESOS Y GASTOS */}
+        <div style={styles.dosColumnas}>
+          <div style={styles.metricaCard}>
+            <p style={styles.metricaLabel}>Ingresos brutos</p>
+            <p style={{...styles.metricaVal, color: t.colors.blue}}>{fmt(ingresosMes)}</p>
+          </div>
+          <div style={styles.metricaCard}>
+            <p style={styles.metricaLabel}>Total gastos</p>
+            <p style={{...styles.metricaVal, color: t.colors.red}}>{fmt(gastosMes)}</p>
+          </div>
+        </div>
+
+        {/* GRÁFICA */}
+        <div style={styles.card}>
+          <p style={styles.cardTitulo}>Evolución últimos 6 meses</p>
+          <div style={styles.grafica}>
+            {ultimos6.map((m,i) => {
+              const pct    = Math.abs(m.neta)/maxGrafica;
+              const altura = Math.max(pct*100, m.neta!==0?4:0);
+              const color  = m.activo ? t.colors.blue : m.neta>=0 ? t.colors.greenBorder : t.colors.redBorder;
+              return (
+                <div key={i} style={styles.graficaCol}>
+                  <p style={{fontSize:"9px", color:t.colors.textTertiary, margin:"0 0 4px", textAlign:"center"}}>
+                    {m.neta!==0?fmtCorto(m.neta):""}
+                  </p>
+                  <div style={styles.graficaBarraWrap}>
+                    <div style={{...styles.graficaBarra, height:`${altura}%`, background:color}} />
+                  </div>
+                  <p style={{fontSize:"10px", color:m.activo?t.colors.blue:t.colors.textTertiary, fontWeight:m.activo?t.fonts.weightBold:t.fonts.weightNormal, margin:"6px 0 0", textAlign:"center"}}>
+                    {m.mes}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* DISTRIBUCIÓN DE GASTOS */}
+        {gastosMes > 0 && (
+          <div style={styles.card}>
+            <p style={styles.cardTitulo}>Distribución de gastos</p>
+            {[
+              {label:"ACPM",      valor:acpmMes,      color:"#3B82F6"},
+              {label:"Adblue",    valor:adblMes,      color:"#8B5CF6"},
+              {label:"Peajes",    valor:peajesMes,    color:t.colors.amber},
+              {label:"Conductor", valor:conductorMes, color:t.colors.green},
+              {label:"Otros",     valor:otrosMes,     color:t.colors.textTertiary},
+            ].filter(item=>item.valor>0).map(item=>{
+              const pct = Math.round((item.valor/gastosMes)*100);
+              return (
+                <div key={item.label} style={{marginBottom:"12px"}}>
+                  <div style={{display:"flex", justifyContent:"space-between", marginBottom:"5px"}}>
+                    <span style={{fontSize:t.fonts.sizeSm, color:t.colors.textSecondary}}>{item.label}</span>
+                    <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold}}>
+                      {fmt(item.valor)} <span style={{color:t.colors.textTertiary, fontWeight:t.fonts.weightNormal}}>{pct}%</span>
+                    </span>
+                  </div>
+                  <div style={{height:"5px", borderRadius:"3px", background:t.colors.bgSection, overflow:"hidden"}}>
+                    <div style={{height:"100%", borderRadius:"3px", background:item.color, width:`${pct}%`, transition:"width 0.4s ease"}} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* VEHÍCULOS */}
+        <div style={styles.card}>
+          <p style={styles.cardTitulo}>Ganancia por vehículo — {MESES[mes]}</p>
+          {vehiculos.length === 0 && (
+            <p style={{fontSize:t.fonts.sizeSm, color:t.colors.textTertiary, textAlign:"center", padding:"20px 0"}}>
+              Sin vehículos registrados.
+            </p>
+          )}
+          {gananciaPorVeh.map((v,i,arr) => {
+            const pct = Math.abs(v.neta)/maxNeta;
+            const col = v.neta>=0 ? t.colors.green : t.colors.red;
+            return (
+              <div key={v.placa} style={{...styles.vehFila, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                <div style={{flex:1}}>
+                  <div style={{display:"flex", justifyContent:"space-between", marginBottom:"5px"}}>
+                    <div>
+                      <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary}}>{v.placa}</span>
+                      <span style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, marginLeft:"8px"}}>{v.tipo} · {v.viajes} viaje{v.viajes!==1?"s":""}</span>
+                    </div>
+                    <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:col}}>
+                      {v.neta>=0?"+":""}{fmt(v.neta)}
+                    </span>
+                  </div>
+                  <div style={{height:"4px", borderRadius:"2px", background:t.colors.bgSection, overflow:"hidden"}}>
+                    <div style={{height:"100%", borderRadius:"2px", background:col, width:`${pct*100}%`, transition:"width 0.4s ease"}} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ESTADO VACÍO */}
+        {viajesMes.length === 0 && (
+          <div style={styles.vacio}>
+            <p style={{fontSize:"32px", marginBottom:"8px"}}>📊</p>
+            <p style={styles.vacioTexto}>Sin datos este mes</p>
+            <p style={styles.vacioSub}>Registra viajes en la calculadora para ver tus cuentas aquí.</p>
+            <button style={styles.btnCalcular} onClick={()=>navigate("/calculadora")}>
+              Calcular flete
+            </button>
+          </div>
+        )}
+
+        {/* VIAJES DEL MES */}
+        {viajesMes.length > 0 && (
+          <div style={styles.card}>
+            <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
+            {[...viajesMes].reverse().map((viaje,i,arr) => (
+              <div
+                key={viaje.firestoreId}
+                style={{...styles.viajeFilaMes, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`, cursor:"pointer"}}
+                onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
+              >
+                <div style={{flex:1}}>
+                  <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{viaje.ruta||"Sin ruta"}</p>
+                  <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0"}}>{viaje.fecha||""}{viaje.placa?` · ${viaje.placa}`:""}</p>
+                </div>
+                <p style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, margin:0, color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
+                  {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  pantalla:         { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"20px" },
+  header:           { display:"flex", justifyContent:"space-between", alignItems:"flex-end", padding:"20px 20px 16px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
+  headerSub:        { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 2px", fontWeight:t.fonts.weightMedium, textTransform:"uppercase", letterSpacing:"0.06em" },
+  titulo:           { fontSize:"22px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:0, letterSpacing:"-0.3px" },
+  btnHistorial:     { display:"flex", alignItems:"center", gap:"6px", padding:"8px 14px", background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.blue, cursor:"pointer" },
+  navMes:           { display:"flex", justifyContent:"space-between", alignItems:"center", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}`, padding:"10px 20px" },
+  btnMes:           { background:"none", border:"none", fontSize:"22px", color:t.colors.blue, cursor:"pointer", padding:"0 8px", fontWeight:t.fonts.weightNormal },
+  labelMes:         { fontSize:"15px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
+  contenido:        { padding:"12px 16px 16px" },
+  gananciaHero:     { borderRadius:t.radius.lg, padding:"20px", marginBottom:"12px", display:"flex", justifyContent:"space-between", alignItems:"center", boxShadow:"0 4px 14px rgba(0,0,0,0.12)" },
+  gananciaHeroLabel:{ fontSize:t.fonts.sizeXs, color:"rgba(255,255,255,0.75)", margin:"0 0 4px", fontWeight:t.fonts.weightMedium, textTransform:"uppercase", letterSpacing:"0.06em" },
+  gananciaHeroVal:  { fontSize:"28px", fontWeight:t.fonts.weightBlack, color:"#fff", margin:"0 0 4px", letterSpacing:"-0.5px" },
+  gananciaHeroSub:  { fontSize:t.fonts.sizeXs, color:"rgba(255,255,255,0.7)", margin:0 },
+  gananciaHeroBadge:{ background:"rgba(255,255,255,0.15)", borderRadius:t.radius.md, padding:"12px", backdropFilter:"blur(10px)" },
+  dosColumnas:      { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"12px" },
+  metricaCard:      { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", boxShadow:t.shadows.card },
+  metricaLabel:     { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 6px", textTransform:"uppercase", letterSpacing:"0.05em" },
+  metricaVal:       { fontSize:"18px", fontWeight:t.fonts.weightBold, margin:0 },
+  card:             { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"12px", boxShadow:t.shadows.card },
+  cardTitulo:       { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 14px" },
+  grafica:          { display:"flex", alignItems:"flex-end", gap:"6px", height:"120px", paddingTop:"20px" },
+  graficaCol:       { flex:1, display:"flex", flexDirection:"column", alignItems:"center", height:"100%" },
+  graficaBarraWrap: { flex:1, width:"100%", display:"flex", alignItems:"flex-end", justifyContent:"center" },
+  graficaBarra:     { width:"100%", borderRadius:"4px 4px 0 0", transition:"height 0.4s ease", minHeight:"2px" },
+  vehFila:          { padding:"12px 0" },
+  vacio:            { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"40px 20px", textAlign:"center", marginBottom:"12px", boxShadow:t.shadows.card },
+  vacioTexto:       { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 6px" },
+  vacioSub:         { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, margin:"0 0 20px" },
+  btnCalcular:      { padding:"12px 28px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer" },
+  viajeFilaMes:     { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0" },
+};
+
+export default Cuentas;
