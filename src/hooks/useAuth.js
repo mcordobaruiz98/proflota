@@ -9,6 +9,8 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
+import { getDoc, doc } from "firebase/firestore";
+import { db } from  "../firebase";
 
 export function useAuth() {
   const [usuario,   setUsuario]   = useState(null);
@@ -24,12 +26,13 @@ export function useAuth() {
   }, []);
 
   // Registro con correo y contraseña
-  const registrar = async (nombre, correo, contrasena) => {
-    const resultado = await createUserWithEmailAndPassword(
-      auth, correo, contrasena
-    );
-    await updateProfile(resultado.user, { displayName: nombre });
-    return resultado.user;
+  const registrar = async (nombre, correo, contrasena, codigo) => {
+  const snap = await getDoc(doc(db, "codigos_beta", "principal"));
+  if (!snap.exists() || snap.data().codigo !== codigo.toUpperCase().trim()) {
+    throw { code: "auth/codigo-invalido" };
+  }
+  const cred = await createUserWithEmailAndPassword(auth, correo, contrasena);
+  await updateProfile(cred.user, { displayName: nombre });
   };
 
   // Login con correo y contraseña

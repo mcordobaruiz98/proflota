@@ -15,12 +15,15 @@ function Registro() {
   const [verConf,    setVerConf]    = useState(false);
   const [errores,    setErrores]    = useState({});
   const [cargando,   setCargando]   = useState(false);
+  const [codigo, setCodigo]         = useState("");
+
 
   const mensajeError = (codigo) => {
     switch (codigo) {
       case "auth/email-already-in-use": return "Ya existe una cuenta con ese correo";
       case "auth/invalid-email":        return "Correo inválido";
       case "auth/weak-password":        return "La contraseña es muy débil";
+      case "auth/codigo-invalido":      return "Codigo de acceso incorrecto. Contáctanos para obtener tu código,"
       default:                          return "Error al crear la cuenta. Intenta de nuevo";
     }
   };
@@ -32,6 +35,7 @@ function Registro() {
     if (!correo.includes("@"))    e.correo     = "Correo inválido";
     if (contrasena.length < 6)    e.contrasena = "Mínimo 6 caracteres";
     if (contrasena !== confirmar) e.confirmar  = "Las contraseñas no coinciden";
+    if (!codigo.trim()) e.codigo = "Ingresa el código de acceso";
     return e;
   };
 
@@ -40,7 +44,7 @@ function Registro() {
     if (Object.keys(e).length > 0) { setErrores(e); return; }
     setCargando(true);
     try {
-      await registrar(nombre.trim(), correo, contrasena);
+      await registrar(nombre.trim(), correo, contrasena, codigo.trim());
       navigate("/");
     } catch (err) {
       setErrores({ general: mensajeError(err.code) });
@@ -122,6 +126,20 @@ function Registro() {
               onChange={(e) => { setConfirmar(e.target.value); setErrores({ ...errores, confirmar: null }); }}
               style={{ ...styles.input, paddingRight: "44px" }}
             />
+
+        <div style={styles.campo}>
+          <label style={styles.label}>Código de acceso beta</label>
+             <input
+              type="text"
+              placeholder="Ingresa tu código de invitación"
+              value={codigo}
+              onChange={(e) => { setCodigo(e.target.value.toUpperCase()); setErrores({ ...errores, codigo: null }); }}
+              style={styles.input}
+            />
+            {errores.codigo && <p style={styles.error}>{errores.codigo}</p>}
+          </div>
+
+        
             <button style={styles.btnOjo} onClick={() => setVerConf(!verConf)}>
               {verConf ? "●" : "○"}
             </button>
