@@ -39,6 +39,7 @@ function Cuentas({ vehiculos = [], viajes = [] }) {
   const peajesMes    = viajesMes.reduce((s,v) => s+(v.peajes||0),    0);
   const conductorMes = viajesMes.reduce((s,v) => s+(v.conductor||0), 0);
   const otrosMes     = viajesMes.reduce((s,v) => s+(v.carp||0)+(v.gv2||0)+(v.extras||0), 0);
+  const descuentosMes = viajesMes.reduce((s,v)=> s+(v.descuentos?.total||0),0);
 
   const gananciaPorVeh = vehiculos.map(veh => {
     const vt = viajesMes.filter(v => v.placa===veh.placa);
@@ -148,6 +149,7 @@ function Cuentas({ vehiculos = [], viajes = [] }) {
               {label:"Peajes",    valor:peajesMes,    color:t.colors.amber},
               {label:"Conductor", valor:conductorMes, color:t.colors.green},
               {label:"Otros",     valor:otrosMes,     color:t.colors.textTertiary},
+              {label:"Descuentos de ley", valor:descuentosMes, color:t.colors.textTertiary},
             ].filter(item=>item.valor>0).map(item=>{
               const pct = Math.round((item.valor/gastosMes)*100);
               return (
