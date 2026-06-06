@@ -549,7 +549,7 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
     value={modoConductor}
     onChange={e => {
       console.log("Modo Conductor:", e.target.value);
-      console.log("porcCond antes:", pocCond);
+      console.log("porcCond antes:", porcCond);
       setModoConductor(e.target.value);
       setPorcCond("");
     }}
@@ -723,4 +723,6 @@ const styles = {
   btnGuardar:       { width:"100%", padding:"15px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" },
 };
 
+
+// v2 - fix conductor
 export default Calculadora;
