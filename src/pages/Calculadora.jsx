@@ -207,6 +207,15 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const [guardando,   setGuardando]   = useState(false);
   const [modoFlete, setModoFlete] = useState("porTon");
   const [modoConductor, setModoConductor] = useState("porcentaje");
+  const [descRetefuente,    setDescRetefuente]    = useState(false);
+  const [pctRetefuente,     setPctRetefuente]     = useState(1);
+  const [descReteica,       setDescReteica]       = useState(false);
+  const [pctReteica,        setPctReteica]        = useState(0.414);
+  const [descFopat,         setDescFopat]         = useState(false);
+  const [pctFopat,          setPctFopat]          = useState(2);
+  const [descOtro,          setDescOtro]          = useState(false);
+  const [pctOtro,           setPctOtro]           = useState(0);
+  const [nombreOtro,        setNombreOtro]        = useState("");
 
   const n   = (v) => parseFloat(v) || 0;
   const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
@@ -234,11 +243,17 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const totPeajes = peajesRuta.reduce((s,p) => s + (p.t[categoria]||0) * (p.iv?2:1), 0);
   const costoConduct = modoConductor === "porcentaje" ? (n(porcCond)/100) * valorViaje : n(porcCond);
   const totExtras = extras.reduce((s,e) => s + e.valor, 0);
-  const totalGastos = costoComb + totPeajes + costoConduct + n(carpado) + n(gastosViaje) + totExtras;
+  const valRetefuente = descRetefuente ? (pctRetefuente/100) * valorViaje : 0;
+  const valReteica    = descReteica    ? (pctReteica/100)    * valorViaje : 0;
+  const valFopat      = descFopat      ? (pctFopat/100)      * valorViaje : 0;
+  const valOtro       = descOtro       ? (pctOtro/100)       * valorViaje : 0;
+  const totalDesc     = valRetefuente + valReteica + valFopat + valOtro;
+  const totalGastos = costoComb + totPeajes + costoConduct + n(carpado) + n(gastosViaje) + totExtras + totalDesc;
   const gananciaNeta = valorViaje - totalGastos;
   const margen = valorViaje > 0 ? (gananciaNeta / valorViaje) * 100 : 0;
   const cxkm   = kmTotal > 0 ? totalGastos / kmTotal : 0;
   const margenColor = margen >= 40 ? t.colors.green : margen >= 20 ? t.colors.amber : t.colors.red;
+
 
   const peajesFiltrados = busquedaP
     ? PEAJES.filter(p =>
@@ -284,6 +299,14 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
       extras: totExtras, extrasList: extras,
       total: totalGastos, neta: gananciaNeta,
       mrg: margen, margen, cxk: cxkm,
+      descuentos: { 
+        retefuente: valRetefuente,
+        reteica: valReteica,
+        fopat: valFopat,
+        otro: valOtro,
+        nombreOtro: nombreOtro,
+        total: totalDesc,
+      }
     });
     alert("✅ Viaje guardado");
     navigate(-1);
@@ -613,6 +636,112 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
         </button>
       </div>
 
+      {/* ── DESCUENTOS DE LEY ── */}
+<div style={styles.seccionLabel}>Descuentos de ley</div>
+<div style={styles.card}>
+  <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 14px"}}>
+    Activa los descuentos que aplique la empresa sobre el valor del viaje.
+  </p>
+
+  {[
+    {
+      id:"retefuente", label:"Retención en la fuente", sub:"Sobre valor del viaje",
+      activo:descRetefuente, setActivo:setDescRetefuente,
+      pct:pctRetefuente,     setPct:setPctRetefuente,
+      val:valRetefuente,
+    },
+    {
+      id:"reteica", label:"Reteica", sub:"Varía por municipio",
+      activo:descReteica, setActivo:setDescReteica,
+      pct:pctReteica,     setPct:setPctReteica,
+      val:valReteica,
+    },
+    {
+      id:"fopat", label:"FOPAT", sub:"Fondo de protección al transportador",
+      activo:descFopat, setActivo:setDescFopat,
+      pct:pctFopat,     setPct:setPctFopat,
+      val:valFopat,
+    },
+  ].map((d,i,arr)=>(
+    <div key={d.id} style={{
+      display:"flex", justifyContent:"space-between", alignItems:"center",
+      padding:"10px 0",
+      borderBottom: i===arr.length-1 ? "none" : `1px solid ${t.colors.borderLight}`,
+    }}>
+      <div style={{display:"flex", alignItems:"center", gap:"10px"}}>
+        <input
+          type="checkbox"
+          checked={d.activo}
+          onChange={e=>d.setActivo(e.target.checked)}
+          style={{width:"18px", height:"18px", cursor:"pointer", accentColor:t.colors.blue}}
+        />
+        <div>
+          <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{d.label}</p>
+          <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0"}}>{d.sub}</p>
+        </div>
+      </div>
+      <div style={{display:"flex", alignItems:"center", gap:"6px"}}>
+        <input
+          type="number" value={d.pct} min="0" max="100" step="0.001"
+          onChange={e=>d.setPct(parseFloat(e.target.value)||0)}
+          style={{...styles.input, width:"60px", textAlign:"right", marginBottom:0, padding:"6px 8px"}}
+        />
+        <span style={{fontSize:t.fonts.sizeSm, color:t.colors.textSecondary}}>%</span>
+        <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.red, minWidth:"80px", textAlign:"right"}}>
+          {d.activo && d.val>0 ? fmt(d.val) : "—"}
+        </span>
+      </div>
+    </div>
+  ))}
+
+  {/* OTRO */}
+  <div style={{borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px", marginTop:"4px"}}>
+    <div style={{display:"flex", alignItems:"center", gap:"10px", marginBottom:"8px"}}>
+      <input
+        type="checkbox"
+        checked={descOtro}
+        onChange={e=>setDescOtro(e.target.checked)}
+        style={{width:"18px", height:"18px", cursor:"pointer", accentColor:t.colors.blue}}
+      />
+      <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>Otro descuento</p>
+    </div>
+    {descOtro && (
+      <div style={styles.fila2}>
+        <div style={styles.campo}>
+          <label style={styles.label}>Nombre</label>
+          <input
+            type="text" placeholder="Ej: Pronto pago"
+            value={nombreOtro} onChange={e=>setNombreOtro(e.target.value)}
+            style={styles.input}
+          />
+        </div>
+        <div style={styles.campo}>
+          <label style={styles.label}>Porcentaje (%)</label>
+          <input
+            type="number" placeholder="0" value={pctOtro} min="0" max="100" step="0.1"
+            onChange={e=>setPctOtro(parseFloat(e.target.value)||0)}
+            style={styles.input}
+          />
+        </div>
+      </div>
+    )}
+    {descOtro && valOtro>0 && (
+      <div style={{display:"flex", justifyContent:"space-between", marginTop:"4px"}}>
+        <span style={{fontSize:t.fonts.sizeSm, color:t.colors.textSecondary}}>{nombreOtro||"Otro"}</span>
+        <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.red}}>{fmt(valOtro)}</span>
+      </div>
+    )}
+  </div>
+
+  {/* TOTAL DESCUENTOS */}
+  {totalDesc > 0 && (
+    <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", borderTop:`1px solid ${t.colors.border}`, paddingTop:"10px", marginTop:"8px"}}>
+      <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary}}>Total descuentos</span>
+      <span style={{fontSize:t.fonts.sizeLg, fontWeight:t.fonts.weightBold, color:t.colors.red}}>{fmt(totalDesc)}</span>
+    </div>
+  )}
+</div>  
+
       {/* ── RESULTADO ── */}
       <div style={styles.seccionLabel}>Resultado del viaje</div>
       <div style={styles.card}>
@@ -648,6 +777,7 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
             {l:"Carpado/Descarpado",              v: n(carpado)},
             {l:"Gastos de viaje",                 v: n(gastosViaje)},
             {l:"Otros gastos",                    v: totExtras},
+            {l:"Descuentos de ley",               v: totalDesc},
           ].filter(r=>r.v>0).map(r=>(
             <div key={r.l} style={styles.desgloseFila}>
               <span style={styles.desgloseL}>{r.l}</span>
