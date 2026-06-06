@@ -206,6 +206,7 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const [nuevoVal,    setNuevoVal]    = useState("");
   const [guardando,   setGuardando]   = useState(false);
   const [modoFlete, setModoFlete] = useState("porTon");
+  const [modoConductor, SetModoConductor] = useState("porcentaje");
 
   const n   = (v) => parseFloat(v) || 0;
   const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
@@ -231,7 +232,7 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const costoAdbl = adblLt   * n(precioAdblue);
   const costoComb = costoAcpm + costoAdbl;
   const totPeajes = peajesRuta.reduce((s,p) => s + (p.t[categoria]||0) * (p.iv?2:1), 0);
-  const costoConduct = (n(porcCond)/100) * valorViaje;
+  const costoConduct = modoConductor === "porcentaje" ? (n(porcCond)/100) * valorViaje : n(pocCond);
   const totExtras = extras.reduce((s,e) => s + e.valor, 0);
   const totalGastos = costoComb + totPeajes + costoConduct + n(carpado) + n(gastosViaje) + totExtras;
   const gananciaNeta = valorViaje - totalGastos;
@@ -542,16 +543,40 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
       {/* ── COSTOS ── */}
       <div style={styles.seccionLabel}>Costos del viaje</div>
       <div style={styles.card}>
-        <div style={styles.fila2}>
-          <div style={styles.campo}>
-            <label style={styles.label}>% Conductor</label>
-            <input type="number" placeholder="10" value={porcCond} onChange={e=>setPorcCond(e.target.value)} style={styles.input} />
-          </div>
-          <div style={styles.campo}>
-            <label style={styles.label}>Carpado/Descarpado</label>
-            <input type="number" placeholder="20000" value={carpado} onChange={e=>setCarpado(e.target.value)} style={styles.input} />
-          </div>
-        </div>
+        <div style={styles.campo}>
+  <label style={styles.label}>Modo de pago conductor</label>
+  <select
+    value={modoConductor}
+    onChange={e => setModoConductor(e.target.value)}
+    style={styles.input}
+  >
+    <option value="porcentaje">Porcentaje del viaje (%)</option>
+    <option value="fijo">Valor fijo ($)</option>
+  </select>
+</div>
+
+<div style={styles.fila2}>
+  <div style={styles.campo}>
+    {modoConductor === "porcentaje" ? (
+      <>
+        <label style={styles.label}>% Conductor</label>
+        <input type="number" placeholder="10" value={porcCond}
+          onChange={e=>setPorcCond(e.target.value)} style={styles.input} />
+      </>
+    ) : (
+      <>
+        <label style={styles.label}>Valor conductor ($)</label>
+        <input type="number" placeholder="200000" value={porcCond}
+          onChange={e=>setPorcCond(e.target.value)} style={styles.input} />
+      </>
+    )}
+  </div>
+  <div style={styles.campo}>
+    <label style={styles.label}>Carpado/Descarpado</label>
+    <input type="number" placeholder="20000" value={carpado}
+      onChange={e=>setCarpado(e.target.value)} style={styles.input} />
+  </div>
+</div>
         <div style={styles.campo}>
           <label style={styles.label}>Gastos de viaje</label>
           <input type="number" placeholder="30000" value={gastosViaje} onChange={e=>setGastosViaje(e.target.value)} style={styles.input} />
@@ -614,7 +639,7 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
             {l:`ACPM (${fnD(galTotal,1)} gal)`,  v: costoAcpm},
             {l:`Adblue (${fnD(adblLt,1)} lt)`,   v: costoAdbl},
             {l:"Peajes",                          v: totPeajes},
-            {l:`Conductor (${n(porcCond)}%)`,     v: costoConduct},
+            {l: modoConductor === "porcentaje" ?  "Conductor (" + n(porcCond) + "%)" : "Conductor (valor fijo", v: costoConduct},
             {l:"Carpado/Descarpado",              v: n(carpado)},
             {l:"Gastos de viaje",                 v: n(gastosViaje)},
             {l:"Otros gastos",                    v: totExtras},
