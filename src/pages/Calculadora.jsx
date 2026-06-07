@@ -351,26 +351,37 @@ function Calculadora({ vehiculos, viajes, rutas = [], onGuardar, onGuardarRuta, 
 const guardarRutaFrecuente = async () => {
   if (!ruta.trim()) { alert("Ingresa el nombre de la ruta primero"); return; }
   setGuardandoRuta(true);
-  await onGuardarRuta({
+  
+  const datos = {
     nombre: nombreRuta.trim() || ruta.trim(),
     ruta: ruta.trim(),
     kmCargado: n(kmCargado),
-    kmVacio:   n(kmVacio),
+    kmVacio: n(kmVacio),
     rendCargado: n(rendCargado),
-    rendVacio:   n(rendVacio),
+    rendVacio: n(rendVacio),
     peajesRuta: peajesRuta.map(p => ({
-    c:    p.c,
-    n:    p.n,
-    d:    p.d,
-    iv:   p.iv,
-    tarifa: p.t[categoria] || 0,
-})),
+      c:      p.c,
+      n:      p.n,
+      d:      p.d,
+      iv:     p.iv,
+      tarifa: p.t[categoria] || 0,
+    })),
     categoria,
-  });
-  setGuardandoRuta(false);
-  setMostrarGuardar(false);
-  setNombreRuta("");
-  alert("✅ Ruta guardada");
+  };
+
+  console.log("Guardando ruta:", JSON.stringify(datos));
+
+  try {
+    await onGuardarRuta(datos);
+    alert("✅ Ruta guardada");
+  } catch(err) {
+    console.error("Error guardando ruta:", err);
+    alert("Error: " + err.message);
+  } finally {
+    setGuardandoRuta(false);
+    setMostrarGuardar(false);
+    setNombreRuta("");
+  }
 };
 
   return (
