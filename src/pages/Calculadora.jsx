@@ -358,7 +358,13 @@ const guardarRutaFrecuente = async () => {
     kmVacio:   n(kmVacio),
     rendCargado: n(rendCargado),
     rendVacio:   n(rendVacio),
-    peajesRuta,
+    peajesRuta: peajesRuta.map(p => ({
+      c: p.c,
+      n: p.n,
+      d: p.d,
+      t: p.t,
+      iv: p.iv,
+    })),
     categoria,
   });
   setGuardandoRuta(false);
