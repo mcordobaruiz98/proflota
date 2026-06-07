@@ -514,10 +514,10 @@ const guardarRutaFrecuente = async () => {
       ))}
     </select>
   ) : null}
-  {(productosFrecuentes.length === 0 || !productosFrecuentes.includes(producto)) && (
-    <input type="text" placeholder="Maíz" value={producto}
-      onChange={evt => setProducto(evt.target.value)} style={styles.input} />
-  )}
+  {(productosFrecuentes.length === 0 || (producto !== "" && !productosFrecuentes.includes(producto))) && (
+  <input type="text" placeholder="Maíz" value={producto}
+    onChange={evt => setProducto(evt.target.value)} style={styles.input} />
+)}
 </div>
           
           <div style={styles.campo}>
@@ -537,7 +537,7 @@ const guardarRutaFrecuente = async () => {
       ))}
     </select>
   )}
-  {(!empresasFrecuentes.includes(empresa)) && (
+  {(empresasFrecuentes.length === 0 || (empresa !== "" && !empresasFrecuentes.includes(empresa))) && (
   <input type="text" placeholder="TransABC" value={empresa}
     onChange={evt => setEmpresa(evt.target.value)} style={styles.input} />
 )}
