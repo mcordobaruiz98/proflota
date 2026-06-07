@@ -542,6 +542,11 @@ const guardarRutaFrecuente = async () => {
       onChange={evt => setEmpresa(evt.target.value)} style={styles.input} />
   )}
 </div>
+          <div style={styles.campo}>
+  <label style={styles.label}>Contacto empresa</label>
+  <input type="text" placeholder="Nombre del contacto" value={contactoEmpresa}
+    onChange={e => setContactoEmpresa(e.target.value)} style={styles.input} />
+</div>
 
           <div style={styles.campo}>
           <label style={styles.label}>Celular contacto</label>
