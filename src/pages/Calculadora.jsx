@@ -239,7 +239,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], onGuardar, onGuardarRuta, 
   )]
 
   const empresasFrecuentes = [...new Set(
-  viajes.map(v => v.emp).filter(e => e && e.trim() !== "")
+  viajes.map(v => v.emp).filter(emp => emp && emp.trim() !== "")
 )];
 
 const productosFrecuentes = [...new Set(
@@ -519,10 +519,10 @@ const guardarRutaFrecuente = async () => {
   {empresasFrecuentes.length > 0 && (
     <select
       value={empresasFrecuentes.includes(empresa) ? empresa : "__nueva__"}
-      onChange={e => {
-        if (e.target.value === "__nueva__") setEmpresa("");
-        else setEmpresa(e.target.value);
-      }}
+      onChange={evt => {
+  if (evt.target.value === "__nueva__") setEmpresa("");
+  else setEmpresa(evt.target.value);
+}}
       style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
     >
       <option value="__nueva__">+ Escribir nueva empresa</option>
