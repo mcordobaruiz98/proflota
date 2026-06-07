@@ -337,14 +337,14 @@ function Calculadora({ vehiculos, viajes, rutas = [], onGuardar, onGuardarRuta, 
     navigate(-1);
   };
 
-  const cargarRuta = (ruta) => {
-  setRuta(ruta.ruta);
-  setKmCargado(ruta.kmCargado || "");
-  setKmVacio(ruta.kmVacio || "");
-  setRendCargado(ruta.rendCargado || "");
-  setRendVacio(ruta.rendVacio || "");
-  setPeajesRuta(ruta.peajesRuta || []);
-  setCategoria(ruta.categoria || "VII");
+  const cargarRuta = (rutaGuardada) => {
+  setRuta(rutaGuardada.ruta);
+  setKmCargado(rutaGuardada.kmCargado || "");
+  setKmVacio(rutaGuardada.kmVacio || "");
+  setRendCargado(rutaGuardada.rendCargado || "");
+  setRendVacio(rutaGuardada.rendVacio || "");
+  setPeajesRuta(rutaGuardada.peajesRuta || []);
+  setCategoria(rutaGuardada.categoria || "VII");
   setMostrarRutas(false);
 };
 
