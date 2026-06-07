@@ -583,7 +583,7 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
           </div>
           <div style={styles.campo}>
             <label style={styles.label}>Precio Adblue ($/lt)</label>
-            <input type="number" placeholder="3500" value={precioAdblue} onChange={e=>setPrecioAdblue(e.target.value)} onBlur= {e=> localStorage.setItem("ultimo_adblue"), e.target.value}  style={styles.input} />
+            <input type="number" placeholder="3500" value={precioAdblue} onChange={e=>setPrecioAdblue(e.target.value)} onBlur= {e=> localStorage.setItem("ultimo_adblue", e.target.value)}  style={styles.input} />
           </div>
         </div>
         {galTotal > 0 && (
