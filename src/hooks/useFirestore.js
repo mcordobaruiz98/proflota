@@ -94,7 +94,7 @@ export function useFirestore(uid) {
   };
 
   return {
-    vehiculos, viajes, empresas, cargando,
+    vehiculos, viajes, empresas, rutas, cargando,
     agregarVehiculo, eliminarVehiculo,
     agregarViaje,    eliminarViaje,
     agregarEmpresa,  eliminarEmpresa,
