@@ -41,7 +41,7 @@ function DetalleViaje({ viajes = [], onEliminar }) {
     {label:"ACPM",               valor:viaje.cAcpm,     detalle:viaje.gTot?`${fnD(viaje.gTot,1)} gal`:null, color:"#3B82F6"},
     {label:"Adblue",             valor:viaje.cAdbl,     detalle:viaje.adlt?`${fnD(viaje.adlt,1)} lt`:null,  color:"#8B5CF6"},
     {label:"Peajes",             valor:viaje.peajes,    detalle:null,                                        color:t.colors.amber},
-    {label:"Conductor",          valor:viaje.conductor, detalle:viaje.pcond?`${viaje.pcond}%`:null,          color:t.colors.green},
+    {label:"Conductor", valor:viaje.conductor, detalle:viaje.pcond&&viaje.pcond<=100?`${viaje.pcond}%`:null, color:t.colors.green},
     {label:"Carpado/Descarpado", valor:viaje.carp,      detalle:null,                                        color:"#06B6D4"},
     {label:"Gastos de viaje",    valor:viaje.gv2,       detalle:null,                                        color:"#EC4899"},
     {label:"Otros gastos",       valor:viaje.extras,    detalle:null,                                        color:t.colors.textTertiary},
