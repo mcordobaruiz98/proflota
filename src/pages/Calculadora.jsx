@@ -537,10 +537,10 @@ const guardarRutaFrecuente = async () => {
       ))}
     </select>
   )}
-  {(!empresasFrecuentes.includes(empresa) || empresasFrecuentes.length === 0) && (
-    <input type="text" placeholder="TransABC" value={empresa}
-      onChange={evt => setEmpresa(evt.target.value)} style={styles.input} />
-  )}
+  {(!empresasFrecuentes.includes(empresa)) && (
+  <input type="text" placeholder="TransABC" value={empresa}
+    onChange={evt => setEmpresa(evt.target.value)} style={styles.input} />
+)}
 </div>
           <div style={styles.campo}>
   <label style={styles.label}>Contacto empresa</label>
