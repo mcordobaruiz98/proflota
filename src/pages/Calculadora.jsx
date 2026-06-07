@@ -397,25 +397,32 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
           </div>
         </div>
         <div style={styles.campo}>
-        <label style={styles.label}>Conductor</label>{conductoresFrecuentes.length > 0 ? (
-        <select value={conductor} onChange={e => setConductor(e.target.value)} 
-        style={{...styles.input, color: conductor ? t.colors.textPrimary : t.colors.textTertiary}}
+  <label style={styles.label}>Conductor</label>
+  {conductoresFrecuentes.length > 0 && (
+    <select
+      value={conductoresFrecuentes.includes(conductor) ? conductor : "__nuevo__"}
+      onChange={e => {
+        if (e.target.value === "__nuevo__") {
+          setConductor("");
+        } else {
+          setConductor(e.target.value);
+        }
+      }}
+      style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
     >
-        <option value="">— Seleccionar conductor —</option>
-        {conductoresFrecuentes.map((c,i) => (
+      <option value="__nuevo__">+ Escribir nuevo conductor</option>
+      {conductoresFrecuentes.map((c,i) => (
         <option key={i} value={c}>{c}</option>
       ))}
-        <option value="__nuevo__">+ Escribir nuevo conductor</option>
-      </select>
-      ) : null}
-      {(conductor === "__nuevo__" || conductoresFrecuentes.length === 0) && (
-      <input
+    </select>
+  )}
+  {(!conductoresFrecuentes.includes(conductor) || conductoresFrecuentes.length === 0) && (
+    <input
       type="text"
       placeholder="Nombre del conductor"
-      value={conductor === "__nuevo__" ? "" : conductor}
+      value={conductor}
       onChange={e => setConductor(e.target.value)}
-      style={{...styles.input, marginTop: conductoresFrecuentes.length > 0 ? "6px" : "0"}}
-      autoFocus
+      style={styles.input}
     />
   )}
 </div>
