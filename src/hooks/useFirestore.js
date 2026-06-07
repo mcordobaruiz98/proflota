@@ -93,16 +93,8 @@ export function useFirestore(uid) {
     await deleteDoc(doc(db, rutaEmpresas, firestoreId));
   };
 
-  return {
-    vehiculos, viajes, empresas, rutas, cargando,
-    agregarVehiculo, eliminarVehiculo,
-    agregarViaje,    eliminarViaje,
-    agregarEmpresa,  eliminarEmpresa,
-    agregarRuta,     eliminarRuta
-  };
-
-  const rutaRutas = uid ? `usuarios/${uid}/rutas` : null;
-const [rutas, setRutas] = useState([]);
+   const rutaRutas = uid ? `usuarios/${uid}/rutas` : null;
+  const [rutas, setRutas] = useState([]);
 
 useEffect(() => {
   if (!rutaRutas) return;
@@ -123,5 +115,15 @@ const agregarRuta = async (datos) => {
 const eliminarRuta = async (firestoreId) => {
   await deleteDoc(doc(db, rutaRutas, firestoreId));
 };
+
+  return {
+    vehiculos, viajes, empresas, rutas, cargando,
+    agregarVehiculo, eliminarVehiculo,
+    agregarViaje,    eliminarViaje,
+    agregarEmpresa,  eliminarEmpresa,
+    agregarRuta,     eliminarRuta
+  };
+
+ 
 
 }
