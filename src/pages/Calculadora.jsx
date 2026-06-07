@@ -173,7 +173,7 @@ const PEAJES = [
 {c:"PE165",n:"ZARAGOZA",d:"ANTIOQUIA",t:{I:17600,II:21800,III:21800,IV:21800,V:51600,VI:64700,VII:74600}},
 ];
 
-function Calculadora({ vehiculos, viajes, rutas = [], onGuardar, onGuardarRuta, onEliminarRuta }) {
+function Calculadora({ vehiculos, viajes, rutas = [], onGuardar, onGuardarRuta, onEliminarRuta, mostrarToast }) {
   const navigate = useNavigate();
 
   const [fecha,       setFecha]       = useState(new Date().toISOString().slice(0,10));
