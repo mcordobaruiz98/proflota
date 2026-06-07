@@ -237,6 +237,15 @@ function Calculadora({ vehiculos, viajes, rutas = [], onGuardar, onGuardarRuta, 
     .map(v => v.condNom)
     .filter(c => c && c.trim() !=="")
   )]
+
+  const empresasFrecuentes = [...new Set(
+  viajes.map(v => v.emp).filter(e => e && e.trim() !== "")
+)];
+
+const productosFrecuentes = [...new Set(
+  viajes.map(v => v.prod).filter(p => p && p.trim() !== "")
+)];
+
   const valorViajeIda = modoFlete === "porTon"
     ?n(tonelaje) * n(fleteTon)
     : n(fleteTon);
@@ -483,17 +492,51 @@ const guardarRutaFrecuente = async () => {
         </div>
         <div style={styles.fila2}>
           <div style={styles.campo}>
-            <label style={styles.label}>Producto</label>
-            <input type="text" placeholder="Maíz" value={producto} onChange={e=>setProducto(e.target.value)} style={styles.input} />
-          </div>
+  <label style={styles.label}>Producto</label>
+  {productosFrecuentes.length > 0 && (
+    <select
+      value={productosFrecuentes.includes(producto) ? producto : "__nuevo__"}
+      onChange={e => {
+        if (e.target.value === "__nuevo__") setProducto("");
+        else setProducto(e.target.value);
+      }}
+      style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
+    >
+      <option value="__nuevo__">+ Escribir nuevo producto</option>
+      {productosFrecuentes.map((p,i) => (
+        <option key={i} value={p}>{p}</option>
+      ))}
+    </select>
+  )}
+  {(!productosFrecuentes.includes(producto) || productosFrecuentes.length === 0) && (
+    <input type="text" placeholder="Maíz" value={producto}
+      onChange={e => setProducto(e.target.value)} style={styles.input} />
+  )}
+</div>
+          
           <div style={styles.campo}>
-            <label style={styles.label}>Empresa</label>
-            <input type="text" placeholder="TransABC" value={empresa} onChange={e=>setEmpresa(e.target.value)} style={styles.input} />
-          </div>
-          <div style={styles.campo}>
-          <label style={styles.label}>Contacto empresa</label>
-          <input type="text" placeholder="Nombre del contacto" value={contactoEmpresa} onChange={e=>setContactoEmpresa(e.target.value)} style={styles.input} />
-          </div>
+  <label style={styles.label}>Empresa</label>
+  {empresasFrecuentes.length > 0 && (
+    <select
+      value={empresasFrecuentes.includes(empresa) ? empresa : "__nueva__"}
+      onChange={e => {
+        if (e.target.value === "__nueva__") setEmpresa("");
+        else setEmpresa(e.target.value);
+      }}
+      style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
+    >
+      <option value="__nueva__">+ Escribir nueva empresa</option>
+      {empresasFrecuentes.map((e,i) => (
+        <option key={i} value={e}>{e}</option>
+      ))}
+    </select>
+  )}
+  {(!empresasFrecuentes.includes(empresa) || empresasFrecuentes.length === 0) && (
+    <input type="text" placeholder="TransABC" value={empresa}
+      onChange={e => setEmpresa(e.target.value)} style={styles.input} />
+  )}
+</div>
+
           <div style={styles.campo}>
           <label style={styles.label}>Celular contacto</label>
           <input type="tel" placeholder="+57 300 000 0000" value={celularEmpresa} onChange={e=>setCelularEmpresa(e.target.value)} style={styles.input} />
