@@ -47,6 +47,7 @@ function AppContenido() {
 ))}
 
   return (
+    <>
     <Routes>
 
       {/* ── PÚBLICAS ── */}
@@ -172,6 +173,17 @@ function AppContenido() {
 } />
 
     </Routes>
+
+    {/*TOASTS - fuera de Routes*/}
+    {toasts.map(toast => (
+      <Toast
+      key = {toast.id}
+      mensaje = {toast.mensaje}
+      tipo = {toast.tipo}
+      onCerrar={() => cerrar(toast.id)}
+      />
+    ))}
+    </>
   );
 }
 
