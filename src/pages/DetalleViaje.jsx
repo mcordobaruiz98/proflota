@@ -71,8 +71,10 @@ function DetalleViaje({ viajes = [], onEliminar }) {
         <div style={styles.heroPills}>
           {viaje.fecha&&<span style={styles.pill}>📅 {viaje.fecha}</span>}
           {viaje.placa&&<span style={styles.pill}>🚚 {viaje.placa}</span>}
+          {viaje.emp&&<span style={styles.pill}>👤{viaje.condNom}</span>}
           {viaje.mani&&<span style={styles.pill}>📄 Man. {viaje.mani}</span>}
           {viaje.emp&&<span style={styles.pill}>🏢 {viaje.emp}</span>}
+          
         </div>
       </div>
 

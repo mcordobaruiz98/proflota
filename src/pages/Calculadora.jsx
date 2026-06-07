@@ -274,6 +274,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], onGuardar, onGuardarRuta, 
   const totalDesc     = valRetefuente + valReteica + valFopat + valOtro;
   const totalGastos = costoComb + totPeajes + costoConduct + n(carpado) + n(gastosViaje) + totExtras + totalDesc;
   const gananciaNeta = valorViaje - totalGastos;
+  const gananciaPropietario = gananciaNeta - costo
   const margen = valorViaje > 0 ? (gananciaNeta / valorViaje) * 100 : 0;
   const cxkm   = kmTotal > 0 ? totalGastos / kmTotal : 0;
   const margenColor = margen >= 40 ? t.colors.green : margen >= 20 ? t.colors.amber : t.colors.red;
