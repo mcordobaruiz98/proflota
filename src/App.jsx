@@ -19,12 +19,15 @@ import OlvideContrasena from "./pages/OlvideContrasena";
 import Configuracion    from "./pages/Configuracion";
 import AyudaSoporte     from "./pages/AyudaSoporte";
 import AcercaDe         from "./pages/AcercaDe";
+import Toast            from "./components/Toast";
 
 import { useAuth }      from "./hooks/useAuth";
 import { useFirestore } from "./hooks/useFirestore";
+import { useToast } from "./hooks/useToast";
 
 function AppContenido() {
   const { usuario } = useAuth();
+  const { toasts, mostrar, cerrar } = useToast();
 
   const {
     vehiculos, viajes, empresas, rutas, cargando,
@@ -33,6 +36,15 @@ function AppContenido() {
     agregarEmpresa,  eliminarEmpresa,
     agregarRuta,     eliminarRuta
   } = useFirestore(usuario?.uid);
+
+    {toasts.map(toast => (
+  <Toast
+    key={toast.id}
+    mensaje={toast.mensaje}
+    tipo={toast.tipo}
+    onCerrar={() => cerrar(toast.id)}
+  />
+))}
 
   return (
     <Routes>
@@ -153,6 +165,7 @@ function AppContenido() {
         onGuardar={agregarViaje}
         onGuardarRuta={agregarRuta}
         onEliminarRuta={eliminarRuta}
+        mostrarToast={mostrar}
       />
     </Layout>
   </RutaProtegida>
