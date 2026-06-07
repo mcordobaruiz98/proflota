@@ -194,7 +194,7 @@ function DetalleViaje({ viajes = [], onEliminar }) {
             {viaje.extrasList.map((e,i,arr)=>(
               <div key={i} style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                 <span style={styles.filaLabel}>{e.n}</span>
-                <span style={styles.filaValor}>{fmt(e.v)}</span>
+                <span style={styles.filaValor}>{fmt(e.valor|| e.v || 0)}</span>
               </div>
             ))}
           </div>
