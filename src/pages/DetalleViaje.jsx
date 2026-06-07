@@ -51,6 +51,8 @@ function DetalleViaje({ viajes = [], onEliminar }) {
     {label:viaje.descuentos?.nombreOtro||"Otro descuento", valor:viaje.descuentos?.otro||0, detalle:null, color:t.colors.red},
   ].filter(g=>g.valor>0);
 
+  console.log("extrasList:", viaje.extrasList);
+
   return (
     <div style={styles.pantalla}>
 
