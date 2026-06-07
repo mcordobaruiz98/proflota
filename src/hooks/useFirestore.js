@@ -78,6 +78,8 @@ export function useFirestore(uid) {
   };
 
  const agregarRuta = async (datos) => {
+  console.log("rutaRutas:", rutaRutas);
+  if (!rutaRutas) throw new Error("Usuario no autenticado");
   const datosLimpios = JSON.parse(JSON.stringify(datos));
   await addDoc(collection(db, rutaRutas), {
     ...datosLimpios,
