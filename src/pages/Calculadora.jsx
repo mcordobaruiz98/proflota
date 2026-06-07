@@ -313,8 +313,8 @@ const productosFrecuentes = [...new Set(
   };
 
   const guardarViaje = async () => {
-    if (!ruta.trim())  { alert("Ingresa la ruta del viaje"); return; }
-    if (!valorViaje)   { alert("Ingresa tonelaje y flete"); return; }
+    if (!ruta.trim())  { mostrarToast("Ingresa la ruta del viaje","error"); return; }
+    if (!valorViaje)   { mostrarToast("Ingresa tonelaje y flete","error"); return; }
     setGuardando(true);
     await onGuardar({
       fecha, mani, placa, tipoCarga, producto,
@@ -343,7 +343,7 @@ const productosFrecuentes = [...new Set(
         total: totalDesc,
       }
     });
-    alert("✅ Viaje guardado");
+    mostrarToast("Viaje guardado correctamente","exito");
     navigate(-1);
   };
 
@@ -379,7 +379,7 @@ const productosFrecuentes = [...new Set(
 
 const guardarRutaFrecuente = async () => {
   if (guardandoRuta) return;
-  if (!ruta.trim()) { alert("Ingresa el nombre de la ruta primero"); return; }
+  if (!ruta.trim()) { mostrarToast("Ingresa la ruta del viaje primero","error"); return; }
   setGuardandoRuta(true);
 
   const datos = {
