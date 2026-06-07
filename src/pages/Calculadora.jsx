@@ -892,7 +892,7 @@ const guardarRutaFrecuente = async () => {
                     style={{...styles.peajeTagBtn, background: p.iv ? t.colors.greenSoft : t.colors.blueSoft, color: p.iv ? t.colors.green : t.colors.blue}}
                     onClick={()=>toggleIV(p.c)}
                   >
-                    {p.iv ? "I+V" : "Ida"}
+                    {p.iv ? "Ida y vuelta" : "Ida"}
                   </button>
                   <button style={styles.peajeTagDel} onClick={()=>quitarP(p.c)}>
                     <X size={12} color={t.colors.red} />
