@@ -31,6 +31,7 @@ function AppContenido() {
     agregarVehiculo, eliminarVehiculo,
     agregarViaje,    eliminarViaje,
     agregarEmpresa,  eliminarEmpresa,
+    agregarRuta,     agregarRuta
   } = useFirestore(usuario?.uid);
 
   return (
