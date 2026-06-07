@@ -192,8 +192,8 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const [rendCargado, setRendCargado] = useState("");
   const [rendVacio,   setRendVacio]   = useState("");
   const [galManual,   setGalManual]   = useState("");
-  const [precioAcpm,  setPrecioAcpm]  = useState("");
-  const [precioAdblue,setPrecioAdblue]= useState("");
+  const [precioAcpm,  setPrecioAcpm]  = useState(() => localStorage.getItem("ultimo_acpm") || "");
+  const [precioAdblue,setPrecioAdblue]= useState(() => localStorage.getItem("ultimo_adblue") ||"");
   const [categoria,   setCategoria]   = useState("VII");
   const [busquedaP,   setBusquedaP]   = useState("");
   const [selP,        setSelP]        = useState("");
@@ -579,11 +579,11 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
         <div style={styles.fila2}>
           <div style={styles.campo}>
             <label style={styles.label}>Precio ACPM ($/gal)</label>
-            <input type="number" placeholder="10500" value={precioAcpm} onChange={e=>setPrecioAcpm(e.target.value)} style={styles.input} />
+            <input type="number" placeholder="10500" value={precioAcpm} onChange={e=>setPrecioAcpm(e.target.value)} onBlur= {e=> localStorage.setItem("ultimo_acpm", e.target.value)}  style={styles.input} />
           </div>
           <div style={styles.campo}>
             <label style={styles.label}>Precio Adblue ($/lt)</label>
-            <input type="number" placeholder="3500" value={precioAdblue} onChange={e=>setPrecioAdblue(e.target.value)} style={styles.input} />
+            <input type="number" placeholder="3500" value={precioAdblue} onChange={e=>setPrecioAdblue(e.target.value)} onBlur= {e=> localStorage.setItem("ultimo_adblue"), e.target.value}  style={styles.input} />
           </div>
         </div>
         {galTotal > 0 && (
