@@ -62,18 +62,6 @@ function AppContenido() {
         </RutaProtegida>
       } />
 
-      <Route path="/calculadora" element={
-        <RutaProtegida>
-          <Layout>
-            <Calculadora
-              vehiculos={vehiculos}
-              viajes={viajes}
-              onGuardar={agregarViaje}
-            />
-          </Layout>
-        </RutaProtegida>
-      } />
-
       <Route path="/cuentas" element={
         <RutaProtegida>
           <Layout>
