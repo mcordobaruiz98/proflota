@@ -499,24 +499,24 @@ const guardarRutaFrecuente = async () => {
         <div style={styles.fila2}>
           <div style={styles.campo}>
   <label style={styles.label}>Producto</label>
-  {productosFrecuentes.length > 0 && (
+  {productosFrecuentes.length > 0 ? (
     <select
       value={productosFrecuentes.includes(producto) ? producto : "__nuevo__"}
-      onChange={e => {
-        if (e.target.value === "__nuevo__") setProducto("");
-        else setProducto(e.target.value);
+      onChange={evt => {
+        if (evt.target.value === "__nuevo__") setProducto("");
+        else setProducto(evt.target.value);
       }}
-      style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
+      style={{...styles.input, marginBottom: producto === "" || !productosFrecuentes.includes(producto) ? "6px" : "0", color: t.colors.textPrimary}}
     >
       <option value="__nuevo__">+ Escribir nuevo producto</option>
-      {productosFrecuentes.map((p,i) => (
+      {productosFrecuentes.map((p, i) => (
         <option key={i} value={p}>{p}</option>
       ))}
     </select>
-  )}
-  {(!productosFrecuentes.includes(producto) || productosFrecuentes.length === 0) && (
+  ) : null}
+  {(productosFrecuentes.length === 0 || !productosFrecuentes.includes(producto)) && (
     <input type="text" placeholder="Maíz" value={producto}
-      onChange={e => setProducto(e.target.value)} style={styles.input} />
+      onChange={evt => setProducto(evt.target.value)} style={styles.input} />
   )}
 </div>
           
