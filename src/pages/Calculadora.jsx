@@ -370,6 +370,8 @@ const guardarRutaFrecuente = async () => {
   };
 
   console.log("Guardando ruta:", JSON.stringify(datos));
+  console.log("onGuardarRuta tipo:", typeof onGuardarRuta);
+await onGuardarRuta(datos);
 
   try {
     await onGuardarRuta(datos);
