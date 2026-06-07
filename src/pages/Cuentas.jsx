@@ -33,6 +33,7 @@ function Cuentas({ vehiculos = [], viajes = [] }) {
   const netaMes      = viajesMes.reduce((s,v) => s+(v.neta||0),   0);
   const rentabilidad = ingresosMes > 0 ? ((netaMes/ingresosMes)*100).toFixed(1) : "0.0";
   const margenColor  = Number(rentabilidad)>=40 ? t.colors.green : Number(rentabilidad)>=20 ? t.colors.amber : t.colors.red;
+  const kmMes = viajesMes.reduce((s,v) => s+(v.kmT||0), 0);
 
   const acpmMes      = viajesMes.reduce((s,v) => s+(v.cAcpm||0),     0);
   const adblMes      = viajesMes.reduce((s,v) => s+(v.cAdbl||0),     0);
@@ -113,6 +114,21 @@ function Cuentas({ vehiculos = [], viajes = [] }) {
             <p style={{...styles.metricaVal, color: t.colors.red}}>{fmt(gastosMes)}</p>
           </div>
         </div>
+
+        <div style={styles.dosColumnas}>
+  <div style={styles.metricaCard}>
+    <p style={styles.metricaLabel}>Km recorridos</p>
+    <p style={{...styles.metricaVal, color: t.colors.textPrimary}}>
+      {kmMes > 0 ? kmMes.toLocaleString("es-CO") + " km" : "—"}
+    </p>
+  </div>
+  <div style={styles.metricaCard}>
+    <p style={styles.metricaLabel}>Viajes realizados</p>
+    <p style={{...styles.metricaVal, color: t.colors.textPrimary}}>
+      {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""}
+    </p>
+  </div>
+</div>
 
         {/* GRÁFICA */}
         <div style={styles.card}>
