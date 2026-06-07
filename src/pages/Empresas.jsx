@@ -5,7 +5,7 @@ import { theme as t } from "../styles/theme";
 
 const TIPOS = ["Transportadora","Generadora de carga","Operador logístico","Comercializadora","Otra"];
 
-function Empresas({ empresas = [], onAgregar, onEliminar }) {
+function Empresas({ empresas = [], onAgregar, onEliminar, mostrarToast }) {
   const navigate = useNavigate();
   const [vista,    setVista]    = useState("lista");
   const [busqueda, setBusqueda] = useState("");
@@ -44,6 +44,7 @@ function Empresas({ empresas = [], onAgregar, onEliminar }) {
   const eliminar = async (emp) => {
     if (!window.confirm("¿Eliminar esta empresa?")) return;
     await onEliminar(emp.firestoreId);
+    mostrarToast("Empresa eliminada","info")
   };
 
   const filtradas = empresas.filter(e=>

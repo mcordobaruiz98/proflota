@@ -70,6 +70,7 @@ function AppContenido() {
               vehiculos={vehiculos}
               viajes={viajes}
               onEliminar={eliminarVehiculo}
+              mostrarToast ={mostrar}
             />
           </Layout>
         </RutaProtegida>
@@ -106,6 +107,7 @@ function AppContenido() {
               empresas={empresas}
               onAgregar={agregarEmpresa}
               onEliminar={eliminarEmpresa}
+              mostrarToast={mostrar}
             />
           </Layout>
         </RutaProtegida>
@@ -132,6 +134,7 @@ function AppContenido() {
           <DetalleViaje
             viajes={viajes}
             onEliminar={eliminarViaje}
+            mostrarToast={mostrar}
           />
         </RutaProtegida>
       } />

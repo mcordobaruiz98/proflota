@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Trash2, Fuel, Route, Receipt, TrendingUp, Package } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
-function DetalleViaje({ viajes = [], onEliminar }) {
+function DetalleViaje({ viajes = [], onEliminar, mostrarToast }) {
   const navigate = useNavigate();
   const { id }   = useParams();
 
@@ -14,6 +14,7 @@ function DetalleViaje({ viajes = [], onEliminar }) {
   const eliminarViaje = async () => {
     if (!window.confirm("¿Eliminar este viaje?")) return;
     await onEliminar(viaje.firestoreId);
+    mostrarToast("Viaje eliminado","info");
     navigate(-1);
   };
 

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Truck, Plus, Search, Trash2 } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
-function Vehiculos({ vehiculos, onEliminar, viajes = [] }) {
+function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast }) {
   const navigate = useNavigate();
   const [busqueda, setBusqueda] = useState("");
 
@@ -15,6 +15,7 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [] }) {
   const eliminarVehiculo = async (vehiculo) => {
     if (!window.confirm("¿Seguro que quieres eliminar este vehículo?")) return;
     await onEliminar(vehiculo.firestoreId);
+    mostrarToast("Vehiculo eliminado","info");
   };
 
   const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
