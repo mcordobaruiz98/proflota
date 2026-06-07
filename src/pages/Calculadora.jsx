@@ -355,12 +355,25 @@ const productosFrecuentes = [...new Set(
   setRendVacio(rutaGuardada.rendVacio || "");
   setCategoria(rutaGuardada.categoria || "VII");
   setPeajesRuta((rutaGuardada.peajesRuta || []).map(p => ({
-    c:  p.c,
-    n:  p.n,
-    d:  p.d,
-    iv: p.iv || false,
-    t:  { [rutaGuardada.categoria || "VII"]: p.tarifa || 0 },
+    c: p.c, n: p.n, d: p.d, iv: p.iv || false,
+    t: { [rutaGuardada.categoria || "VII"]: p.tarifa || 0 },
   })));
+  // Datos adicionales
+  if (rutaGuardada.empresa)         setEmpresa(rutaGuardada.empresa);
+  if (rutaGuardada.contactoEmpresa) setContactoEmpresa(rutaGuardada.contactoEmpresa);
+  if (rutaGuardada.celularEmpresa)  setCelularEmpresa(rutaGuardada.celularEmpresa);
+  if (rutaGuardada.conductor)       setConductor(rutaGuardada.conductor);
+  if (rutaGuardada.modoConductor)   setModoConductor(rutaGuardada.modoConductor);
+  if (rutaGuardada.porcCond)        setPorcCond(rutaGuardada.porcCond);
+  if (rutaGuardada.carpado)         setCarpado(rutaGuardada.carpado);
+  if (rutaGuardada.gastosViaje)     setGastosViaje(rutaGuardada.gastosViaje);
+  // Descuentos de ley
+  if (rutaGuardada.descRetefuente !== undefined) setDescRetefuente(rutaGuardada.descRetefuente);
+  if (rutaGuardada.pctRetefuente)   setPctRetefuente(rutaGuardada.pctRetefuente);
+  if (rutaGuardada.descReteica !== undefined) setDescReteica(rutaGuardada.descReteica);
+  if (rutaGuardada.pctReteica)      setPctReteica(rutaGuardada.pctReteica);
+  if (rutaGuardada.descFopat !== undefined) setDescFopat(rutaGuardada.descFopat);
+  if (rutaGuardada.pctFopat)        setPctFopat(rutaGuardada.pctFopat);
   setMostrarRutas(false);
 };
 
@@ -368,31 +381,44 @@ const guardarRutaFrecuente = async () => {
   if (guardandoRuta) return;
   if (!ruta.trim()) { alert("Ingresa el nombre de la ruta primero"); return; }
   setGuardandoRuta(true);
-  
+
   const datos = {
-    nombre: nombreRuta.trim() || ruta.trim(),
-    ruta: ruta.trim(),
-    kmCargado: n(kmCargado),
-    kmVacio: n(kmVacio),
+    nombre:      nombreRuta.trim() || ruta.trim(),
+    ruta:        ruta.trim(),
+    kmCargado:   n(kmCargado),
+    kmVacio:     n(kmVacio),
     rendCargado: n(rendCargado),
-    rendVacio: n(rendVacio),
-    peajesRuta: peajesRuta.map(p => ({
-      c:      p.c,
-      n:      p.n,
-      d:      p.d,
-      iv:     p.iv,
+    rendVacio:   n(rendVacio),
+    peajesRuta:  peajesRuta.map(p => ({
+      c: p.c, n: p.n, d: p.d, iv: p.iv || false,
       tarifa: p.t ? (p.t[categoria] || 0) : (p.tarifa || 0),
     })),
     categoria,
+    // Datos adicionales
+    empresa:        empresa,
+    contactoEmpresa: contactoEmpresa,
+    celularEmpresa:  celularEmpresa,
+    conductor:       conductor,
+    modoConductor:   modoConductor,
+    porcCond:        n(porcCond),
+    carpado:         n(carpado),
+    gastosViaje:     n(gastosViaje),
+    // Descuentos de ley
+    descRetefuente:  descRetefuente,
+    pctRetefuente:   pctRetefuente,
+    descReteica:     descReteica,
+    pctReteica:      pctReteica,
+    descFopat:       descFopat,
+    pctFopat:        pctFopat,
   };
 
   try {
     await onGuardarRuta(datos);
-    alert("✅ Ruta guardada");
+    mostrarToast("Ruta guardada correctamente", "exito");
     setMostrarGuardar(false);
     setNombreRuta("");
   } catch(err) {
-    alert("Error: " + err.message);
+    mostrarToast("Error al guardar la ruta", "error");
   } finally {
     setGuardandoRuta(false);
   }
@@ -439,8 +465,11 @@ const guardarRutaFrecuente = async () => {
                 {r.nombre}
               </p>
               <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0"}}>
-                {r.kmCargado>0?`${r.kmCargado} km cargado`:""}{r.kmVacio>0?` · ${r.kmVacio} km vacío`:""} · {r.peajesRuta?.length||0} peajes
-              </p>
+                {r.kmCargado>0?`${r.kmCargado} km`:""} 
+                {r.peajesRuta?.length>0?` · ${r.peajesRuta.length} peajes`:""} 
+                {r.conductor?` · ${r.conductor}`:""}
+                {r.empresa?` · ${r.empresa}`:""}
+                </p>
             </div>
             <div style={{display:"flex", gap:"8px"}}>
               <button
