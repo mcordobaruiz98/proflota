@@ -27,7 +27,7 @@ function AppContenido() {
   const { usuario } = useAuth();
 
   const {
-    vehiculos, viajes, empresas, cargando,
+    vehiculos, viajes, empresas, rutas, cargando,
     agregarVehiculo, eliminarVehiculo,
     agregarViaje,    eliminarViaje,
     agregarEmpresa,  eliminarEmpresa,
