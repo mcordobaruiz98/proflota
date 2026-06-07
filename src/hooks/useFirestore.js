@@ -77,9 +77,14 @@ export function useFirestore(uid) {
     await deleteDoc(doc(db, rutaEmpresas, firestoreId));
   };
 
-  const agregarRuta = async (datos) => {
-    await addDoc(collection(db, rutaRutas), { ...datos, creadoEn: new Date().toISOString() });
-  };
+ const agregarRuta = async (datos) => {
+  const datosLimpios = JSON.parse(JSON.stringify(datos));
+  await addDoc(collection(db, rutaRutas), {
+    ...datosLimpios,
+    creadoEn: new Date().toISOString(),
+  });
+};
+
   const eliminarRuta = async (firestoreId) => {
     await deleteDoc(doc(db, rutaRutas, firestoreId));
   };
