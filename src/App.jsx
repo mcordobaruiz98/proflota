@@ -154,6 +154,21 @@ function AppContenido() {
         <RutaProtegida><AcercaDe /></RutaProtegida>
       } />
 
+      <Route path="/calculadora" element={
+  <RutaProtegida>
+    <Layout>
+      <Calculadora
+        vehiculos={vehiculos}
+        viajes={viajes}
+        rutas={rutas}
+        onGuardar={agregarViaje}
+        onGuardarRuta={agregarRuta}
+        onEliminarRuta={eliminarRuta}
+      />
+    </Layout>
+  </RutaProtegida>
+} />
+
     </Routes>
   );
 }

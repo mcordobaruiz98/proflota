@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { use, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Plus, X, ChevronDown } from "lucide-react";
 import { theme as t } from "../styles/theme";
@@ -173,7 +173,7 @@ const PEAJES = [
 {c:"PE165",n:"ZARAGOZA",d:"ANTIOQUIA",t:{I:17600,II:21800,III:21800,IV:21800,V:51600,VI:64700,VII:74600}},
 ];
 
-function Calculadora({ vehiculos, viajes, onGuardar }) {
+function Calculadora({ vehiculos, viajes, rutas = [], onGuardar, onGuardarRuta, onEliminarRuta }) {
   const navigate = useNavigate();
 
   const [fecha,       setFecha]       = useState(new Date().toISOString().slice(0,10));
@@ -222,6 +222,10 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
   const [fleteRetorno,     setFleteRetorno]       = useState("");
   const [tonelajeRetorno,  setTonelajeRetorno]    = useState("");
   const [modoFleteRetorno, setModoFleteRetorno]   = useState("porTon");
+  const [mostrarRutas,   setMostrarRutas]   = useState(false);
+  const [guardandoRuta,  setGuardandoRuta]  = useState(false);
+  const [nombreRuta,     setNombreRuta]     = useState("");
+  const [mostrarGuardar, setMostrarGuardar] = useState(false);
 
 
   const n   = (v) => parseFloat(v) || 0;
@@ -333,6 +337,36 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
     navigate(-1);
   };
 
+  const cargarRuta = (ruta) => {
+  setRuta(ruta.ruta);
+  setKmCargado(ruta.kmCargado || "");
+  setKmVacio(ruta.kmVacio || "");
+  setRendCargado(ruta.rendCargado || "");
+  setRendVacio(ruta.rendVacio || "");
+  setPeajesRuta(ruta.peajesRuta || []);
+  setCategoria(ruta.categoria || "VII");
+  setMostrarRutas(false);
+};
+
+const guardarRutaFrecuente = async () => {
+  if (!ruta.trim()) { alert("Ingresa el nombre de la ruta primero"); return; }
+  setGuardandoRuta(true);
+  await onGuardarRuta({
+    nombre: nombreRuta.trim() || ruta.trim(),
+    ruta: ruta.trim(),
+    kmCargado: n(kmCargado),
+    kmVacio:   n(kmVacio),
+    rendCargado: n(rendCargado),
+    rendVacio:   n(rendVacio),
+    peajesRuta,
+    categoria,
+  });
+  setGuardandoRuta(false);
+  setMostrarGuardar(false);
+  setNombreRuta("");
+  alert("✅ Ruta guardada");
+};
+
   return (
     <div style={styles.pantalla}>
 
@@ -344,6 +378,59 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
         </button>
         <h1 style={styles.titulo}>Calculadora</h1>
       </div>
+
+      {/* ── RUTAS FRECUENTES ── */}
+{rutas.length > 0 && (
+  <div style={{padding:"10px 16px 0"}}>
+    <button
+      style={{
+        width:"100%", padding:"11px", background:t.colors.blueSoft,
+        border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md,
+        fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold,
+        color:t.colors.blue, cursor:"pointer",
+        display:"flex", alignItems:"center", justifyContent:"center", gap:"6px"
+      }}
+      onClick={()=>setMostrarRutas(!mostrarRutas)}
+    >
+      📍 {mostrarRutas ? "Cerrar rutas" : `Cargar ruta guardada (${rutas.length})`}
+    </button>
+
+    {mostrarRutas && (
+      <div style={{background:t.colors.bgCard, borderRadius:t.radius.lg, marginTop:"8px", overflow:"hidden", boxShadow:t.shadows.card}}>
+        {rutas.map((r,i,arr)=>(
+          <div key={r.firestoreId} style={{
+            display:"flex", justifyContent:"space-between", alignItems:"center",
+            padding:"12px 16px",
+            borderBottom: i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`
+          }}>
+            <div>
+              <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>
+                {r.nombre}
+              </p>
+              <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0"}}>
+                {r.kmCargado>0?`${r.kmCargado} km cargado`:""}{r.kmVacio>0?` · ${r.kmVacio} km vacío`:""} · {r.peajesRuta?.length||0} peajes
+              </p>
+            </div>
+            <div style={{display:"flex", gap:"8px"}}>
+              <button
+                style={{padding:"6px 12px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, cursor:"pointer"}}
+                onClick={()=>cargarRuta(r)}
+              >
+                Cargar
+              </button>
+              <button
+                style={{padding:"6px 10px", background:t.colors.redSoft, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, cursor:"pointer"}}
+                onClick={()=>onEliminarRuta(r.firestoreId)}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
       {/* ── DATOS DEL VIAJE ── */}
       <div style={styles.seccionLabel}>Datos del viaje</div>
@@ -425,6 +512,54 @@ function Calculadora({ vehiculos, viajes, onGuardar }) {
       style={styles.input}
     />
   )}
+
+  {/* GUARDAR RUTA */}
+<div style={{marginTop:"10px", borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px"}}>
+  {!mostrarGuardar ? (
+    <button
+      style={{
+        width:"100%", padding:"9px", background:"none",
+        border:`1.5px dashed ${t.colors.blueBorder}`,
+        borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm,
+        color:t.colors.blue, cursor:"pointer",
+        display:"flex", alignItems:"center", justifyContent:"center", gap:"6px",
+        fontWeight:t.fonts.weightSemibold
+      }}
+      onClick={()=>setMostrarGuardar(true)}
+    >
+      + Guardar como ruta frecuente
+    </button>
+  ) : (
+    <div>
+      <div style={styles.campo}>
+        <label style={styles.label}>Nombre de la ruta</label>
+        <input
+          type="text"
+          placeholder="Ej: Barranquilla - Bogotá"
+          value={nombreRuta}
+          onChange={e=>setNombreRuta(e.target.value)}
+          style={styles.input}
+        />
+      </div>
+      <div style={{display:"flex", gap:"8px"}}>
+        <button
+          style={{flex:1, padding:"10px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoRuta?0.75:1}}
+          onClick={guardarRutaFrecuente}
+          disabled={guardandoRuta}
+        >
+          {guardandoRuta?"Guardando...":"Guardar ruta"}
+        </button>
+        <button
+          style={{padding:"10px 14px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, cursor:"pointer"}}
+          onClick={()=>{setMostrarGuardar(false);setNombreRuta("");}}
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  )}
+</div>
+
 </div>
         <div style={styles.fila2}>
           <div style={styles.campo}>

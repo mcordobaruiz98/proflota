@@ -98,5 +98,30 @@ export function useFirestore(uid) {
     agregarVehiculo, eliminarVehiculo,
     agregarViaje,    eliminarViaje,
     agregarEmpresa,  eliminarEmpresa,
+    agregarRuta,     eliminarRuta
   };
+
+  const rutaRutas = uid ? `usuarios/${uid}/rutas` : null;
+const [rutas, setRutas] = useState([]);
+
+useEffect(() => {
+  if (!rutaRutas) return;
+  const q = query(collection(db, rutaRutas));
+  const unsub = onSnapshot(q, (snap) => {
+    setRutas(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
+  });
+  return () => unsub();
+}, [rutaRutas]);
+
+const agregarRuta = async (datos) => {
+  await addDoc(collection(db, rutaRutas), {
+    ...datos,
+    creadoEn: new Date().toISOString(),
+  });
+};
+
+const eliminarRuta = async (firestoreId) => {
+  await deleteDoc(doc(db, rutaRutas, firestoreId));
+};
+
 }
