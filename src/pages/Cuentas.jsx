@@ -44,7 +44,7 @@ function Cuentas({ vehiculos = [], viajes = [] }) {
 
   const gananciaPorVeh = vehiculos.map(veh => {
     const vt = viajesMes.filter(v => v.placa===veh.placa);
-    return { placa: veh.placa, tipo: veh.tipoVehiculo, neta: vt.reduce((s,v)=>s+(v.neta||0),0), viajes: vt.length };
+    return { placa: veh.placa, tipo: veh.tipoVehiculo, neta: vt.reduce((s,v)=>s+(v.neta||0),0), viajes: vt.length, km: vt.reduce((s,v) => s+(v.kmT||0), 0),};
   }).sort((a,b) => b.neta - a.neta);
   const maxNeta = Math.max(...gananciaPorVeh.map(v=>Math.abs(v.neta)), 1);
 
@@ -117,7 +117,7 @@ function Cuentas({ vehiculos = [], viajes = [] }) {
 
         <div style={styles.dosColumnas}>
   <div style={styles.metricaCard}>
-    <p style={styles.metricaLabel}>Km recorridos</p>
+    <p style={styles.metricaLabel}>Km totales flota</p>
     <p style={{...styles.metricaVal, color: t.colors.textPrimary}}>
       {kmMes > 0 ? kmMes.toLocaleString("es-CO") + " km" : "—"}
     </p>
@@ -202,7 +202,7 @@ function Cuentas({ vehiculos = [], viajes = [] }) {
                   <div style={{display:"flex", justifyContent:"space-between", marginBottom:"5px"}}>
                     <div>
                       <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary}}>{v.placa}</span>
-                      <span style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, marginLeft:"8px"}}>{v.tipo} · {v.viajes} viaje{v.viajes!==1?"s":""}</span>
+                      <span style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, marginLeft:"8px"}}>{v.tipo} · {v.viajes} viaje{v.viajes!==1?"s":""}· {v.km.toLocaleString("es-CO")} km</span>
                     </div>
                     <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:col}}>
                       {v.neta>=0?"+":""}{fmt(v.neta)}
