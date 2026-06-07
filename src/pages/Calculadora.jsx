@@ -526,14 +526,14 @@ const guardarRutaFrecuente = async () => {
       style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
     >
       <option value="__nueva__">+ Escribir nueva empresa</option>
-      {empresasFrecuentes.map((e,i) => (
-        <option key={i} value={e}>{e}</option>
+      {empresasFrecuentes.map((emp, i) => (
+        <option key={i} value={emp}>{emp}</option>
       ))}
     </select>
   )}
   {(!empresasFrecuentes.includes(empresa) || empresasFrecuentes.length === 0) && (
     <input type="text" placeholder="TransABC" value={empresa}
-      onChange={e => setEmpresa(e.target.value)} style={styles.input} />
+      onChange={evt => setEmpresa(evt.target.value)} style={styles.input} />
   )}
 </div>
 
