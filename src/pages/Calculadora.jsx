@@ -353,8 +353,14 @@ const productosFrecuentes = [...new Set(
   setKmVacio(rutaGuardada.kmVacio || "");
   setRendCargado(rutaGuardada.rendCargado || "");
   setRendVacio(rutaGuardada.rendVacio || "");
-  setPeajesRuta(rutaGuardada.peajesRuta || []);
   setCategoria(rutaGuardada.categoria || "VII");
+  setPeajesRuta((rutaGuardada.peajesRuta || []).map(p => ({
+    c:  p.c,
+    n:  p.n,
+    d:  p.d,
+    iv: p.iv || false,
+    t:  { [rutaGuardada.categoria || "VII"]: p.tarifa || 0 },
+  })));
   setMostrarRutas(false);
 };
 
