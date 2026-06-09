@@ -231,3 +231,4 @@ const styles = {
 };
 
 export default DetalleViaje;
+
