@@ -19,6 +19,7 @@ function Empresas({ empresas = [], onAgregar, onEliminar, mostrarToast }) {
   const [contacto,   setContacto]   = useState("");
   const [telefono,   setTelefono]   = useState("");
   const [correo,     setCorreo]     = useState("");
+  const [empresaAEliminar, setEmpresaAEliminar] = useState(null);
 
   const limpiar = () => {
     setTipo("");setRazonSocial("");setNit("");
@@ -42,7 +43,6 @@ function Empresas({ empresas = [], onAgregar, onEliminar, mostrarToast }) {
   };
 
   const eliminar = async (emp) => {
-    if (!window.confirm("¿Eliminar esta empresa?")) return;
     await onEliminar(emp.firestoreId);
     mostrarToast("Empresa eliminada","info")
   };
@@ -176,9 +176,26 @@ function Empresas({ empresas = [], onAgregar, onEliminar, mostrarToast }) {
                 )}
               </div>
             </div>
-            <button style={styles.btnEliminar} onClick={()=>eliminar(emp)}>
-              <Trash2 size={16} color={t.colors.red} strokeWidth={1.8} />
-            </button>
+            {empresaAEliminar?.firestoreId === emp.firestoreId ? (
+  <div style={{display:"flex", flexDirection:"column", gap:"4px", padding:"8px"}}>
+    <button
+      style={{padding:"6px 10px", background:t.colors.redSoft, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.red, cursor:"pointer"}}
+      onClick={() => { eliminar(emp); setEmpresaAEliminar(null); }}
+    >
+      Confirmar
+    </button>
+    <button
+      style={{padding:"6px 10px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, cursor:"pointer", color:t.colors.textSecondary}}
+      onClick={() => setEmpresaAEliminar(null)}
+    >
+      Cancelar
+    </button>
+  </div>
+) : (
+  <button style={styles.btnEliminar} onClick={() => setEmpresaAEliminar(emp)}>
+    <Trash2 size={16} color={t.colors.red} strokeWidth={1.8} />
+  </button>
+)}
           </div>
         ))}
       </div>
