@@ -12,7 +12,7 @@ function DetalleViaje({ viajes = [], onEliminar, mostrarToast }) {
   const fmt = (n) => "$" + Math.round(n||0).toLocaleString("es-CO");
   const fnD = (n,d) => (Math.round((n||0)*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
 
-  const [confimarEliminar, serConfirmarEliminar] = useState(false);
+  const [confimarEliminar, setConfirmarEliminar] = useState(false);
 
   const eliminarViaje = async () => {
     await onEliminar(viaje.firestoreId);
