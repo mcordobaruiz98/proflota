@@ -205,7 +205,7 @@ function DetalleVehiculo({ vehiculos, viajes = [] }) {
     {id:"viajes",    label:"Viajes",   Icono:Route},
     {id:"cuentas",   label:"Cuentas",  Icono:TrendingUp},
     {id:"historial", label:"Historial",Icono:Clock},
-    {id:"hvida",     label:"H. Vida",  Icono:FileText},
+    {id:"hvida",     label:"H.Vida",  Icono:FileText},
   ];
 
   return (
@@ -259,7 +259,10 @@ function DetalleVehiculo({ vehiculos, viajes = [] }) {
               onClick={()=>setTabActivo(tab.id)}
             >
               <tab.Icono size={14} color={activo?t.colors.blue:t.colors.textTertiary} strokeWidth={activo?2.5:1.8} />
-              <span style={{color:activo?t.colors.blue:t.colors.textTertiary}}>{tab.label}</span>
+              <span style={{color:activo?t.colors.blue:t.colors.textTertiary, 
+                fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.04em",
+                fontWeight: activo ? t.fonts.weightBold : t.fonts.weightMedium,
+              }}>{tab.label}</span>
             </button>
           );
         })}
@@ -619,7 +622,7 @@ const styles = {
   metricaLabel:        { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"3px 0 0" },
   metricaSep:          { width:"1px", height:"32px", background:t.colors.borderLight },
   tabsWrap:            { display:"flex", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}`, overflowX:"auto" },
-  tab:                 { flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:"4px", padding:"10px 4px 8px", border:"none", background:"none", cursor:"pointer", borderBottom:"2px solid transparent", minWidth:"60px" },
+  tab:      { flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:"4px", padding:"12px 2px 10px", border:"none", background:"none", cursor:"pointer", borderBottom:"2px solid transparent", minWidth:"0" },
   tabActivo:           { borderBottom:`2px solid ${t.colors.blue}`, background:t.colors.blueSoft },
   contenido:           { padding:"12px 16px 80px" },
   card:                { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
