@@ -13,12 +13,13 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast }) {
   );
 
   const eliminarVehiculo = async (vehiculo) => {
-    if (!window.confirm("¿Seguro que quieres eliminar este vehículo?")) return;
     await onEliminar(vehiculo.firestoreId);
     mostrarToast("Vehiculo eliminado","info");
   };
 
   const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
+
+  const [vehiculoAEliminar, setVehiculoAEliminar] = useState(null);
 
   return (
     <div style={styles.pantalla}>
@@ -119,12 +120,29 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast }) {
               </div>
 
               {/* Botón eliminar */}
-              <button
-                style={styles.btnEliminar}
-                onClick={() => eliminarVehiculo(vehiculo)}
-              >
-                <Trash2 size={16} color={t.colors.red} strokeWidth={1.8} />
-              </button>
+              {vehiculoAEliminar?.firestoreId === vehiculo.firestoreId ? (
+  <div style={{display:"flex", flexDirection:"column", gap:"4px", padding:"8px"}}>
+    <button
+      style={{padding:"6px 10px", background:t.colors.redSoft, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.red, cursor:"pointer"}}
+      onClick={() => { eliminarVehiculo(vehiculo); setVehiculoAEliminar(null); }}
+    >
+      Confirmar
+    </button>
+    <button
+      style={{padding:"6px 10px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, cursor:"pointer", color:t.colors.textSecondary}}
+      onClick={() => setVehiculoAEliminar(null)}
+    >
+      Cancelar
+    </button>
+  </div>
+) : (
+  <button
+    style={styles.btnEliminar}
+    onClick={() => setVehiculoAEliminar(vehiculo)}
+  >
+    <Trash2 size={16} color={t.colors.red} strokeWidth={1.8} />
+  </button>
+)}
 
             </div>
           );
