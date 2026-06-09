@@ -32,7 +32,7 @@ function AppContenido() {
   const {
     vehiculos, viajes, empresas, rutas, cargando,
     agregarVehiculo, eliminarVehiculo,
-    agregarViaje,    eliminarViaje,
+    agregarViaje,    eliminarViaje, editarViaje,
     agregarEmpresa,  eliminarEmpresa,
     agregarRuta,     eliminarRuta
   } = useFirestore(usuario?.uid);
@@ -134,6 +134,7 @@ function AppContenido() {
           <DetalleViaje
             viajes={viajes}
             onEliminar={eliminarViaje}
+            onEditar={editarViaje}
             mostrarToast={mostrar}
           />
         </RutaProtegida>

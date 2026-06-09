@@ -1,22 +1,79 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2, Fuel, Route, Receipt, TrendingUp, Package } from "lucide-react";
-import { theme as t } from "../styles/theme";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package } from "lucide-react";
+import { theme as t } from "../styles/theme";
 
-function DetalleViaje({ viajes = [], onEliminar, mostrarToast }) {
+function DetalleViaje({ viajes = [], onEliminar, onEditar, mostrarToast }) {
   const navigate = useNavigate();
   const { id }   = useParams();
 
   const viaje = viajes.find(v => String(v.firestoreId) === String(id));
 
+  const [editando,        setEditando]        = useState(false);
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
+  const [guardando,       setGuardando]       = useState(false);
+
+  const [fecha,     setFecha]     = useState("");
+  const [ruta,      setRuta]      = useState("");
+  const [mani,      setMani]      = useState("");
+  const [placa,     setPlaca]     = useState("");
+  const [emp,       setEmp]       = useState("");
+  const [tipoCarga, setTipoCarga] = useState("");
+  const [prod,      setProd]      = useState("");
+  const [condNom,   setCondNom]   = useState("");
+  const [ton,       setTon]       = useState("");
+  const [fleteTon,  setFleteTon]  = useState("");
+  const [kmCargado, setKmCargado] = useState("");
+  const [kmVacio,   setKmVacio]   = useState("");
+
   const fmt = (n) => "$" + Math.round(n||0).toLocaleString("es-CO");
   const fnD = (n,d) => (Math.round((n||0)*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
 
-  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
+  const abrirEdicion = () => {
+    setFecha(viaje.fecha || "");
+    setRuta(viaje.ruta || "");
+    setMani(viaje.mani || "");
+    setPlaca(viaje.placa || "");
+    setEmp(viaje.emp || "");
+    setTipoCarga(viaje.carga || viaje.tipoCarga || "");
+    setProd(viaje.prod || "");
+    setCondNom(viaje.condNom || "");
+    setTon(viaje.ton || "");
+    setFleteTon(viaje.fleteTon || "");
+    setKmCargado(viaje.kmCargado || "");
+    setKmVacio(viaje.kmVacio || "");
+    setEditando(true);
+  };
+
+  const guardarEdicion = async () => {
+    if (!ruta.trim()) { mostrarToast("Ingresa la ruta del viaje", "error"); return; }
+    setGuardando(true);
+    try {
+      await onEditar(viaje.firestoreId, {
+        fecha, ruta: ruta.trim(), mani,
+        placa, emp, carga: tipoCarga,
+        prod, condNom,
+        ton:       parseFloat(ton)     || viaje.ton,
+        fleteTon:  parseFloat(fleteTon)|| viaje.fleteTon,
+        kmCargado: parseFloat(kmCargado)||viaje.kmCargado,
+        kmVacio:   parseFloat(kmVacio)  ||viaje.kmVacio,
+        kmT: (parseFloat(kmCargado)||viaje.kmCargado||0) + (parseFloat(kmVacio)||viaje.kmVacio||0),
+        vViaje: viaje.modoFlete === "porViaje"
+          ? parseFloat(fleteTon)||viaje.vViaje
+          : (parseFloat(ton)||viaje.ton) * (parseFloat(fleteTon)||viaje.fleteTon),
+      });
+      mostrarToast("Viaje actualizado", "exito");
+      setEditando(false);
+    } catch(err) {
+      mostrarToast("Error al guardar", "error");
+    } finally {
+      setGuardando(false);
+    }
+  };
 
   const eliminarViaje = async () => {
     await onEliminar(viaje.firestoreId);
-    mostrarToast("Viaje eliminado","info");
+    mostrarToast("Viaje eliminado", "info");
     navigate(-1);
   };
 
@@ -44,17 +101,15 @@ function DetalleViaje({ viajes = [], onEliminar, mostrarToast }) {
     {label:"ACPM",               valor:viaje.cAcpm,     detalle:viaje.gTot?`${fnD(viaje.gTot,1)} gal`:null, color:"#3B82F6"},
     {label:"Adblue",             valor:viaje.cAdbl,     detalle:viaje.adlt?`${fnD(viaje.adlt,1)} lt`:null,  color:"#8B5CF6"},
     {label:"Peajes",             valor:viaje.peajes,    detalle:null,                                        color:t.colors.amber},
-    {label:"Conductor", valor:viaje.conductor, detalle:viaje.pcond&&viaje.pcond<=100?`${viaje.pcond}%`:null, color:t.colors.green},
+    {label:"Conductor",          valor:viaje.conductor, detalle:viaje.pcond&&viaje.pcond<=100?`${viaje.pcond}%`:null, color:t.colors.green},
     {label:"Carpado/Descarpado", valor:viaje.carp,      detalle:null,                                        color:"#06B6D4"},
     {label:"Gastos de viaje",    valor:viaje.gv2,       detalle:null,                                        color:"#EC4899"},
     {label:"Otros gastos",       valor:viaje.extras,    detalle:null,                                        color:t.colors.textTertiary},
-    {label:"Retencion en la fuente", valor:viaje.descuentos?.retefuente ||0, detalle:null, color:t.colors.red},
-    {label:"Reteica",            valor:viaje.descuentos?.reteica ||0, detalle:null, color:t.colors.red},
-    {label:"FOPAT",              valor:viaje.descuentos?.fopat ||0, detalle:null, color:t.colors.red},
+    {label:"Retención en la fuente", valor:viaje.descuentos?.retefuente||0, detalle:null, color:t.colors.red},
+    {label:"Reteica",            valor:viaje.descuentos?.reteica||0,    detalle:null, color:t.colors.red},
+    {label:"FOPAT",              valor:viaje.descuentos?.fopat||0,      detalle:null, color:t.colors.red},
     {label:viaje.descuentos?.nombreOtro||"Otro descuento", valor:viaje.descuentos?.otro||0, detalle:null, color:t.colors.red},
   ].filter(g=>g.valor>0);
-
-  console.log("extrasList:", viaje.extrasList);
 
   return (
     <div style={styles.pantalla}>
@@ -65,189 +120,289 @@ function DetalleViaje({ viajes = [], onEliminar, mostrarToast }) {
           <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
           <span>Volver</span>
         </button>
-        {!confirmarEliminar ? (
-  <button style={styles.btnEliminar} onClick={() => setConfirmarEliminar(true)}>
-    <Trash2 size={18} color={t.colors.red} strokeWidth={2} />
-  </button>
-) : (
-  <div style={{display:"flex", gap:"8px", alignItems:"center"}}>
-    <button
-      style={{...styles.btnEliminar, background:t.colors.redSoft, padding:"8px 12px", borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.red, border:`1px solid ${t.colors.redBorder}`}}
-      onClick={eliminarViaje}
-    >
-      Confirmar
-    </button>
-    <button
-      style={{background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, padding:"8px 12px", fontSize:t.fonts.sizeXs, cursor:"pointer", color:t.colors.textSecondary}}
-      onClick={() => setConfirmarEliminar(false)}
-    >
-      Cancelar
-    </button>
-  </div>
-)}
-      </div>
-
-      {/* HERO */}
-      <div style={styles.hero}>
-        <p style={styles.heroRuta}>{viaje.ruta||"Sin ruta"}</p>
-        <div style={styles.heroPills}>
-          {viaje.fecha&&<span style={styles.pill}>📅 {viaje.fecha}</span>}
-          {viaje.placa&&<span style={styles.pill}>🚚 {viaje.placa}</span>}
-          {viaje.emp&&<span style={styles.pill}>👤{viaje.condNom}</span>}
-          {viaje.mani&&<span style={styles.pill}>📄 Man. {viaje.mani}</span>}
-          {viaje.emp&&<span style={styles.pill}>🏢 {viaje.emp}</span>}
-          
-        </div>
-      </div>
-
-      <div style={styles.contenido}>
-
-        {/* MÉTRICAS KPI */}
-        <div style={styles.dosColumnas}>
-          <div style={styles.kpiCard}>
-            <p style={styles.kpiLabel}>Valor viaje</p>
-            <p style={{...styles.kpiVal, color:t.colors.blue}}>{fmt(viaje.vViaje)}</p>
-          </div>
-          <div style={{...styles.kpiCard, background:positivo?t.colors.greenSoft:t.colors.redSoft, border:`1.5px solid ${positivo?t.colors.greenBorder:t.colors.redBorder}`}}>
-            <p style={styles.kpiLabel}>Ganancia neta</p>
-            <p style={{...styles.kpiVal, color:positivo?t.colors.green:t.colors.red}}>{fmt(viaje.neta)}</p>
-          </div>
-        </div>
-        <div style={styles.dosColumnas}>
-          <div style={styles.kpiCard}>
-            <p style={styles.kpiLabel}>Total gastos</p>
-            <p style={{...styles.kpiVal, color:t.colors.red}}>{fmt(viaje.total)}</p>
-          </div>
-          <div style={styles.kpiCard}>
-            <p style={styles.kpiLabel}>Margen neto</p>
-            <p style={{...styles.kpiVal, color:margenColor}}>{margen.toFixed(1)}%</p>
-            <div style={{height:"4px",borderRadius:"2px",background:t.colors.bgSection,overflow:"hidden",marginTop:"8px"}}>
-              <div style={{height:"100%",borderRadius:"2px",background:margenColor,width:`${Math.min(margen,100)}%`}} />
+        <div style={{display:"flex", gap:"8px"}}>
+          {!editando && (
+            <button style={styles.btnEditar} onClick={abrirEdicion}>
+              <Edit3 size={16} color={t.colors.blue} strokeWidth={2} />
+              <span style={{fontSize:t.fonts.sizeXs, color:t.colors.blue, fontWeight:t.fonts.weightSemibold}}>Editar</span>
+            </button>
+          )}
+          {!confirmarEliminar ? (
+            <button style={styles.btnEliminar} onClick={()=>setConfirmarEliminar(true)}>
+              <Trash2 size={18} color={t.colors.red} strokeWidth={2} />
+            </button>
+          ) : (
+            <div style={{display:"flex", gap:"6px", alignItems:"center"}}>
+              <button
+                style={{padding:"8px 12px", background:t.colors.redSoft, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.red, cursor:"pointer"}}
+                onClick={eliminarViaje}
+              >
+                Confirmar
+              </button>
+              <button
+                style={{padding:"8px 12px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, cursor:"pointer", color:t.colors.textSecondary}}
+                onClick={()=>setConfirmarEliminar(false)}
+              >
+                Cancelar
+              </button>
             </div>
-          </div>
+          )}
         </div>
+      </div>
 
-        {/* DESGLOSE */}
-        {gastos.length>0&&(
+      {/* MODO EDICIÓN */}
+      {editando && (
+        <div style={styles.contenido}>
           <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <Receipt size={16} color={t.colors.blue} strokeWidth={2} />
-              <p style={styles.cardTitulo}>Desglose de gastos</p>
+            <p style={styles.cardTituloEdit}>Editar datos del viaje</p>
+
+            <div style={styles.campo}>
+              <label style={styles.label}>Fecha</label>
+              <input type="date" value={fecha} onChange={e=>setFecha(e.target.value)} style={styles.input}/>
             </div>
-            {gastos.map((g,i,arr)=>(
-              <div key={g.label} style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
-                <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
-                  <div style={{width:"28px",height:"28px",borderRadius:"50%",background:g.color+"22",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                    <div style={{width:"8px",height:"8px",borderRadius:"50%",background:g.color}} />
-                  </div>
-                  <div>
-                    <span style={styles.filaLabel}>{g.label}</span>
-                    {g.detalle&&<span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}> · {g.detalle}</span>}
-                  </div>
-                </div>
-                <span style={styles.filaValor}>{fmt(g.valor)}</span>
+            <div style={styles.campo}>
+              <label style={styles.label}>Ruta</label>
+              <input type="text" placeholder="Origen – Destino" value={ruta} onChange={e=>setRuta(e.target.value)} style={styles.input}/>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>Manifiesto</label>
+                <input type="text" value={mani} onChange={e=>setMani(e.target.value)} style={styles.input}/>
               </div>
-            ))}
-          </div>
-        )}
+              <div style={styles.campo}>
+                <label style={styles.label}>Placa</label>
+                <input type="text" value={placa} onChange={e=>setPlaca(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.campo}>
+              <label style={styles.label}>Empresa</label>
+              <input type="text" value={emp} onChange={e=>setEmp(e.target.value)} style={styles.input}/>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>Tipo de carga</label>
+                <input type="text" value={tipoCarga} onChange={e=>setTipoCarga(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Producto</label>
+                <input type="text" value={prod} onChange={e=>setProd(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.campo}>
+              <label style={styles.label}>Conductor</label>
+              <input type="text" value={condNom} onChange={e=>setCondNom(e.target.value)} style={styles.input}/>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>Toneladas</label>
+                <input type="number" value={ton} onChange={e=>setTon(e.target.value)} step="0.01" style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Flete ($/ton o total)</label>
+                <input type="number" value={fleteTon} onChange={e=>setFleteTon(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>Km cargado</label>
+                <input type="number" value={kmCargado} onChange={e=>setKmCargado(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Km vacío</label>
+                <input type="number" value={kmVacio} onChange={e=>setKmVacio(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
 
-        {/* INDICADORES */}
-        <div style={styles.card}>
-          <div style={styles.cardHeader}>
-            <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
-            <p style={styles.cardTitulo}>Indicadores del viaje</p>
+            <div style={{display:"flex", gap:"8px", marginTop:"8px"}}>
+              <button
+                style={{flex:1, padding:"13px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px", opacity:guardando?0.75:1}}
+                onClick={guardarEdicion}
+                disabled={guardando}
+              >
+                <Save size={16} color="#fff" strokeWidth={2}/>
+                {guardando?"Guardando...":"Guardar cambios"}
+              </button>
+              <button
+                style={{padding:"13px 16px", background:"none", border:`1.5px solid ${t.colors.border}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, cursor:"pointer", color:t.colors.textSecondary}}
+                onClick={()=>setEditando(false)}
+              >
+                <X size={16} strokeWidth={2}/>
+              </button>
+            </div>
           </div>
-          <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}>
-            <span style={styles.filaLabel}>Recorrido total</span>
-            <span style={styles.filaValor}>{viaje.kmT?viaje.kmT.toLocaleString("es-CO")+" km":"—"}</span>
-          </div>
-          <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}>
-            <span style={styles.filaLabel}>Costo por km</span>
-            <span style={styles.filaValor}>{viaje.kmT&&viaje.total?fmt(viaje.total/viaje.kmT)+"/km":"—"}</span>
-          </div>
-          <div style={{...styles.fila,borderBottom:"none"}}>
-            <span style={styles.filaLabel}>Tonelaje</span>
-            <span style={styles.filaValor}>{viaje.ton?fnD(viaje.ton,2)+" ton":"—"}</span>
-          </div>
-        </div>
-
-        {/* CARGA */}
-        {(viaje.carga||viaje.prod||viaje.condNom||viaje.contactoEmpresa||viaje.celularEmpresa)&&(
-        <div style={styles.card}>
-            <div style={styles.cardHeader}>
-             <Package size={16} color={t.colors.blue} strokeWidth={2} />
-            <p style={styles.cardTitulo}>Datos del viaje</p>
-          </div>
-          {viaje.carga&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Tipo de carga</span><span style={styles.filaValor}>{viaje.carga}</span></div>}
-          {viaje.prod&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Producto</span><span style={styles.filaValor}>{viaje.prod}</span></div>}
-          {viaje.condNom&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Conductor</span><span style={styles.filaValor}>{viaje.condNom}</span></div>}
-          {viaje.contactoEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Contacto empresa</span><span style={styles.filaValor}>{viaje.contactoEmpresa}</span></div>}
-          {viaje.celularEmpresa&&<div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Celular contacto</span><a href={`tel:${viaje.celularEmpresa}`} style={{...styles.filaValor,color:t.colors.blue,textDecoration:"none"}}>{viaje.celularEmpresa}</a></div>}
         </div>
       )}
 
-        {/* PEAJES */}
-        {viaje.peajesDetalle&&viaje.peajesDetalle.length>0&&(
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <Route size={16} color={t.colors.blue} strokeWidth={2} />
-              <p style={styles.cardTitulo}>Peajes ({viaje.peajesDetalle.length})</p>
+      {/* MODO VISTA */}
+      {!editando && (
+        <>
+          {/* HERO */}
+          <div style={styles.hero}>
+            <p style={styles.heroRuta}>{viaje.ruta||"Sin ruta"}</p>
+            <div style={styles.heroPills}>
+              {viaje.fecha&&<span style={styles.pill}>📅 {viaje.fecha}</span>}
+              {viaje.placa&&<span style={styles.pill}>🚚 {viaje.placa}</span>}
+              {viaje.condNom&&<span style={styles.pill}>👤 {viaje.condNom}</span>}
+              {viaje.mani&&<span style={styles.pill}>📄 Man. {viaje.mani}</span>}
+              {viaje.emp&&<span style={styles.pill}>🏢 {viaje.emp}</span>}
             </div>
-            {viaje.peajesDetalle.map((p,i,arr)=>(
-              <div key={i} style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
-                <div>
-                  <span style={styles.filaLabel}>{p.n}</span>
-                  <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}> · {p.d}</span>
-                  {p.iv&&<span style={{fontSize:"10px",background:t.colors.greenSoft,color:t.colors.green,padding:"2px 6px",borderRadius:t.radius.full,marginLeft:"6px"}}>I+V</span>}
+          </div>
+
+          <div style={styles.contenido}>
+
+            {/* MÉTRICAS KPI */}
+            <div style={styles.dosColumnas}>
+              <div style={styles.kpiCard}>
+                <p style={styles.kpiLabel}>Valor viaje</p>
+                <p style={{...styles.kpiVal, color:t.colors.blue}}>{fmt(viaje.vViaje)}</p>
+              </div>
+              <div style={{...styles.kpiCard, background:positivo?t.colors.greenSoft:t.colors.redSoft, border:`1.5px solid ${positivo?t.colors.greenBorder:t.colors.redBorder}`}}>
+                <p style={styles.kpiLabel}>Ganancia neta</p>
+                <p style={{...styles.kpiVal, color:positivo?t.colors.green:t.colors.red}}>{fmt(viaje.neta)}</p>
+              </div>
+            </div>
+            <div style={styles.dosColumnas}>
+              <div style={styles.kpiCard}>
+                <p style={styles.kpiLabel}>Total gastos</p>
+                <p style={{...styles.kpiVal, color:t.colors.red}}>{fmt(viaje.total)}</p>
+              </div>
+              <div style={styles.kpiCard}>
+                <p style={styles.kpiLabel}>Margen neto</p>
+                <p style={{...styles.kpiVal, color:margenColor}}>{margen.toFixed(1)}%</p>
+                <div style={{height:"4px",borderRadius:"2px",background:t.colors.bgSection,overflow:"hidden",marginTop:"8px"}}>
+                  <div style={{height:"100%",borderRadius:"2px",background:margenColor,width:`${Math.min(margen,100)}%`}} />
                 </div>
-                <span style={styles.filaValor}>{fmt(p.total)}</span>
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* OTROS GASTOS */}
-        {viaje.extrasList&&viaje.extrasList.length>0&&(
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <Fuel size={16} color={t.colors.blue} strokeWidth={2} />
-              <p style={styles.cardTitulo}>Otros gastos</p>
             </div>
-            {viaje.extrasList.map((e,i,arr)=>(
-              <div key={i} style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
-                <span style={styles.filaLabel}>{e.n}</span>
-                <span style={styles.filaValor}>{fmt(e.valor|| e.v || 0)}</span>
-              </div>
-            ))}
-          </div>
-        )}
 
-      </div>
+            {/* DESGLOSE */}
+            {gastos.length>0&&(
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <Receipt size={16} color={t.colors.blue} strokeWidth={2} />
+                  <p style={styles.cardTitulo}>Desglose de gastos</p>
+                </div>
+                {gastos.map((g,i,arr)=>(
+                  <div key={g.label} style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                    <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+                      <div style={{width:"28px",height:"28px",borderRadius:"50%",background:g.color+"22",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                        <div style={{width:"8px",height:"8px",borderRadius:"50%",background:g.color}} />
+                      </div>
+                      <div>
+                        <span style={styles.filaLabel}>{g.label}</span>
+                        {g.detalle&&<span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}> · {g.detalle}</span>}
+                      </div>
+                    </div>
+                    <span style={styles.filaValor}>{fmt(g.valor)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* INDICADORES */}
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
+                <p style={styles.cardTitulo}>Indicadores del viaje</p>
+              </div>
+              <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                <span style={styles.filaLabel}>Recorrido total</span>
+                <span style={styles.filaValor}>{viaje.kmT?viaje.kmT.toLocaleString("es-CO")+" km":"—"}</span>
+              </div>
+              <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                <span style={styles.filaLabel}>Costo por km</span>
+                <span style={styles.filaValor}>{viaje.kmT&&viaje.total?fmt(viaje.total/viaje.kmT)+"/km":"—"}</span>
+              </div>
+              <div style={{...styles.fila,borderBottom:"none"}}>
+                <span style={styles.filaLabel}>Tonelaje</span>
+                <span style={styles.filaValor}>{viaje.ton?fnD(viaje.ton,2)+" ton":"—"}</span>
+              </div>
+            </div>
+
+            {/* DATOS */}
+            {(viaje.carga||viaje.prod||viaje.condNom||viaje.contactoEmpresa||viaje.celularEmpresa)&&(
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <Package size={16} color={t.colors.blue} strokeWidth={2} />
+                  <p style={styles.cardTitulo}>Datos del viaje</p>
+                </div>
+                {viaje.carga&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Tipo de carga</span><span style={styles.filaValor}>{viaje.carga}</span></div>}
+                {viaje.prod&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Producto</span><span style={styles.filaValor}>{viaje.prod}</span></div>}
+                {viaje.condNom&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Conductor</span><span style={styles.filaValor}>{viaje.condNom}</span></div>}
+                {viaje.contactoEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Contacto empresa</span><span style={styles.filaValor}>{viaje.contactoEmpresa}</span></div>}
+                {viaje.celularEmpresa&&<div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Celular contacto</span><a href={`tel:${viaje.celularEmpresa}`} style={{...styles.filaValor,color:t.colors.blue,textDecoration:"none"}}>{viaje.celularEmpresa}</a></div>}
+              </div>
+            )}
+
+            {/* PEAJES */}
+            {viaje.peajesDetalle&&viaje.peajesDetalle.length>0&&(
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <Route size={16} color={t.colors.blue} strokeWidth={2} />
+                  <p style={styles.cardTitulo}>Peajes ({viaje.peajesDetalle.length})</p>
+                </div>
+                {viaje.peajesDetalle.map((p,i,arr)=>(
+                  <div key={i} style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                    <div>
+                      <span style={styles.filaLabel}>{p.n}</span>
+                      <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}> · {p.d}</span>
+                      {p.iv&&<span style={{fontSize:"10px",background:t.colors.greenSoft,color:t.colors.green,padding:"2px 6px",borderRadius:t.radius.full,marginLeft:"6px"}}>Ida y vuelta</span>}
+                    </div>
+                    <span style={styles.filaValor}>{fmt(p.total)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* OTROS GASTOS */}
+            {viaje.extrasList&&viaje.extrasList.length>0&&(
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <Fuel size={16} color={t.colors.blue} strokeWidth={2} />
+                  <p style={styles.cardTitulo}>Otros gastos</p>
+                </div>
+                {viaje.extrasList.map((e,i,arr)=>(
+                  <div key={i} style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                    <span style={styles.filaLabel}>{e.n}</span>
+                    <span style={styles.filaValor}>{fmt(e.valor||e.v||0)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
 const styles = {
-  pantalla:    { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary },
-  header:      { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:   { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
-  btnEliminar: { background:t.colors.redSoft, border:`1.5px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, padding:"8px", cursor:"pointer", display:"flex", alignItems:"center" },
-  hero:        { background:t.colors.bgCard, padding:"16px 20px", borderBottom:`1px solid ${t.colors.borderLight}` },
-  heroRuta:    { fontSize:"20px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:"0 0 10px", letterSpacing:"-0.3px" },
-  heroPills:   { display:"flex", flexWrap:"wrap", gap:"6px" },
-  pill:        { fontSize:"11px", background:t.colors.bgSection, color:t.colors.textSecondary, padding:"4px 10px", borderRadius:t.radius.full },
-  contenido:   { padding:"12px 16px 30px" },
-  dosColumnas: { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" },
-  kpiCard:     { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", boxShadow:t.shadows.card, border:`1.5px solid ${t.colors.border}` },
-  kpiLabel:    { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 6px", textTransform:"uppercase", letterSpacing:"0.05em" },
-  kpiVal:      { fontSize:"17px", fontWeight:t.fonts.weightBold, margin:0 },
-  card:        { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
-  cardHeader:  { display:"flex", alignItems:"center", gap:"8px", marginBottom:"12px" },
-  cardTitulo:  { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:0 },
-  fila:        { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0" },
-  filaLabel:   { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary },
-  filaValor:   { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary },
+  pantalla:        { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary },
+  header:          { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
+  btnVolver:       { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  btnEditar:       { display:"flex", alignItems:"center", gap:"6px", padding:"8px 12px", background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, cursor:"pointer" },
+  btnEliminar:     { background:t.colors.redSoft, border:`1.5px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, padding:"8px", cursor:"pointer", display:"flex", alignItems:"center" },
+  hero:            { background:t.colors.bgCard, padding:"16px 20px", borderBottom:`1px solid ${t.colors.borderLight}` },
+  heroRuta:        { fontSize:"20px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:"0 0 10px", letterSpacing:"-0.3px" },
+  heroPills:       { display:"flex", flexWrap:"wrap", gap:"6px" },
+  pill:            { fontSize:"11px", background:t.colors.bgSection, color:t.colors.textSecondary, padding:"4px 10px", borderRadius:t.radius.full },
+  contenido:       { padding:"12px 16px 30px" },
+  dosColumnas:     { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" },
+  kpiCard:         { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", boxShadow:t.shadows.card, border:`1.5px solid ${t.colors.border}` },
+  kpiLabel:        { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 6px", textTransform:"uppercase", letterSpacing:"0.05em" },
+  kpiVal:          { fontSize:"17px", fontWeight:t.fonts.weightBold, margin:0 },
+  card:            { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
+  cardTitulo:      { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:0 },
+  cardTituloEdit:  { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 16px" },
+  cardHeader:      { display:"flex", alignItems:"center", gap:"8px", marginBottom:"12px" },
+  fila:            { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0" },
+  filaLabel:       { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary },
+  filaValor:       { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary },
+  campo:           { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
+  fila2:           { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },
+  label:           { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
+  input:           { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
 };
 
 export default DetalleViaje;
-

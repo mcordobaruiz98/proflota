@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   collection, doc, onSnapshot, addDoc,
-  deleteDoc, query, orderBy,
+   updateDoc, deleteDoc, query, orderBy,
 } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -98,10 +98,15 @@ const agregarRuta = async (datos) => {
     await deleteDoc(doc(db, rutaRutas, firestoreId));
   };
 
+  const editarViaje = async (firestoreId, datos) => {
+  const datosLimpios = JSON.parse(JSON.stringify(datos));
+  await updateDoc(doc(db, rutaViajes, firestoreId), datosLimpios);
+};
+
   return {
     vehiculos, viajes, empresas, rutas, cargando,
     agregarVehiculo, eliminarVehiculo,
-    agregarViaje,    eliminarViaje,
+    agregarViaje,    eliminarViaje, editarViaje,
     agregarEmpresa,  eliminarEmpresa,
     agregarRuta,     eliminarRuta,
   };
