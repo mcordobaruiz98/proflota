@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Trash2, Fuel, Route, Receipt, TrendingUp, Package } from "lucide-react";
 import { theme as t } from "../styles/theme";
+import { useState } from "react";
 
 function DetalleViaje({ viajes = [], onEliminar, mostrarToast }) {
   const navigate = useNavigate();
@@ -11,8 +12,9 @@ function DetalleViaje({ viajes = [], onEliminar, mostrarToast }) {
   const fmt = (n) => "$" + Math.round(n||0).toLocaleString("es-CO");
   const fnD = (n,d) => (Math.round((n||0)*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
 
+  const [confimarEliminar, serConfirmarEliminar] = useState(false);
+
   const eliminarViaje = async () => {
-    if (!window.confirm("¿Eliminar este viaje?")) return;
     await onEliminar(viaje.firestoreId);
     mostrarToast("Viaje eliminado","info");
     navigate(-1);
@@ -63,9 +65,26 @@ function DetalleViaje({ viajes = [], onEliminar, mostrarToast }) {
           <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
           <span>Volver</span>
         </button>
-        <button style={styles.btnEliminar} onClick={eliminarViaje}>
-          <Trash2 size={18} color={t.colors.red} strokeWidth={2} />
-        </button>
+        {!confirmarEliminar ? (
+  <button style={styles.btnEliminar} onClick={() => setConfirmarEliminar(true)}>
+    <Trash2 size={18} color={t.colors.red} strokeWidth={2} />
+  </button>
+) : (
+  <div style={{display:"flex", gap:"8px", alignItems:"center"}}>
+    <button
+      style={{...styles.btnEliminar, background:t.colors.redSoft, padding:"8px 12px", borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.red, border:`1px solid ${t.colors.redBorder}`}}
+      onClick={eliminarViaje}
+    >
+      Confirmar
+    </button>
+    <button
+      style={{background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, padding:"8px 12px", fontSize:t.fonts.sizeXs, cursor:"pointer", color:t.colors.textSecondary}}
+      onClick={() => setConfirmarEliminar(false)}
+    >
+      Cancelar
+    </button>
+  </div>
+)}
       </div>
 
       {/* HERO */}
