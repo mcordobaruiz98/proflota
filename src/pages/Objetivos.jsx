@@ -19,7 +19,9 @@ function Objetivos({ viajes = [] }) {
 
   const hoy = new Date();
   const inicioSemana = new Date(hoy);
-  inicioSemana.setDate(hoy.getDate()-hoy.getDay());
+  const dia = hoy.getDay();
+  const diff = dia === 0 ? 6 : dia -1;
+  inicioSemana.setDate(hoy.getDate()- diff);
   inicioSemana.setHours(0,0,0,0);
 
   const viajesHoy    = viajes.filter(v=>{const f=new Date(v.fecha);return f.getDate()===hoy.getDate()&&f.getMonth()===hoy.getMonth()&&f.getFullYear()===hoy.getFullYear();});

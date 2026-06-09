@@ -24,7 +24,14 @@ function Viajes({ viajes = [] }) {
     if (!coincide) return false;
     const f = new Date(v.fecha);
     if (filtro==="mes")    return f.getMonth()===hoy.getMonth() && f.getFullYear()===hoy.getFullYear();
-    if (filtro==="semana") { const h=new Date(); h.setDate(hoy.getDate()-7); return f>=h; }
+    if (filtro==="semana") {
+  const inicioSemana = new Date(hoy);
+  const dia = hoy.getDay();
+  const diff = dia === 0 ? 6 : dia - 1;
+  inicioSemana.setDate(hoy.getDate() - diff);
+  inicioSemana.setHours(0,0,0,0);
+  return f >= inicioSemana;
+}
     return true;
   });
 
