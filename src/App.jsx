@@ -35,13 +35,14 @@ function AppContenido() {
   const { toasts, mostrar, cerrar } = useToast();
 
  const {
-    vehiculos, viajes, empresas, rutas, mantenimientos, cargando,
-    agregarVehiculo, eliminarVehiculo,
-    agregarViaje,    eliminarViaje, editarViaje,
-    agregarEmpresa,  eliminarEmpresa,
-    agregarRuta,     eliminarRuta,
-    agregarMantenimiento, eliminarMantenimiento,
-  } = useFirestore(usuario?.uid);
+  vehiculos, viajes, empresas, rutas, mantenimientos, configMant, cargando,
+  agregarVehiculo, eliminarVehiculo,
+  agregarViaje,    eliminarViaje,    editarViaje,
+  agregarEmpresa,  eliminarEmpresa,
+  agregarRuta,     eliminarRuta,
+  agregarMantenimiento, eliminarMantenimiento,
+  agregarConfigMant,    eliminarConfigMant,
+} = useFirestore(usuario?.uid);
 
     {toasts.map(toast => (
   <Toast
