@@ -5,26 +5,16 @@ import {
   signInWithPopup,
   signOut,
   onAuthStateChanged,
+  GoogleAuthProvider,
   updateProfile,
+  updatePassword,
   sendPasswordResetEmail,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
 } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from  "../firebase";
-
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  sendPasswordResetEmail,
-  updateProfile,
-  updatePassword,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-} from "firebase/auth";
 
 export function useAuth() {
   const [usuario,   setUsuario]   = useState(null);
