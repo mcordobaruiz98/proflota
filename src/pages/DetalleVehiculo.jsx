@@ -897,3 +897,4 @@ const styles = {
 };
 
 export default DetalleVehiculo;
+
