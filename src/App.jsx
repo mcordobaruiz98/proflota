@@ -168,7 +168,7 @@ function AppContenido() {
       <Route path="/olvide-contrasena" element={<OlvideContrasena />} />
 
       <Route path="/configuracion" element={
-        <RutaProtegida><Configuracion /></RutaProtegida>
+        <RutaProtegida><Configuracion mostrarToast = {mostrar} /></RutaProtegida>
       } />
       
       <Route path="/ayuda" element={
