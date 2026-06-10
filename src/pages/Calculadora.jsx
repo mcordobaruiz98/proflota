@@ -6,7 +6,9 @@ import { theme as t } from "../styles/theme";
 const ADBLUE_RATIO = 0.18925;
 
 function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, onGuardarRuta, onEliminarRuta, mostrarToast }) {
-  const PEAJES_CO = peajes.length > 0 ? peajes : [];
+  const PEAJES_CO = peajes.length > 0 
+  ? [...peajes].sort((a, b) => a.n.localeCompare(b.n, 'es')) 
+  : [];
   const navigate = useNavigate();
 
   const [fecha,            setFecha]              = useState(new Date().toISOString().slice(0,10));
