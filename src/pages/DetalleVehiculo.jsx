@@ -618,116 +618,121 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
       )}
     </div>
 
-    {/* ALERTAS */}
-    {alertasMant.map(item => {
-      const colorMap = {
-        vencido: {bg:t.colors.redSoft,    border:t.colors.redBorder,   text:t.colors.red,   label:"Vencido"},
-        proximo: {bg:t.colors.amberSoft,  border:"#FDE68A",            text:t.colors.amber, label:"Próximo"},
-        ok:      {bg:t.colors.greenSoft,  border:t.colors.greenBorder, text:t.colors.green, label:"Al día"},
-      };
-      const c = colorMap[item.estado];
-      return (
-        <div key={item.tipo} style={styles.card}>
-          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"10px"}}>
-            <div style={{display:"flex", alignItems:"center", gap:"10px"}}>
-              <div style={{width:"38px", height:"38px", background:c.bg, borderRadius:t.radius.sm, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"20px"}}>
-                {item.icono}
-              </div>
-              <div>
-                <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{item.tipo}</p>
-                <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0"}}>
-                  {item.estado==="vencido"
-                    ? `Venció hace ${Math.abs(item.kmFaltantes).toLocaleString("es-CO")} km`
-                    : `Faltan ${item.kmFaltantes.toLocaleString("es-CO")} km`}
-                  {item.ultimoRegistro ? ` · Último: ${item.ultimoKm.toLocaleString("es-CO")} km` : " · Sin registro"}
-                </p>
-              </div>
-            </div>
-            <span style={{fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, padding:"3px 10px", borderRadius:t.radius.full, background:c.bg, color:c.text, border:`0.5px solid ${c.border}`, whiteSpace:"nowrap"}}>
-              {c.label}
-            </span>
-          </div>
-          <div style={{height:"5px", borderRadius:"3px", background:t.colors.bgSection, overflow:"hidden"}}>
-            <div style={{height:"100%", borderRadius:"3px", background:c.text, width:`${Math.round(item.pct)}%`, transition:"width 0.4s ease"}} />
-          </div>
-        </div>
-      );
-    })}
-
-    {/* REGISTRAR MANTENIMIENTO */}
-    <div style={styles.card}>
-      <p style={styles.cardTitulo}>Registrar mantenimiento</p>
-      <div style={styles.campo}>
-        <label style={styles.label}>Tipo</label>
-        <select value={tipoMant} onChange={e=>setTipoMant(e.target.value)} style={styles.input}>
-          <option>Cambio de aceite</option>
-          <option>Cambio de llantas</option>
-          <option>Frenos</option>
-          <option>Filtros</option>
-          <option>Rodamientos</option>
-          <option>Otro</option>
-        </select>
-      </div>
-      <div style={styles.fila2}>
-        <div style={styles.campo}>
-          <label style={styles.label}>Km al realizar</label>
-          <input type="number" placeholder="145000" value={kmMant} onChange={e=>setKmMant(e.target.value)} style={styles.input}/>
-        </div>
-        <div style={styles.campo}>
-          <label style={styles.label}>Costo ($)</label>
-          <input type="number" placeholder="180000" value={costoMant} onChange={e=>setCostoMant(e.target.value)} style={styles.input}/>
-        </div>
-      </div>
-      <div style={styles.fila2}>
-        <div style={styles.campo}>
-          <label style={styles.label}>Fecha</label>
-          <input type="date" value={fechaMant} onChange={e=>setFechaMant(e.target.value)} style={styles.input}/>
-        </div>
-        <div style={styles.campo}>
-          <label style={styles.label}>Nota (opcional)</label>
-          <input type="text" placeholder="Marca, taller..." value={notaMant} onChange={e=>setNotaMant(e.target.value)} style={styles.input}/>
-        </div>
-      </div>
-      <button
-        style={{width:"100%", padding:"13px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoMant?0.75:1}}
-        onClick={guardarMantenimiento}
-        disabled={guardandoMant}
-      >
-        {guardandoMant?"Guardando...":"Registrar mantenimiento"}
-      </button>
-    </div>
-
-    {/* HISTORIAL DE MANTENIMIENTOS */}
-    {mantVehiculo.length > 0 && (
+    {/* ALERTAS PERSONALIZADAS */}
+    {configMant.filter(c => c.vehiculoId === id).length > 0 && (
       <div style={styles.card}>
-        <p style={styles.cardTitulo}>Historial de mantenimientos</p>
-        {[...mantVehiculo].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha)).map((m,i,arr)=>(
-          <div key={m.firestoreId} style={{...styles.fila, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`, alignItems:"flex-start"}}>
-            <div style={{flex:1}}>
-              <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{m.tipo}</p>
-              <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0"}}>
-                {m.fecha} · {m.km.toLocaleString("es-CO")} km
-                {m.nota?` · ${m.nota}`:""}
-              </p>
+        <p style={styles.cardTitulo}>Alertas de mantenimiento</p>
+        {configMant.filter(c => c.vehiculoId === id).map(item => {
+          const ultimoMant = mantVehiculo
+            .filter(m => m.configId === item.firestoreId)
+            .sort((a,b) => b.km - a.km)[0];
+          const ultimoKm    = ultimoMant ? ultimoMant.km : 0;
+          const proximoKm   = ultimoKm + item.intervalo;
+          const kmRef       = kmOdometro || kmActual;
+          const kmFaltantes = proximoKm - kmRef;
+          const pct         = Math.max(0, Math.min(100, ((item.intervalo - kmFaltantes) / item.intervalo) * 100));
+          const vencido     = kmFaltantes <= 0;
+          const proximo     = kmFaltantes > 0 && kmFaltantes <= (item.alerta || 2000);
+          const estado      = vencido ? "vencido" : proximo ? "proximo" : "ok";
+          const colorMap    = {
+            vencido: {bg:t.colors.redSoft,   border:t.colors.redBorder,   text:t.colors.red,   label:"Vencido"},
+            proximo: {bg:t.colors.amberSoft, border:"#FDE68A",            text:t.colors.amber, label:"Próximo"},
+            ok:      {bg:t.colors.greenSoft, border:t.colors.greenBorder, text:t.colors.green, label:"Al día"},
+          };
+          const c = colorMap[estado];
+          return (
+            <div key={item.firestoreId} style={{marginBottom:"14px"}}>
+              <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"8px"}}>
+                <div>
+                  <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{item.nombre}</p>
+                  <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0"}}>
+                    {vencido ? `Venció hace ${Math.abs(kmFaltantes).toLocaleString("es-CO")} km` : `Faltan ${kmFaltantes.toLocaleString("es-CO")} km`}
+                  </p>
+                </div>
+                <span style={{fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, padding:"3px 10px", borderRadius:t.radius.full, background:c.bg, color:c.text, border:`0.5px solid ${c.border}`, whiteSpace:"nowrap"}}>
+                  {c.label}
+                </span>
+              </div>
+              <div style={{height:"5px", borderRadius:"3px", background:t.colors.bgSection, overflow:"hidden"}}>
+                <div style={{height:"100%", borderRadius:"3px", background:c.text, width:`${Math.round(pct)}%`, transition:"width 0.4s ease"}} />
+              </div>
             </div>
-            <div style={{display:"flex", alignItems:"center", gap:"10px"}}>
-              {m.costo>0&&<span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.red}}>${Math.round(m.costo).toLocaleString("es-CO")}</span>}
-              <button
-                style={{background:"none", border:"none", cursor:"pointer", padding:"4px"}}
-                onClick={()=>onEliminarMant(m.firestoreId)}
-              >
-                <Trash2 size={14} color={t.colors.red} strokeWidth={1.8}/>
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     )}
 
+    {/* AGREGAR ALERTA */}
+    <div style={styles.card}>
+      <p style={styles.cardTitulo}>Agregar ítem de mantenimiento</p>
+      <div style={styles.campo}>
+        <label style={styles.label}>Nombre</label>
+        <input type="text" placeholder="Ej: Cambio de aceite, Filtro de aire..."
+          value={tipoMant} onChange={e=>setTipoMant(e.target.value)} style={styles.input}/>
+      </div>
+      <div style={styles.fila2}>
+        <div style={styles.campo}>
+          <label style={styles.label}>Intervalo (km)</label>
+          <input type="number" placeholder="15000" value={kmMant}
+            onChange={e=>setKmMant(e.target.value)} style={styles.input}/>
+        </div>
+        <div style={styles.campo}>
+          <label style={styles.label}>Alerta a (km antes)</label>
+          <input type="number" placeholder="2000" value={costoMant}
+            onChange={e=>setCostoMant(e.target.value)} style={styles.input}/>
+        </div>
+      </div>
+      <button
+        style={{width:"100%", padding:"12px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoMant?0.75:1}}
+        onClick={async()=>{
+          if (!tipoMant.trim()) { mostrarToast("Ingresa el nombre del ítem","error"); return; }
+          setGuardandoMant(true);
+          await onAgregarConfig({
+            vehiculoId: id,
+            placa: vehiculo.placa,
+            nombre: tipoMant.trim(),
+            intervalo: Number(kmMant)||15000,
+            alerta: Number(costoMant)||2000,
+          });
+          setTipoMant(""); setKmMant(""); setCostoMant("");
+          mostrarToast("Ítem agregado","exito");
+          setGuardandoMant(false);
+        }}
+        disabled={guardandoMant}
+      >
+        + Agregar ítem
+      </button>
+    </div>
+
+    {/* MÓDULOS DE DETALLE */}
+    <div style={styles.card}>
+      <p style={styles.cardTitulo}>Módulos de detalle</p>
+      {[
+        {label:"Llantas",  sub:"Diagrama y estado por posición", ruta:`/vehiculo/${id}/llantas`,       icono:"🛞"},
+        {label:"Aceite",   sub:"Marca, viscosidad y cambios",    ruta:`/vehiculo/${id}/aceite`,        icono:"🛢️"},
+        {label:"Filtros",  sub:"Aire, combustible, lubricación", ruta:`/vehiculo/${id}/filtros`,       icono:"🔵"},
+        {label:"Frenos",   sub:"Estado por eje",                 ruta:`/vehiculo/${id}/frenos`,        icono:"🔴"},
+        {label:"Historial",sub:"Todos los mantenimientos",       ruta:`/vehiculo/${id}/historial-mant`,icono:"📋"},
+      ].map((item,i,arr)=>(
+        <div
+          key={item.ruta}
+          style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 0", borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`, cursor:"pointer"}}
+          onClick={()=>navigate(item.ruta)}
+        >
+          <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
+            <span style={{fontSize:"22px"}}>{item.icono}</span>
+            <div>
+              <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{item.label}</p>
+              <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0"}}>{item.sub}</p>
+            </div>
+          </div>
+          <span style={{color:t.colors.textTertiary, fontSize:"18px"}}>›</span>
+        </div>
+      ))}
+    </div>
   </div>
-)}  
-
-
+)}
+  
         {/* ── HOJA DE VIDA ── */}
         {tabActivo==="hvida" && (
           <div>
@@ -842,7 +847,7 @@ const styles = {
   metricaLabel:        { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"3px 0 0" },
   metricaSep:          { width:"1px", height:"32px", background:t.colors.borderLight },
   tabsWrap:            { display:"flex", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}`, overflowX:"auto" },
-  tab:      { flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:"4px", padding:"12px 2px 10px", border:"none", background:"none", cursor:"pointer", borderBottom:"2px solid transparent", minWidth:"0" },
+  tab:                 { flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:"4px", padding:"12px 2px 10px", border:"none", background:"none", cursor:"pointer", borderBottom:"2px solid transparent", minWidth:"0" },
   tabActivo:           { borderBottom:`2px solid ${t.colors.blue}`, background:t.colors.blueSoft },
   contenido:           { padding:"12px 16px 80px" },
   card:                { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },

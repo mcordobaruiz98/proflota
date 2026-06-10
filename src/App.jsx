@@ -1,25 +1,30 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Layout          from "./components/Layout";
-import RutaProtegida   from "./components/RutaProtegida";
-import Home            from "./pages/Home";
-import Vehiculos       from "./pages/Vehiculos";
-import AgregarVehiculo from "./pages/AgregarVehiculo";
-import DetalleVehiculo from "./pages/DetalleVehiculo";
-import DetalleViaje    from "./pages/DetalleViaje";
-import Calculadora     from "./pages/Calculadora";
-import Cuentas         from "./pages/Cuentas";
-import Viajes          from "./pages/Viajes";
-import Objetivos       from "./pages/Objetivos";
-import Empresas        from "./pages/Empresas";
-import Perfil          from "./pages/Perfil";
-import Login           from "./pages/Login";
-import Registro        from "./pages/Registro";
+import Layout           from "./components/Layout";
+import RutaProtegida    from "./components/RutaProtegida";
+import Home             from "./pages/Home";
+import Vehiculos        from "./pages/Vehiculos";
+import AgregarVehiculo  from "./pages/AgregarVehiculo";
+import DetalleVehiculo  from "./pages/DetalleVehiculo";
+import DetalleViaje     from "./pages/DetalleViaje";
+import Calculadora      from "./pages/Calculadora";
+import Cuentas          from "./pages/Cuentas";
+import Viajes           from "./pages/Viajes";
+import Objetivos        from "./pages/Objetivos";
+import Empresas         from "./pages/Empresas";
+import Perfil           from "./pages/Perfil";
+import Login            from "./pages/Login";
+import Registro         from "./pages/Registro";
 import OlvideContrasena from "./pages/OlvideContrasena";
 import Configuracion    from "./pages/Configuracion";
 import AyudaSoporte     from "./pages/AyudaSoporte";
 import AcercaDe         from "./pages/AcercaDe";
 import Toast            from "./components/Toast";
+import Llantas          from "./pages/mantenimiento/Llantas";
+import Aceite           from "./pages/mantenimiento/Aceite";
+import Filtros          from "./pages/mantenimiento/Filtros";
+import Frenos           from "./pages/mantenimiento/Frenos";
+import HistorialMant    from "./pages/mantenimiento/HistorialMant";
 
 import { useAuth }      from "./hooks/useAuth";
 import { useFirestore } from "./hooks/useFirestore";
@@ -181,6 +186,36 @@ function AppContenido() {
         mostrarToast={mostrar}
       />
     </Layout>
+  </RutaProtegida>
+} />
+
+    <Route path="/vehiculo/:id/llantas" element={
+  <RutaProtegida>
+    <Llantas vehiculos={vehiculos} mantenimientos={mantenimientos} onAgregar={agregarMantenimiento} mostrarToast={mostrar}/>
+  </RutaProtegida>
+} />
+
+<Route path="/vehiculo/:id/aceite" element={
+  <RutaProtegida>
+    <Aceite vehiculos={vehiculos} mantenimientos={mantenimientos} onAgregar={agregarMantenimiento} mostrarToast={mostrar}/>
+  </RutaProtegida>
+} />
+
+<Route path="/vehiculo/:id/filtros" element={
+  <RutaProtegida>
+    <Filtros vehiculos={vehiculos} mantenimientos={mantenimientos} onAgregar={agregarMantenimiento} mostrarToast={mostrar}/>
+  </RutaProtegida>
+} />
+
+<Route path="/vehiculo/:id/frenos" element={
+  <RutaProtegida>
+    <Frenos vehiculos={vehiculos} mantenimientos={mantenimientos} onAgregar={agregarMantenimiento} mostrarToast={mostrar}/>
+  </RutaProtegida>
+} />
+
+<Route path="/vehiculo/:id/historial-mant" element={
+  <RutaProtegida>
+    <HistorialMant vehiculos={vehiculos} mantenimientos={mantenimientos} onEliminar={eliminarMantenimiento} mostrarToast={mostrar}/>
   </RutaProtegida>
 } />
 
