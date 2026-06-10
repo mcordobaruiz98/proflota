@@ -278,3 +278,4 @@ const styles = {
 };
 
 export default Frenos;
+

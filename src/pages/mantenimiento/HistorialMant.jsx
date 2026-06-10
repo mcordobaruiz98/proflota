@@ -147,3 +147,4 @@ const styles = {
 };
 
 export default HistorialMant;
+
