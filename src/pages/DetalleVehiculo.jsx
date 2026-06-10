@@ -70,7 +70,7 @@ const seccionesHV = [
   },
 ];
 
-function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], onAgregarMant, onEliminarMant, mostrarToast }) {
+function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, mostrarToast }) {
   const navigate  = useNavigate();
   const { id }    = useParams();
   const [tabActivo, setTabActivo] = useState("info");
