@@ -67,12 +67,12 @@ function DiagramaLlantas({ total, llantas, onSelect, llantaActiva }) {
                 strokeWidth="2"
               />
               <text
-                x={l.x > 100 ? l.x + 3 : l.x - 3}
+                x={l.x > 100 ? l.x + 4 : l.x - 4}
                 y={y + 4}
                 textAnchor={l.x > 100 ? "start" : "end"}
                 fontSize="9"
                 fontWeight="500"
-                fill="#6B7280"
+                fill="#000000"
               >
                 {l.n}
               </text>
