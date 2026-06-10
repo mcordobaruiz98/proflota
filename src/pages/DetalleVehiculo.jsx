@@ -94,9 +94,6 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], onAgrega
 
   const { subirArchivo, eliminarArchivo, progreso: progresoArchivo, subiendo } = useSubirArchivo();
 
-  const kmActual = viajes
-  .filter(v => v.placa === vehiculo?.placa)
-  .reduce((max, v) => Math.max(max, v.kmT || 0), 0);
 
   const [kmOdometro,    setKmOdometro]    = useState(() => Number(localStorage.getItem(`km_${id}`))||0);
   const [editandoKm,    setEditandoKm]    = useState(false);
@@ -164,6 +161,10 @@ const alertasMant = INTERVALOS.map(item => {
 });
 
   const vehiculo = vehiculos.find(v => String(v.firestoreId) === String(id));
+
+  const kmActual = viajes
+  .filter(v => v.placa === vehiculo?.placa)
+  .reduce((max, v) => Math.max(max, v.kmT || 0), 0);
 
   const fmt  = (n) => "$" + Math.round(n).toLocaleString("es-CO");
   const fnD  = (n,d) => (Math.round(n*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
