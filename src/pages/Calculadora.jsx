@@ -127,7 +127,7 @@ const productosFrecuentes = [...new Set(
     ? PEAJES_CO.filter(p =>
         p.n.toLowerCase().includes(busquedaP.toLowerCase()) ||
         p.d.toLowerCase().includes(busquedaP.toLowerCase()))
-    : PEAJES;
+    : PEAJES_CO;
 
   const agregarPeaje = () => {
     if (!selP) return;
