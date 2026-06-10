@@ -161,3 +161,4 @@ const eliminarConfigMant = async (firestoreId) => {
     agregarConfigMant, eliminarConfigMant,
   };
 }
+
