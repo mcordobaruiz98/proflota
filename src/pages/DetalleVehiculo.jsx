@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, Wrench } from "lucide-react";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
 import { theme as t } from "../styles/theme";
+
 
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
@@ -69,7 +70,7 @@ const seccionesHV = [
   },
 ];
 
-function DetalleVehiculo({ vehiculos, viajes = [] }) {
+function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], onAgregarMant, onEliminarMant, mostrarToast }) {
   const navigate  = useNavigate();
   const { id }    = useParams();
   const [tabActivo, setTabActivo] = useState("info");
@@ -92,6 +93,75 @@ function DetalleVehiculo({ vehiculos, viajes = [] }) {
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({propietario:true,tenedor:false,vehiculo:false,conductor:false});
 
   const { subirArchivo, eliminarArchivo, progreso: progresoArchivo, subiendo } = useSubirArchivo();
+
+  const kmActual = viajes
+  .filter(v => v.placa === vehiculo?.placa)
+  .reduce((max, v) => Math.max(max, v.kmT || 0), 0);
+
+  const [kmOdometro,    setKmOdometro]    = useState(() => Number(localStorage.getItem(`km_${id}`))||0);
+  const [editandoKm,    setEditandoKm]    = useState(false);
+  const [kmTemp,        setKmTemp]        = useState("");
+  const [tipoMant,      setTipoMant]      = useState("Cambio de aceite");
+  const [kmMant,        setKmMant]        = useState("");
+  const [costoMant,     setCostoMant]     = useState("");
+  const [fechaMant,     setFechaMant]     = useState(new Date().toISOString().slice(0,10));
+  const [notaMant,      setNotaMant]      = useState("");
+  const [guardandoMant, setGuardandoMant] = useState(false);
+
+  const guardarKm = () => {
+  const val = Number(kmTemp)||0;
+  setKmOdometro(val);
+  localStorage.setItem(`km_${id}`, val);
+  setEditandoKm(false);
+  setKmTemp("");
+};
+
+const guardarMantenimiento = async () => {
+  if (!kmMant) { mostrarToast("Ingresa el km al realizar el mantenimiento", "error"); return; }
+  setGuardandoMant(true);
+  try {
+    await onAgregarMant({
+      vehiculoId: id,
+      placa: vehiculo.placa,
+      tipo: tipoMant,
+      km: Number(kmMant),
+      costo: Number(costoMant)||0,
+      fecha: fechaMant,
+      nota: notaMant.trim(),
+    });
+    mostrarToast("Mantenimiento registrado", "exito");
+    setKmMant(""); setCostoMant(""); setNotaMant("");
+  } catch(err) {
+    mostrarToast("Error al guardar", "error");
+  } finally {
+    setGuardandoMant(false);
+  }
+};
+
+const INTERVALOS = [
+  {tipo:"Cambio de aceite",   icono:"🛢️", intervalo:15000},
+  {tipo:"Cambio de llantas",  icono:"⚫", intervalo:80000},
+  {tipo:"Frenos",             icono:"🔴", intervalo:40000},
+  {tipo:"Filtros",            icono:"🔵", intervalo:20000},
+  {tipo:"Rodamientos",        icono:"⚙️", intervalo:60000},
+];
+
+const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
+
+const alertasMant = INTERVALOS.map(item => {
+  const ultimo = mantVehiculo
+    .filter(m => m.tipo === item.tipo)
+    .sort((a,b) => b.km - a.km)[0];
+  const ultimoKm  = ultimo ? ultimo.km : 0;
+  const proximoKm = ultimoKm + item.intervalo;
+  const kmRef     = kmOdometro || kmActual;
+  const kmFaltantes = proximoKm - kmRef;
+  const pct = Math.max(0, Math.min(100, ((item.intervalo - kmFaltantes) / item.intervalo) * 100));
+  const vencido = kmFaltantes <= 0;
+  const proximo = kmFaltantes > 0 && kmFaltantes <= 3000;
+  const estado  = vencido ? "vencido" : proximo ? "proximo" : "ok";
+  return { ...item, ultimoKm, proximoKm, kmFaltantes, pct, estado, ultimoRegistro: ultimo };
+});
 
   const vehiculo = vehiculos.find(v => String(v.firestoreId) === String(id));
 
@@ -201,12 +271,13 @@ function DetalleVehiculo({ vehiculos, viajes = [] }) {
   };
 
   const tabs = [
-    {id:"info",      label:"Info",     Icono:Info},
-    {id:"viajes",    label:"Viajes",   Icono:Route},
-    {id:"cuentas",   label:"Cuentas",  Icono:TrendingUp},
-    {id:"historial", label:"Historial",Icono:Clock},
-    {id:"hvida",     label:"H.Vida",  Icono:FileText},
-  ];
+  {id:"info",      label:"Info",    Icono:Info},
+  {id:"viajes",    label:"Viajes",  Icono:Route},
+  {id:"cuentas",   label:"Cuentas", Icono:TrendingUp},
+  {id:"historial", label:"Historial",Icono:Clock},
+  {id:"mant",      label:"Mant.",   Icono:Wrench},
+  {id:"hvida",     label:"H.Vida",  Icono:FileText},
+];
 
   return (
     <div style={styles.pantalla}>
@@ -507,6 +578,154 @@ function DetalleVehiculo({ vehiculos, viajes = [] }) {
             ))}
           </div>
         )}
+
+        {/* ── MANTENIMIENTO ── */}
+{tabActivo==="mant" && (
+  <div>
+
+    {/* ODÓMETRO */}
+    <div style={styles.card}>
+      <p style={styles.cardTitulo}>Odómetro actual</p>
+      {!editandoKm ? (
+        <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+          <div>
+            <p style={{fontSize:"28px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:0}}>
+              {(kmOdometro||kmActual).toLocaleString("es-CO")} km
+            </p>
+            <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"4px 0 0"}}>
+              Actualiza el km cada vez que tanqueas
+            </p>
+          </div>
+          <button
+            style={{padding:"8px 14px", background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.blue, cursor:"pointer"}}
+            onClick={()=>{setEditandoKm(true); setKmTemp(String(kmOdometro||kmActual));}}
+          >
+            Actualizar
+          </button>
+        </div>
+      ) : (
+        <div>
+          <input type="number" value={kmTemp} onChange={e=>setKmTemp(e.target.value)}
+            placeholder="Km actual" style={{...styles.input, marginBottom:"8px"}} autoFocus />
+          <div style={{display:"flex", gap:"8px"}}>
+            <button style={{flex:1, padding:"10px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer"}}
+              onClick={guardarKm}>Guardar</button>
+            <button style={{padding:"10px 14px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, cursor:"pointer", color:t.colors.textSecondary, fontSize:t.fonts.sizeSm}}
+              onClick={()=>setEditandoKm(false)}>Cancelar</button>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* ALERTAS */}
+    {alertasMant.map(item => {
+      const colorMap = {
+        vencido: {bg:t.colors.redSoft,    border:t.colors.redBorder,   text:t.colors.red,   label:"Vencido"},
+        proximo: {bg:t.colors.amberSoft,  border:"#FDE68A",            text:t.colors.amber, label:"Próximo"},
+        ok:      {bg:t.colors.greenSoft,  border:t.colors.greenBorder, text:t.colors.green, label:"Al día"},
+      };
+      const c = colorMap[item.estado];
+      return (
+        <div key={item.tipo} style={styles.card}>
+          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"10px"}}>
+            <div style={{display:"flex", alignItems:"center", gap:"10px"}}>
+              <div style={{width:"38px", height:"38px", background:c.bg, borderRadius:t.radius.sm, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"20px"}}>
+                {item.icono}
+              </div>
+              <div>
+                <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{item.tipo}</p>
+                <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0"}}>
+                  {item.estado==="vencido"
+                    ? `Venció hace ${Math.abs(item.kmFaltantes).toLocaleString("es-CO")} km`
+                    : `Faltan ${item.kmFaltantes.toLocaleString("es-CO")} km`}
+                  {item.ultimoRegistro ? ` · Último: ${item.ultimoKm.toLocaleString("es-CO")} km` : " · Sin registro"}
+                </p>
+              </div>
+            </div>
+            <span style={{fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, padding:"3px 10px", borderRadius:t.radius.full, background:c.bg, color:c.text, border:`0.5px solid ${c.border}`, whiteSpace:"nowrap"}}>
+              {c.label}
+            </span>
+          </div>
+          <div style={{height:"5px", borderRadius:"3px", background:t.colors.bgSection, overflow:"hidden"}}>
+            <div style={{height:"100%", borderRadius:"3px", background:c.text, width:`${Math.round(item.pct)}%`, transition:"width 0.4s ease"}} />
+          </div>
+        </div>
+      );
+    })}
+
+    {/* REGISTRAR MANTENIMIENTO */}
+    <div style={styles.card}>
+      <p style={styles.cardTitulo}>Registrar mantenimiento</p>
+      <div style={styles.campo}>
+        <label style={styles.label}>Tipo</label>
+        <select value={tipoMant} onChange={e=>setTipoMant(e.target.value)} style={styles.input}>
+          <option>Cambio de aceite</option>
+          <option>Cambio de llantas</option>
+          <option>Frenos</option>
+          <option>Filtros</option>
+          <option>Rodamientos</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div style={styles.fila2}>
+        <div style={styles.campo}>
+          <label style={styles.label}>Km al realizar</label>
+          <input type="number" placeholder="145000" value={kmMant} onChange={e=>setKmMant(e.target.value)} style={styles.input}/>
+        </div>
+        <div style={styles.campo}>
+          <label style={styles.label}>Costo ($)</label>
+          <input type="number" placeholder="180000" value={costoMant} onChange={e=>setCostoMant(e.target.value)} style={styles.input}/>
+        </div>
+      </div>
+      <div style={styles.fila2}>
+        <div style={styles.campo}>
+          <label style={styles.label}>Fecha</label>
+          <input type="date" value={fechaMant} onChange={e=>setFechaMant(e.target.value)} style={styles.input}/>
+        </div>
+        <div style={styles.campo}>
+          <label style={styles.label}>Nota (opcional)</label>
+          <input type="text" placeholder="Marca, taller..." value={notaMant} onChange={e=>setNotaMant(e.target.value)} style={styles.input}/>
+        </div>
+      </div>
+      <button
+        style={{width:"100%", padding:"13px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoMant?0.75:1}}
+        onClick={guardarMantenimiento}
+        disabled={guardandoMant}
+      >
+        {guardandoMant?"Guardando...":"Registrar mantenimiento"}
+      </button>
+    </div>
+
+    {/* HISTORIAL DE MANTENIMIENTOS */}
+    {mantVehiculo.length > 0 && (
+      <div style={styles.card}>
+        <p style={styles.cardTitulo}>Historial de mantenimientos</p>
+        {[...mantVehiculo].sort((a,b)=>new Date(b.fecha)-new Date(a.fecha)).map((m,i,arr)=>(
+          <div key={m.firestoreId} style={{...styles.fila, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`, alignItems:"flex-start"}}>
+            <div style={{flex:1}}>
+              <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{m.tipo}</p>
+              <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0"}}>
+                {m.fecha} · {m.km.toLocaleString("es-CO")} km
+                {m.nota?` · ${m.nota}`:""}
+              </p>
+            </div>
+            <div style={{display:"flex", alignItems:"center", gap:"10px"}}>
+              {m.costo>0&&<span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.red}}>${Math.round(m.costo).toLocaleString("es-CO")}</span>}
+              <button
+                style={{background:"none", border:"none", cursor:"pointer", padding:"4px"}}
+                onClick={()=>onEliminarMant(m.firestoreId)}
+              >
+                <Trash2 size={14} color={t.colors.red} strokeWidth={1.8}/>
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+
+  </div>
+)}  
+
 
         {/* ── HOJA DE VIDA ── */}
         {tabActivo==="hvida" && (

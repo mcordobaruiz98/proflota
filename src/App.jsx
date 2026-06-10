@@ -34,7 +34,8 @@ function AppContenido() {
     agregarVehiculo, eliminarVehiculo,
     agregarViaje,    eliminarViaje, editarViaje,
     agregarEmpresa,  eliminarEmpresa,
-    agregarRuta,     eliminarRuta
+    agregarRuta,     eliminarRuta,
+    agregarMantenimiento, eliminarMantenimiento,
   } = useFirestore(usuario?.uid);
 
     {toasts.map(toast => (
@@ -123,11 +124,18 @@ function AppContenido() {
         </RutaProtegida>
       } />
 
-      <Route path="/vehiculo/:id" element={
-        <RutaProtegida>
-          <DetalleVehiculo vehiculos={vehiculos} viajes={viajes} />
-        </RutaProtegida>
-      } />
+     <Route path="/vehiculo/:id" element={
+  <RutaProtegida>
+    <DetalleVehiculo
+      vehiculos={vehiculos}
+      viajes={viajes}
+      mantenimientos={mantenimientos}
+      onAgregarMant={agregarMantenimiento}
+      onEliminarMant={eliminarMantenimiento}
+      mostrarToast={mostrar}
+    />
+  </RutaProtegida>
+} />
 
       <Route path="/viaje/:id" element={
         <RutaProtegida>
