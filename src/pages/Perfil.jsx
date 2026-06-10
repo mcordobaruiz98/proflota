@@ -201,6 +201,24 @@ function Perfil({ mostrarToast }) {
         </div>
 
       </div>
+
+      {/* OTRAS OPCIONES */}
+<div style={styles.card}>
+  {[
+    {label:"Configuración",     ruta:"/configuracion"},
+    {label:"Ayuda y soporte",   ruta:"/ayuda"},
+    {label:"Acerca de",         ruta:"/acerca-de"},
+  ].map((item,i,arr)=>(
+    <div
+      key={item.ruta}
+      style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`,cursor:"pointer"}}
+      onClick={()=>navigate(item.ruta)}
+    >
+      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textPrimary}}>{item.label}</span>
+      <span style={{color:t.colors.textTertiary,fontSize:"18px"}}>›</span>
+    </div>
+  ))}
+</div>
     </div>
   );
 }
