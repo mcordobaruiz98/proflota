@@ -7,9 +7,9 @@ function AcercaDe() {
 
   const info = [
     { label: "Versión",          valor: "1.0.0" },
-    { label: "Desarrollado por", valor: "FleteApp Team" },
-    { label: "Contacto",         valor: "soporte@fleteapp.com" },
-    { label: "Sitio web",        valor: "www.fleteapp.com" },
+    { label: "Desarrollado por", valor: "MoVia Team" },
+    { label: "Contacto",         valor: "soporte@movia.com" },
+    { label: "Sitio web",        valor: "www.movia.com" },
   ];
 
   const tecnologias = [
@@ -36,7 +36,7 @@ function AcercaDe() {
         <div style={styles.logoIconoWrap}>
           <span style={{ fontSize: "40px" }}>🚚</span>
         </div>
-        <h2 style={styles.logoNombre}>FleteApp</h2>
+        <h2 style={styles.logoNombre}>MoVia</h2>
         <span style={styles.logoBadge}>v1.0.0</span>
         <p style={styles.logoDesc}>
           La herramienta definitiva para transportadores colombianos.
@@ -89,33 +89,33 @@ function AcercaDe() {
       <div style={styles.seccion}>
         <button
           style={{ ...styles.contactoBtn, borderBottom: `1px solid ${t.colors.borderLight}` }}
-          onClick={() => window.open("mailto:soporte@fleteapp.com")}
+          onClick={() => window.open("mailto:soporte@movia.com")}
         >
           <div style={{ ...styles.techIconoWrap, background: t.colors.blueSoft }}>
             <Mail size={18} color={t.colors.blue} strokeWidth={2} />
           </div>
           <div style={{ flex: 1 }}>
             <p style={styles.techLabel}>Correo de soporte</p>
-            <p style={styles.techSub}>soporte@fleteapp.com</p>
+            <p style={styles.techSub}>soporte@movia.com</p>
           </div>
           <ChevronRight size={16} color={t.colors.textTertiary} />
         </button>
         <button
           style={{ ...styles.contactoBtn, borderBottom: "none" }}
-          onClick={() => window.open("https://www.fleteapp.com")}
+          onClick={() => window.open("https://www.movia.com")}
         >
           <div style={{ ...styles.techIconoWrap, background: t.colors.greenSoft }}>
             <Globe size={18} color={t.colors.green} strokeWidth={2} />
           </div>
           <div style={{ flex: 1 }}>
             <p style={styles.techLabel}>Sitio web</p>
-            <p style={styles.techSub}>www.fleteapp.com</p>
+            <p style={styles.techSub}>www.movia.com</p>
           </div>
           <ChevronRight size={16} color={t.colors.textTertiary} />
         </button>
       </div>
 
-      <p style={styles.copy}>© 2026 FleteApp. Todos los derechos reservados.</p>
+      <p style={styles.copy}>© 2026 MoVia. Todos los derechos reservados.</p>
 
     </div>
   );
