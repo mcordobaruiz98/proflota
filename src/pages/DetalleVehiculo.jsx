@@ -135,7 +135,9 @@ const guardarMantenimiento = async () => {
   }
 };
 
-const INTERVALOS = [
+  const vehiculo = vehiculos.find(v => String(v.firestoreId) === String(id));
+
+  const INTERVALOS = [
   {tipo:"Cambio de aceite",   icono:"🛢️", intervalo:15000},
   {tipo:"Cambio de llantas",  icono:"⚫", intervalo:80000},
   {tipo:"Frenos",             icono:"🔴", intervalo:40000},
@@ -159,8 +161,6 @@ const alertasMant = INTERVALOS.map(item => {
   const estado  = vencido ? "vencido" : proximo ? "proximo" : "ok";
   return { ...item, ultimoKm, proximoKm, kmFaltantes, pct, estado, ultimoRegistro: ultimo };
 });
-
-  const vehiculo = vehiculos.find(v => String(v.firestoreId) === String(id));
 
   const kmActual = viajes
   .filter(v => v.placa === vehiculo?.placa)
