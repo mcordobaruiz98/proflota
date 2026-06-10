@@ -5,8 +5,6 @@ import { theme as t } from "../styles/theme";
 
 const ADBLUE_RATIO = 0.18925;
 
-const PEAJES_CO = peajes.length > 0 ? peajes : [];
-
 function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, onGuardarRuta, onEliminarRuta, mostrarToast }) {
   const PEAJES_CO = peajes.length > 0 ? peajes : [];
   const navigate = useNavigate();
