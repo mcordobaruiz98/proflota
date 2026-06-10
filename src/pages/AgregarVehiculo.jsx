@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
 import { theme as t } from "../styles/theme";
+import { useSubirArchivo } from "../hooks/useSubirArchivo";
 
 function AgregarVehiculo({ vehiculos, onGuardar }) {
   const navigate = useNavigate();
@@ -16,7 +17,11 @@ function AgregarVehiculo({ vehiculos, onGuardar }) {
   const [tenedor,       setTenedor]       = useState("");
   const [errores,       setErrores]       = useState({});
   const [guardando,     setGuardando]     = useState(false);
+  const {subirArchivo, progreso, subiendo} = useSubirArchivo();
+  const [fotoUrl,       setFotoUrl]       = useState("");
 
+  
+  
   const validar = () => {
     const e = {};
     if (!tipoVehiculo)       e.tipoVehiculo = "Selecciona el tipo de vehículo";
@@ -38,6 +43,7 @@ function AgregarVehiculo({ vehiculos, onGuardar }) {
       marca, modelo,
       propietario:   propietario.trim(),
       tenedor:       tenedor.trim(),
+      fotoUrl,
     });
     navigate("/vehiculos");
   };
@@ -247,6 +253,36 @@ function AgregarVehiculo({ vehiculos, onGuardar }) {
           />
         </div>
       </div>
+
+      <div style={styles.campo}>
+  <label style={styles.label}>Foto del vehículo</label>
+  {fotoUrl ? (
+    <div style={{position:"relative"}}>
+      <img src={fotoUrl} alt="Vehículo" style={{width:"100%", height:"180px", objectFit:"cover", borderRadius:t.radius.md}}/>
+      <button
+        style={{position:"absolute", top:"8px", right:"8px", background:t.colors.redSoft, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, padding:"4px 8px", cursor:"pointer", fontSize:t.fonts.sizeXs, color:t.colors.red}}
+        onClick={()=>setFotoUrl("")}
+      >
+        Cambiar
+      </button>
+    </div>
+  ) : (
+    <label style={{display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"120px", background:t.colors.bgSection, borderRadius:t.radius.md, border:`2px dashed ${t.colors.border}`, cursor:"pointer", gap:"8px"}}>
+      <span style={{fontSize:"32px"}}>📷</span>
+      <span style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary}}>
+        {subiendo ? `Subiendo ${progreso}%...` : "Toca para subir foto"}
+      </span>
+      <input type="file" accept="image/*" style={{display:"none"}}
+        onChange={async (e) => {
+          const archivo = e.target.files[0];
+          if (!archivo) return;
+          const ruta = `vehiculos/${Date.now()}_${archivo.name}`;
+          subirArchivo(archivo, ruta, "foto", (url) => setFotoUrl(url));
+        }}
+      />
+    </label>
+  )}
+</div>
 
       {/* BOTÓN GUARDAR */}
       <div style={{ padding: "0 16px" }}>
