@@ -1,25 +1,25 @@
 import { useState, useEffect } from "react";
 import {
   collection, doc, onSnapshot, addDoc,
-   updateDoc, deleteDoc, query, orderBy,
+  updateDoc, deleteDoc, query, orderBy,
 } from "firebase/firestore";
 import { db } from "../firebase";
 
 export function useFirestore(uid) {
   console.log("useFirestore uid:", uid);
 
-  const [vehiculos, setVehiculos] = useState([]);
-  const [viajes,    setViajes]    = useState([]);
-  const [empresas,  setEmpresas]  = useState([]);
-  const [rutas,     setRutas]     = useState([]);
-  const [cargando,  setCargando]  = useState(true);
+  const [vehiculos,      setVehiculos]      = useState([]);
+  const [viajes,         setViajes]         = useState([]);
+  const [empresas,       setEmpresas]       = useState([]);
+  const [rutas,          setRutas]          = useState([]);
   const [mantenimientos, setMantenimientos] = useState([]);
+  const [cargando,       setCargando]       = useState(true);
 
-  const rutaVehiculos = uid ? `usuarios/${uid}/vehiculos` : null;
-  const rutaViajes    = uid ? `usuarios/${uid}/viajes`    : null;
-  const rutaEmpresas  = uid ? `usuarios/${uid}/empresas`  : null;
-  const rutaRutas     = uid ? `usuarios/${uid}/rutas`     : null;
-  const rutaMant      = uid ? `usuarios/${uid}/mantenimiento` : null; 
+  const rutaVehiculos = uid ? `usuarios/${uid}/vehiculos`     : null;
+  const rutaViajes    = uid ? `usuarios/${uid}/viajes`        : null;
+  const rutaEmpresas  = uid ? `usuarios/${uid}/empresas`      : null;
+  const rutaRutas     = uid ? `usuarios/${uid}/rutas`         : null;
+  const rutaMant      = uid ? `usuarios/${uid}/mantenimiento` : null;
 
   useEffect(() => {
     if (!rutaVehiculos) return;
@@ -59,13 +59,13 @@ export function useFirestore(uid) {
   }, [rutaRutas]);
 
   useEffect(() => {
-  if (!rutaMant) return;
-  const q = query(collection(db, rutaMant), orderBy("fecha", "desc"));
-  const unsub = onSnapshot(q, (snap) => {
-    setMantenimientos(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
-  });
-  return () => unsub();
-}, [rutaMant]);
+    if (!rutaMant) return;
+    const q = query(collection(db, rutaMant), orderBy("fecha", "desc"));
+    const unsub = onSnapshot(q, (snap) => {
+      setMantenimientos(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, [rutaMant]);
 
   const agregarVehiculo = async (datos) => {
     await addDoc(collection(db, rutaVehiculos), { ...datos, creadoEn: new Date().toISOString() });
@@ -80,6 +80,10 @@ export function useFirestore(uid) {
   const eliminarViaje = async (firestoreId) => {
     await deleteDoc(doc(db, rutaViajes, firestoreId));
   };
+  const editarViaje = async (firestoreId, datos) => {
+    const datosLimpios = JSON.parse(JSON.stringify(datos));
+    await updateDoc(doc(db, rutaViajes, firestoreId), datosLimpios);
+  };
 
   const agregarEmpresa = async (datos) => {
     await addDoc(collection(db, rutaEmpresas), { ...datos, creadoEn: new Date().toISOString() });
@@ -88,45 +92,37 @@ export function useFirestore(uid) {
     await deleteDoc(doc(db, rutaEmpresas, firestoreId));
   };
 
-  useEffect(() => {
-  if (!rutaMant) return;
-  const q = query(collection(db, rutaMant), orderBy("fecha", "desc"));
-  const unsub = onSnapshot(q, (snap) => {
-    setMantenimientos(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
-  });
-  return () => unsub();
-}, [rutaMant]);
-
-let guardandoRuta = false;
-
-const agregarRuta = async (datos) => {
-  if (guardandoRuta) return;
-  guardandoRuta = true;
-  console.log("agregarRuta llamado, rutaRutas:", rutaRutas);
-  if (!uid) throw new Error("Sin uid");
-  const path = `usuarios/${uid}/rutas`;
-  const datosLimpios = JSON.parse(JSON.stringify(datos));
-  const ref = collection(db, path);
-  await addDoc(ref, {
-    ...datosLimpios,
-    creadoEn: new Date().toISOString(),
-  });
-  guardandoRuta = false;
-};
-
+  let guardandoRuta = false;
+  const agregarRuta = async (datos) => {
+    if (guardandoRuta) return;
+    guardandoRuta = true;
+    if (!uid) throw new Error("Sin uid");
+    const datosLimpios = JSON.parse(JSON.stringify(datos));
+    await addDoc(collection(db, `usuarios/${uid}/rutas`), {
+      ...datosLimpios,
+      creadoEn: new Date().toISOString(),
+    });
+    guardandoRuta = false;
+  };
   const eliminarRuta = async (firestoreId) => {
     await deleteDoc(doc(db, rutaRutas, firestoreId));
   };
 
-  const editarViaje = async (firestoreId, datos) => {
-  const datosLimpios = JSON.parse(JSON.stringify(datos));
-  await updateDoc(doc(db, rutaViajes, firestoreId), datosLimpios);
-};
+  const agregarMantenimiento = async (datos) => {
+    const datosLimpios = JSON.parse(JSON.stringify(datos));
+    await addDoc(collection(db, rutaMant), {
+      ...datosLimpios,
+      creadoEn: new Date().toISOString(),
+    });
+  };
+  const eliminarMantenimiento = async (firestoreId) => {
+    await deleteDoc(doc(db, rutaMant, firestoreId));
+  };
 
   return {
-    vehiculos, viajes, empresas, rutas, cargando,
+    vehiculos, viajes, empresas, rutas, mantenimientos, cargando,
     agregarVehiculo, eliminarVehiculo,
-    agregarViaje,    eliminarViaje, editarViaje,
+    agregarViaje,    eliminarViaje,    editarViaje,
     agregarEmpresa,  eliminarEmpresa,
     agregarRuta,     eliminarRuta,
     agregarMantenimiento, eliminarMantenimiento,
