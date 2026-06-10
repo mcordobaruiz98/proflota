@@ -184,7 +184,7 @@ const styles = {
   gananciaCard:      { background: `linear-gradient(135deg, #15803D 0%, ${t.colors.green} 100%)`, margin: "16px", borderRadius: t.radius.lg, padding: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 4px 14px rgba(22,163,74,0.3)" },
   gananciaIzq:       { flex: 1 },
   gananciaLabel:     { fontSize: t.fonts.sizeXs, color: "rgba(255,255,255,0.75)", margin: "0 0 4px", fontWeight: t.fonts.weightMedium, textTransform: "uppercase", letterSpacing: "0.06em" },
-  gananciaValor:     { fontSize: "28px", fontWeight: t.fonts.weightBlack, color: "#fff", margin: "0 0 4px", letterSpacing: "-0.5px" },
+  gananciaValor:     { fontSize: "38px", fontWeight: t.fonts.weightBlack, color: "#fff", margin: "0 0 4px", letterSpacing: "-0.5px" },
   gananciaSub:       { fontSize: t.fonts.sizeXs, color: "rgba(255,255,255,0.65)", margin: 0 },
   gananciaDer:       { marginLeft: "16px" },
   vehMetrica:        { background: "rgba(255,255,255,0.15)", borderRadius: t.radius.md, padding: "12px 16px", textAlign: "center", backdropFilter: "blur(10px)" },
