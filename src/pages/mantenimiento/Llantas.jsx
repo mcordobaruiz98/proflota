@@ -44,41 +44,45 @@ function DiagramaLlantas({ total, llantas, onSelect, llantaActiva }) {
 
   return (
     <svg width="200" height={altura} viewBox={`0 0 200 ${altura}`} style={{display:"block",margin:"0 auto"}}>
-      <rect x="65" y="10" width="70" height={altura-20} rx="6" 
-  fill="var(--color-background-tertiary)" 
-  stroke="var(--color-border-tertiary)" 
-  strokeWidth="1"/>
-      {ejes.map((eje, ei) => {
-        const y = yBase + ei * paso;
-        return (
-          <g key={ei}>
-            <line x1="20" x2="180" y1={y} y2={y} stroke="var(--color-border-secondary)" strokeWidth="1.5"/>
-            {eje.map(l => {
-              const datos  = llantas[l.n] || {};
-              const color  = estadoColor(datos.estado || "ok");
-              const activo = llantaActiva === l.n;
-              const lw = l.n <= 2 ? 10 : 8;
-              const lh = l.n <= 2 ? 22 : 20;
-              return (
-                <g key={l.n} onClick={()=>onSelect(l.n)} style={{cursor:"pointer"}}>
-                  <rect x={l.x-lw/2} y={y-lh/2} width={lw} height={lh} rx="2"
-                    fill="transparent" stroke="var(--color-border-secondary" strokeWidth="1.5"/>
-                  <text 
-  x={l.x > 100 ? l.x + 16 : l.x - 16} 
-  y={y + 4}
-  textAnchor={l.x > 100 ? "start" : "end"}
-  fontSize="9" 
-  fontWeight="500"
-  fill="var(--color-text-secondary)">
-  {l.n}
-</text>
-                </g>
-              );
-            })}
-          </g>
-        );
-      })}
-    </svg>
+  <rect x="65" y="10" width="70" height={altura-20} rx="6"
+    fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1"/>
+  {ejes.map((eje, ei) => {
+    const y = yBase + ei * paso;
+    return (
+      <g key={ei}>
+        <line x1="20" x2="180" y1={y} y2={y} stroke="#D1D5DB" strokeWidth="1.5"/>
+        {eje.map(l => {
+          const datos  = llantas[l.n] || {};
+          const color  = estadoColor(datos.estado || "ok");
+          const activo = llantaActiva === l.n;
+          const lw     = l.n <= 2 ? 10 : 8;
+          const lh     = l.n <= 2 ? 22 : 20;
+          return (
+            <g key={l.n} onClick={()=>onSelect(l.n)} style={{cursor:"pointer"}}>
+              <rect
+                x={l.x - lw/2} y={y - lh/2}
+                width={lw} height={lh} rx="2"
+                fill={color}
+                stroke={activo ? "#fff" : "none"}
+                strokeWidth="2"
+              />
+              <text
+                x={l.x > 100 ? l.x + 16 : l.x - 16}
+                y={y + 4}
+                textAnchor={l.x > 100 ? "start" : "end"}
+                fontSize="9"
+                fontWeight="500"
+                fill="#6B7280"
+              >
+                {l.n}
+              </text>
+            </g>
+          );
+        })}
+      </g>
+    );
+  })}
+</svg>
   );
 }
 
