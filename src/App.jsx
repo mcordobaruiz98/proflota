@@ -159,7 +159,8 @@ function AppContenido() {
 
       <Route path="/perfil" element={
         <RutaProtegida>
-          <Perfil />
+          <Perfil
+            mostrarToast={mostrar} />
         </RutaProtegida>
       } />
 
