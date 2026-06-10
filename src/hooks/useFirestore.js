@@ -15,12 +15,14 @@ export function useFirestore(uid) {
   const [mantenimientos, setMantenimientos] = useState([]);
   const [cargando,       setCargando]       = useState(true);
   const [peajes,         setPeajes]         = useState([]);
+  const [configMant,     setConfigMant]     = useState([]);
 
   const rutaVehiculos = uid ? `usuarios/${uid}/vehiculos`     : null;
   const rutaViajes    = uid ? `usuarios/${uid}/viajes`        : null;
   const rutaEmpresas  = uid ? `usuarios/${uid}/empresas`      : null;
   const rutaRutas     = uid ? `usuarios/${uid}/rutas`         : null;
   const rutaMant      = uid ? `usuarios/${uid}/mantenimiento` : null;
+  const rutaConfigMant = uid ? `usuarios/${uid}/config_mant` : null;
 
   useEffect(() => {
     if (!rutaVehiculos) return;
@@ -76,6 +78,15 @@ export function useFirestore(uid) {
   return () => unsub();
 }, []);
 
+useEffect(() => {
+  if (!rutaConfigMant) return;
+  const q = query(collection(db, rutaConfigMant));
+  const unsub = onSnapshot(q, (snap) => {
+    setConfigMant(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
+  });
+  return () => unsub();
+}, [rutaConfigMant]);
+
   const agregarVehiculo = async (datos) => {
     await addDoc(collection(db, rutaVehiculos), { ...datos, creadoEn: new Date().toISOString() });
   };
@@ -127,6 +138,18 @@ export function useFirestore(uid) {
   const eliminarMantenimiento = async (firestoreId) => {
     await deleteDoc(doc(db, rutaMant, firestoreId));
   };
+
+  const agregarConfigMant = async (datos) => {
+  await addDoc(collection(db, rutaConfigMant), {
+    ...datos,
+    creadoEn: new Date().toISOString(),
+  });
+};
+
+const eliminarConfigMant = async (firestoreId) => {
+  await deleteDoc(doc(db, rutaConfigMant, firestoreId));
+};
+  
 
   return {
     vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, cargando,
