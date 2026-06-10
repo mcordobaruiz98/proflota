@@ -207,7 +207,7 @@ function Perfil({ mostrarToast }) {
   {[
     {label:"Configuración",     ruta:"/configuracion"},
     {label:"Ayuda y soporte",   ruta:"/ayuda"},
-    {label:"Acerca de",         ruta:"/acerca-de"},
+    {label:"Acerca de",         ruta:"/acerca"},
   ].map((item,i,arr)=>(
     <div
       key={item.ruta}
