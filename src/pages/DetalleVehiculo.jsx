@@ -147,21 +147,6 @@ const guardarMantenimiento = async () => {
 
 const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
 
-const alertasMant = INTERVALOS.map(item => {
-  const ultimo = mantVehiculo
-    .filter(m => m.tipo === item.tipo)
-    .sort((a,b) => b.km - a.km)[0];
-  const ultimoKm  = ultimo ? ultimo.km : 0;
-  const proximoKm = ultimoKm + item.intervalo;
-  const kmRef     = kmOdometro || kmActual;
-  const kmFaltantes = proximoKm - kmRef;
-  const pct = Math.max(0, Math.min(100, ((item.intervalo - kmFaltantes) / item.intervalo) * 100));
-  const vencido = kmFaltantes <= 0;
-  const proximo = kmFaltantes > 0 && kmFaltantes <= 3000;
-  const estado  = vencido ? "vencido" : proximo ? "proximo" : "ok";
-  return { ...item, ultimoKm, proximoKm, kmFaltantes, pct, estado, ultimoRegistro: ultimo };
-});
-
   const kmActual = viajes
   .filter(v => v.placa === vehiculo?.placa)
   .reduce((max, v) => Math.max(max, v.kmT || 0), 0);
@@ -279,6 +264,21 @@ const alertasMant = INTERVALOS.map(item => {
   {id:"mant",      label:"Mant.",   Icono:Wrench},
   {id:"hvida",     label:"H.Vida",  Icono:FileText},
 ];
+
+  const alertasMant = INTERVALOS.map(item => {
+  const ultimo = mantVehiculo
+    .filter(m => m.tipo === item.tipo)
+    .sort((a,b) => b.km - a.km)[0];
+  const ultimoKm  = ultimo ? ultimo.km : 0;
+  const proximoKm = ultimoKm + item.intervalo;
+  const kmRef     = kmOdometro || kmActual;
+  const kmFaltantes = proximoKm - kmRef;
+  const pct = Math.max(0, Math.min(100, ((item.intervalo - kmFaltantes) / item.intervalo) * 100));
+  const vencido = kmFaltantes <= 0;
+  const proximo = kmFaltantes > 0 && kmFaltantes <= 3000;
+  const estado  = vencido ? "vencido" : proximo ? "proximo" : "ok";
+  return { ...item, ultimoKm, proximoKm, kmFaltantes, pct, estado, ultimoRegistro: ultimo };
+});
 
   return (
     <div style={styles.pantalla}>
