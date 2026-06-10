@@ -176,56 +176,57 @@ const PEAJES = [
 function Calculadora({ vehiculos, viajes, rutas = [], onGuardar, onGuardarRuta, onEliminarRuta, mostrarToast }) {
   const navigate = useNavigate();
 
-  const [fecha,       setFecha]       = useState(new Date().toISOString().slice(0,10));
-  const [mani,        setMani]        = useState("");
-  const [placa,       setPlaca]       = useState("");
-  const [tipoCarga,   setTipoCarga]   = useState("");
-  const [producto,    setProducto]    = useState("");
-  const [ruta,        setRuta]        = useState("");
-  const [empresa,     setEmpresa]     = useState("");
-  const [conductor,   setConductor]   = useState("");
-  const [kmCargado,   setKmCargado]   = useState("");
-  const [kmVacio,     setKmVacio]     = useState("");
-  const [tonelaje,    setTonelaje]    = useState("");
-  const [fleteTon,    setFleteTon]    = useState("");
-  const [modoComb,    setModoComb]    = useState("auto");
-  const [rendCargado, setRendCargado] = useState("");
-  const [rendVacio,   setRendVacio]   = useState("");
-  const [galManual,   setGalManual]   = useState("");
-  const [precioAcpm,  setPrecioAcpm]  = useState(() => localStorage.getItem("ultimo_acpm") || "");
-  const [precioAdblue,setPrecioAdblue]= useState(() => localStorage.getItem("ultimo_adblue") ||"");
-  const [categoria,   setCategoria]   = useState("VII");
-  const [busquedaP,   setBusquedaP]   = useState("");
-  const [selP,        setSelP]        = useState("");
-  const [peajesRuta,  setPeajesRuta]  = useState([]);
-  const [porcCond,    setPorcCond]    = useState("");
-  const [carpado,     setCarpado]     = useState("");
-  const [gastosViaje, setGastosViaje] = useState("");
-  const [extras,      setExtras]      = useState([]);
-  const [nuevoNom,    setNuevoNom]    = useState("");
-  const [nuevoVal,    setNuevoVal]    = useState("");
-  const [guardando,   setGuardando]   = useState(false);
-  const [modoFlete, setModoFlete] = useState("porTon");
-  const [modoConductor, setModoConductor] = useState("porcentaje");
-  const [descRetefuente,    setDescRetefuente]    = useState(false);
-  const [pctRetefuente,     setPctRetefuente]     = useState(1);
-  const [descReteica,       setDescReteica]       = useState(false);
-  const [pctReteica,        setPctReteica]        = useState(0.414);
-  const [descFopat,         setDescFopat]         = useState(false);
-  const [pctFopat,          setPctFopat]          = useState(2);
-  const [descOtro,          setDescOtro]          = useState(false);
-  const [pctOtro,           setPctOtro]           = useState(0);
-  const [nombreOtro,        setNombreOtro]        = useState("");
-  const [contactoEmpresa,   setContactoEmpresa]   = useState("");
-  const [celularEmpresa,    setCelularEmpresa]    = useState("");
+  const [fecha,            setFecha]              = useState(new Date().toISOString().slice(0,10));
+  const [mani,             setMani]               = useState("");
+  const [placa,            setPlaca]              = useState("");
+  const [tipoCarga,        setTipoCarga]          = useState("");
+  const [producto,         setProducto]           = useState("");
+  const [ruta,             setRuta]               = useState("");
+  const [empresa,          setEmpresa]            = useState("");
+  const [conductor,        setConductor]          = useState("");
+  const [kmCargado,        setKmCargado]          = useState("");
+  const [kmVacio,          setKmVacio]            = useState("");
+  const [tonelaje,         setTonelaje]           = useState("");
+  const [fleteTon,         setFleteTon]           = useState("");
+  const [modoComb,         setModoComb]           = useState("auto");
+  const [rendCargado,      setRendCargado]        = useState("");
+  const [rendVacio,        setRendVacio]          = useState("");
+  const [galManual,        setGalManual]          = useState("");
+  const [precioAcpm,       setPrecioAcpm]         = useState(() => localStorage.getItem("ultimo_acpm") || "");
+  const [precioAdblue,     setPrecioAdblue]       = useState(() => localStorage.getItem("ultimo_adblue") ||"");
+  const [categoria,        setCategoria]          = useState("VII");
+  const [busquedaP,        setBusquedaP]          = useState("");
+  const [selP,             setSelP]               = useState("");
+  const [peajesRuta,       setPeajesRuta]         = useState([]);
+  const [porcCond,         setPorcCond]           = useState("");
+  const [carpado,          setCarpado]            = useState("");
+  const [gastosViaje,      setGastosViaje]        = useState("");
+  const [extras,           setExtras]             = useState([]);
+  const [nuevoNom,         setNuevoNom]           = useState("");
+  const [nuevoVal,         setNuevoVal]           = useState("");
+  const [guardando,        setGuardando]          = useState(false);
+  const [modoFlete,        setModoFlete]          = useState("porTon");
+  const [modoConductor,    setModoConductor]      = useState("porcentaje");
+  const [descRetefuente,   setDescRetefuente]     = useState(false);
+  const [pctRetefuente,    setPctRetefuente]      = useState(1);
+  const [descReteica,      setDescReteica]        = useState(false);
+  const [pctReteica,       setPctReteica]         = useState(0.414);
+  const [descFopat,        setDescFopat]          = useState(false);
+  const [pctFopat,         setPctFopat]           = useState(2);
+  const [descOtro,         setDescOtro]           = useState(false);
+  const [pctOtro,          setPctOtro]            = useState(0);
+  const [nombreOtro,       setNombreOtro]         = useState("");
+  const [contactoEmpresa,  setContactoEmpresa]    = useState("");
+  const [celularEmpresa,   setCelularEmpresa]     = useState("");
   const [tieneRetorno,     setTieneRetorno]       = useState(false);
   const [fleteRetorno,     setFleteRetorno]       = useState("");
   const [tonelajeRetorno,  setTonelajeRetorno]    = useState("");
   const [modoFleteRetorno, setModoFleteRetorno]   = useState("porTon");
-  const [mostrarRutas,   setMostrarRutas]   = useState(false);
-  const [guardandoRuta,  setGuardandoRuta]  = useState(false);
-  const [nombreRuta,     setNombreRuta]     = useState("");
-  const [mostrarGuardar, setMostrarGuardar] = useState(false);
+  const [mostrarRutas,     setMostrarRutas]       = useState(false);
+  const [guardandoRuta,    setGuardandoRuta]      = useState(false);
+  const [nombreRuta,       setNombreRuta]         = useState("");
+  const [mostrarGuardar,   setMostrarGuardar]     = useState(false);
+  const [rutaCargada,      setRutaCargada]        = useState(null);
 
 
   const n   = (v) => parseFloat(v) || 0;
@@ -375,6 +376,9 @@ const productosFrecuentes = [...new Set(
   if (rutaGuardada.descFopat !== undefined) setDescFopat(rutaGuardada.descFopat);
   if (rutaGuardada.pctFopat)        setPctFopat(rutaGuardada.pctFopat);
   setMostrarRutas(false);
+
+  setRutaCargada(rutaGuardada.nombre);
+  setMostrarRutas(false);
 };
 
 const guardarRutaFrecuente = async () => {
@@ -451,6 +455,27 @@ const guardarRutaFrecuente = async () => {
     >
       📍 {mostrarRutas ? "Cerrar rutas" : `Cargar ruta guardada (${rutas.length})`}
     </button>
+
+    {rutaCargada && (
+  <div style={{
+    display:"flex", justifyContent:"space-between", alignItems:"center",
+    padding:"8px 12px",
+    background:t.colors.greenSoft,
+    border:`1px solid ${t.colors.greenBorder}`,
+    borderRadius:t.radius.md,
+    marginTop:"6px"
+  }}>
+    <span style={{fontSize:t.fonts.sizeXs, color:t.colors.green, fontWeight:t.fonts.weightSemibold}}>
+      📍 Ruta cargada: {rutaCargada}
+    </span>
+    <button
+      style={{background:"none", border:"none", cursor:"pointer", fontSize:"14px", color:t.colors.green, padding:0}}
+      onClick={()=>setRutaCargada(null)}
+    >
+      ✕
+    </button>
+  </div>
+)}
 
     {mostrarRutas && (
       <div style={{background:t.colors.bgCard, borderRadius:t.radius.lg, marginTop:"8px", overflow:"hidden", boxShadow:t.shadows.card}}>
