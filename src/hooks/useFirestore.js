@@ -14,6 +14,7 @@ export function useFirestore(uid) {
   const [rutas,          setRutas]          = useState([]);
   const [mantenimientos, setMantenimientos] = useState([]);
   const [cargando,       setCargando]       = useState(true);
+  const [peajes,         setPeajes]         = useState([]);
 
   const rutaVehiculos = uid ? `usuarios/${uid}/vehiculos`     : null;
   const rutaViajes    = uid ? `usuarios/${uid}/viajes`        : null;
@@ -66,6 +67,14 @@ export function useFirestore(uid) {
     });
     return () => unsub();
   }, [rutaMant]);
+
+  useEffect(() => {
+  const q = query(collection(db, "peajes"));
+  const unsub = onSnapshot(q, (snap) => {
+    setPeajes(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
+  });
+  return () => unsub();
+}, []);
 
   const agregarVehiculo = async (datos) => {
     await addDoc(collection(db, rutaVehiculos), { ...datos, creadoEn: new Date().toISOString() });
@@ -120,11 +129,12 @@ export function useFirestore(uid) {
   };
 
   return {
-    vehiculos, viajes, empresas, rutas, mantenimientos, cargando,
+    vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, cargando,
     agregarVehiculo, eliminarVehiculo,
     agregarViaje,    eliminarViaje,    editarViaje,
     agregarEmpresa,  eliminarEmpresa,
     agregarRuta,     eliminarRuta,
     agregarMantenimiento, eliminarMantenimiento,
+    agregarConfigMant, eliminarConfigMant,
   };
 }

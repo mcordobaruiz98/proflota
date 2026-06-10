@@ -35,7 +35,7 @@ function AppContenido() {
   const { toasts, mostrar, cerrar } = useToast();
 
  const {
-  vehiculos, viajes, empresas, rutas, mantenimientos, configMant, cargando,
+  vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, cargando,
   agregarVehiculo, eliminarVehiculo,
   agregarViaje,    eliminarViaje,    editarViaje,
   agregarEmpresa,  eliminarEmpresa,
