@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
+import { ArrowLeft, Camera } from "lucide-react";
 
 function AgregarVehiculo({ vehiculos, onGuardar }) {
   const navigate = useNavigate();
@@ -268,7 +269,7 @@ function AgregarVehiculo({ vehiculos, onGuardar }) {
     </div>
   ) : (
     <label style={{display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"120px", background:t.colors.bgSection, borderRadius:t.radius.md, border:`2px dashed ${t.colors.border}`, cursor:"pointer", gap:"8px"}}>
-      <span style={{fontSize:"32px"}}>📷</span>
+      <Camera size={28} color={t.colors.textTertiary} strokeWidth={1.5} />
       <span style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary}}>
         {subiendo ? `Subiendo ${progreso}%...` : "Toca para subir foto"}
       </span>
