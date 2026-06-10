@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Search, CheckCircle, AlertCircle } from "lucide-react";
 import { theme as t } from "../styles/theme";
+import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-function Viajes({ viajes = [] }) {
+function Viajes({ viajes = [], cargando}) {
   const navigate  = useNavigate();
   const [busqueda, setBusqueda] = useState("");
   const [filtro,   setFiltro]   = useState("todos");

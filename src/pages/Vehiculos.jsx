@@ -4,7 +4,7 @@ import { Truck, Plus, Search, Trash2 } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
-function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast }) {
+function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}) {
   const navigate = useNavigate();
   const [busqueda, setBusqueda] = useState("");
 

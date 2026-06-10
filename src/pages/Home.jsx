@@ -4,7 +4,7 @@ import { theme as t }  from "../styles/theme";
 import {Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake} from "lucide-react";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
-function Home({ vehiculos = [], viajes = [] }) {
+function Home({ vehiculos = [], viajes = [], cargando}) {
   const navigate = useNavigate();
   const { usuario } = useAuth();
 

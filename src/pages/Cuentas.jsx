@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, History, TrendingUp, TrendingDown } from "lucide-react";
 import { theme as t } from "../styles/theme";
+import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
 const MESES       = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const MESES_CORTO = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
-function Cuentas({ vehiculos = [], viajes = [] }) {
+function Cuentas({ vehiculos = [], viajes = [], cargando }) {
   const navigate = useNavigate();
   const hoy = new Date();
   const [mes,  setMes]  = useState(hoy.getMonth());

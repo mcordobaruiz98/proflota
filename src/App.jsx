@@ -65,7 +65,7 @@ function AppContenido() {
       <Route path="/" element={
         <RutaProtegida>
           <Layout>
-            <Home vehiculos={vehiculos} viajes={viajes} />
+            <Home vehiculos={vehiculos} viajes={viajes} cargando={cargando}/>
           </Layout>
         </RutaProtegida>
       } />
@@ -78,6 +78,7 @@ function AppContenido() {
               viajes={viajes}
               onEliminar={eliminarVehiculo}
               mostrarToast ={mostrar}
+              cargando={cargando}
             />
           </Layout>
         </RutaProtegida>
@@ -86,7 +87,7 @@ function AppContenido() {
       <Route path="/cuentas" element={
         <RutaProtegida>
           <Layout>
-            <Cuentas vehiculos={vehiculos} viajes={viajes} />
+            <Cuentas vehiculos={vehiculos} viajes={viajes} cargando={cargando} />
           </Layout>
         </RutaProtegida>
       } />
@@ -94,7 +95,7 @@ function AppContenido() {
       <Route path="/viajes" element={
         <RutaProtegida>
           <Layout>
-            <Viajes viajes={viajes} />
+            <Viajes viajes={viajes} cargando={cargando} />
           </Layout>
         </RutaProtegida>
       } />
