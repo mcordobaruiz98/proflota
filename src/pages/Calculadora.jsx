@@ -6,7 +6,7 @@ import { theme as t } from "../styles/theme";
 const ADBLUE_RATIO = 0.18925;
 
 function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, onGuardarRuta, onEliminarRuta, mostrarToast }) {
-  const PEAJES_CO = peajes.length > 0 ? peajes : [];
+  const PEAJES_CO = PEAJES_CO.length > 0 ? peajes : [];
   const navigate = useNavigate();
 
   const [fecha,            setFecha]              = useState(new Date().toISOString().slice(0,10));
@@ -124,14 +124,14 @@ const productosFrecuentes = [...new Set(
 
 
   const peajesFiltrados = busquedaP
-    ? PEAJES.filter(p =>
+    ? PEAJES_CO.filter(p =>
         p.n.toLowerCase().includes(busquedaP.toLowerCase()) ||
         p.d.toLowerCase().includes(busquedaP.toLowerCase()))
     : PEAJES;
 
   const agregarPeaje = () => {
     if (!selP) return;
-    const p = PEAJES.find(x => x.c === selP);
+    const p = PEAJES_CO.find(x => x.c === selP);
     if (!p || peajesRuta.find(x => x.c === p.c)) return;
     setPeajesRuta([...peajesRuta, { ...p, iv: false }]);
     setSelP("");
