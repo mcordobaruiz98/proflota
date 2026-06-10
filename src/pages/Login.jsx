@@ -59,7 +59,7 @@ function Login() {
           <div style={styles.logoIcono}>
             <span style={{ fontSize: "32px" }}>🚛</span>
           </div>
-          <h1 style={styles.logoNombre}>Movia</h1>
+          <h1 style={styles.logoNombre}>MoVia</h1>
           <p style={styles.logoSub}>Controla tus fletes. Maximiza tus ganancias.</p>
         </div>
       </div>
