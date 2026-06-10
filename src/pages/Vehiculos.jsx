@@ -98,37 +98,42 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}
 
               {/* Contenido */}
               <div
-                style={styles.tarjetaContenido}
-                onClick={() => navigate(`/vehiculo/${vehiculo.firestoreId}`)}
-              >
-                <div style={styles.tarjetaIconoWrap}>
-                  <Truck size={24} color={t.colors.blue} strokeWidth={1.8} />
-                </div>
-                <div style={styles.tarjetaInfo}>
-                  <p style={styles.tarjetaPlaca}>{vehiculo.placa}</p>
-                  <p style={styles.tarjetaTipo}>
-                    {vehiculo.tipoVehiculo}
-                    {vehiculo.tipoRemolque ? ` · ${vehiculo.tipoRemolque}` : ""}
-                  </p>
-                  <div style={styles.tarjetaStats}>
-                    <span style={styles.tarjetaStat}>
-                      {viajesVeh.length} viaje{viajesVeh.length !== 1 ? "s" : ""}
-                    </span>
-                    {viajesVeh.length > 0 && (
-                      <>
-                        <span style={styles.tarjetaStatDot}>·</span>
-                        <span style={{
-                          ...styles.tarjetaStat,
-                          color: gananciaTot >= 0 ? t.colors.green : t.colors.red,
-                          fontWeight: t.fonts.weightSemibold,
-                        }}>
-                          {fmt(gananciaTot)}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
+  style={styles.tarjetaContenido}
+  onClick={() => navigate(`/vehiculo/${vehiculo.firestoreId}`)}
+>
+  {vehiculo.fotoUrl ? (
+    <img src={vehiculo.fotoUrl} alt={vehiculo.placa}
+      style={{width:"56px", height:"56px", objectFit:"cover", borderRadius:t.radius.md, flexShrink:0}}/>
+  ) : (
+    <div style={styles.tarjetaIconoWrap}>
+      <Truck size={24} color={t.colors.blue} strokeWidth={1.8} />
+    </div>
+  )}
+  <div style={styles.tarjetaInfo}>
+    <p style={styles.tarjetaPlaca}>{vehiculo.placa}</p>
+    <p style={styles.tarjetaTipo}>
+      {vehiculo.tipoVehiculo}
+      {vehiculo.tipoRemolque ? ` · ${vehiculo.tipoRemolque}` : ""}
+    </p>
+    <div style={styles.tarjetaStats}>
+      <span style={styles.tarjetaStat}>
+        {viajesVeh.length} viaje{viajesVeh.length !== 1 ? "s" : ""}
+      </span>
+      {viajesVeh.length > 0 && (
+        <>
+          <span style={styles.tarjetaStatDot}>·</span>
+          <span style={{
+            ...styles.tarjetaStat,
+            color: gananciaTot >= 0 ? t.colors.green : t.colors.red,
+            fontWeight: t.fonts.weightSemibold,
+          }}>
+            {fmt(gananciaTot)}
+          </span>
+        </>
+      )}
+    </div>
+  </div>
+</div>
 
               {/* Botón eliminar */}
               {vehiculoAEliminar?.firestoreId === vehiculo.firestoreId ? (
