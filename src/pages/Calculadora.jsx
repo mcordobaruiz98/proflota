@@ -794,8 +794,6 @@ const guardarRutaFrecuente = async () => {
   <select
     value={modoConductor}
     onChange={e => {
-      console.log("Modo Conductor:", e.target.value);
-      console.log("porcCond antes:", porcCond);
       setModoConductor(e.target.value);
       setPorcCond("");
     }}

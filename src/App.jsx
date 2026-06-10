@@ -53,7 +53,7 @@ function AppContenido() {
   />
 ))}
 
-console.log("App configMant:", configMant);
+("App configMant:", configMant);
   return (
     <>
     <Routes>

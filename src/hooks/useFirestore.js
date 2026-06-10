@@ -6,7 +6,6 @@ import {
 import { db } from "../firebase";
 
 export function useFirestore(uid) {
-  console.log("useFirestore uid:", uid);
 
   const [vehiculos,      setVehiculos]      = useState([]);
   const [viajes,         setViajes]         = useState([]);

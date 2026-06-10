@@ -136,22 +136,6 @@ function Configuracion({mostrarToast}) {
           </div>
         </button>
       </div>
-
-      <button
-  style={{width:"100%", padding:"12px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", marginTop:"10px"}}
-  onClick={async () => {
-    console.log("mostrarToast tipo:", typeof mostrarToast)
-  try {
-    await subirPeajes();
-    mostrarToast("165 peajes subidos a Firestore", "exito");
-  } catch(err) {
-    mostrarToast("Error al subir peajes", "error");
-  }
-}}
->
-  Subir peajes a Firestore
-</button>
-
     </div>
   );
 }

@@ -171,20 +171,15 @@ const PEAJES_CO = [
 
 export async function subirPeajes() {
   try {
-    console.log("Verificando peajes existentes...");
     const snapshot = await getDocs(collection(db, "peajes"));
     
     if (snapshot.size > 0) {
-      console.log(`Ya existen ${snapshot.size} peajes en Firestore. Eliminando...`);
       const promises = snapshot.docs.map(d => deleteDoc(doc(db, "peajes", d.id)));
       await Promise.all(promises);
-      console.log("Peajes anteriores eliminados.");
     }
 
-    console.log("Subiendo 165 peajes...");
     const promises = PEAJES_CO.map(p => addDoc(collection(db, "peajes"), p));
     await Promise.all(promises);
-    console.log("✅ 165 peajes subidos exitosamente.");
     return true;
   } catch(err) {
     console.error("Error subiendo peajes:", err);
