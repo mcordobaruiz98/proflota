@@ -500,10 +500,7 @@ const guardarRutaFrecuente = async () => {
             <label style={styles.label}>Fecha</label>
             <input type="date" value={fecha} onChange={e=>setFecha(e.target.value)} style={styles.input} />
           </div>
-          <div style={styles.campo}>
-            <label style={styles.label}>Manifiesto</label>
-            <input type="text" placeholder="123456789" value={mani} onChange={e=>setMani(e.target.value)} style={styles.input} />
-          </div>
+
         </div>
         <div style={styles.fila2}>
           <div style={styles.campo}>
@@ -611,6 +608,13 @@ const guardarRutaFrecuente = async () => {
       style={styles.input}
     />
   )}
+
+  <div style={styles.campo}>
+  <label style={styles.label}>Manifiesto</label>
+  <input type="text" placeholder="123456789" value={mani}
+    onChange={e=>setMani(e.target.value)} style={styles.input}/>
+</div>
+
 
   {/* GUARDAR RUTA */}
 <div style={{marginTop:"10px", borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px"}}>
