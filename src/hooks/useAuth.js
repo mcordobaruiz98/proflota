@@ -12,6 +12,20 @@ import { auth, googleProvider } from "../firebase";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from  "../firebase";
 
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail,
+  updateProfile,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+} from "firebase/auth";
+
 export function useAuth() {
   const [usuario,   setUsuario]   = useState(null);
   const [cargando,  setCargando]  = useState(true);
@@ -59,5 +73,18 @@ export function useAuth() {
     await sendPasswordResetEmail(auth, correo);
   };
 
-  return { usuario, cargando, registrar, login, loginGoogle, cerrarSesion, recuperarContrasena };
+  const cambiarNombre = async (nuevoNombre) => {
+  await updateProfile(auth.currentUser, { displayName: nuevoNombre });
+};
+
+const cambiarContrasena = async (contrasenaActual, nuevaContrasena) => {
+  const credential = EmailAuthProvider.credential(
+    auth.currentUser.email,
+    contrasenaActual
+  );
+  await reauthenticateWithCredential(auth.currentUser, credential);
+  await updatePassword(auth.currentUser, nuevaContrasena);
+};
+
+  return { usuario, cargando, registrar, login, loginGoogle, cerrarSesion, recuperarContrasena, cambiarNombre, cambiarContrasena };
 }
