@@ -44,7 +44,10 @@ function DiagramaLlantas({ total, llantas, onSelect, llantaActiva }) {
 
   return (
     <svg width="200" height={altura} viewBox={`0 0 200 ${altura}`} style={{display:"block",margin:"0 auto"}}>
-      <rect x="65" y="10" width="70" height={altura-20} rx="6" fill="var(--color-background-secondary)" stroke="var(--color-border-secondary)" strokeWidth="1"/>
+      <rect x="65" y="10" width="70" height={altura-20} rx="6" 
+  fill="var(--color-background-secondary)" 
+  stroke="var(--color-border-secondary)" 
+  strokeWidth="1"/>
       {ejes.map((eje, ei) => {
         const y = yBase + ei * paso;
         return (
@@ -60,9 +63,15 @@ function DiagramaLlantas({ total, llantas, onSelect, llantaActiva }) {
                 <g key={l.n} onClick={()=>onSelect(l.n)} style={{cursor:"pointer"}}>
                   <rect x={l.x-lw/2} y={y-lh/2} width={lw} height={lh} rx="2"
                     fill={color} stroke={activo?"#fff":"none"} strokeWidth="2"/>
-                  <text x={l.x > 100 ? l.x+14 : l.x-14} y={y+4}
-                    textAnchor="middle" fontSize="9" fontWeight="500"
-                    fill="var(--color-text-secondary)">{l.n}</text>
+                  <text 
+  x={l.x > 100 ? l.x + 16 : l.x - 16} 
+  y={y + 4}
+  textAnchor={l.x > 100 ? "start" : "end"}
+  fontSize="9" 
+  fontWeight="500"
+  fill="var(--color-text-secondary)">
+  {l.n}
+</text>
                 </g>
               );
             })}
