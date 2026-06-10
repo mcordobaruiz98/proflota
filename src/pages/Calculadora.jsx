@@ -542,17 +542,17 @@ const guardarRutaFrecuente = async () => {
   <label style={styles.label}>Tipo de carga</label>
   <select value={tipoCarga} onChange={e=>setTipoCarga(e.target.value)} style={styles.input}>
     <option value="">— Seleccionar —</option>
-    <option>GRANEL SÓLIDO</option>
-    <option>GRANEL LÍQUIDO</option>
-    <option>CARGA GENERAL</option>
-    <option>CONTENEDOR CARGADO</option>
-    <option>CONTENEDOR VACÍO</option>
-    <option>CARGA REFRIGERADA</option>
-    <option>SIN CARGA</option>
-    <option>CARGA PELIGROSA</option>
-    <option>CARGA SOBREDIMENSIONADA</option>
-    <option>GANADO</option>
-    <option>VEHÍCULOS</option>
+    <option>Granel sólido</option>
+    <option>Granel líquido</option>
+    <option>Carga general</option>
+    <option>Contenedor cargado</option>
+    <option>Contenedor vacío</option>
+    <option>Carga refrigerada</option>
+    <option>Sin carga</option>
+    <option>Carga peligrosa</option>
+    <option>Carga sobredimensionada</option>
+    <option>Ganado</option>
+    <option>Vehículos</option>
   </select>
 </div>
         </div>
