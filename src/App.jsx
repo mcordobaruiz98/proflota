@@ -132,13 +132,16 @@ function AppContenido() {
      <Route path="/vehiculo/:id" element={
   <RutaProtegida>
     <DetalleVehiculo
-      vehiculos={vehiculos}
-      viajes={viajes}
-      mantenimientos={mantenimientos}
-      onAgregarMant={agregarMantenimiento}
-      onEliminarMant={eliminarMantenimiento}
-      mostrarToast={mostrar}
-    />
+  vehiculos={vehiculos}
+  viajes={viajes}
+  mantenimientos={mantenimientos}
+  configMant={configMant}
+  onAgregarMant={agregarMantenimiento}
+  onEliminarMant={eliminarMantenimiento}
+  onAgregarConfig={agregarConfigMant}
+  onEliminarConfig={eliminarConfigMant}
+  mostrarToast={mostrar}
+/>
   </RutaProtegida>
 } />
 
