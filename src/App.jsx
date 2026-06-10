@@ -186,6 +186,7 @@ function AppContenido() {
         vehiculos={vehiculos}
         viajes={viajes}
         rutas={rutas}
+        peajes={peajes}
         onGuardar={agregarViaje}
         onGuardarRuta={agregarRuta}
         onEliminarRuta={eliminarRuta}
