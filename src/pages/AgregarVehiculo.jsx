@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Camera } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
-import { ArrowLeft, Camera } from "lucide-react";
+
 
 function AgregarVehiculo({ vehiculos, onGuardar }) {
   const navigate = useNavigate();
