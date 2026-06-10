@@ -61,7 +61,7 @@ function Home({ vehiculos = [], viajes = [] }) {
           <p style={styles.gananciaLabel}>Ganancia este mes</p>
           <p style={{
             ...styles.gananciaValor,
-            color: gananciaMes >= 0 ? t.colors.green : t.colors.red,
+            color: gananciaMes >= 0 ? "#064E3B" : "#7F1D1D",
           }}>
             {fmt(gananciaMes)}
           </p>
