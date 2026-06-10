@@ -268,7 +268,7 @@ const styles = {
   contenido:        { padding:"12px 16px 16px" },
   gananciaHero:     { borderRadius:t.radius.lg, padding:"20px", marginBottom:"12px", display:"flex", justifyContent:"space-between", alignItems:"center", boxShadow:"0 4px 14px rgba(0,0,0,0.12)" },
   gananciaHeroLabel:{ fontSize:t.fonts.sizeXs, color:"rgba(255,255,255,0.75)", margin:"0 0 4px", fontWeight:t.fonts.weightMedium, textTransform:"uppercase", letterSpacing:"0.06em" },
-  gananciaHeroVal:  { fontSize:"28px", fontWeight:t.fonts.weightBlack, color:"#fff", margin:"0 0 4px", letterSpacing:"-0.5px" },
+  gananciaHeroVal:  { fontSize:"42px", fontWeight:t.fonts.weightBlack, color:"#fff", margin:"0 0 4px", letterSpacing:"-0.5px" },
   gananciaHeroSub:  { fontSize:t.fonts.sizeXs, color:"rgba(255,255,255,0.7)", margin:0 },
   gananciaHeroBadge:{ background:"rgba(255,255,255,0.15)", borderRadius:t.radius.md, padding:"12px", backdropFilter:"blur(10px)" },
   dosColumnas:      { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"12px" },
