@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Truck, Plus, Search, Trash2 } from "lucide-react";
 import { theme as t } from "../styles/theme";
+import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
 function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast }) {
   const navigate = useNavigate();
@@ -20,6 +21,16 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast }) {
   const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
 
   const [vehiculoAEliminar, setVehiculoAEliminar] = useState(null);
+
+  if (cargando) return (
+  <div style={styles.pantalla}>
+    <div style={{padding:"16px"}}>
+      <SkeletonCard filas={2}/>
+      <SkeletonCard filas={2}/>
+      <SkeletonCard filas={2}/>
+    </div>
+  </div>
+);
 
   return (
     <div style={styles.pantalla}>

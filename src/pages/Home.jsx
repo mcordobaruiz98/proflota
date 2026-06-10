@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth }     from "../hooks/useAuth";
 import { theme as t }  from "../styles/theme";
 import {Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake} from "lucide-react";
+import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
 function Home({ vehiculos = [], viajes = [] }) {
   const navigate = useNavigate();
@@ -40,6 +41,16 @@ function Home({ vehiculos = [], viajes = [] }) {
   { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      color: t.colors.blueSoft,  border: t.colors.blueBorder,  iconColor: t.colors.blue  },
   { label: "Empresas",    Icono: Handshake,   ruta: "/empresas",    color: t.colors.blueSoft,  border: t.colors.blueBorder,  iconColor: t.colors.blue  },
 ];
+
+  if (cargando) return (
+  <div style={styles.pantalla}>
+    <div style={{padding:"16px"}}>
+      <SkeletonKpi />
+      <SkeletonCard filas={3}/>
+      <SkeletonCard filas={2}/>
+    </div>
+  </div>
+);
 
   return (
     <div style={styles.pantalla}>

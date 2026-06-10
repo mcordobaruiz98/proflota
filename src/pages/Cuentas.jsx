@@ -56,6 +56,16 @@ function Cuentas({ vehiculos = [], viajes = [] }) {
   });
   const maxGrafica = Math.max(...ultimos6.map(m=>Math.abs(m.neta)), 1);
 
+  if (cargando) return (
+  <div style={styles.pantalla}>
+    <div style={{padding:"16px"}}>
+      <SkeletonKpi />
+      <SkeletonCard filas={3}/>
+      <SkeletonCard filas={5}/>
+    </div>
+  </div>
+);
+
   return (
     <div style={styles.pantalla}>
 

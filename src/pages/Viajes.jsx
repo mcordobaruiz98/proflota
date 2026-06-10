@@ -44,6 +44,15 @@ function Viajes({ viajes = [] }) {
     return grupos;
   }, []);
 
+if (cargando) return (
+  <div style={styles.pantalla}>
+    <div style={{padding:"16px"}}>
+      <SkeletonCard filas={4}/>
+      <SkeletonCard filas={4}/>
+    </div>
+  </div>
+);
+
   return (
     <div style={styles.pantalla}>
 
