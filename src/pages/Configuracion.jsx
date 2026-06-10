@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { subirPeajes } from "../scripts/subirPeajes";
 
-function Configuracion() {
+function Configuracion({mostrarToast}) {
   const navigate = useNavigate();
   const { usuario } = useAuth();
 
@@ -135,6 +136,17 @@ function Configuracion() {
           </div>
         </button>
       </div>
+
+      <button
+  style={{width:"100%", padding:"12px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", marginTop:"10px"}}
+  onClick={async () => {
+    const ok = await subirPeajes();
+    if (ok) mostrarToast("165 peajes subidos a Firestore","exito");
+    else mostrarToast("Error al subir peajes","error");
+  }}
+>
+  Subir peajes a Firestore
+</button>
 
     </div>
   );
