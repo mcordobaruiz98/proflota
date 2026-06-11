@@ -34,12 +34,12 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
   const recientes    = [...viajes].slice(-4).reverse();
 
   const accesos = [
-  { label: "Vehículos",   Icono: Truck,       ruta: "/vehiculos",   color: t.colors.blueSoft,  border: t.colors.blueBorder,  iconColor: t.colors.blue  },
-  { label: "Cuentas",     Icono: TrendingUp,  ruta: "/cuentas",     color: t.colors.greenSoft, border: t.colors.greenBorder, iconColor: t.colors.green },
-  { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", color: t.colors.greenSoft, border: t.colors.greenBorder, iconColor: t.colors.green },
-  { label: "Objetivos",   Icono: Trophy,      ruta: "/objetivos",   color: t.colors.greenSoft, border: t.colors.greenBorder, iconColor: t.colors.green },
-  { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      color: t.colors.blueSoft,  border: t.colors.blueBorder,  iconColor: t.colors.blue  },
-  { label: "Empresas",    Icono: Handshake,   ruta: "/empresas",    color: t.colors.blueSoft,  border: t.colors.blueBorder,  iconColor: t.colors.blue  },
+  { label: "Vehículos",   Icono: Truck,       ruta: "/vehiculos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
+  { label: "Cuentas",     Icono: TrendingUp,  ruta: "/cuentas",     color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
+  { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", color: "#0F2340", border: "#1565FF", iconColor: "#1565FF" },
+  { label: "Objetivos",   Icono: Trophy,      ruta: "/objetivos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
+  { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
+  { label: "Empresas",    Icono: Handshake,   ruta: "/empresas",    color: "#0F2340", border: "#1565FF", iconColor: "#1565FF" },
 ];
 
   if (cargando) return (
