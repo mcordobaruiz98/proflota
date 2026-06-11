@@ -31,8 +31,8 @@ function Layout({ children }) {
         key={tab.path}
         style={{
           ...styles.navBtn,
-          background: activo ? t.colors.blueSoft : "transparent",
-          borderTop: activo ? `2px solid ${t.colors.blue}` : "2px solid transparent",
+          background: activo ? "#1E3A5F" : "transparent",
+          borderTop: activo ? `2px solid #22C55E` : "2px solid transparent",
         }}
         onClick={() => navigate(tab.path)}
       >
