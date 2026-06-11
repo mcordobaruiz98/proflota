@@ -3,25 +3,25 @@ export const theme = {
   // ── COLORES ──
   colors: {
     // Fondos
-    bgPrimary:   "#F9FAFB",  // fondo principal
+    bgPrimary:   "#F1F5F9",  // fondo principal
     bgCard:      "#FFFFFF",  // cards
-    bgSection:   "#F3F4F6",  // secciones secundarias
+    bgSection:   "#F1F5F9",  // secciones secundarias
 
     // Texto
-    textPrimary:   "#111827", // títulos
-    textSecondary: "#6B7280", // labels
-    textTertiary:  "#9CA3AF", // hints, placeholders
+    textPrimary:   "#0A1A2F", // títulos
+    textSecondary: "#475569", // labels
+    textTertiary:  "#94A3B8", // hints, placeholders
 
     // Acciones
-    blue:        "#0E7490",  // azul petróleo
-    blueSoft:    "#ECFEFF",  // fondo azul petróleo suave
-    blueBorder:  "#A5F3FC",  // borde azul petróleo suave
-    blueDark:    "#155E75",  // azul petróleo oscuro para gradientes
+    blue:        "#1565FF",  // azul petróleo
+    blueSoft:    "#EEF3FF",  // fondo azul petróleo suave
+    blueBorder:  "#93B4FF",  // borde azul petróleo suave
+    blueDark:    "#0A1A2F",  // azul petróleo oscuro para gradientes
 
     // Ganancia — el color más importante
-    green:       "#16A34A",  // ganancia, éxito
-    greenSoft:   "#F0FDF4",  // fondo verde suave
-    greenBorder: "#BBF7D0",  // borde verde suave
+    green:       "#22C55E",  // ganancia, éxito
+    greenSoft:   "#DCFCE7",  // fondo verde suave
+    greenBorder: "#86EFAC",  // borde verde suave
 
     // Gastos
     red:         "#DC2626",  // gastos, pérdida, eliminar
