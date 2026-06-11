@@ -36,10 +36,10 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
   const accesos = [
   { label: "Vehículos",   Icono: Truck,       ruta: "/vehiculos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Cuentas",     Icono: TrendingUp,  ruta: "/cuentas",     color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
-  { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", color: "#0F2340", border: "#1565FF", iconColor: "#1565FF" },
+  { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Objetivos",   Icono: Trophy,      ruta: "/objetivos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
-  { label: "Empresas",    Icono: Handshake,   ruta: "/empresas",    color: "#0F2340", border: "#1565FF", iconColor: "#1565FF" },
+  { label: "Empresas",    Icono: Handshake,   ruta: "/empresas",    color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
 ];
 
   if (cargando) return (
