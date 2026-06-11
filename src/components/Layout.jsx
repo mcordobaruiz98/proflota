@@ -38,13 +38,13 @@ function Layout({ children }) {
       >
         <tab.Icono
           size={22}
-          color={activo ? t.colors.blue : t.colors.textTertiary}
+          color={activo ? "#22C55E" : "#475569"}
           strokeWidth={activo ? 2.5 : 1.8}
         />
         <span style={{
           ...styles.navLabel,
-          color:      activo ? t.colors.blue : t.colors.textTertiary,
-          fontWeight: activo ? t.fonts.weightBold : t.fonts.weightMedium,
+          color:      activo ? "#22C55E" : "#475569",
+          fontWeight: activo ? t.fonts.weightBold : t.fonts.weightNormal,
         }}>
           {tab.label}
         </span>
@@ -63,7 +63,7 @@ const styles = {
     margin:     "0 auto",
     minHeight:  "100vh",
     position:   "relative",
-    background: "#f2f4f7",
+    background: "#0A1A2F",
   },
   pantalla: {
     paddingBottom: "72px",
@@ -75,11 +75,11 @@ const styles = {
     transform:       "translateX(-50%)",
     width:           "100%",
     maxWidth:        "430px",
-    background:      t.colors.bgCard,
-    borderTop:       '1px solid ${tcolors.border}',
+    background:      "#0A1A2F",
+    borderTop:       '1px solid #1E3A5F',
     display:         "flex",
     zIndex:          100,
-    boxShadow:       "0 -2px 10px rgba(0,0,0,0.06)",
+    boxShadow:       "0 -2px 10px rgba(0,0,0,0.15)",
   },
   navBtn: {
     flex:            1,
@@ -93,7 +93,7 @@ const styles = {
     cursor:          "pointer",
   },
   navBtnActivo: {
-    background: "#eff6ff",
+    background: "transparent",
   },
   navIcono: {
     fontSize: "20px",
