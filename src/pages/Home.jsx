@@ -206,7 +206,7 @@ const styles = {
   btnVerTodos:       { background: "none", border: "none", fontSize: t.fonts.sizeXs, color: t.colors.blue, fontWeight: t.fonts.weightBold, cursor: "pointer", padding: "12px 20px 8px" },
   grid:              { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", padding: "0 16px 4px" },
   accesoCard:        { display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "16px", borderRadius: t.radius.lg, cursor: "pointer", transition: "transform 0.1s", background:"#0F2340" },
-  accesoIcono:       { width:"44pc", height:"44px", borderRadius: t.radius.md, background: "#1565ff22", display: "flex", alignItems:"center", justifyContent:"center", },
+  accesoIcono:       { width:"44px", height:"44px", borderRadius: t.radius.md, background: "#1565ff22", display: "flex", alignItems:"center", justifyContent:"center", },
   accesoLabel:       { fontSize: t.fonts.sixeXs, fontWeight: t.fonts.weightSemibold, color: "#ffffff", textAlign:"center", },
   vacio:             { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "40px 20px", textAlign: "center", margin: "0 16px", boxShadow: t.shadows.card },
   vacioIcono:        { fontSize: "36px", marginBottom: "10px" },
