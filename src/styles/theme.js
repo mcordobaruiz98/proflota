@@ -3,14 +3,14 @@ export const theme = {
   // ── COLORES ──
   colors: {
     // Fondos
-    bgPrimary:   "#F1F5F9",  // fondo principal
-    bgCard:      "#FFFFFF",  // cards
-    bgSection:   "#F1F5F9",  // secciones secundarias
+    bgPrimary:   "#0A1A2F",  // fondo principal
+    bgCard:      "#0F2340",  // cards
+    bgSection:   "#071527",  // secciones secundarias
 
     // Texto
-    textPrimary:   "#0A1A2F", // títulos
-    textSecondary: "#475569", // labels
-    textTertiary:  "#94A3B8", // hints, placeholders
+    textPrimary:   "#FFFFFF", // títulos
+    textSecondary: "#94A3B8", // labels
+    textTertiary:  "#475569", // hints, placeholders
 
     // Acciones
     blue:        "#1565FF",  // azul petróleo
@@ -33,8 +33,8 @@ export const theme = {
     amberSoft:   "#FFFBEB",  // fondo amber suave
 
     // Bordes
-    border:      "#E5E7EB",  // borde general
-    borderLight: "#F3F4F6",  // borde muy suave
+    border:      "#1E3A5F",  // borde general
+    borderLight: "#152D4A",  // borde muy suave
   },
 
   // ── TIPOGRAFÍA ──
