@@ -161,7 +161,7 @@ function Registro() {
 
       </div>
 
-      <p style={styles.version}>MoVia v1.0</p>
+      <p style={styles.version}>Navira v1.0</p>
 
     </div>
   );

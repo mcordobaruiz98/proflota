@@ -24,8 +24,8 @@ function AcercaDe() {
         {/* LOGO Y NOMBRE */}
         <div style={{textAlign:"center", padding:"30px 20px 20px"}}>
           <p style={{fontSize:"48px", margin:"0 0 8px"}}>🚛</p>
-          <p style={{fontSize:"24px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:"0 0 4px"}}>FleetGo</p>
-          <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 4px"}}>Tu flota, en movimiento inteligente</p>
+          <p style={{fontSize:"24px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:"0 0 4px"}}>Navira</p>
+          <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 4px"}}>Inteligencia y Precisión en movimiento </p>
           <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:0}}>Versión 1.0 Beta</p>
         </div>
 
@@ -49,10 +49,10 @@ function AcercaDe() {
             <div style={styles.cuerpo}>
               {[
                 {titulo:"1. Aceptación", texto:"Al usar esta aplicación aceptas estos términos. Si no estás de acuerdo, no uses la app."},
-                {titulo:"2. Uso de la app", texto:"FleetGo es una herramienta de apoyo para la gestión de flotas de transporte de carga. Las decisiones financieras y operativas son responsabilidad exclusiva del usuario."},
-                {titulo:"3. Versión Beta", texto:"Esta es una versión beta. Puede contener errores. El equipo de FleetGo no se hace responsable por pérdidas derivadas del uso de la app."},
+                {titulo:"2. Uso de la app", texto:"Navira es una herramienta de apoyo para la gestión de flotas de transporte de carga. Las decisiones financieras y operativas son responsabilidad exclusiva del usuario."},
+                {titulo:"3. Versión Beta", texto:"Esta es una versión beta. Puede contener errores. El equipo de Navira no se hace responsable por pérdidas derivadas del uso de la app."},
                 {titulo:"4. Datos", texto:"Tus datos son tuyos. No los vendemos ni compartimos con terceros. Los usamos únicamente para hacer funcionar la app."},
-                {titulo:"5. Acceso", texto:"El acceso está limitado por código de invitación. FleetGo se reserva el derecho de revocar el acceso en cualquier momento durante la fase beta."},
+                {titulo:"5. Acceso", texto:"El acceso está limitado por código de invitación. Navira se reserva el derecho de revocar el acceso en cualquier momento durante la fase beta."},
                 {titulo:"6. Contacto", texto:"Para soporte escríbenos al WhatsApp del administrador."},
               ].map((item,i)=>(
                 <div key={i} style={{marginBottom:"12px"}}>

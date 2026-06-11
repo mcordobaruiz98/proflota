@@ -59,7 +59,7 @@ function AyudaSoporte() {
             <span style={styles.filaIcono}>📧</span>
             <div>
               <p style={styles.filaLabel}>Correo de soporte</p>
-              <p style={styles.filaSub}>soporte@movia.com</p>
+              <p style={styles.filaSub}>soporte@Navira.com</p>
             </div>
           </div>
         </div>

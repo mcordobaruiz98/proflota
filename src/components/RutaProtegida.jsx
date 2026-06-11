@@ -8,7 +8,7 @@ function RutaProtegida({ children }) {
     return (
       <div style={styles.cargando}>
         <p style={{ fontSize: "32px", marginBottom: "12px" }}>🚛</p>
-        <p style={styles.texto}>Cargando MoVia...</p>
+        <p style={styles.texto}>Cargando Navira...</p>
       </div>
     );
   }
