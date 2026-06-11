@@ -21,7 +21,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast }) {
   const [marca,       setMarca]       = useState("");
   const [referencia,  setReferencia]  = useState("");
   const [viscosidad,  setViscosidad]  = useState("15W-40");
-  const [litros,      setLitros]      = useState("");
+  const [galones,     setGalones]      = useState("");
   const [kmCambio,    setKmCambio]    = useState("");
   const [fecha,       setFecha]       = useState(new Date().toISOString().slice(0,10));
   const [taller,      setTaller]      = useState("");
@@ -37,11 +37,11 @@ function Aceite({ vehiculos, onAgregar, mostrarToast }) {
     if (!marca.trim()) { mostrarToast("Ingresa la marca del aceite","error"); return; }
     if (!kmCambio)     { mostrarToast("Ingresa el km del cambio","error"); return; }
     setGuardando(true);
-    const nuevo = { id:Date.now(), marca, referencia, viscosidad, litros:Number(litros)||0, km:Number(kmCambio), fecha, taller, telTaller, costo:Number(costo)||0, nota };
+    const nuevo = { id:Date.now(), marca, referencia, viscosidad, galones:Number(galones)||0, km:Number(kmCambio), fecha, taller, telTaller, costo:Number(costo)||0, nota };
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
     localStorage.setItem(claveLocal, JSON.stringify(nuevos));
-    setMarca(""); setReferencia(""); setLitros(""); setKmCambio(""); setTaller(""); setTelTaller(""); setCosto(""); setNota("");
+    setMarca(""); setReferencia(""); setGalones(""); setKmCambio(""); setTaller(""); setTelTaller(""); setCosto(""); setNota("");
     setMostrarForm(false);
     mostrarToast("Cambio de aceite registrado","exito");
     setGuardando(false);
@@ -75,7 +75,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast }) {
             <p style={{fontSize:"22px", fontWeight:t.fonts.weightBlack, color:"#fff", margin:"0 0 4px"}}>{ultimo.marca} {ultimo.viscosidad}</p>
             <p style={{fontSize:t.fonts.sizeXs, color:"rgba(255,255,255,0.75)", margin:0}}>
               {ultimo.fecha} · {ultimo.km.toLocaleString("es-CO")} km
-              {ultimo.litros>0?` · ${ultimo.litros} litros`:""}
+              {ultimo.galones>0?` · ${ultimo.galones} galones`:""}
               {ultimo.taller?` · ${ultimo.taller}`:""}
             </p>
           </div>
@@ -120,9 +120,9 @@ function Aceite({ vehiculos, onAgregar, mostrarToast }) {
                 </select>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Litros</label>
-                <input type="number" placeholder="12" value={litros}
-                  onChange={e=>setLitros(e.target.value)} style={styles.input}/>
+                <label style={styles.label}>Galones</label>
+                <input type="number" placeholder="12" value={galones}
+                  onChange={e=>setGalones(e.target.value)} style={styles.input}/>
               </div>
             </div>
 
@@ -194,7 +194,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast }) {
                   </p>
                   <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>
                     {r.fecha} · {r.km.toLocaleString("es-CO")} km
-                    {r.litros>0?` · ${r.litros} lt`:""}
+                    {r.galones>0?` · ${r.galones} gal`:""}
                   </p>
                   {r.taller&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{r.taller}{r.telTaller?` · ${r.telTaller}`:""}</p>}
                   {r.nota&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{r.nota}</p>}
