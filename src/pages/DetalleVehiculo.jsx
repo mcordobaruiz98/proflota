@@ -51,7 +51,7 @@ const seccionesHV = [
     campos: [
       {id:"veh_satelital", label:"Empresa satelital", tipo:"text",     placeholder:"Nombre GPS"},
       {id:"veh_usuario",   label:"Usuario",           tipo:"text",     placeholder:"usuario123"},
-      {id:"veh_pass",      label:"Contraseña",        tipo:"password", placeholder:"••••••••"},
+      {id:"veh_pass",      label:"Contraseña",        tipo:"text", placeholder:"••••••••"},
     ],
   },
   {
