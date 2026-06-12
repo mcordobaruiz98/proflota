@@ -428,6 +428,7 @@ const guardarRutaFrecuente = async () => {
     style={styles.input} 
     />
 )}
+
 </div>
           
           <div style={styles.campo}>
