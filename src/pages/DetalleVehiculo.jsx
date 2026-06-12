@@ -565,13 +565,13 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   style={styles.btnMeta}
                   onClick={()=>{setEditandoMeta(true);setMetaTemp(metaMensual>0?String(metaMensual):"");}}
                 >
-                  {metaMensual>0?"✏️ Meta":"+ Meta"}
+                  {metaMensual>0?"Editar ":"+ Meta"}
                 </button>
               </div>
 
               {editandoMeta && (
                 <div style={styles.editarMeta}>
-                  <p style={styles.cardTitulo}>Meta mensual de ganancia</p>
+                  <p style={styles.cardTitulo}>PUNTO EQUILIBRIO MENSUAL</p>
                   <input type="number" placeholder="Ej: 5000000" value={metaTemp}
                     onChange={e=>setMetaTemp(e.target.value)} style={styles.input} autoFocus />
                   <div style={{display:"flex",gap:"8px",marginTop:"8px"}}>
@@ -681,7 +681,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   <div style={{...styles.card, border:`1.5px solid ${balanceFinal >= 0 ? t.colors.greenBorder : t.colors.redBorder}`}}>
                     <p style={styles.cardTitulo}>Balance final del mes</p>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
-                      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Ganancia neta viajes</span>
+                      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>GANANCIA VIAJES</span>
                       <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:netaMes>=0?t.colors.green:t.colors.red}}>{fmt(netaMes)}</span>
                     </div>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
