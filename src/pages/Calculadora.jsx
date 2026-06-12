@@ -76,11 +76,11 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
 
   const empresasFrecuentes = [...new Set(
   viajes.map(v => v.emp).filter(emp => emp && emp.trim() !== "")
-)];
+  )];
 
-const productosFrecuentes = [...new Set(
+  const productosFrecuentes = [...new Set(
   viajes.map(v => v.prod).filter(p => p && p.trim() !== "")
-)];
+  )];
 
   const valorViajeIda = modoFlete === "porTon"
     ?n(tonelaje) * n(fleteTon)
