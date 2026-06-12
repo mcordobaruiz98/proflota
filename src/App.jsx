@@ -35,25 +35,16 @@ function AppContenido() {
   const { toasts, mostrar, cerrar } = useToast();
 
  const {
-  vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, cargando,
+  vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, gastosVehiculo, cargando,
   agregarVehiculo, eliminarVehiculo, editarVehiculo,
   agregarViaje,    eliminarViaje,    editarViaje,
   agregarEmpresa,  eliminarEmpresa,
   agregarRuta,     eliminarRuta,
   agregarMantenimiento, eliminarMantenimiento,
   agregarConfigMant,    eliminarConfigMant,
+  agregarGasto, eliminarGasto,
 } = useFirestore(usuario?.uid);
 
-    {toasts.map(toast => (
-  <Toast
-    key={toast.id}
-    mensaje={toast.mensaje}
-    tipo={toast.tipo}
-    onCerrar={() => cerrar(toast.id)}
-  />
-))}
-
-("App configMant:", configMant);
   return (
     <>
     <Routes>
@@ -139,11 +130,14 @@ function AppContenido() {
   viajes={viajes}
   mantenimientos={mantenimientos}
   configMant={configMant}
+  gastosVehiculo={gastosVehiculo}
   onAgregarMant={agregarMantenimiento}
   onEliminarMant={eliminarMantenimiento}
   onAgregarConfig={agregarConfigMant}
   onEliminarConfig={eliminarConfigMant}
   onEditarVehiculo={editarVehiculo}
+  onAgregarGasto={agregarGasto}
+  onEliminarGasto={eliminarGasto}
   mostrarToast={mostrar}
 />
   </RutaProtegida>
@@ -252,4 +246,3 @@ function App() {
 }
 
 export default App;
-

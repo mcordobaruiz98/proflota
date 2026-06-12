@@ -74,7 +74,7 @@ const seccionesHV = [
   },
 ];
 
-function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, mostrarToast }) {
+function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], gastosVehiculo = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, onAgregarGasto, onEliminarGasto, mostrarToast }) {
   const navigate  = useNavigate();
   const { id }    = useParams();
   const [tabActivo, setTabActivo] = useState("info");
@@ -101,6 +101,12 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [editando,      setEditando]      = useState(false);
   const [editData,      setEditData]      = useState({});
   const [guardandoEdit, setGuardandoEdit] = useState(false);
+
+  const [gastoDesc,     setGastoDesc]     = useState("");
+  const [gastoMonto,    setGastoMonto]    = useState("");
+  const [gastoFecha,    setGastoFecha]    = useState(new Date().toISOString().slice(0,10));
+  const [guardandoGasto,setGuardandoGasto]= useState(false);
+  const [verFormGasto,  setVerFormGasto]  = useState(false);
 
 
   const [kmOdometro,    setKmOdometro]    = useState(() => Number(localStorage.getItem(`km_${id}`))||0);
@@ -658,6 +664,136 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 ))}
               </div>
             )}
+
+            {/* ── GASTOS Y FACTURAS DEL VEHÍCULO ── */}
+            {(() => {
+              const gastosMesVeh = gastosVehiculo.filter(g => {
+                if (g.vehiculoId !== id) return false;
+                const f = new Date(g.fecha);
+                return f.getMonth() === mesActual && f.getFullYear() === anioActual;
+              });
+              const totalGastosFijos = gastosMesVeh.reduce((s, g) => s + (g.monto || 0), 0);
+              const balanceFinal = netaMes - totalGastosFijos;
+
+              return (
+                <>
+                  {/* Balance final */}
+                  <div style={{...styles.card, border:`1.5px solid ${balanceFinal >= 0 ? t.colors.greenBorder : t.colors.redBorder}`}}>
+                    <p style={styles.cardTitulo}>Balance final del mes</p>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Ganancia neta viajes</span>
+                      <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:netaMes>=0?t.colors.green:t.colors.red}}>{fmt(netaMes)}</span>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos y facturas</span>
+                      <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:totalGastosFijos>0?t.colors.red:t.colors.textTertiary}}>
+                        {totalGastosFijos > 0 ? `-${fmt(totalGastosFijos)}` : fmt(0)}
+                      </span>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0 0"}}>
+                      <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Le queda</span>
+                      <span style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:balanceFinal>=0?t.colors.green:t.colors.red}}>
+                        {fmt(balanceFinal)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Lista de gastos + formulario */}
+                  <div style={styles.card}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
+                      <p style={{...styles.cardTitulo,margin:0}}>Gastos y facturas</p>
+                      <button
+                        style={{padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,cursor:"pointer"}}
+                        onClick={()=>setVerFormGasto(!verFormGasto)}
+                      >
+                        {verFormGasto ? "Cancelar" : "+ Agregar"}
+                      </button>
+                    </div>
+
+                    {verFormGasto && (
+                      <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"12px"}}>
+                        <div style={styles.campo}>
+                          <label style={styles.label}>Descripción</label>
+                          <input type="text" placeholder="Ej: Cuota camión, Seguro, GPS..."
+                            value={gastoDesc} onChange={e=>setGastoDesc(e.target.value)} style={styles.input} />
+                        </div>
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+                          <div style={styles.campo}>
+                            <label style={styles.label}>Monto</label>
+                            <input type="number" placeholder="500000"
+                              value={gastoMonto} onChange={e=>setGastoMonto(e.target.value)} style={styles.input} />
+                          </div>
+                          <div style={styles.campo}>
+                            <label style={styles.label}>Fecha</label>
+                            <input type="date" value={gastoFecha}
+                              onChange={e=>setGastoFecha(e.target.value)} style={styles.input} />
+                          </div>
+                        </div>
+                        <button
+                          style={{width:"100%",padding:"11px",background:t.colors.blue,color:"#fff",border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardandoGasto?0.75:1}}
+                          disabled={guardandoGasto}
+                          onClick={async()=>{
+                            if (!gastoDesc.trim()) { mostrarToast("Ingresa una descripción","error"); return; }
+                            if (!gastoMonto || Number(gastoMonto)<=0) { mostrarToast("Ingresa un monto válido","error"); return; }
+                            setGuardandoGasto(true);
+                            try {
+                              await onAgregarGasto({
+                                vehiculoId: id,
+                                placa: vehiculo.placa,
+                                descripcion: gastoDesc.trim(),
+                                monto: Number(gastoMonto),
+                                fecha: gastoFecha,
+                              });
+                              mostrarToast("Gasto registrado","exito");
+                              setGastoDesc(""); setGastoMonto(""); setGastoFecha(new Date().toISOString().slice(0,10));
+                              setVerFormGasto(false);
+                            } catch(err) {
+                              mostrarToast("Error al guardar","error");
+                            } finally {
+                              setGuardandoGasto(false);
+                            }
+                          }}
+                        >
+                          Guardar gasto
+                        </button>
+                      </div>
+                    )}
+
+                    {gastosMesVeh.length === 0 && !verFormGasto && (
+                      <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textTertiary,textAlign:"center",padding:"12px 0",margin:0}}>
+                        Sin gastos registrados este mes
+                      </p>
+                    )}
+
+                    {gastosMesVeh.map((g, i, arr) => (
+                      <div key={g.firestoreId} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                        <div style={{flex:1,minWidth:0}}>
+                          <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>{g.descripcion}</p>
+                          <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{g.fecha}</p>
+                        </div>
+                        <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                          <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.red}}>-{fmt(g.monto)}</span>
+                          <button
+                            style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
+                            onClick={async()=>{
+                              try {
+                                await onEliminarGasto(g.firestoreId);
+                                mostrarToast("Gasto eliminado","exito");
+                              } catch(err) {
+                                mostrarToast("Error al eliminar","error");
+                              }
+                            }}
+                          >
+                            <Trash2 size={14} color={t.colors.textTertiary} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
+
           </div>
         )}
 
