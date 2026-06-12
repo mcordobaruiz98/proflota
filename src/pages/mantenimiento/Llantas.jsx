@@ -137,7 +137,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast }) {
   if (!vehiculo) return (
     <div style={styles.pantalla}>
       <div style={styles.header}>
-        <button style={styles.btnVolver} onClick={()=>navigate(-1)}>
+        <button style={styles.btnVolver} onClick={()=>navigate(`/vehiculo/${id}`, { state: { tab: "mant" } })}>
           <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5}/>
           <span>Volver</span>
         </button>
@@ -149,7 +149,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast }) {
   return (
     <div style={styles.pantalla}>
       <div style={styles.header}>
-        <button style={styles.btnVolver} onClick={()=>navigate(/vehiculo/%{id},{state:{tab:"mant"}})}>
+        <button style={styles.btnVolver} onClick={()=>navigate(`/vehiculo/${id}`, { state: { tab: "mant" } })}>
           <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5}/>
           <span>Volver</span>
         </button>
@@ -293,4 +293,3 @@ const styles = {
 };
 
 export default Llantas;
-
