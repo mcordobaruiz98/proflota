@@ -69,6 +69,7 @@ const seccionesHV = [
       {id:"con_tel",    label:"Teléfono",            tipo:"tel",   placeholder:"+57 300 000 0000"},
       {id:"con_correo", label:"Correo electrónico",  tipo:"email", placeholder:"correo@ejemplo.com"},
       {id:"con_ref",    label:"Referencia familiar", tipo:"text",  placeholder:"Nombre y teléfono"},
+      {id:"con_telref", label:"Telefono referencia familiar", tipo:"tel", placeholder:"+57 300 000 0000"},
     ],
   },
 ];
