@@ -421,7 +421,7 @@ const guardarRutaFrecuente = async () => {
     type="text" 
     placeholder="Maíz" 
     value={producto}
-    onChange={e => setProducto(evt.target.value)} 
+    onChange={e => setProducto(e.target.value)} 
     style={styles.input} 
     />
 )}
