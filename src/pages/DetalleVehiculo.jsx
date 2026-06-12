@@ -601,7 +601,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 <p style={{...styles.metricaCardVal,color:t.colors.blue}}>{fmt(ingresosMes)}</p>
               </div>
               <div style={styles.metricaCard}>
-                <p style={styles.metricaCardLabel}>Total gastos</p>
+                <p style={styles.metricaCardLabel}>Total gastos de viaje</p>
                 <p style={{...styles.metricaCardVal,color:t.colors.red}}>{fmt(gastosMes)}</p>
               </div>
             </div>
@@ -609,7 +609,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
             {/* Distribución */}
             {gastosMes>0&&(
               <div style={styles.card}>
-                <p style={styles.cardTitulo}>Distribución de gastos</p>
+                <p style={styles.cardTitulo}>Distribución de gastos de viaje</p>
                 {[
                   {label:"ACPM",      valor:acpmMes,      color:"#3B82F6"},
                   {label:"Adblue",    valor:adblMes,      color:"#8B5CF6"},
