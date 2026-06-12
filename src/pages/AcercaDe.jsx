@@ -22,10 +22,9 @@ function AcercaDe() {
       <div style={styles.contenido}>
 
         {/* LOGO Y NOMBRE */}
-        <div style={{textAlign:"center", padding:"30px 20px 20px"}}>
-          <p style={{fontSize:"48px", margin:"0 0 8px"}}>🚛</p>
-          <p style={{fontSize:"24px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:"0 0 4px"}}>Navira</p>
-          <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 4px"}}>Inteligencia y Precisión en movimiento </p>
+        <div style={{textAlign:"center", padding:"30px 20px 20px", display:"flex", flexDirection:"column", alignItems:"center", gap:"8px"}}>
+          <img src="/logo-navira.png" alt="Navira" style={{ height: "60px", objectFit:"contain"}} />
+          <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:0}}>Inteligencia y Precisión en movimiento </p>
           <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:0}}>Versión 1.0 Beta</p>
         </div>
 
