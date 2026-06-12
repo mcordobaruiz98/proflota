@@ -7,7 +7,7 @@ function RutaProtegida({ children }) {
   if (cargando) {
     return (
       <div style={styles.cargando}>
-        <p style={{ fontSize: "32px", marginBottom: "12px" }}>🚛</p>
+        <img src="/icon-512.png" alt="Navira" style={{height: "50px", objectFit:"contain"}} />
         <p style={styles.texto}>Cargando Navira...</p>
       </div>
     );
