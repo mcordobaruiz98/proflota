@@ -416,7 +416,7 @@ const guardarRutaFrecuente = async () => {
       ))}
     </select>
   )}
-  {(!productosFrecuentes.includes(producto) || conductoresFrecuentes.length === 0) && (
+  {(!productosFrecuentes.includes(producto) || productosFrecuentes.length === 0) && (
   <input 
     type="text" 
     placeholder="Maíz" 
