@@ -151,7 +151,7 @@ const guardarMantenimiento = async () => {
 
   const vehiculo = vehiculos.find(v => String(v.firestoreId) === String(id));
 
-const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
+  const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
 
   const kmActual = viajes
   .filter(v => v.placa === vehiculo?.placa)
