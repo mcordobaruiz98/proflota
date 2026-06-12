@@ -43,7 +43,10 @@ const seccionesHV = [
       {id:"veh_soat",    label:"SOAT"},
       {id:"veh_rtm",     label:"RTM"},
       {id:"veh_poliza",  label:"Póliza seguro todo riesgo"},
-      {id:"veh_fotos",   label:"Fotos (frente, lados, trasera)"},
+      {id:"veh_fotos",   label:"Foto frente"},
+      {id:"veh_fotos",   label:"Foto costado derecho"},
+      {id:"veh_fotos",   label:"Foto costado izquierdo"},
+      {id:"veh_fotos",   label:"Foto trasera"},
     ],
     campos: [
       {id:"veh_satelital", label:"Empresa satelital", tipo:"text",     placeholder:"Nombre GPS"},
