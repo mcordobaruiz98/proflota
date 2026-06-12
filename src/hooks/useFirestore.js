@@ -92,6 +92,10 @@ useEffect(() => {
   const eliminarVehiculo = async (firestoreId) => {
     await deleteDoc(doc(db, rutaVehiculos, firestoreId));
   };
+  const editarVehiculo = async (firestoreId, datos) => {
+    const datosLimpios = JSON.parse(JSON.stringify(datos));
+    await updateDoc(doc(db, rutaVehiculos, firestoreId), datosLimpios);
+  };
 
   const agregarViaje = async (datos) => {
     await addDoc(collection(db, rutaViajes), { ...datos, creadoEn: new Date().toISOString() });
@@ -152,7 +156,7 @@ const eliminarConfigMant = async (firestoreId) => {
 
   return {
     vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, cargando,
-    agregarVehiculo, eliminarVehiculo,
+    agregarVehiculo, eliminarVehiculo, editarVehiculo,
     agregarViaje,    eliminarViaje,    editarViaje,
     agregarEmpresa,  eliminarEmpresa,
     agregarRuta,     eliminarRuta,

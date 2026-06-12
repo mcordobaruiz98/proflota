@@ -36,7 +36,7 @@ function AppContenido() {
 
  const {
   vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, cargando,
-  agregarVehiculo, eliminarVehiculo,
+  agregarVehiculo, eliminarVehiculo, editarVehiculo,
   agregarViaje,    eliminarViaje,    editarViaje,
   agregarEmpresa,  eliminarEmpresa,
   agregarRuta,     eliminarRuta,
@@ -143,6 +143,7 @@ function AppContenido() {
   onEliminarMant={eliminarMantenimiento}
   onAgregarConfig={agregarConfigMant}
   onEliminarConfig={eliminarConfigMant}
+  onEditarVehiculo={editarVehiculo}
   mostrarToast={mostrar}
 />
   </RutaProtegida>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, Wrench } from "lucide-react";
+import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, Wrench, Camera, Edit2, Save, X } from "lucide-react";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
 import { theme as t } from "../styles/theme";
 
@@ -74,7 +74,7 @@ const seccionesHV = [
   },
 ];
 
-function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, mostrarToast }) {
+function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, mostrarToast }) {
   const navigate  = useNavigate();
   const { id }    = useParams();
   const [tabActivo, setTabActivo] = useState("info");
@@ -97,6 +97,10 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({propietario:true,tenedor:false,vehiculo:false,conductor:false});
 
   const { subirArchivo, eliminarArchivo, progreso: progresoArchivo, subiendo } = useSubirArchivo();
+
+  const [editando,      setEditando]      = useState(false);
+  const [editData,      setEditData]      = useState({});
+  const [guardandoEdit, setGuardandoEdit] = useState(false);
 
 
   const [kmOdometro,    setKmOdometro]    = useState(() => Number(localStorage.getItem(`km_${id}`))||0);
@@ -246,6 +250,61 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     eliminarArchivo(doc.ruta, ()=>actualizarHV(docId,"pendiente"));
   };
 
+  const iniciarEdicion = () => {
+    setEditData({
+      tipoVehiculo:  vehiculo.tipoVehiculo  || "",
+      tipoRemolque:  vehiculo.tipoRemolque  || "",
+      placa:         vehiculo.placa          || "",
+      placaRemolque: vehiculo.placaRemolque  || "",
+      marca:         vehiculo.marca          || "",
+      modelo:        vehiculo.modelo         || "",
+      propietario:   vehiculo.propietario    || "",
+      tenedor:       vehiculo.tenedor        || "",
+      fotoUrl:       vehiculo.fotoUrl        || "",
+    });
+    setEditando(true);
+  };
+
+  const guardarEdicion = async () => {
+    if (!editData.tipoVehiculo) { mostrarToast("Selecciona el tipo de vehículo","error"); return; }
+    if (!editData.placa.trim()) { mostrarToast("La placa es obligatoria","error"); return; }
+    if (!editData.propietario.trim()) { mostrarToast("El propietario es obligatorio","error"); return; }
+    const placaNueva = editData.placa.trim().toUpperCase();
+    if (placaNueva !== vehiculo.placa && vehiculos.find(v => v.placa.toLowerCase() === placaNueva.toLowerCase())) {
+      mostrarToast("Ya existe un vehículo con esa placa","error"); return;
+    }
+    setGuardandoEdit(true);
+    try {
+      await onEditarVehiculo(vehiculo.firestoreId, {
+        ...editData,
+        placa: placaNueva,
+        placaRemolque: editData.placaRemolque.trim().toUpperCase(),
+        propietario: editData.propietario.trim(),
+        tenedor: editData.tenedor.trim(),
+      });
+      mostrarToast("Vehículo actualizado","exito");
+      setEditando(false);
+    } catch(err) {
+      mostrarToast("Error al guardar","error");
+    } finally {
+      setGuardandoEdit(false);
+    }
+  };
+
+  const cambiarFotoVehiculo = async (e) => {
+    const archivo = e.target.files[0];
+    if (!archivo) return;
+    const ruta = `vehiculos/${Date.now()}_${archivo.name}`;
+    subirArchivo(archivo, ruta, "fotoVehiculo", async (url) => {
+      try {
+        await onEditarVehiculo(vehiculo.firestoreId, { fotoUrl: url });
+        mostrarToast("Foto actualizada","exito");
+      } catch(err) {
+        mostrarToast("Error al cambiar foto","error");
+      }
+    });
+  };
+
   const contarDocumentos = (seccion) => {
     const total   = seccion.documentos.length;
     const cargados= seccion.documentos.filter(d=>hvData[d.id]&&hvData[d.id].estado==="cargado").length;
@@ -275,8 +334,18 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
       {/* BLOQUE SUPERIOR */}
       <div style={styles.bloqueTop}>
         <div style={styles.vehiculoFila}>
-          <div style={styles.vehiculoIconoWrap}>
-            <Truck size={26} color={t.colors.blue} strokeWidth={1.8} />
+          <div style={{position:"relative"}}>
+            {vehiculo.fotoUrl ? (
+              <img src={vehiculo.fotoUrl} alt={vehiculo.placa} style={{width:"50px",height:"50px",borderRadius:t.radius.md,objectFit:"cover"}} />
+            ) : (
+              <div style={styles.vehiculoIconoWrap}>
+                <Truck size={26} color={t.colors.blue} strokeWidth={1.8} />
+              </div>
+            )}
+            <label style={{position:"absolute",bottom:"-4px",right:"-4px",width:"22px",height:"22px",borderRadius:"50%",background:t.colors.blue,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",border:`2px solid ${t.colors.bgCard}`}}>
+              <Camera size={11} color="#fff" strokeWidth={2.5} />
+              <input type="file" accept="image/*" style={{display:"none"}} onChange={cambiarFotoVehiculo} />
+            </label>
           </div>
           <div>
             <p style={styles.vehiculoPlaca}>{vehiculo.placa}</p>
@@ -327,22 +396,105 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
         {/* ── INFO ── */}
         {tabActivo==="info" && (
           <div style={styles.card}>
-            <p style={styles.cardTitulo}>Información del vehículo</p>
-            {[
-              {label:"Tipo de vehículo", valor:vehiculo.tipoVehiculo},
-              {label:"Tipo de remolque", valor:vehiculo.tipoRemolque},
-              {label:"Placa vehículo",   valor:vehiculo.placa},
-              {label:"Placa remolque",   valor:vehiculo.placaRemolque},
-              {label:"Marca",            valor:vehiculo.marca},
-              {label:"Modelo",           valor:vehiculo.modelo},
-              {label:"Propietario",      valor:vehiculo.propietario},
-              {label:"Tenedor",          valor:vehiculo.tenedor},
-            ].map((item,i,arr)=>(
-              <div key={item.label} style={{...styles.fila, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
-                <span style={styles.filaLabel}>{item.label}</span>
-                <span style={styles.filaValor}>{item.valor||"—"}</span>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
+              <p style={{...styles.cardTitulo,margin:0}}>Información del vehículo</p>
+              {!editando ? (
+                <button style={{display:"flex",alignItems:"center",gap:"5px",padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,cursor:"pointer"}} onClick={iniciarEdicion}>
+                  <Edit2 size={12} /> Editar
+                </button>
+              ) : (
+                <div style={{display:"flex",gap:"6px"}}>
+                  <button style={{display:"flex",alignItems:"center",gap:"4px",padding:"6px 12px",background:t.colors.green,border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:"#fff",cursor:"pointer",opacity:guardandoEdit?0.75:1}} onClick={guardarEdicion} disabled={guardandoEdit}>
+                    <Save size={12} /> {guardandoEdit?"Guardando...":"Guardar"}
+                  </button>
+                  <button style={{display:"flex",alignItems:"center",gap:"4px",padding:"6px 12px",background:"none",border:`1px solid ${t.colors.border}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,cursor:"pointer"}} onClick={()=>setEditando(false)}>
+                    <X size={12} /> Cancelar
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {!editando ? (
+              <>
+                {[
+                  {label:"Tipo de vehículo", valor:vehiculo.tipoVehiculo},
+                  {label:"Tipo de remolque", valor:vehiculo.tipoRemolque},
+                  {label:"Placa vehículo",   valor:vehiculo.placa},
+                  {label:"Placa remolque",   valor:vehiculo.placaRemolque},
+                  {label:"Marca",            valor:vehiculo.marca},
+                  {label:"Modelo",           valor:vehiculo.modelo},
+                  {label:"Propietario",      valor:vehiculo.propietario},
+                  {label:"Tenedor",          valor:vehiculo.tenedor},
+                ].map((item,i,arr)=>(
+                  <div key={item.label} style={{...styles.fila, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                    <span style={styles.filaLabel}>{item.label}</span>
+                    <span style={styles.filaValor}>{item.valor||"—"}</span>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <div>
+                <div style={styles.campo}>
+                  <label style={styles.label}>Tipo de vehículo *</label>
+                  <select value={editData.tipoVehiculo} onChange={e=>setEditData({...editData,tipoVehiculo:e.target.value})}
+                    style={{...styles.input, color:editData.tipoVehiculo?t.colors.textPrimary:t.colors.textTertiary}}>
+                    <option value="">Seleccionar...</option>
+                    {["CUATRO MANOS","DOBLETROQUE","PATINETA 2S2","PATINETA 2S3","SENCILLO","TRACTOMULA 3S2","TRACTOMULA 3S3","TURBO","TURBO SENCILLO","VOLQUETA","OTRO"].map(o=>(
+                      <option key={o} value={o}>{o.charAt(0)+o.slice(1).toLowerCase()}</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={styles.campo}>
+                  <label style={styles.label}>Tipo de remolque</label>
+                  <select value={editData.tipoRemolque} onChange={e=>setEditData({...editData,tipoRemolque:e.target.value})}
+                    style={{...styles.input, color:editData.tipoRemolque?t.colors.textPrimary:t.colors.textTertiary}}>
+                    <option value="">Sin remolque</option>
+                    {["BOTELLERO","CAMA BAJA","CISTERNA","CONTENEDOR","CARROCERIA","FURGON","FURGON REFRIGERADO","NIÑERA","PLANCHA","PORTA CONTENEDORES","VOLCO AUTODESCARGABLE","OTRO"].map(o=>(
+                      <option key={o} value={o}>{o.charAt(0)+o.slice(1).toLowerCase()}</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+                  <div style={styles.campo}>
+                    <label style={styles.label}>Placa vehículo *</label>
+                    <input type="text" value={editData.placa} maxLength={6}
+                      onChange={e=>setEditData({...editData,placa:e.target.value.toUpperCase()})} style={styles.input} />
+                  </div>
+                  <div style={styles.campo}>
+                    <label style={styles.label}>Placa remolque</label>
+                    <input type="text" value={editData.placaRemolque}
+                      onChange={e=>setEditData({...editData,placaRemolque:e.target.value.toUpperCase()})} style={styles.input} />
+                  </div>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+                  <div style={styles.campo}>
+                    <label style={styles.label}>Marca</label>
+                    <select value={editData.marca} onChange={e=>setEditData({...editData,marca:e.target.value})}
+                      style={{...styles.input, color:editData.marca?t.colors.textPrimary:t.colors.textTertiary}}>
+                      <option value="">Seleccionar...</option>
+                      {["AUTOCAR","ASTRA","BERLIET","BARREIROS","BElAZ","BYD","C.C.C","CATERPILLAR","CARIBE","CHANGAN","CHANGFENG","CITROEN","CHERY","CHEVROLET","CMC","DAEWOO","DAF","DAIHATSU","DFSK","DONGFENG","FAW","FORD","FOTON","FOTON AUMAN","FIAT","FREIGHTLINER","FUTONG","FWD","GMC","HINO","HITACHI","HYUNDAI","INTERNATIONAL","ISUZU","IVECO","JAC","JMC","KAMAZ","KENWORTH","KIA","KING LONG","KOMATSU","KRAZ","LIUGONG","MACK","MAN","MARCOPOLO","MASSEY FERGUSON","MAZDA","MERCEDES BENZ","MITSUBISHI","MG","NISSAN","PEGASSO","PEUGEOT","PETERBILT","RAM","RENAULT","SCANIA","SHACMAN","SINOTRUK","SITRACK","VOLKSWAGEN","VOLVO","WESTERN STAR","YUTONG","OTRO"].map(o=>(
+                        <option key={o} value={o}>{o}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div style={styles.campo}>
+                    <label style={styles.label}>Modelo (año)</label>
+                    <input type="number" value={editData.modelo} min="1970" max="2100"
+                      onChange={e=>setEditData({...editData,modelo:e.target.value})} style={styles.input} />
+                  </div>
+                </div>
+                <div style={styles.campo}>
+                  <label style={styles.label}>Propietario *</label>
+                  <input type="text" value={editData.propietario}
+                    onChange={e=>setEditData({...editData,propietario:e.target.value})} style={styles.input} />
+                </div>
+                <div style={styles.campo}>
+                  <label style={styles.label}>Tenedor</label>
+                  <input type="text" value={editData.tenedor}
+                    onChange={e=>setEditData({...editData,tenedor:e.target.value})} style={styles.input} />
+                </div>
               </div>
-            ))}
+            )}
           </div>
         )}
 
@@ -875,7 +1027,8 @@ const styles = {
   hvBtnSubir:          { display:"inline-flex", alignItems:"center", gap:"4px", padding:"6px 12px", borderRadius:t.radius.full, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, cursor:"pointer", background:t.colors.blueSoft, color:t.colors.blue, border:`1.5px solid ${t.colors.blueBorder}`, whiteSpace:"nowrap", flexShrink:0 },
   hvEstadoCargado:     { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.green, whiteSpace:"nowrap", flexShrink:0 },
   hvEstadoSubiendo:    { fontSize:t.fonts.sizeXs, color:t.colors.amber, whiteSpace:"nowrap", flexShrink:0 },
+  campo:               { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"12px" },
+  label:               { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
 };
 
 export default DetalleVehiculo;
-
