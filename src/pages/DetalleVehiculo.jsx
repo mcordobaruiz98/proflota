@@ -77,6 +77,7 @@ const seccionesHV = [
 function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], gastosVehiculo = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, onAgregarGasto, onEliminarGasto, mostrarToast }) {
   const navigate  = useNavigate();
   const { id }    = useParams();
+  const location  = useLocation();
   const [tabActivo, setTabActivo] = useState(location.state?.tab || "info");
   const [filtro,    setFiltro]    = useState("todos");
   const [busquedaH, setBusquedaH] = useState("");
@@ -151,7 +152,7 @@ const guardarMantenimiento = async () => {
 
   const vehiculo = vehiculos.find(v => String(v.firestoreId) === String(id));
 
-  const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
+const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
 
   const kmActual = viajes
   .filter(v => v.placa === vehiculo?.placa)
