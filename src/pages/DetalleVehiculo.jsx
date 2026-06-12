@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, Wrench, Camera, Edit3, Save, X, Target, AlertCircle, History, Search } from "lucide-react";
+import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, Wrench, Camera, Edit2, Save, X, CircleDot, Droplets, Filter, Disc, ClipboardList } from "lucide-react";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
 import { theme as t } from "../styles/theme";
 
@@ -406,7 +406,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               <p style={{...styles.cardTitulo,margin:0}}>Información del vehículo</p>
               {!editando ? (
                 <button style={{display:"flex",alignItems:"center",gap:"5px",padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,cursor:"pointer"}} onClick={iniciarEdicion}>
-                  <Edit3 size={12} /> Editar
+                  <Edit2 size={12} /> Editar
                 </button>
               ) : (
                 <div style={{display:"flex",gap:"6px"}}>
@@ -993,11 +993,11 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     <div style={styles.card}>
       <p style={styles.cardTitulo}>Módulos de detalle</p>
       {[
-        {label:"Llantas",  sub:"Diagrama y estado por posición", ruta:`/vehiculo/${id}/llantas`,       Icono:Target,       color:t.colors.textSecondary},
-        {label:"Aceite",   sub:"Marca, viscosidad y cambios",    ruta:`/vehiculo/${id}/aceite`,        Icono:Wrench,       color:t.colors.amber},
-        {label:"Filtros",  sub:"Aire, combustible, lubricación", ruta:`/vehiculo/${id}/filtros`,       Icono:Search,       color:t.colors.blue},
-        {label:"Frenos",   sub:"Estado por eje",                 ruta:`/vehiculo/${id}/frenos`,        Icono:AlertCircle,  color:t.colors.red},
-        {label:"Historial",sub:"Todos los mantenimientos",       ruta:`/vehiculo/${id}/historial-mant`,Icono:History,      color:t.colors.textSecondary},
+        {label:"Llantas",  sub:"Diagrama y estado por posición", ruta:`/vehiculo/${id}/llantas`,       Icono:CircleDot,     color:t.colors.textSecondary},
+        {label:"Aceite",   sub:"Marca, viscosidad y cambios",    ruta:`/vehiculo/${id}/aceite`,        Icono:Droplets,      color:t.colors.amber},
+        {label:"Filtros",  sub:"Aire, combustible, lubricación", ruta:`/vehiculo/${id}/filtros`,       Icono:Filter,        color:t.colors.blue},
+        {label:"Frenos",   sub:"Estado por eje",                 ruta:`/vehiculo/${id}/frenos`,        Icono:Disc,          color:t.colors.red},
+        {label:"Historial",sub:"Todos los mantenimientos",       ruta:`/vehiculo/${id}/historial-mant`,Icono:ClipboardList, color:t.colors.textSecondary},
       ].map((item,i,arr)=>(
         <div
           key={item.ruta}

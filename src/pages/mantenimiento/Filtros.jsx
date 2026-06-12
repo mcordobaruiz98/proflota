@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Droplets, Wind, Fuel, Filter, Thermometer, Droplet } from "lucide-react";
 import { theme as t } from "../../styles/theme";
 
 const TIPOS_FILTRO = [
-  { id:"aceite",       label:"Filtro de aceite",       icono:"🛢️" },
-  { id:"aire",         label:"Filtro de aire",         icono:"💨" },
-  { id:"combustible",  label:"Filtro de combustible",  icono:"⛽" },
-  { id:"trampa",       label:"Trampa de combustible",  icono:"🪤" },
-  { id:"refrigerante", label:"Filtro de refrigerante", icono:"🌡️" },
-  { id:"hidraulico",   label:"Filtro hidráulico",      icono:"🔵" },
+  { id:"aceite",       label:"Filtro de aceite",       Icono:Droplets,     color:t.colors.amber },
+  { id:"aire",         label:"Filtro de aire",         Icono:Wind,         color:t.colors.blue },
+  { id:"combustible",  label:"Filtro de combustible",  Icono:Fuel,         color:t.colors.green },
+  { id:"trampa",       label:"Trampa de combustible",  Icono:Filter,       color:t.colors.textSecondary },
+  { id:"refrigerante", label:"Filtro de refrigerante", Icono:Thermometer,  color:t.colors.red },
+  { id:"hidraulico",   label:"Filtro hidráulico",      Icono:Droplet,      color:"#3B82F6" },
 ];
 
 function Filtros({ vehiculos, mostrarToast }) {
@@ -57,6 +57,16 @@ function Filtros({ vehiculos, mostrarToast }) {
     mostrarToast("Registro eliminado","info");
   };
 
+  const IconoFiltro = ({ tipo, size = 18 }) => {
+    const tf = TIPOS_FILTRO.find(x => x.id === tipo);
+    if (!tf) return null;
+    return (
+      <div style={{width:"32px",height:"32px",borderRadius:t.radius.sm,background:t.colors.bgSection,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        <tf.Icono size={size} color={tf.color} strokeWidth={1.8} />
+      </div>
+    );
+  };
+
   return (
     <div style={styles.pantalla}>
       <div style={styles.header}>
@@ -77,7 +87,7 @@ function Filtros({ vehiculos, mostrarToast }) {
             return (
               <div key={tf.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                 <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
-                  <span style={{fontSize:"20px"}}>{tf.icono}</span>
+                  <IconoFiltro tipo={tf.id} />
                   <div>
                     <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>{tf.label}</p>
                   </div>
@@ -115,7 +125,7 @@ function Filtros({ vehiculos, mostrarToast }) {
             <div style={styles.campo}>
               <label style={styles.label}>Tipo de filtro</label>
               <select value={tipoFiltro} onChange={e=>setTipoFiltro(e.target.value)} style={styles.input}>
-                {TIPOS_FILTRO.map(tf=><option key={tf.id} value={tf.id}>{tf.icono} {tf.label}</option>)}
+                {TIPOS_FILTRO.map(tf=><option key={tf.id} value={tf.id}>{tf.label}</option>)}
               </select>
             </div>
 
@@ -189,16 +199,19 @@ function Filtros({ vehiculos, mostrarToast }) {
               const tf = TIPOS_FILTRO.find(x=>x.id===r.tipo);
               return (
                 <div key={r.id} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"12px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
-                  <div style={{flex:1}}>
-                    <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>
-                      {tf?.icono} {tf?.label}
-                    </p>
-                    <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>
-                      {r.fecha} · {r.km.toLocaleString("es-CO")} km
-                      {r.marca?` · ${r.marca}`:""}
-                      {r.referencia?` ${r.referencia}`:""}
-                    </p>
-                    {r.taller&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{r.taller}</p>}
+                  <div style={{display:"flex",gap:"10px",flex:1}}>
+                    <IconoFiltro tipo={r.tipo} size={16} />
+                    <div style={{flex:1,minWidth:0}}>
+                      <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>
+                        {tf?.label}
+                      </p>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>
+                        {r.fecha} · {r.km.toLocaleString("es-CO")} km
+                        {r.marca?` · ${r.marca}`:""}
+                        {r.referencia?` ${r.referencia}`:""}
+                      </p>
+                      {r.taller&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{r.taller}</p>}
+                    </div>
                   </div>
                   <div style={{display:"flex",alignItems:"center",gap:"8px",marginLeft:"10px"}}>
                     {r.costo>0&&<span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>{fmt(r.costo)}</span>}
@@ -232,4 +245,3 @@ const styles = {
 };
 
 export default Filtros;
-
