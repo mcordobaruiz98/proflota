@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, Wrench, Camera, Edit2, Save, X } from "lucide-react";
+import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, Wrench, Camera, Edit3, Save, X, Target, AlertCircle, History, Search } from "lucide-react";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
 import { theme as t } from "../styles/theme";
 
@@ -406,7 +406,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               <p style={{...styles.cardTitulo,margin:0}}>Información del vehículo</p>
               {!editando ? (
                 <button style={{display:"flex",alignItems:"center",gap:"5px",padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,cursor:"pointer"}} onClick={iniciarEdicion}>
-                  <Edit2 size={12} /> Editar
+                  <Edit3 size={12} /> Editar
                 </button>
               ) : (
                 <div style={{display:"flex",gap:"6px"}}>
@@ -565,13 +565,13 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   style={styles.btnMeta}
                   onClick={()=>{setEditandoMeta(true);setMetaTemp(metaMensual>0?String(metaMensual):"");}}
                 >
-                  {metaMensual>0?"Editar ":"+ Meta"}
+                  {metaMensual>0?"✏️ Meta":"+ Meta"}
                 </button>
               </div>
 
               {editandoMeta && (
                 <div style={styles.editarMeta}>
-                  <p style={styles.cardTitulo}>PUNTO EQUILIBRIO MENSUAL</p>
+                  <p style={styles.cardTitulo}>Meta mensual de ganancia</p>
                   <input type="number" placeholder="Ej: 5000000" value={metaTemp}
                     onChange={e=>setMetaTemp(e.target.value)} style={styles.input} autoFocus />
                   <div style={{display:"flex",gap:"8px",marginTop:"8px"}}>
@@ -585,7 +585,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 <div style={{marginTop:"14px"}}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
                     <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>{progreso.toFixed(0)}% del objetivo</span>
-                    <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>Punto equilibirio mensual: {fmt(metaMensual)}</span>
+                    <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>Meta: {fmt(metaMensual)}</span>
                   </div>
                   <div style={styles.barraFondo}>
                     <div style={{...styles.barraRelleno,width:`${progreso}%`,background:progresoColor}} />
@@ -601,7 +601,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 <p style={{...styles.metricaCardVal,color:t.colors.blue}}>{fmt(ingresosMes)}</p>
               </div>
               <div style={styles.metricaCard}>
-                <p style={styles.metricaCardLabel}>Total gastos de viaje</p>
+                <p style={styles.metricaCardLabel}>Total gastos</p>
                 <p style={{...styles.metricaCardVal,color:t.colors.red}}>{fmt(gastosMes)}</p>
               </div>
             </div>
@@ -609,7 +609,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
             {/* Distribución */}
             {gastosMes>0&&(
               <div style={styles.card}>
-                <p style={styles.cardTitulo}>Distribución de gastos de viaje</p>
+                <p style={styles.cardTitulo}>Distribución de gastos</p>
                 {[
                   {label:"ACPM",      valor:acpmMes,      color:"#3B82F6"},
                   {label:"Adblue",    valor:adblMes,      color:"#8B5CF6"},
@@ -681,17 +681,17 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   <div style={{...styles.card, border:`1.5px solid ${balanceFinal >= 0 ? t.colors.greenBorder : t.colors.redBorder}`}}>
                     <p style={styles.cardTitulo}>Balance final del mes</p>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
-                      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>GANANCIA VIAJES</span>
+                      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Ganancia neta viajes</span>
                       <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:netaMes>=0?t.colors.green:t.colors.red}}>{fmt(netaMes)}</span>
                     </div>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
-                      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>FACTURAS Y GASTOS</span>
+                      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos y facturas</span>
                       <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:totalGastosFijos>0?t.colors.red:t.colors.textTertiary}}>
                         {totalGastosFijos > 0 ? `-${fmt(totalGastosFijos)}` : fmt(0)}
                       </span>
                     </div>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0 0"}}>
-                      <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>UTILIDAD</span>
+                      <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Le queda</span>
                       <span style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:balanceFinal>=0?t.colors.green:t.colors.red}}>
                         {fmt(balanceFinal)}
                       </span>
@@ -993,11 +993,11 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     <div style={styles.card}>
       <p style={styles.cardTitulo}>Módulos de detalle</p>
       {[
-        {label:"Llantas",  sub:"Diagrama y estado por posición", ruta:`/vehiculo/${id}/llantas`,       Icono:Circle.Dot,        color:t.colors.textSecondary},
-        {label:"Aceite",   sub:"Marca, viscosidad y cambios",    ruta:`/vehiculo/${id}/aceite`,        Icono:Droplets,      color:t.colors.amber},
-        {label:"Filtros",  sub:"Aire, combustible, lubricación", ruta:`/vehiculo/${id}/filtros`,       Icono:Filter,        color:t.colors.blue},
-        {label:"Frenos",   sub:"Estado por eje",                 ruta:`/vehiculo/${id}/frenos`,        Icono:Disc,          color:t.colors.red},
-        {label:"Historial",sub:"Todos los mantenimientos",       ruta:`/vehiculo/${id}/historial-mant`,Icono:ClipboardList, color:t.colors.textSecondary},
+        {label:"Llantas",  sub:"Diagrama y estado por posición", ruta:`/vehiculo/${id}/llantas`,       Icono:Target,       color:t.colors.textSecondary},
+        {label:"Aceite",   sub:"Marca, viscosidad y cambios",    ruta:`/vehiculo/${id}/aceite`,        Icono:Wrench,       color:t.colors.amber},
+        {label:"Filtros",  sub:"Aire, combustible, lubricación", ruta:`/vehiculo/${id}/filtros`,       Icono:Search,       color:t.colors.blue},
+        {label:"Frenos",   sub:"Estado por eje",                 ruta:`/vehiculo/${id}/frenos`,        Icono:AlertCircle,  color:t.colors.red},
+        {label:"Historial",sub:"Todos los mantenimientos",       ruta:`/vehiculo/${id}/historial-mant`,Icono:History,      color:t.colors.textSecondary},
       ].map((item,i,arr)=>(
         <div
           key={item.ruta}
@@ -1005,7 +1005,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
           onClick={()=>navigate(item.ruta)}
         >
           <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
-            <div style={{width:"36PX", height:"36px", borderRadius:t.radius.sm, background:t.colors.bgSection, display:"flex", alignItems:"center", justifyContent:"center"}}>
+            <div style={{width:"36px",height:"36px",borderRadius:t.radius.sm,background:t.colors.bgSection,display:"flex",alignItems:"center",justifyContent:"center"}}>
               <item.Icono size={18} color={item.color} strokeWidth={1.8} />
             </div>
             <div>
@@ -1186,4 +1186,3 @@ const styles = {
 };
 
 export default DetalleVehiculo;
-
