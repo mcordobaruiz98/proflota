@@ -993,7 +993,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     <div style={styles.card}>
       <p style={styles.cardTitulo}>Módulos de detalle</p>
       {[
-        {label:"Llantas",  sub:"Diagrama y estado por posición", ruta:`/vehiculo/${id}/llantas`,       Icono:Circle,        color:t.colors.textSecondary},
+        {label:"Llantas",  sub:"Diagrama y estado por posición", ruta:`/vehiculo/${id}/llantas`,       Icono:Circle.Dot,        color:t.colors.textSecondary},
         {label:"Aceite",   sub:"Marca, viscosidad y cambios",    ruta:`/vehiculo/${id}/aceite`,        Icono:Droplets,      color:t.colors.amber},
         {label:"Filtros",  sub:"Aire, combustible, lubricación", ruta:`/vehiculo/${id}/filtros`,       Icono:Filter,        color:t.colors.blue},
         {label:"Frenos",   sub:"Estado por eje",                 ruta:`/vehiculo/${id}/frenos`,        Icono:Disc,          color:t.colors.red},
