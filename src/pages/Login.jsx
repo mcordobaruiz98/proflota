@@ -56,10 +56,7 @@ function Login() {
       {/* HERO */}
       <div style={styles.hero}>
         <div style={styles.logoWrap}>
-          <div style={styles.logoIcono}>
-            <span style={{ fontSize: "32px" }}>🚛</span>
-          </div>
-          <h1 style={styles.logoNombre}>Navira</h1>
+          <img src="/logo-navira.png" alt="Navira" style={{ height: "80px", objectFit: "contain" }} />
           <p style={styles.logoSub}>Controla tus fletes. Maximiza tus ganancias.</p>
         </div>
       </div>
@@ -149,7 +146,7 @@ function Login() {
           style={styles.btnRegistro}
           onClick={() => navigate("/registro")}
         >
-          Crear cuenta gratis
+          Crear tu cuenta
         </button>
       </div>
 
@@ -161,8 +158,6 @@ const styles = {
   pantalla:       { maxWidth: "430px", margin: "0 auto", minHeight: "100vh", background: t.colors.bgPrimary, display: "flex", flexDirection: "column" },
   hero:           { background: `linear-gradient(135deg, #155E75 0%, #0E7490 50%, #16A34A 100%)`, padding: "48px 24px 36px", textAlign: "center" },
   logoWrap:       { display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" },
-  logoIcono:      { width: "72px", height: "72px", background: "rgba(255,255,255,0.15)", borderRadius: "20px", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(10px)" },
-  logoNombre:     { fontSize: "32px", fontWeight: t.fonts.weightBlack, color: "#fff", margin: 0, letterSpacing: "-0.5px" },
   logoSub:        { fontSize: t.fonts.sizeSm, color: "rgba(255,255,255,0.8)", margin: 0, fontWeight: t.fonts.weightMedium },
   card:           { background: t.colors.bgCard, borderRadius: `${t.radius.xl} ${t.radius.xl} 0 0`, padding: "28px 24px 24px", marginTop: "-16px", flex: 1, boxShadow: "0 -4px 20px rgba(0,0,0,0.08)" },
   cardTitulo:     { fontSize: t.fonts.sizeXl, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: "0 0 24px" },
@@ -185,3 +180,4 @@ const styles = {
 };
 
 export default Login;
+
