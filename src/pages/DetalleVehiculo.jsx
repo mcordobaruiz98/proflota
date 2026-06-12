@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, Wrench, Camera, Edit2, Save, X, CircleDot, Droplets, Filter, Disc, ClipboardList } from "lucide-react";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
 import { theme as t } from "../styles/theme";
@@ -77,7 +77,7 @@ const seccionesHV = [
 function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], gastosVehiculo = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, onAgregarGasto, onEliminarGasto, mostrarToast }) {
   const navigate  = useNavigate();
   const { id }    = useParams();
-  const [tabActivo, setTabActivo] = useState("info");
+  const [tabActivo, setTabActivo] = useState(location.state?.tab || "info");
   const [filtro,    setFiltro]    = useState("todos");
   const [busquedaH, setBusquedaH] = useState("");
   const hoy = new Date();
