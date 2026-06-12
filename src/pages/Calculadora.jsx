@@ -195,6 +195,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
     t: { [rutaGuardada.categoria || "VII"]: p.tarifa || 0 },
   })));
   // Datos adicionales
+  if (rutaGuardada.producto)        setProducto(rutaCargada.producto);
   if (rutaGuardada.empresa)         setEmpresa(rutaGuardada.empresa);
   if (rutaGuardada.contactoEmpresa) setContactoEmpresa(rutaGuardada.contactoEmpresa);
   if (rutaGuardada.celularEmpresa)  setCelularEmpresa(rutaGuardada.celularEmpresa);
@@ -234,6 +235,7 @@ const guardarRutaFrecuente = async () => {
     })),
     categoria,
     // Datos adicionales
+    producto:       producto,
     empresa:        empresa,
     contactoEmpresa: contactoEmpresa,
     celularEmpresa:  celularEmpresa,
@@ -329,6 +331,7 @@ const guardarRutaFrecuente = async () => {
                 {r.peajesRuta?.length>0?` · ${r.peajesRuta.length} peajes`:""} 
                 {r.conductor?` · ${r.conductor}`:""}
                 {r.empresa?` · ${r.empresa}`:""}
+                {r.producto?` . ${r.producto}`:""}
                 </p>
             </div>
             <div style={{display:"flex", gap:"8px"}}>
