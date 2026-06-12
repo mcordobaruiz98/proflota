@@ -585,7 +585,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 <div style={{marginTop:"14px"}}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
                     <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>{progreso.toFixed(0)}% del objetivo</span>
-                    <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>Meta: {fmt(metaMensual)}</span>
+                    <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>PUNTO EQUILIBRIO MENSUAL: {fmt(metaMensual)}</span>
                   </div>
                   <div style={styles.barraFondo}>
                     <div style={{...styles.barraRelleno,width:`${progreso}%`,background:progresoColor}} />
