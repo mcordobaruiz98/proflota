@@ -398,8 +398,7 @@ const guardarRutaFrecuente = async () => {
           <label style={styles.label}>Ruta (Origen → Destino)</label>
           <input type="text" placeholder="Barranquilla – Bogotá" value={ruta} onChange={e=>setRuta(e.target.value)} style={styles.input} />
         </div>
-        
-
+        <div style={styles.fila2}>
           <div style={styles.campo}>
   <label style={styles.label}>Producto</label>
   {productosFrecuentes.length > 0 && (
@@ -429,7 +428,7 @@ const guardarRutaFrecuente = async () => {
     style={styles.input} 
     />
 )}
-
+</div>
           
           <div style={styles.campo}>
   <label style={styles.label}>Empresa</label>
@@ -460,8 +459,10 @@ const guardarRutaFrecuente = async () => {
     style={styles.input} 
     />
 )}
-  
+
 </div>
+
+
           <div style={styles.campo}>
   <label style={styles.label}>Contacto empresa</label>
   <input type="text" placeholder="Nombre del contacto" value={contactoEmpresa}
