@@ -912,15 +912,31 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
           return (
             <div key={item.firestoreId} style={{marginBottom:"14px"}}>
               <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"8px"}}>
-                <div>
+                <div style={{flex:1,minWidth:0}}>
                   <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{item.nombre}</p>
                   <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0"}}>
                     {vencido ? `Venció hace ${Math.abs(kmFaltantes).toLocaleString("es-CO")} km` : `Faltan ${kmFaltantes.toLocaleString("es-CO")} km`}
+                    {` · Cada ${item.intervalo.toLocaleString("es-CO")} km`}
                   </p>
                 </div>
-                <span style={{fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, padding:"3px 10px", borderRadius:t.radius.full, background:c.bg, color:c.text, border:`0.5px solid ${c.border}`, whiteSpace:"nowrap"}}>
-                  {c.label}
-                </span>
+                <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                  <span style={{fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, padding:"3px 10px", borderRadius:t.radius.full, background:c.bg, color:c.text, border:`0.5px solid ${c.border}`, whiteSpace:"nowrap"}}>
+                    {c.label}
+                  </span>
+                  <button
+                    style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
+                    onClick={async()=>{
+                      try {
+                        await onEliminarConfig(item.firestoreId);
+                        mostrarToast("Alerta eliminada","exito");
+                      } catch(err) {
+                        mostrarToast("Error al eliminar","error");
+                      }
+                    }}
+                  >
+                    <Trash2 size={14} color={t.colors.textTertiary} />
+                  </button>
+                </div>
               </div>
               <div style={{height:"5px", borderRadius:"3px", background:t.colors.bgSection, overflow:"hidden"}}>
                 <div style={{height:"100%", borderRadius:"3px", background:c.text, width:`${Math.round(pct)}%`, transition:"width 0.4s ease"}} />
@@ -977,11 +993,11 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     <div style={styles.card}>
       <p style={styles.cardTitulo}>Módulos de detalle</p>
       {[
-        {label:"Llantas",  sub:"Diagrama y estado por posición", ruta:`/vehiculo/${id}/llantas`,       icono:"🛞"},
-        {label:"Aceite",   sub:"Marca, viscosidad y cambios",    ruta:`/vehiculo/${id}/aceite`,        icono:"🛢️"},
-        {label:"Filtros",  sub:"Aire, combustible, lubricación", ruta:`/vehiculo/${id}/filtros`,       icono:"🔵"},
-        {label:"Frenos",   sub:"Estado por eje",                 ruta:`/vehiculo/${id}/frenos`,        icono:"🔴"},
-        {label:"Historial",sub:"Todos los mantenimientos",       ruta:`/vehiculo/${id}/historial-mant`,icono:"📋"},
+        {label:"Llantas",  sub:"Diagrama y estado por posición", ruta:`/vehiculo/${id}/llantas`,       Icono:Circle,        color:t.colors.textSecondary},
+        {label:"Aceite",   sub:"Marca, viscosidad y cambios",    ruta:`/vehiculo/${id}/aceite`,        Icono:Droplets,      color:t.colors.amber},
+        {label:"Filtros",  sub:"Aire, combustible, lubricación", ruta:`/vehiculo/${id}/filtros`,       Icono:Filter,        color:t.colors.blue},
+        {label:"Frenos",   sub:"Estado por eje",                 ruta:`/vehiculo/${id}/frenos`,        Icono:Disc,          color:t.colors.red},
+        {label:"Historial",sub:"Todos los mantenimientos",       ruta:`/vehiculo/${id}/historial-mant`,Icono:ClipboardList, color:t.colors.textSecondary},
       ].map((item,i,arr)=>(
         <div
           key={item.ruta}
@@ -989,7 +1005,9 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
           onClick={()=>navigate(item.ruta)}
         >
           <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
-            <span style={{fontSize:"22px"}}>{item.icono}</span>
+            <div style={{width:"36PX", height:"36px", borderRadius:t.radius.sm, background:t.colors.bgSection, display:"flex", alignItems:"center", justifyContent:"center"}}>
+              <item.Icono size={18} color={item.color} strokeWidth={1.8} />
+            </div>
             <div>
               <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{item.label}</p>
               <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0"}}>{item.sub}</p>
