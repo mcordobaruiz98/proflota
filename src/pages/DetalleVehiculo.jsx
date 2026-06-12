@@ -685,13 +685,13 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                       <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:netaMes>=0?t.colors.green:t.colors.red}}>{fmt(netaMes)}</span>
                     </div>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
-                      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos y facturas</span>
+                      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>FACTURAS Y GASTOS</span>
                       <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:totalGastosFijos>0?t.colors.red:t.colors.textTertiary}}>
                         {totalGastosFijos > 0 ? `-${fmt(totalGastosFijos)}` : fmt(0)}
                       </span>
                     </div>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0 0"}}>
-                      <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Le queda</span>
+                      <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>UTILIDAD</span>
                       <span style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:balanceFinal>=0?t.colors.green:t.colors.red}}>
                         {fmt(balanceFinal)}
                       </span>
