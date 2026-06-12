@@ -1135,7 +1135,7 @@ const styles = {
   metricaSep:          { width:"1px", height:"32px", background:t.colors.borderLight },
   tabsWrap:            { display:"flex", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}`, overflowX:"auto" },
   tab:                 { flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:"4px", padding:"12px 2px 10px", border:"none", background:"none", cursor:"pointer", borderBottom:"2px solid transparent", minWidth:"0" },
-  tabActivo:           { borderBottom:`2px solid ${t.colors.blue}`, background:t.colors.blueSoft },
+  tabActivo:           { borderBottom:`2px solid ${t.colors.blue}`, background:"#1E3A5F" },
   contenido:           { padding:"12px 16px 80px" },
   card:                { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
   cardTitulo:          { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" },

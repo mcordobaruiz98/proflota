@@ -16,7 +16,7 @@ function Viajes({ viajes = [], cargando}) {
 
   const hoy = new Date();
 
-  const viajesFiltrados = [...viajes].reverse().filter(v => {
+  const viajesFiltrados = [...viajes].filter(v => {
     const q = busqueda.toLowerCase();
     const coincide = !q ||
       (v.ruta||"").toLowerCase().includes(q) ||

@@ -31,7 +31,7 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
 
   const gananciaMes  = viajesMes.reduce((s, v) => s + (v.neta   || 0), 0);
   const ingresosMes  = viajesMes.reduce((s, v) => s + (v.vViaje || 0), 0);
-  const recientes    = [...viajes].slice(-4).reverse();
+  const recientes    = [...viajes].slice(0, 4);
 
   const accesos = [
   { label: "Vehículos",   Icono: Truck,       ruta: "/vehiculos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
