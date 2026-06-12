@@ -153,7 +153,7 @@ const productosFrecuentes = [...new Set(
     if (!valorViaje)   { mostrarToast("Ingresa tonelaje y flete","error"); return; }
     setGuardando(true);
     await onGuardar({
-      fecha, mani, placa, tipoCarga, p: producto,
+      fecha, mani, placa, tipoCarga, prod: producto,
       ruta: ruta.trim(), emp: empresa, condNom: conductor, contactoEmpresa, celularEmpresa,
       kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmT: kmTotal,
       ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
