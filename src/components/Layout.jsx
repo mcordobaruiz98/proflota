@@ -66,7 +66,7 @@ const styles = {
     background: "#0A1A2F",
   },
   pantalla: {
-    paddingBottom: "72px",
+    paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
   },
   navbar: {
     position:        "fixed",
@@ -80,6 +80,7 @@ const styles = {
     display:         "flex",
     zIndex:          100,
     boxShadow:       "0 -2px 10px rgba(0,0,0,0.15)",
+    paddingBottom:  "env(safe-area-inset-bottom, 0px"
   },
   navBtn: {
     flex:            1,
