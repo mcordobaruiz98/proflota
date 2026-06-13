@@ -16,6 +16,7 @@ export function useFirestore(uid) {
   const [peajes,         setPeajes]         = useState([]);
   const [configMant,     setConfigMant]     = useState([]);
   const [gastosVehiculo, setGastosVehiculo] = useState([]);
+  const [gastosFijos,    setGastosFijos]    = useState([]);
 
   const rutaVehiculos = uid ? `usuarios/${uid}/vehiculos`     : null;
   const rutaViajes    = uid ? `usuarios/${uid}/viajes`        : null;
@@ -24,6 +25,7 @@ export function useFirestore(uid) {
   const rutaMant      = uid ? `usuarios/${uid}/mantenimiento` : null;
   const rutaConfigMant = uid ? `usuarios/${uid}/config_mant` : null;
   const rutaGastos     = uid ? `usuarios/${uid}/gastos_vehiculo` : null;
+  const rutaGastosFijos = uid ? `usuarios/${uid}/gastos_fijos` : null;
 
   useEffect(() => {
     if (!rutaVehiculos) return;
@@ -96,6 +98,15 @@ useEffect(() => {
   });
   return () => unsub();
 }, [rutaGastos]);
+
+useEffect(() => {
+  if (!rutaGastosFijos) return;
+  const q = query(collection(db, rutaGastosFijos));
+  const unsub = onSnapshot(q, (snap) => {
+    setGastosFijos(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
+  });
+  return () => unsub();
+}, [rutaGastosFijos]);
 
   const agregarVehiculo = async (datos) => {
     await addDoc(collection(db, rutaVehiculos), { ...datos, creadoEn: new Date().toISOString() });
@@ -172,8 +183,16 @@ const eliminarConfigMant = async (firestoreId) => {
     await deleteDoc(doc(db, rutaGastos, firestoreId));
   };
 
+  const agregarGastoFijo = async (datos) => {
+    const datosLimpios = JSON.parse(JSON.stringify(datos));
+    await addDoc(collection(db, rutaGastosFijos), { ...datosLimpios, creadoEn: new Date().toISOString() });
+  };
+  const eliminarGastoFijo = async (firestoreId) => {
+    await deleteDoc(doc(db, rutaGastosFijos, firestoreId));
+  };
+
   return {
-    vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, gastosVehiculo, cargando,
+    vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, gastosVehiculo, gastosFijos, cargando,
     agregarVehiculo, eliminarVehiculo, editarVehiculo,
     agregarViaje,    eliminarViaje,    editarViaje,
     agregarEmpresa,  eliminarEmpresa,
@@ -181,5 +200,6 @@ const eliminarConfigMant = async (firestoreId) => {
     agregarMantenimiento, eliminarMantenimiento,
     agregarConfigMant, eliminarConfigMant,
     agregarGasto, eliminarGasto,
+    agregarGastoFijo, eliminarGastoFijo,
   };
 }

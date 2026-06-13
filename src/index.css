@@ -95,6 +95,7 @@ button, a {
 
 /* ── ANIMACIÓN SUAVE PARA TRANSICIONES ── */
 * {
+  transition-timing-function: ease-out;
   -webkit-transition-timing-function: ease-out;
 }
 

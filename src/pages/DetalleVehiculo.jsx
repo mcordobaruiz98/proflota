@@ -74,7 +74,7 @@ const seccionesHV = [
   },
 ];
 
-function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], gastosVehiculo = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, onAgregarGasto, onEliminarGasto, mostrarToast }) {
+function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], gastosVehiculo = [], gastosFijos = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, onAgregarGasto, onEliminarGasto, onAgregarGastoFijo, onEliminarGastoFijo, mostrarToast }) {
   const navigate  = useNavigate();
   const { id }    = useParams();
   const location  = useLocation();
@@ -84,11 +84,6 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const hoy = new Date();
   const [mesActual,  setMesActual]  = useState(hoy.getMonth());
   const [anioActual, setAnioActual] = useState(hoy.getFullYear());
-
-  const claveMetaLocal = `meta_${id}`;
-  const [metaMensual,  setMetaMensual]  = useState(() => Number(localStorage.getItem(claveMetaLocal))||0);
-  const [editandoMeta, setEditandoMeta] = useState(false);
-  const [metaTemp,     setMetaTemp]     = useState("");
 
   const claveHVLocal = `hv_${id}`;
   const [hvData, setHvData] = useState(() => {
@@ -108,6 +103,12 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [gastoFecha,    setGastoFecha]    = useState(new Date().toISOString().slice(0,10));
   const [guardandoGasto,setGuardandoGasto]= useState(false);
   const [verFormGasto,  setVerFormGasto]  = useState(false);
+
+  const [gfNombre,       setGfNombre]       = useState("");
+  const [gfMonto,        setGfMonto]        = useState("");
+  const [gfPeriodo,      setGfPeriodo]      = useState("mensual");
+  const [verFormGF,      setVerFormGF]      = useState(false);
+  const [guardandoGF,    setGuardandoGF]    = useState(false);
 
 
   const [kmOdometro,    setKmOdometro]    = useState(() => Number(localStorage.getItem(`km_${id}`))||0);
@@ -201,21 +202,21 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
   const peajesMes    = viajesMes.reduce((s,v)=>s+(v.peajes||0),0);
   const conductorMes = viajesMes.reduce((s,v)=>s+(v.conductor||0),0);
   const otrosMes     = viajesMes.reduce((s,v)=>s+(v.carp||0)+(v.gv2||0)+(v.extras||0),0);
-  const progreso     = metaMensual>0 ? Math.min((netaMes/metaMensual)*100,100) : 0;
-  const progresoColor= progreso>=100?t.colors.green:progreso>=50?t.colors.amber:t.colors.red;
+
+  // Punto de equilibrio = gastos fijos mensualizados de este vehículo
+  const gfVehiculo   = gastosFijos.filter(g => g.vehiculoId === id);
+  const puntoEquilibrio = gfVehiculo.reduce((s, g) => {
+    const monto = g.monto || 0;
+    return s + (g.periodicidad === "anual" ? monto / 12 : monto);
+  }, 0);
+  const progresoPE   = puntoEquilibrio > 0 ? Math.min((netaMes / puntoEquilibrio) * 100, 150) : 0;
+  const progresoPEColor = progresoPE >= 100 ? t.colors.green : progresoPE >= 60 ? t.colors.amber : t.colors.red;
 
   const cambiarMes = (dir) => {
     let m=mesActual+dir, a=anioActual;
     if (m>11){m=0;a++;}
     if (m<0){m=11;a--;}
     setMesActual(m); setAnioActual(a);
-  };
-
-  const guardarMeta = () => {
-    const val = Number(metaTemp)||0;
-    setMetaMensual(val);
-    localStorage.setItem(claveMetaLocal, val);
-    setEditandoMeta(false); setMetaTemp("");
   };
 
   // Tab Historial
@@ -553,45 +554,42 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               <button style={styles.btnMes} onClick={()=>cambiarMes(1)}>›</button>
             </div>
 
-            {/* Ganancia + meta */}
+            {/* Punto de equilibrio */}
             <div style={styles.card}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+              <p style={styles.cardTitulo}>Punto de equilibrio</p>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:"12px"}}>
                 <div>
-                  <p style={styles.cardTitulo}>Ganancia neta del mes</p>
-                  <p style={{fontSize:"28px",fontWeight:t.fonts.weightBlack,margin:0,color:netaMes>=0?t.colors.green:t.colors.red}}>
+                  <p style={{fontSize:"28px",fontWeight:t.fonts.weightBlack,margin:0,color:netaMes>=puntoEquilibrio?t.colors.green:netaMes>0?t.colors.amber:t.colors.red}}>
                     {fmt(netaMes)}
                   </p>
+                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"4px 0 0"}}>Ganancia neta del mes</p>
                 </div>
-                <button
-                  style={styles.btnMeta}
-                  onClick={()=>{setEditandoMeta(true);setMetaTemp(metaMensual>0?String(metaMensual):"");}}
-                >
-                  {metaMensual>0?"✏️ Meta":"+ Meta"}
-                </button>
+                {puntoEquilibrio > 0 && (
+                  <div style={{textAlign:"right"}}>
+                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,margin:0,color:t.colors.textPrimary}}>{fmt(puntoEquilibrio)}</p>
+                    <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>Meta gastos fijos</p>
+                  </div>
+                )}
               </div>
 
-              {editandoMeta && (
-                <div style={styles.editarMeta}>
-                  <p style={styles.cardTitulo}>Meta mensual de ganancia</p>
-                  <input type="number" placeholder="Ej: 5000000" value={metaTemp}
-                    onChange={e=>setMetaTemp(e.target.value)} style={styles.input} autoFocus />
-                  <div style={{display:"flex",gap:"8px",marginTop:"8px"}}>
-                    <button style={styles.btnGuardarMeta} onClick={guardarMeta}>Guardar</button>
-                    <button style={styles.btnCancelarMeta} onClick={()=>setEditandoMeta(false)}>Cancelar</button>
-                  </div>
-                </div>
-              )}
-
-              {metaMensual>0&&!editandoMeta&&(
-                <div style={{marginTop:"14px"}}>
+              {puntoEquilibrio > 0 ? (
+                <div>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
-                    <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>{progreso.toFixed(0)}% del objetivo</span>
-                    <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>Meta: {fmt(metaMensual)}</span>
+                    <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightSemibold,color:progresoPEColor}}>
+                      {progresoPE >= 100 ? `✓ Equilibrio superado (${progresoPE.toFixed(0)}%)` : `${progresoPE.toFixed(0)}% del equilibrio`}
+                    </span>
+                    <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}>
+                      {netaMes >= puntoEquilibrio ? `+${fmt(netaMes - puntoEquilibrio)} utilidad` : `Faltan ${fmt(puntoEquilibrio - netaMes)}`}
+                    </span>
                   </div>
                   <div style={styles.barraFondo}>
-                    <div style={{...styles.barraRelleno,width:`${progreso}%`,background:progresoColor}} />
+                    <div style={{...styles.barraRelleno, width:`${Math.min(progresoPE, 100)}%`, background:progresoPEColor}} />
                   </div>
                 </div>
+              ) : (
+                <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:0}}>
+                  Configura tus gastos fijos abajo para calcular el punto de equilibrio
+                </p>
               )}
             </div>
 
@@ -673,36 +671,164 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 const f = new Date(g.fecha);
                 return f.getMonth() === mesActual && f.getFullYear() === anioActual;
               });
-              const totalGastosFijos = gastosMesVeh.reduce((s, g) => s + (g.monto || 0), 0);
-              const balanceFinal = netaMes - totalGastosFijos;
+              const totalGastosAdicionales = gastosMesVeh.reduce((s, g) => s + (g.monto || 0), 0);
+              const utilidadReal = netaMes - puntoEquilibrio - totalGastosAdicionales;
 
               return (
                 <>
-                  {/* Balance final */}
-                  <div style={{...styles.card, border:`1.5px solid ${balanceFinal >= 0 ? t.colors.greenBorder : t.colors.redBorder}`}}>
-                    <p style={styles.cardTitulo}>Balance final del mes</p>
+                  {/* Balance / Utilidad real */}
+                  <div style={{...styles.card, border:`1.5px solid ${utilidadReal >= 0 ? t.colors.greenBorder : t.colors.redBorder}`}}>
+                    <p style={styles.cardTitulo}>Utilidad real del mes</p>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
                       <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Ganancia neta viajes</span>
                       <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:netaMes>=0?t.colors.green:t.colors.red}}>{fmt(netaMes)}</span>
                     </div>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
-                      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos y facturas</span>
-                      <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:totalGastosFijos>0?t.colors.red:t.colors.textTertiary}}>
-                        {totalGastosFijos > 0 ? `-${fmt(totalGastosFijos)}` : fmt(0)}
-                      </span>
-                    </div>
+                    {puntoEquilibrio > 0 && (
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                        <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos fijos (P.E.)</span>
+                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(puntoEquilibrio)}</span>
+                      </div>
+                    )}
+                    {totalGastosAdicionales > 0 && (
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                        <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos adicionales</span>
+                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(totalGastosAdicionales)}</span>
+                      </div>
+                    )}
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0 0"}}>
-                      <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Le queda</span>
-                      <span style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:balanceFinal>=0?t.colors.green:t.colors.red}}>
-                        {fmt(balanceFinal)}
+                      <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Utilidad</span>
+                      <span style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:utilidadReal>=0?t.colors.green:t.colors.red}}>
+                        {fmt(utilidadReal)}
                       </span>
                     </div>
                   </div>
 
-                  {/* Lista de gastos + formulario */}
+                  {/* ── GASTOS FIJOS (configuración) ── */}
                   <div style={styles.card}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
-                      <p style={{...styles.cardTitulo,margin:0}}>Gastos y facturas</p>
+                      <div>
+                        <p style={{...styles.cardTitulo,margin:0}}>Gastos fijos mensuales</p>
+                        <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>Definen tu punto de equilibrio</p>
+                      </div>
+                      <button
+                        style={{padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,cursor:"pointer"}}
+                        onClick={()=>setVerFormGF(!verFormGF)}
+                      >
+                        {verFormGF ? "Cancelar" : "+ Agregar"}
+                      </button>
+                    </div>
+
+                    {verFormGF && (
+                      <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"12px"}}>
+                        <div style={styles.campo}>
+                          <label style={styles.label}>Nombre del gasto</label>
+                          <select value={gfNombre} onChange={e=>setGfNombre(e.target.value)} style={styles.input}>
+                            <option value="">Seleccionar o escribir...</option>
+                            {["Cuota del camión","Seguro","Parqueadero","GPS / Rastreo","SOAT","Tecnomecánica","Impuestos","Lavadas","Administración"].map(o=>(
+                              <option key={o} value={o}>{o}</option>
+                            ))}
+                            <option value="__otro__">+ Otro gasto</option>
+                          </select>
+                        </div>
+                        {gfNombre === "__otro__" && (
+                          <div style={styles.campo}>
+                            <label style={styles.label}>Nombre personalizado</label>
+                            <input type="text" placeholder="Ej: Peaje fijo mensual" value=""
+                              onChange={e=>setGfNombre(e.target.value)} style={styles.input} />
+                          </div>
+                        )}
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+                          <div style={styles.campo}>
+                            <label style={styles.label}>Monto ($)</label>
+                            <input type="number" placeholder="2500000" value={gfMonto}
+                              onChange={e=>setGfMonto(e.target.value)} style={styles.input} />
+                          </div>
+                          <div style={styles.campo}>
+                            <label style={styles.label}>Periodicidad</label>
+                            <select value={gfPeriodo} onChange={e=>setGfPeriodo(e.target.value)} style={styles.input}>
+                              <option value="mensual">Mensual</option>
+                              <option value="anual">Anual (÷12)</option>
+                            </select>
+                          </div>
+                        </div>
+                        <button
+                          style={{width:"100%",padding:"11px",background:t.colors.blue,color:"#fff",border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardandoGF?0.75:1}}
+                          disabled={guardandoGF}
+                          onClick={async()=>{
+                            if (!gfNombre.trim() || gfNombre==="__otro__") { mostrarToast("Ingresa el nombre del gasto","error"); return; }
+                            if (!gfMonto || Number(gfMonto)<=0) { mostrarToast("Ingresa un monto válido","error"); return; }
+                            setGuardandoGF(true);
+                            try {
+                              await onAgregarGastoFijo({
+                                vehiculoId: id,
+                                placa: vehiculo.placa,
+                                nombre: gfNombre.trim(),
+                                monto: Number(gfMonto),
+                                periodicidad: gfPeriodo,
+                              });
+                              mostrarToast("Gasto fijo registrado","exito");
+                              setGfNombre(""); setGfMonto(""); setGfPeriodo("mensual");
+                              setVerFormGF(false);
+                            } catch(err) {
+                              mostrarToast("Error al guardar","error");
+                            } finally {
+                              setGuardandoGF(false);
+                            }
+                          }}
+                        >
+                          Guardar gasto fijo
+                        </button>
+                      </div>
+                    )}
+
+                    {gfVehiculo.length === 0 && !verFormGF && (
+                      <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textTertiary,textAlign:"center",padding:"12px 0",margin:0}}>
+                        Sin gastos fijos configurados
+                      </p>
+                    )}
+
+                    {gfVehiculo.map((g, i, arr) => {
+                      const mensual = g.periodicidad === "anual" ? (g.monto || 0) / 12 : (g.monto || 0);
+                      return (
+                        <div key={g.firestoreId} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                          <div style={{flex:1,minWidth:0}}>
+                            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>{g.nombre}</p>
+                            <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
+                              {g.periodicidad === "anual" ? `${fmt(g.monto)}/año → ${fmt(mensual)}/mes` : `${fmt(g.monto)}/mes`}
+                            </p>
+                          </div>
+                          <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                            <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.amber}}>{fmt(mensual)}</span>
+                            <button
+                              style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
+                              onClick={async()=>{
+                                try {
+                                  await onEliminarGastoFijo(g.firestoreId);
+                                  mostrarToast("Gasto fijo eliminado","exito");
+                                } catch(err) {
+                                  mostrarToast("Error al eliminar","error");
+                                }
+                              }}
+                            >
+                              <Trash2 size={14} color={t.colors.textTertiary} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {gfVehiculo.length > 0 && (
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0 0",marginTop:"6px",borderTop:`1.5px solid ${t.colors.border}`}}>
+                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Punto de equilibrio</span>
+                        <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:t.colors.amber}}>{fmt(puntoEquilibrio)}/mes</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── GASTOS ADICIONALES (manuales del mes) ── */}
+                  <div style={styles.card}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
+                      <p style={{...styles.cardTitulo,margin:0}}>Gastos adicionales</p>
                       <button
                         style={{padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,cursor:"pointer"}}
                         onClick={()=>setVerFormGasto(!verFormGasto)}
@@ -715,7 +841,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                       <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"12px"}}>
                         <div style={styles.campo}>
                           <label style={styles.label}>Descripción</label>
-                          <input type="text" placeholder="Ej: Cuota camión, Seguro, GPS..."
+                          <input type="text" placeholder="Ej: Lavada, parqueadero extra..."
                             value={gastoDesc} onChange={e=>setGastoDesc(e.target.value)} style={styles.input} />
                         </div>
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
@@ -762,7 +888,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
 
                     {gastosMesVeh.length === 0 && !verFormGasto && (
                       <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textTertiary,textAlign:"center",padding:"12px 0",margin:0}}>
-                        Sin gastos registrados este mes
+                        Sin gastos adicionales este mes
                       </p>
                     )}
 
