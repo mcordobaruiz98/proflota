@@ -23,7 +23,7 @@ function AcercaDe() {
 
         {/* LOGO Y NOMBRE */}
         <div style={{textAlign:"center", padding:"30px 20px 20px", display:"flex", flexDirection:"column", alignItems:"center", gap:"8px"}}>
-          <img src="/logo-navira.png" alt="Navira" style={{ height: "120px", objectFit:"contain"}} />
+          <img src="/logo-naviraT.png" alt="Navira" style={{ height: "120px", objectFit:"contain"}} />
           <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:0}}>Versión 1.0 Beta</p>
         </div>
 
