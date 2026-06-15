@@ -227,3 +227,4 @@ const styles = {
 };
 
 export default Cartera;
+
