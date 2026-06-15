@@ -23,7 +23,7 @@ function Layout({ children }) {
       </div>
 
       {/* Barra de navegación inferior */}
-      <nav style={styles.navbar}>
+      <nav id="navira-navbar" style={styles.navbar}>
   {tabs.map((tab) => {
     const activo = ruta === tab.path;
     return (
@@ -80,7 +80,6 @@ const styles = {
     display:         "flex",
     zIndex:          100,
     boxShadow:       "0 -2px 10px rgba(0,0,0,0.15)",
-    paddingBottom:   "env(safe-area-inset-bottom, 0px)",
   },
   navBtn: {
     flex:            1,
