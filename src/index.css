@@ -12,16 +12,16 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
 }
 
-/* ── VIEWPORT Y ANTI-BOUNCE ── */
+/* ── VIEWPORT ── */
 html, body, #root {
   height: 100%;
   min-height: 100dvh;
   background: #0A1A2F;
   color: #FFFFFF;
   overflow: hidden;
-  overscroll-behavior: none;
 }
 
 @supports not (min-height: 100dvh) {
@@ -32,10 +32,8 @@ html, body, #root {
 
 /* ── BODY ── */
 body {
-  position: fixed;
-  width: 100%;
+  overscroll-behavior-y: none;
   touch-action: manipulation;
-  -webkit-touch-callout: none;
   padding-top: env(safe-area-inset-top);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
