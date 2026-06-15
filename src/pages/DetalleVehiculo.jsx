@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, Wrench, Camera, Edit2, Save, X, CircleDot, Droplets, Filter, Disc, ClipboardList } from "lucide-react";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
@@ -87,6 +87,15 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [anioActual, setAnioActual] = useState(hoy.getFullYear());
 
   const [hvData, setHvData] = useState(vehiculo?.hvData || {});
+  const [hvCargado, setHvCargado] = useState(false);
+
+  // Sincronizar hvData cuando el vehículo carga de Firestore
+  useEffect(() => {
+    if (vehiculo?.hvData && !hvCargado) {
+      setHvData(vehiculo.hvData);
+      setHvCargado(true);
+    }
+  }, [vehiculo?.hvData]);
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({propietario:true,tenedor:false,vehiculo:false,conductor:false});
 
   const { subirArchivo, eliminarArchivo, progreso: progresoArchivo, subiendo } = useSubirArchivo();
@@ -109,6 +118,12 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
 
 
   const [kmOdometro,    setKmOdometro]    = useState(vehiculo?.kmOdometro || 0);
+
+  useEffect(() => {
+    if (vehiculo?.kmOdometro && !kmOdometro) {
+      setKmOdometro(vehiculo.kmOdometro);
+    }
+  }, [vehiculo?.kmOdometro]);
   const [editandoKm,    setEditandoKm]    = useState(false);
   const [kmTemp,        setKmTemp]        = useState("");
   const [tipoMant,      setTipoMant]      = useState("Cambio de aceite");
