@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package } from "lucide-react";
+import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
 function DetalleViaje({ viajes = [], onEliminar, onEditar, mostrarToast }) {
@@ -369,6 +369,101 @@ function DetalleViaje({ viajes = [], onEliminar, onEditar, mostrarToast }) {
                 ))}
               </div>
             )}
+
+            {/* ESTADO DE PAGO */}
+            <div style={{...styles.card, border:`1.5px solid ${
+              viaje.estadoPago==="pagado"?t.colors.greenBorder:
+              (() => {
+                const dias = Math.floor((new Date() - new Date(viaje.fecha))/(1000*60*60*24));
+                const plazo = viaje.diasPago || 30;
+                return dias > plazo ? t.colors.redBorder : t.colors.border;
+              })()
+            }`}}>
+              <div style={styles.cardHeader}>
+                {viaje.estadoPago==="pagado"
+                  ? <CheckCircle size={16} color={t.colors.green} strokeWidth={2} />
+                  : <Clock size={16} color={t.colors.amber} strokeWidth={2} />
+                }
+                <p style={styles.cardTitulo}>Estado de pago</p>
+              </div>
+
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                <span style={styles.filaLabel}>Estado</span>
+                <button
+                  style={{
+                    padding:"6px 14px",
+                    borderRadius:t.radius.full,
+                    border:"none",
+                    fontSize:t.fonts.sizeXs,
+                    fontWeight:t.fonts.weightBold,
+                    cursor:"pointer",
+                    background: viaje.estadoPago==="pagado" ? t.colors.greenSoft : t.colors.amberSoft || "#FEF3C7",
+                    color: viaje.estadoPago==="pagado" ? t.colors.green : t.colors.amber,
+                  }}
+                  onClick={async()=>{
+                    const nuevo = viaje.estadoPago==="pagado" ? "pendiente" : "pagado";
+                    try {
+                      await onEditar(viaje.firestoreId, {
+                        estadoPago: nuevo,
+                        fechaPago: nuevo==="pagado" ? new Date().toISOString().slice(0,10) : null,
+                      });
+                      mostrarToast(nuevo==="pagado"?"Viaje marcado como pagado":"Viaje marcado como pendiente","exito");
+                    } catch(err) {
+                      mostrarToast("Error al actualizar","error");
+                    }
+                  }}
+                >
+                  {viaje.estadoPago==="pagado" ? "✓ Pagado" : "⏳ Pendiente"}
+                </button>
+              </div>
+
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                <span style={styles.filaLabel}>Plazo de pago</span>
+                <select
+                  value={viaje.diasPago || 30}
+                  onChange={async(e)=>{
+                    try {
+                      await onEditar(viaje.firestoreId, { diasPago: Number(e.target.value) });
+                    } catch(err) {}
+                  }}
+                  style={{padding:"4px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}}
+                >
+                  <option value={0}>Contado</option>
+                  <option value={15}>15 días</option>
+                  <option value={30}>30 días</option>
+                  <option value={45}>45 días</option>
+                  <option value={60}>60 días</option>
+                  <option value={90}>90 días</option>
+                </select>
+              </div>
+
+              {viaje.estadoPago==="pagado" && viaje.fechaPago && (
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0"}}>
+                  <span style={styles.filaLabel}>Fecha de pago</span>
+                  <span style={{...styles.filaValor, color:t.colors.green}}>{viaje.fechaPago}</span>
+                </div>
+              )}
+
+              {viaje.estadoPago!=="pagado" && (
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0"}}>
+                  <span style={styles.filaLabel}>Vencimiento</span>
+                  {(() => {
+                    const plazo = viaje.diasPago || 30;
+                    const fechaViaje = new Date(viaje.fecha);
+                    const vencimiento = new Date(fechaViaje);
+                    vencimiento.setDate(vencimiento.getDate() + plazo);
+                    const hoy = new Date();
+                    const diasRestantes = Math.ceil((vencimiento - hoy)/(1000*60*60*24));
+                    const vencido = diasRestantes < 0;
+                    return (
+                      <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:vencido?t.colors.red:diasRestantes<=7?t.colors.amber:t.colors.textSecondary}}>
+                        {vencido ? `Vencido hace ${Math.abs(diasRestantes)} días` : `En ${diasRestantes} días`}
+                      </span>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
 
           </div>
         </>
