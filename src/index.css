@@ -78,7 +78,10 @@ select {
   border-radius: 4px;
 }
 
-/* ── PWA STANDALONE ── */
+/* ── NAVBAR SAFE AREA (iOS) ── */
+#navira-navbar {
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+}
 @media (display-mode: standalone) {
   body {
     padding-bottom: 0;
