@@ -43,12 +43,12 @@ function DetalleViaje({ viajes = [], onEliminar, onEditar, mostrarToast }) {
       viaje.ton ? `⚖️ *Toneladas:* ${viaje.ton}` : null,
       ``,
       `💰 *Valor flete:* ${fmt(viaje.vViaje || 0)}`,
-      `⛽ *Combustible:* ${fmt(viaje.costoComb || 0)}`,
-      `🛣️ *Peajes:* ${fmt(viaje.totPeajes || 0)}`,
-      `👤 *Conductor:* ${fmt(viaje.costoConduct || 0)}`,
-      viaje.extras ? `📋 *Otros gastos:* ${fmt(viaje.extras || 0)}` : null,
+      `⛽ *Combustible:* ${fmt(viaje.cComb || 0)}`,
+      `🛣️ *Peajes:* ${fmt(viaje.peajes || 0)}`,
+      `👤 *Conductor:* ${fmt(viaje.conductor || 0)}`,
+      (viaje.carp || viaje.gv2 || viaje.extras) ? `📋 *Otros gastos:* ${fmt((viaje.carp||0)+(viaje.gv2||0)+(viaje.extras||0))}` : null,
       ``,
-      `📊 *Total gastos:* ${fmt((viaje.vViaje||0) - (viaje.neta||0))}`,
+      `📊 *Total gastos:* ${fmt(viaje.total || 0)}`,
       `✅ *Ganancia neta:* ${fmt(viaje.neta || 0)}`,
       ``,
       `_Generado por Navira — Inteligencia en Movimiento_`,
@@ -539,4 +539,3 @@ const styles = {
 };
 
 export default DetalleViaje;
-
