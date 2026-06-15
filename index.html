@@ -1,92 +1,340 @@
-/* ── RESET BASE ── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
 
-/* ── FUENTE ── */
-html {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
+CALCULADORA DE FLETES
+El proyecto trata de una calculadora de fletes. Donde insertemos datos variables de viajes realizados en tractomulas y obtengamos como resultados costos/km, ganancias/ton, margen de viaje y ganancia por viaje. Objetivos, que nuestra calculadora nos diga cuales son los fletes mas rentables y podamos guardar los viajas hasta el punto en que podamos manejar los datos mensuales de nuestro vehiculo con ella.
+Mostrar más
 
-/* ── VIEWPORT Y ANTI-BOUNCE ── */
-html, body, #root {
-  height: 100%;
-  min-height: 100dvh;
-  background: #0A1A2F;
-  color: #FFFFFF;
-  overflow: hidden;
-  overscroll-behavior: none;
-}
 
-@supports not (min-height: 100dvh) {
-  html, body, #root {
-    min-height: -webkit-fill-available;
-  }
-}
 
-/* ── BODY ── */
-body {
-  position: fixed;
-  width: 100%;
-  touch-action: manipulation;
-  -webkit-touch-callout: none;
-  padding-top: env(safe-area-inset-top);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
+¿Cómo puedo ayudarle hoy?
 
-/* ── INPUTS — quitar zoom en iOS ── */
-input, select, textarea {
-  font-size: 16px !important;
-}
 
-input, select, textarea, button {
-  font-family: inherit;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-}
+Continuando con Navira
+Último mensaje hace 2 minutos
+Guardar datos de viajes por tractomula
+Último mensaje 25 may
+Qué nos falta en nuestro camino
+Último mensaje 13 may
+Memoria
+Solo tú
+Purpose & context Mario is building NAVIRA ("Inteligencia y precisión en movimiento"), a freight transport management PWA for the Colombian trucking industry, focused on tractomulas and multi-vehicle fleet operations. The app targets owner-operators and fleet managers who need to track trip profitability, vehicle health, documentation, and financials in one place. Core domain: Colombian freight logistics — toll networks, ACPM/Adblue fuel costs, driver commissions, cargo types (SICE-TAC), and route economics where fixed costs per route stay constant but freight rates vary per negotiation/trip. Backend: Firebase (Firestore + Storage). Frontend: PWA with manifest.json created; icons (192/512) pending designer delivery. Beta code: BETA2026V1. Current domain: proflota.vercel.app (pending change). --- Current state NAVIRA is in active beta preparation. Key implemented modules include: Freight calculator / trip wizard: Multi-step flow (vehicle → trip data → expenses → results dashboard), with correct toll category mapping per vehicle type, embedded 165-station toll database (migrated to Firestore), Adblue at 26.5% of fuel volume, margin alerts, and live calculation without DOM-focus bugs. Trip management: Save trips per vehicle, re-use trips as bases (pre-fills fixed costs, clears date/manifest), edit trip functionality implemented. Financial dashboard: Month navigation, per-vehicle breakdown, expense distribution charts, global trip history with search, and earnings goals (daily/weekly/monthly). Empresa directory: Auto-aggregates trip stats by company; freight rates are intentionally never auto-filled from company records (rates vary per negotiation). Mantenimiento module: Customizable km alerts (configMant in Firestore), tire diagram (SVG by vehicle type), oil history, filter tracking by type, brake tracking by axle, general maintenance history. Vehicle profiles: Photo upload via Firebase Storage, hoja de vida (document management) with expiration tracking and color-coded alerts surfaced on home screen. Frequent entities: Conductor, empresa, producto, and rutas frecuentes (with pre-loaded tolls/km/conductor/empresa/discounts). UX: Toasts replace all native alerts. Five bottom nav tabs: Inicio, Vehículos, Cuentas, Empresas, Perfil. Legal: Terms and privacy in AcercaDe.jsx for beta launch. Logo: stylized N with road graphic, blue-to-green gradient. Palette: #0A1A2F background, #1565FF blue, #22C55E green, #0F2340 cards. --- On the horizon Planned future modules and features (not yet built): Google Maps integration for origin/destination Share trip via WhatsApp Vehicle tool inventory Document expiration control (dedicated module) Export accounts to PDF Accounts receivable (cartera) control Traffic fines (multas) log Driver advance (anticipos) tracking Propietario vs. conductor module Weekly summary view Monthly break-even point Historical route comparison Retractable axle (eje abatible) toll handling Domain migration from proflota.vercel.app to final domain — pending. PWA icons (192/512px) — pending designer. --- Key learnings & principles Route cost model: Fixed costs (tolls, fuel, loading/unloading, driver %) are stable per route and should be pre-filled; only freight rate and tonnage change trip-to-trip. The calculator itself serves as the "template" — no separate template abstraction needed. Freight rates are never auto-filled from company records: Rates vary even with the same company, so pre-filling them would introduce errors. DOM rendering discipline: Full re-renders on every keystroke cause focus loss. Solution: separate text input handlers (onStr) from numeric handlers (onNum); only numeric/calculation-affecting inputs trigger re-renders. Data architecture: Vehicle-level data (profile, maintenance, documents) is separated from trip-level data (route economics, cargo, financials). --- Approach & patterns Mario communicates concisely and iteratively, preferring direct and objective responses. He pushes back clearly when Claude over-engineers or misinterprets requirements. Development proceeds in discrete, well-scoped phases — each phase adding a complete module rather than partial features. Corrections are made in-conversation and should be respected immediately without over-explanation. User instructions (like this synthesis update) are provided in structured shorthand; Claude should parse and integrate them accurately. --- Tools & resources Frontend: PWA (React-based, Vercel deployment) Backend: Firebase — Firestore for data/config/tolls, Firebase Storage for vehicle photos Toll data: 165 Colombian toll stations with per-category tariffs (Categories IV–VII mapped to vehicle types C2→IV, C3→V, T5→VI, T6→VII) Deployment: Vercel (proflota.vercel.app, domain change pending)
 
-/* ── SELECT — flecha personalizada ── */
-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 36px !important;
-}
+Última actualización hace 4 días
 
-/* ── SCROLLBAR SUTIL ── */
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #1E3A5F;
-  border-radius: 4px;
-}
+Instrucciones
+Agregar instrucciones para personalizar las respuestas de Claude
 
-/* ── PREVENIR SELECCIÓN EN BOTONES ── */
-button, a {
-  -webkit-user-select: none;
-  user-select: none;
-}
+Archivos
+12% de la capacidad del proyecto utilizada
+Modo de búsqueda
 
-/* ── TRANSICIONES ── */
-* {
-  -webkit-transition-timing-function: ease-out;
-  transition-timing-function: ease-out;
-}
+Llantas.jsx
+291 líneas
 
-/* ── IMÁGENES ── */
-img {
-  max-width: 100%;
-  height: auto;
-}
+jsx
+
+
+
+subirPeajes.js
+189 líneas
+
+js
+
+
+
+HistorialMant.jsx
+151 líneas
+
+jsx
+
+
+
+Frenos.jsx
+282 líneas
+
+jsx
+
+
+
+Aceite.jsx
+242 líneas
+
+jsx
+
+
+
+Filtros.jsx
+248 líneas
+
+jsx
+
+
+
+Calculadora.jsx
+1,102 líneas
+
+jsx
+
+
+
+vite.config.js
+8 líneas
+
+js
+
+
+
+vercel.json
+11 líneas
+
+json
+
+
+
+package.json
+31 líneas
+
+json
+
+
+
+package-lock.json
+3,554 líneas
+
+json
+
+
+
+index.html
+21 líneas
+
+html
+
+
+
+main.jsx
+7 líneas
+
+jsx
+
+
+
+firebase.jsx
+20 líneas
+
+jsx
+
+
+
+App.jsx
+255 líneas
+
+jsx
+
+
+
+theme.js
+83 líneas
+
+js
+
+
+
+Viajes.jsx
+208 líneas
+
+jsx
+
+
+
+Vehiculos.jsx
+203 líneas
+
+jsx
+
+
+
+Registro.jsx
+190 líneas
+
+jsx
+
+
+
+Perfil.jsx
+242 líneas
+
+jsx
+
+
+
+OlvideContrasena.jsx
+122 líneas
+
+jsx
+
+
+
+Objetivos.jsx
+179 líneas
+
+jsx
+
+
+
+Login.jsx
+187 líneas
+
+jsx
+
+
+
+Home.jsx
+229 líneas
+
+jsx
+
+
+
+Empresas.jsx
+241 líneas
+
+jsx
+
+
+
+DetallevIaje.jsxx
+408 líneas
+
+text
+
+
+
+Cuentas.jsx
+303 líneas
+
+jsx
+
+
+
+Configuracion.jsx
+162 líneas
+
+jsx
+
+
+
+AyudaSoporte.jsx
+319 líneas
+
+jsx
+
+
+
+AgregarVehiculo.jsx
+319 líneas
+
+jsx
+
+
+
+AcercaDe.jsx
+118 líneas
+
+jsx
+
+
+
+useToast.js
+16 líneas
+
+js
+
+
+
+useSubirArchivo.js
+164 líneas
+
+js
+
+
+
+useFirestore.js
+164 líneas
+
+js
+
+
+
+useAuth.js
+80 líneas
+
+js
+
+
+
+Toast.jsx
+65 líneas
+
+jsx
+
+
+
+Skeleton.jsx
+41 líneas
+
+jsx
+
+
+
+RutaProtegica.jsx
+41 líneas
+
+jsx
+
+
+
+Layout.jsx
+111 líneas
+
+jsx
+
+
+
+BASE DE DATOS PEAJES.xlsx
+xlsx
+
+
+
+APP EXCEL.xlsx
+xlsx
+
+
+Control_tractocamion.pdf
+pdf
+
+
+
+index.html
+
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Navira</title>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0A1A2F" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Navira" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+ 
+ 
