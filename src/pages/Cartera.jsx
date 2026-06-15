@@ -63,6 +63,18 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
     }
   };
 
+  const marcarPendiente = async (viaje) => {
+    try {
+      await onEditar(viaje.firestoreId, {
+        estadoPago: "pendiente",
+        fechaPago: null,
+      });
+      mostrarToast("Viaje marcado como pendiente", "info");
+    } catch (err) {
+      mostrarToast("Error al actualizar", "error");
+    }
+  };
+
   return (
     <div style={styles.pantalla}>
       <div style={styles.header}>
@@ -197,9 +209,13 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
                         }
                       </button>
                     ) : (
-                      <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: t.colors.greenSoft, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <button
+                        style={{ width: "28px", height: "28px", borderRadius: "50%", background: t.colors.greenSoft, display: "flex", alignItems: "center", justifyContent: "center", border: "none", cursor: "pointer" }}
+                        onClick={() => marcarPendiente(v)}
+                        title="Marcar como pendiente"
+                      >
                         <CheckCircle size={14} color={t.colors.green} strokeWidth={2.5} />
-                      </div>
+                      </button>
                     )}
                   </div>
                 </div>
@@ -227,5 +243,3 @@ const styles = {
 };
 
 export default Cartera;
-
-
