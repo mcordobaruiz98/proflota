@@ -61,12 +61,12 @@ const styles = {
   contenedor: {
     maxWidth:   "430px",
     margin:     "0 auto",
-    minHeight:  "100vh",
+    minHeight:  "100dvh",
     position:   "relative",
     background: "#0A1A2F",
   },
   pantalla: {
-    paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
+    paddingBottom: "72px",
   },
   navbar: {
     position:        "fixed",
@@ -80,7 +80,7 @@ const styles = {
     display:         "flex",
     zIndex:          100,
     boxShadow:       "0 -2px 10px rgba(0,0,0,0.15)",
-    paddingBottom:  "env(safe-area-inset-bottom, 0px"
+    paddingBottom:   "env(safe-area-inset-bottom, 0px)",
   },
   navBtn: {
     flex:            1,
@@ -107,5 +107,3 @@ const styles = {
 };
 
 export default Layout;
-
-

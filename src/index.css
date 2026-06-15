@@ -32,7 +32,6 @@ html, body, #root {
 /* ── SAFE AREAS (notch iPhone, cámara Android) ── */
 body {
   padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
 }
@@ -79,11 +78,10 @@ select {
   border-radius: 4px;
 }
 
-/* ── PWA STANDALONE — ajustar barra de navegación inferior ── */
+/* ── PWA STANDALONE ── */
 @media (display-mode: standalone) {
-  /* Cuando se instala como PWA, dar espacio extra abajo para el gesto de iOS/Android */
   body {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 0px);
+    padding-bottom: 0;
   }
 }
 
@@ -96,7 +94,6 @@ button, a {
 /* ── ANIMACIÓN SUAVE PARA TRANSICIONES ── */
 * {
   -webkit-transition-timing-function: ease-out;
-  transition-timing-function: ease-out;
 }
 
 /* ── IMÁGENES RESPONSIVE ── */
