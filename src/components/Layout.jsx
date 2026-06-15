@@ -7,6 +7,11 @@ function Layout({ children }) {
   const location  = useLocation();
   const ruta      = location.pathname;
 
+  // Detectar iOS standalone para safe area
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+  const bottomPad = isIOS && isStandalone ? 34 : 0;
+
   const tabs = [
   { path: "/",            label: "Inicio",      Icono: Home       },
   { path: "/vehiculos",   label: "Vehículos",   Icono: Truck      },
@@ -18,12 +23,12 @@ function Layout({ children }) {
     <div style={styles.contenedor}>
 
       {/* Contenido de la pantalla */}
-      <div style={styles.pantalla}>
+      <div style={{...styles.pantalla, paddingBottom: (72 + bottomPad) + "px"}}>
         {children}
       </div>
 
       {/* Barra de navegación inferior */}
-      <nav id="navira-navbar" style={styles.navbar}>
+      <nav id="navira-navbar" style={{...styles.navbar, paddingBottom: bottomPad + "px"}}>
   {tabs.map((tab) => {
     const activo = ruta === tab.path;
     return (
