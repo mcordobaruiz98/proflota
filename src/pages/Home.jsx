@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth }     from "../hooks/useAuth";
 import { theme as t }  from "../styles/theme";
-import {Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake} from "lucide-react";
+import {Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake, AlertCircle} from "lucide-react";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
 function Home({ vehiculos = [], viajes = [], cargando}) {
@@ -31,13 +31,24 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
 
   const gananciaMes  = viajesMes.reduce((s, v) => s + (v.neta   || 0), 0);
   const ingresosMes  = viajesMes.reduce((s, v) => s + (v.vViaje || 0), 0);
-  const recientes    = [...viajes].slice(0, 4);
+  const recientes    = viajes.slice(0, 4);
+
+  // Cartera - viajes pendientes y vencidos
+  const pendientes = viajes.filter(v => v.estadoPago !== "pagado");
+  const vencidos = pendientes.filter(v => {
+    const plazo = v.diasPago || 30;
+    const fecha = new Date(v.fecha);
+    const vence = new Date(fecha);
+    vence.setDate(vence.getDate() + plazo);
+    return new Date() > vence;
+  });
+  const totalVencido = vencidos.reduce((s, v) => s + (v.vViaje || 0), 0);
 
   const accesos = [
   { label: "Vehículos",   Icono: Truck,       ruta: "/vehiculos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Cuentas",     Icono: TrendingUp,  ruta: "/cuentas",     color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
-  { label: "Objetivos",   Icono: Trophy,      ruta: "/objetivos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
+  { label: "Cartera",     Icono: AlertCircle, ruta: "/cartera",     color: "#0F2340", border: vencidos.length > 0 ? "#EF4444" : "#1E3A5F", iconColor: vencidos.length > 0 ? "#EF4444" : "#22C55E" },
   { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Empresas",    Icono: Handshake,   ruta: "/empresas",    color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
 ];
@@ -87,6 +98,34 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
           </div>
         </div>
       </div>
+
+      {/* ALERTA CARTERA VENCIDA */}
+      {vencidos.length > 0 && (
+        <div
+          style={{
+            margin: "0 16px 10px",
+            padding: "12px 16px",
+            background: t.colors.redSoft,
+            border: `1.5px solid ${t.colors.redBorder}`,
+            borderRadius: t.radius.lg,
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            cursor: "pointer",
+          }}
+          onClick={() => navigate("/cartera")}
+        >
+          <AlertCircle size={20} color={t.colors.red} strokeWidth={2} />
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.red, margin: 0 }}>
+              {vencidos.length} pago{vencidos.length !== 1 ? "s" : ""} vencido{vencidos.length !== 1 ? "s" : ""}
+            </p>
+            <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textSecondary, margin: "2px 0 0" }}>
+              {fmt(totalVencido)} pendiente · Toca para ver
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ACCESOS RÁPIDOS */}
       <p style={styles.seccionTitulo}>Accesos rápidos</p>
@@ -225,4 +264,3 @@ const styles = {
 };
 
 export default Home;
-

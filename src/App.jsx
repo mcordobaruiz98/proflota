@@ -19,6 +19,7 @@ import OlvideContrasena from "./pages/OlvideContrasena";
 import Configuracion    from "./pages/Configuracion";
 import AyudaSoporte     from "./pages/AyudaSoporte";
 import AcercaDe         from "./pages/AcercaDe";
+import Cartera          from "./pages/Cartera";
 import Toast            from "./components/Toast";
 import Llantas          from "./pages/mantenimiento/Llantas";
 import Aceite           from "./pages/mantenimiento/Aceite";
@@ -177,6 +178,17 @@ function AppContenido() {
 
       <Route path="/acerca" element={
         <RutaProtegida><AcercaDe /></RutaProtegida>
+      } />
+
+      <Route path="/cartera" element={
+        <RutaProtegida>
+          <Cartera
+            viajes={viajes}
+            vehiculos={vehiculos}
+            onEditar={editarViaje}
+            mostrarToast={mostrar}
+          />
+        </RutaProtegida>
       } />
 
       <Route path="/calculadora" element={
