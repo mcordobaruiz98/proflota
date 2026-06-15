@@ -2,15 +2,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {Home, Truck, Calculator, TrendingUp} from "lucide-react";
 import {theme as t} from "../styles/theme";
 
+// iOS standalone PWA detection
+const IOS_STANDALONE = !!(window.navigator.standalone);
+const SAFE_BOTTOM = IOS_STANDALONE ? 34 : 0;
+
 function Layout({ children }) {
   const navigate  = useNavigate();
   const location  = useLocation();
   const ruta      = location.pathname;
-
-  // Detectar iOS standalone para safe area
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
-  const bottomPad = isIOS && isStandalone ? 34 : 0;
 
   const tabs = [
   { path: "/",            label: "Inicio",      Icono: Home       },
@@ -22,13 +21,11 @@ function Layout({ children }) {
   return (
     <div style={styles.contenedor}>
 
-      {/* Contenido de la pantalla */}
-      <div style={{...styles.pantalla, paddingBottom: (72 + bottomPad) + "px"}}>
+      <div style={{paddingBottom: (72 + SAFE_BOTTOM) + "px"}}>
         {children}
       </div>
 
-      {/* Barra de navegación inferior */}
-      <nav id="navira-navbar" style={{...styles.navbar, paddingBottom: bottomPad + "px"}}>
+      <nav style={{...styles.navbar, paddingBottom: SAFE_BOTTOM + "px"}}>
   {tabs.map((tab) => {
     const activo = ruta === tab.path;
     return (
@@ -70,9 +67,6 @@ const styles = {
     position:   "relative",
     background: "#0A1A2F",
   },
-  pantalla: {
-    paddingBottom: "72px",
-  },
   navbar: {
     position:        "fixed",
     bottom:          0,
@@ -96,12 +90,6 @@ const styles = {
     border:          "none",
     transition:      "background 0.15s",
     cursor:          "pointer",
-  },
-  navBtnActivo: {
-    background: "transparent",
-  },
-  navIcono: {
-    fontSize: "20px",
   },
   navLabel: {
     fontSize:      "9px",
