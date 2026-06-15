@@ -12,6 +12,9 @@ function DetalleViaje({ viajes = [], onEliminar, onEditar, mostrarToast }) {
   const [editando,        setEditando]        = useState(false);
   const [confirmarEliminar, setConfirmarEliminar] = useState(false);
   const [guardando,       setGuardando]       = useState(false);
+  const [verFormAnticipo, setVerFormAnticipo] = useState(false);
+  const [antDesc,         setAntDesc]         = useState("");
+  const [antMonto,        setAntMonto]        = useState("");
 
   const [fecha,     setFecha]     = useState("");
   const [ruta,      setRuta]      = useState("");
@@ -407,6 +410,107 @@ function DetalleViaje({ viajes = [], onEliminar, onEditar, mostrarToast }) {
                 ))}
               </div>
             )}
+
+            {/* ANTICIPOS AL CONDUCTOR */}
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <Receipt size={16} color={t.colors.amber} strokeWidth={2} />
+                <p style={styles.cardTitulo}>Anticipo al conductor</p>
+              </div>
+
+              {/* Monto entregado */}
+              <div style={{...styles.fila, borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                <span style={styles.filaLabel}>Entregado</span>
+                <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                  <span style={{color:t.colors.textTertiary,fontSize:t.fonts.sizeXs}}>$</span>
+                  <input
+                    type="number"
+                    value={viaje.anticipoMonto || ""}
+                    placeholder="0"
+                    onChange={async(e)=>{
+                      const val = Number(e.target.value) || 0;
+                      try { await onEditar(viaje.firestoreId, { anticipoMonto: val }); } catch(err){}
+                    }}
+                    style={{width:"120px",padding:"4px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,textAlign:"right"}}
+                  />
+                </div>
+              </div>
+
+              {/* Gastos del anticipo */}
+              {(viaje.anticipoGastos || []).map((g, i, arr) => (
+                <div key={i} style={{...styles.fila, borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                  <span style={styles.filaLabel}>{g.descripcion}</span>
+                  <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                    <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(g.monto)}</span>
+                    <button
+                      style={{background:"none",border:"none",cursor:"pointer",padding:"2px"}}
+                      onClick={async()=>{
+                        const nuevos = (viaje.anticipoGastos||[]).filter((_,idx)=>idx!==i);
+                        try { await onEditar(viaje.firestoreId, { anticipoGastos: nuevos }); } catch(err){}
+                      }}
+                    >
+                      <Trash2 size={12} color={t.colors.textTertiary} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Agregar gasto */}
+              <div style={{padding:"8px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                {!verFormAnticipo ? (
+                  <button
+                    style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,background:"none",border:"none",cursor:"pointer",fontWeight:t.fonts.weightSemibold}}
+                    onClick={()=>setVerFormAnticipo(true)}
+                  >
+                    + Agregar gasto del conductor
+                  </button>
+                ) : (
+                  <div style={{display:"flex",gap:"6px",alignItems:"flex-end"}}>
+                    <div style={{flex:1}}>
+                      <input type="text" placeholder="Descripción" value={antDesc}
+                        onChange={e=>setAntDesc(e.target.value)}
+                        style={{width:"100%",padding:"6px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs,marginBottom:"4px"}} />
+                      <input type="number" placeholder="Monto" value={antMonto}
+                        onChange={e=>setAntMonto(e.target.value)}
+                        style={{width:"100%",padding:"6px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}} />
+                    </div>
+                    <button
+                      style={{padding:"6px 10px",background:t.colors.green,border:"none",borderRadius:t.radius.sm,color:"#fff",fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,cursor:"pointer",whiteSpace:"nowrap"}}
+                      onClick={async()=>{
+                        if (!antDesc.trim()) { mostrarToast("Ingresa descripción","error"); return; }
+                        if (!antMonto || Number(antMonto)<=0) { mostrarToast("Ingresa monto","error"); return; }
+                        const nuevos = [...(viaje.anticipoGastos||[]), { descripcion: antDesc.trim(), monto: Number(antMonto) }];
+                        try {
+                          await onEditar(viaje.firestoreId, { anticipoGastos: nuevos });
+                          setAntDesc(""); setAntMonto(""); setVerFormAnticipo(false);
+                        } catch(err) { mostrarToast("Error","error"); }
+                      }}
+                    >✓</button>
+                    <button
+                      style={{padding:"6px 8px",background:"none",border:`1px solid ${t.colors.border}`,borderRadius:t.radius.sm,color:t.colors.textTertiary,fontSize:t.fonts.sizeXs,cursor:"pointer"}}
+                      onClick={()=>{setVerFormAnticipo(false);setAntDesc("");setAntMonto("");}}
+                    >✕</button>
+                  </div>
+                )}
+              </div>
+
+              {/* Saldo */}
+              {(viaje.anticipoMonto > 0) && (() => {
+                const entregado = viaje.anticipoMonto || 0;
+                const gastado = (viaje.anticipoGastos||[]).reduce((s,g)=>s+g.monto, 0);
+                const saldo = entregado - gastado;
+                return (
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0"}}>
+                    <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>
+                      {saldo >= 0 ? "Conductor debe devolver" : "Se le debe al conductor"}
+                    </span>
+                    <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:saldo>=0?t.colors.amber:t.colors.red}}>
+                      {fmt(Math.abs(saldo))}
+                    </span>
+                  </div>
+                );
+              })()}
+            </div>
 
             {/* ESTADO DE PAGO */}
             <div style={{...styles.card, border:`1.5px solid ${
