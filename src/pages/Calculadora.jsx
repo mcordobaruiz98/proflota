@@ -929,7 +929,7 @@ const guardarRutaFrecuente = async () => {
           type="checkbox"
           checked={d.activo}
           onChange={e=>d.setActivo(e.target.checked)}
-          style={{width:"18px", height:"18px", cursor:"pointer", accentColor:t.colors.blue}}
+          style={{width:"18px", height:"18px", cursor:"pointer", accentColor:t.colors.blueSoft}}
         />
         <div>
           <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{d.label}</p>
