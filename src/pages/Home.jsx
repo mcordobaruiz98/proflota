@@ -48,7 +48,7 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
   { label: "Vehículos",   Icono: Truck,       ruta: "/vehiculos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Cuentas",     Icono: TrendingUp,  ruta: "/cuentas",     color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
-  { label: "Cartera",     Icono: AlertCircle, ruta: "/cartera",     color: "#0F2340", border: vencidos.length > 0 ? "#EF4444" : "#1E3A5F", iconColor: vencidos.length > 0 ? "#EF4444" : "#22C55E" },
+  { label: "Cartera",     Icono: AlertCircle, ruta: "/cartera",     color: "#0F2340", border: "#1E3A5F", iconColor: vencidos.length > 0 ? "#EF4444" : "#22C55E" },
   { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Empresas",    Icono: Handshake,   ruta: "/empresas",    color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
 ];
