@@ -109,7 +109,19 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   const costoAcpm = galTotal * n(precioAcpm);
   const costoAdbl = adblLt   * n(precioAdblue);
   const costoComb = costoAcpm + costoAdbl;
-  const totPeajes = peajesRuta.reduce((s,p) => s + (p.t[categoria]||0) * (p.iv?2:1), 0);
+
+  // Fallback: si la categoría no existe en el peaje (tarifa=0), baja a la siguiente disponible
+  const CATS_ORDEN = ["I","II","III","IV","V","VI","VII"];
+  const obtenerTarifa = (peaje, cat) => {
+    let idx = CATS_ORDEN.indexOf(cat);
+    while (idx >= 0) {
+      if (peaje.t && peaje.t[CATS_ORDEN[idx]] > 0) return peaje.t[CATS_ORDEN[idx]];
+      idx--;
+    }
+    return 0;
+  };
+
+  const totPeajes = peajesRuta.reduce((s,p) => s + obtenerTarifa(p, categoria) * (p.iv?2:1), 0);
   const costoConduct = modoConductor === "porcentaje" ? (n(porcCond)/100) * valorViaje : n(porcCond);
   const totExtras = extras.reduce((s,e) => s + e.valor, 0);
   const valRetefuente = descRetefuente ? (pctRetefuente/100) * valorViaje : 0;
@@ -162,8 +174,8 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
       adlt: adblLt, cAcpm: costoAcpm, cAdbl: costoAdbl, cComb: costoComb,
       peajes: totPeajes,
       peajesDetalle: peajesRuta.map(p => ({
-        n: p.n, d: p.d, tarifa: p.t[categoria]||0, iv: p.iv,
-        total: (p.t[categoria]||0) * (p.iv?2:1),
+        n: p.n, d: p.d, tarifa: obtenerTarifa(p, categoria), iv: p.iv,
+        total: (obtenerTarifa(p, categoria)) * (p.iv?2:1),
       })),
       pcond: n(porcCond), conductor: costoConduct,
       carp: n(carpado), gv2: n(gastosViaje),
@@ -195,7 +207,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
     t: { [rutaGuardada.categoria || "VII"]: p.tarifa || 0 },
   })));
   // Datos adicionales
-  if (rutaGuardada.producto)        setProducto(rutaGuardada.producto);
+  if (rutaGuardada.producto)        setProducto(rutaCargada.producto);
   if (rutaGuardada.empresa)         setEmpresa(rutaGuardada.empresa);
   if (rutaGuardada.contactoEmpresa) setContactoEmpresa(rutaGuardada.contactoEmpresa);
   if (rutaGuardada.celularEmpresa)  setCelularEmpresa(rutaGuardada.celularEmpresa);
@@ -231,7 +243,7 @@ const guardarRutaFrecuente = async () => {
     rendVacio:   n(rendVacio),
     peajesRuta:  peajesRuta.map(p => ({
       c: p.c, n: p.n, d: p.d, iv: p.iv || false,
-      tarifa: p.t ? (p.t[categoria] || 0) : (p.tarifa || 0),
+      tarifa: p.t ? obtenerTarifa(p, categoria) : (p.tarifa || 0),
     })),
     categoria,
     // Datos adicionales
@@ -771,7 +783,7 @@ const guardarRutaFrecuente = async () => {
             <option value="">— Seleccionar peaje —</option>
             {peajesFiltrados.map(p=>(
               <option key={p.c} value={p.c}>
-                {p.n} ({p.d}) — ${(p.t[categoria]||0).toLocaleString("es-CO")}
+                {p.n} ({p.d}) — ${(obtenerTarifa(p, categoria)).toLocaleString("es-CO")}
               </option>
             ))}
           </select>
@@ -783,7 +795,7 @@ const guardarRutaFrecuente = async () => {
         {peajesRuta.length > 0 && (
           <div style={styles.peajesTags}>
             {peajesRuta.map(p=>{
-              const tarifa = p.t[categoria]||0;
+              const tarifa = obtenerTarifa(p, categoria);
               const total  = tarifa*(p.iv?2:1);
               return (
                 <div key={p.c} style={styles.peajeTag}>
