@@ -81,7 +81,7 @@ function AppContenido() {
       <Route path="/cuentas" element={
         <RutaProtegida>
           <Layout>
-            <Cuentas vehiculos={vehiculos} viajes={viajes} cargando={cargando} />
+            <Cuentas vehiculos={vehiculos} viajes={viajes} gastosFijos={gastosFijos} gastosVehiculo={gastosVehiculo} cargando={cargando} />
           </Layout>
         </RutaProtegida>
       } />

@@ -7,7 +7,7 @@ import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 const MESES       = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const MESES_CORTO = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
-function Cuentas({ vehiculos = [], viajes = [], cargando }) {
+function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo = [], cargando }) {
   const navigate = useNavigate();
   const hoy = new Date();
   const [mes,  setMes]  = useState(hoy.getMonth());
@@ -42,6 +42,21 @@ function Cuentas({ vehiculos = [], viajes = [], cargando }) {
   const conductorMes = viajesMes.reduce((s,v) => s+(v.conductor||0), 0);
   const otrosMes     = viajesMes.reduce((s,v) => s+(v.carp||0)+(v.gv2||0)+(v.extras||0), 0);
   const descuentosMes = viajesMes.reduce((s,v)=> s+(v.descuentos?.total||0),0);
+
+  // Punto de equilibrio total de la flota
+  const totalPE = gastosFijos.reduce((s, g) => {
+    const monto = g.monto || 0;
+    return s + (g.periodicidad === "anual" ? monto / 12 : monto);
+  }, 0);
+
+  // Gastos adicionales del mes
+  const gastosAdicMes = gastosVehiculo.filter(g => {
+    const f = new Date(g.fecha);
+    return f.getMonth() === mes && f.getFullYear() === anio;
+  });
+  const totalGastosAdic = gastosAdicMes.reduce((s, g) => s + (g.monto || 0), 0);
+
+  const utilidadReal = netaMes - totalPE - totalGastosAdic;
 
   const gananciaPorVeh = vehiculos.map(veh => {
     const vt = viajesMes.filter(v => v.placa===veh.placa);
@@ -79,6 +94,64 @@ function Cuentas({ vehiculos = [], viajes = [], cargando }) {
         <button style={styles.btnHistorial} onClick={() => navigate("/viajes")}>
           <History size={16} color={t.colors.blue} strokeWidth={2} />
           Historial
+        </button>
+        <button style={{...styles.btnHistorial, marginLeft:"6px"}} onClick={()=>{
+          const w = window.open("","_blank","width=800,height=600");
+          w.document.write(`<!DOCTYPE html><html><head><title>Resumen ${MESES[mes]} ${anio}</title>
+          <style>
+            body{font-family:-apple-system,sans-serif;padding:30px;color:#1a1a1a;max-width:700px;margin:0 auto}
+            h1{font-size:20px;margin:0 0 4px}
+            h2{font-size:14px;margin:20px 0 8px;color:#666;border-bottom:1px solid #ddd;padding-bottom:4px}
+            .sub{color:#666;font-size:12px;margin:0 0 20px}
+            table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px}
+            td{padding:6px 8px;border-bottom:1px solid #eee}
+            td:last-child{text-align:right;font-weight:600}
+            .total td{border-top:2px solid #333;font-weight:700;font-size:14px}
+            .veh{background:#f5f5f5}
+            .footer{text-align:center;color:#999;font-size:11px;margin-top:30px;border-top:1px solid #ddd;padding-top:10px}
+            @media print{body{padding:15px}}
+          </style></head><body>
+          <h1>Resumen Financiero — ${MESES[mes]} ${anio}</h1>
+          <p class="sub">Generado por NAVIRA · ${new Date().toLocaleDateString("es-CO")}</p>
+
+          <h2>Resumen de flota</h2>
+          <table>
+            <tr><td>Ingresos brutos</td><td>${fmt(ingresosMes)}</td></tr>
+            <tr><td>Total gastos viajes</td><td>${fmt(gastosMes)}</td></tr>
+            <tr><td>Ganancia neta viajes</td><td>${fmt(netaMes)}</td></tr>
+            ${totalPE > 0 ? `<tr><td>Gastos fijos (P.E.)</td><td>-${fmt(totalPE)}</td></tr>` : ""}
+            ${totalGastosAdic > 0 ? `<tr><td>Gastos adicionales</td><td>-${fmt(totalGastosAdic)}</td></tr>` : ""}
+            <tr class="total"><td>${totalPE>0||totalGastosAdic>0?"Utilidad real":"Ganancia neta"}</td><td>${totalPE>0||totalGastosAdic>0?fmt(utilidadReal):fmt(netaMes)}</td></tr>
+          </table>
+          <table>
+            <tr><td>Rentabilidad</td><td>${rentabilidad}%</td></tr>
+            <tr><td>Viajes</td><td>${viajesMes.length}</td></tr>
+            <tr><td>Km totales</td><td>${kmMes.toLocaleString("es-CO")} km</td></tr>
+          </table>
+
+          <h2>Desglose por vehículo</h2>
+          <table>
+            <tr class="veh"><td><b>Placa</b></td><td><b>Viajes</b></td><td><b>Km</b></td><td><b>Neta</b></td></tr>
+            ${gananciaPorVeh.map(v=>`<tr><td>${v.placa}</td><td>${v.viajes}</td><td>${v.km.toLocaleString("es-CO")}</td><td>${fmt(v.neta)}</td></tr>`).join("")}
+          </table>
+
+          <h2>Distribución de gastos</h2>
+          <table>
+            <tr><td>ACPM</td><td>${fmt(acpmMes)}</td></tr>
+            <tr><td>Adblue</td><td>${fmt(adblMes)}</td></tr>
+            <tr><td>Peajes</td><td>${fmt(peajesMes)}</td></tr>
+            <tr><td>Conductor</td><td>${fmt(conductorMes)}</td></tr>
+            <tr><td>Otros</td><td>${fmt(otrosMes)}</td></tr>
+            ${descuentosMes>0?`<tr><td>Descuentos</td><td>${fmt(descuentosMes)}</td></tr>`:""}
+          </table>
+
+          <p class="footer">NAVIRA — Inteligencia en Movimiento · ${anio}</p>
+          </body></html>`);
+          w.document.close();
+          setTimeout(()=>w.print(), 500);
+        }}>
+          <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
+          Exportar
         </button>
       </div>
 
@@ -140,6 +213,33 @@ function Cuentas({ vehiculos = [], viajes = [], cargando }) {
     </p>
   </div>
 </div>
+
+        {/* UTILIDAD REAL DE LA FLOTA */}
+        {(totalPE > 0 || totalGastosAdic > 0) && (
+          <div style={{...styles.card, border:`1.5px solid ${utilidadReal >= 0 ? t.colors.greenBorder : t.colors.redBorder}`}}>
+            <p style={styles.cardTitulo}>Utilidad real de la flota</p>
+            <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+              <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Ganancia neta viajes</span>
+              <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:netaMes>=0?t.colors.green:t.colors.red}}>{fmt(netaMes)}</span>
+            </div>
+            {totalPE > 0 && (
+              <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos fijos (P.E.)</span>
+                <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(totalPE)}</span>
+              </div>
+            )}
+            {totalGastosAdic > 0 && (
+              <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos adicionales</span>
+                <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(totalGastosAdic)}</span>
+              </div>
+            )}
+            <div style={{display:"flex",justifyContent:"space-between",padding:"10px 0 0"}}>
+              <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Utilidad</span>
+              <span style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:utilidadReal>=0?t.colors.green:t.colors.red}}>{fmt(utilidadReal)}</span>
+            </div>
+          </div>
+        )}
 
         {/* GRÁFICA */}
         <div style={styles.card}>

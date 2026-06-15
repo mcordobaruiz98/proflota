@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
 function DetalleViaje({ viajes = [], onEliminar, onEditar, mostrarToast }) {
@@ -28,6 +28,35 @@ function DetalleViaje({ viajes = [], onEliminar, onEditar, mostrarToast }) {
 
   const fmt = (n) => "$" + Math.round(n||0).toLocaleString("es-CO");
   const fnD = (n,d) => (Math.round((n||0)*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
+
+  const compartirWhatsApp = () => {
+    if (!viaje) return;
+    const lineas = [
+      `🚛 *Resumen de viaje — NAVIRA*`,
+      ``,
+      `📍 *Ruta:* ${viaje.ruta || "—"}`,
+      `📅 *Fecha:* ${viaje.fecha || "—"}`,
+      `🚗 *Placa:* ${viaje.placa || "—"}`,
+      viaje.emp ? `🏢 *Empresa:* ${viaje.emp}` : null,
+      viaje.condNom ? `👤 *Conductor:* ${viaje.condNom}` : null,
+      viaje.prod ? `📦 *Producto:* ${viaje.prod}` : null,
+      viaje.ton ? `⚖️ *Toneladas:* ${viaje.ton}` : null,
+      ``,
+      `💰 *Valor flete:* ${fmt(viaje.vViaje || 0)}`,
+      `⛽ *Combustible:* ${fmt(viaje.costoComb || 0)}`,
+      `🛣️ *Peajes:* ${fmt(viaje.totPeajes || 0)}`,
+      `👤 *Conductor:* ${fmt(viaje.costoConduct || 0)}`,
+      viaje.extras ? `📋 *Otros gastos:* ${fmt(viaje.extras || 0)}` : null,
+      ``,
+      `📊 *Total gastos:* ${fmt((viaje.vViaje||0) - (viaje.neta||0))}`,
+      `✅ *Ganancia neta:* ${fmt(viaje.neta || 0)}`,
+      ``,
+      `_Generado por Navira — Inteligencia en Movimiento_`,
+    ].filter(Boolean).join("\n");
+
+    const url = `https://wa.me/?text=${encodeURIComponent(lineas)}`;
+    window.open(url, "_blank");
+  };
 
   const abrirEdicion = () => {
     setFecha(viaje.fecha || "");
@@ -122,10 +151,19 @@ function DetalleViaje({ viajes = [], onEliminar, onEditar, mostrarToast }) {
         </button>
         <div style={{display:"flex", gap:"8px"}}>
           {!editando && (
-            <button style={styles.btnEditar} onClick={abrirEdicion}>
-              <Edit3 size={16} color={t.colors.blue} strokeWidth={2} />
-              <span style={{fontSize:t.fonts.sizeXs, color:t.colors.blue, fontWeight:t.fonts.weightSemibold}}>Editar</span>
-            </button>
+            <>
+              <button
+                style={{background:"#25D366",border:"none",borderRadius:t.radius.sm,padding:"8px",cursor:"pointer",display:"flex",alignItems:"center"}}
+                onClick={compartirWhatsApp}
+                title="Compartir por WhatsApp"
+              >
+                <Send size={16} color="#fff" strokeWidth={2} />
+              </button>
+              <button style={styles.btnEditar} onClick={abrirEdicion}>
+                <Edit3 size={16} color={t.colors.blue} strokeWidth={2} />
+                <span style={{fontSize:t.fonts.sizeXs, color:t.colors.blue, fontWeight:t.fonts.weightSemibold}}>Editar</span>
+              </button>
+            </>
           )}
           {!confirmarEliminar ? (
             <button style={styles.btnEliminar} onClick={()=>setConfirmarEliminar(true)}>
