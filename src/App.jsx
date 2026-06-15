@@ -180,7 +180,7 @@ function AppContenido() {
         <RutaProtegida><AcercaDe /></RutaProtegida>
       } />
 
-      <Route path="/cartera" element={
+      <Route path="/Cartera" element={
         <RutaProtegida>
           <Cartera
             viajes={viajes}
