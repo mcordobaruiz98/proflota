@@ -78,6 +78,7 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const navigate  = useNavigate();
   const { id }    = useParams();
   const location  = useLocation();
+  const vehiculo  = vehiculos.find(v => String(v.firestoreId) === String(id));
   const [tabActivo, setTabActivo] = useState(location.state?.tab || "info");
   const [filtro,    setFiltro]    = useState("todos");
   const [busquedaH, setBusquedaH] = useState("");
@@ -146,8 +147,6 @@ const guardarMantenimiento = async () => {
     setGuardandoMant(false);
   }
 };
-
-  const vehiculo = vehiculos.find(v => String(v.firestoreId) === String(id));
 
 const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
 
