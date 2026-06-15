@@ -44,6 +44,24 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
   });
   const totalVencido = vencidos.reduce((s, v) => s + (v.vViaje || 0), 0);
 
+  // Documentos por vencer
+  const DOCS_CON_VENC = [
+    {id:"veh_soat",label:"SOAT"},{id:"veh_rtm",label:"RTM"},{id:"veh_poliza",label:"Póliza"},{id:"con_licencia",label:"Licencia"}
+  ];
+  const docsAlerta = [];
+  vehiculos.forEach(v => {
+    if (!v.hvData) return;
+    DOCS_CON_VENC.forEach(doc => {
+      const fv = v.hvData[doc.id+"_venc"];
+      if (!fv) return;
+      const dias = Math.ceil((new Date(fv)-new Date())/(1000*60*60*24));
+      if (dias <= 30) {
+        docsAlerta.push({ placa:v.placa, doc:doc.label, dias, vencido:dias<0, vehiculoId:v.firestoreId });
+      }
+    });
+  });
+  docsAlerta.sort((a,b) => a.dias - b.dias);
+
   const accesos = [
   { label: "Vehículos",   Icono: Truck,       ruta: "/vehiculos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Cuentas",     Icono: TrendingUp,  ruta: "/cuentas",     color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
@@ -124,6 +142,40 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
               {fmt(totalVencido)} pendiente · Toca para ver
             </p>
           </div>
+        </div>
+      )}
+
+      {/* ALERTA DOCUMENTOS POR VENCER */}
+      {docsAlerta.length > 0 && (
+        <div
+          style={{
+            margin: "0 16px 10px",
+            padding: "12px 16px",
+            background: docsAlerta.some(d=>d.vencido) ? t.colors.redSoft : "#FEF3C7",
+            border: `1.5px solid ${docsAlerta.some(d=>d.vencido) ? t.colors.redBorder : "#F59E0B33"}`,
+            borderRadius: t.radius.lg,
+          }}
+        >
+          <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
+            <AlertCircle size={18} color={docsAlerta.some(d=>d.vencido)?t.colors.red:t.colors.amber} strokeWidth={2} />
+            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:docsAlerta.some(d=>d.vencido)?t.colors.red:t.colors.amber,margin:0}}>
+              Documentos por vencer
+            </p>
+          </div>
+          {docsAlerta.map((d,i) => (
+            <div
+              key={`${d.placa}-${d.doc}-${i}`}
+              style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0",cursor:"pointer"}}
+              onClick={()=>navigate(`/vehiculo/${d.vehiculoId}`,{state:{tab:"historial"}})}
+            >
+              <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>
+                {d.doc} · {d.placa}
+              </span>
+              <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:d.vencido?t.colors.red:d.dias<=7?t.colors.amber:t.colors.textSecondary}}>
+                {d.vencido?`Venció hace ${Math.abs(d.dias)}d`:d.dias===0?"Vence hoy":`Vence en ${d.dias}d`}
+              </span>
+            </div>
+          ))}
         </div>
       )}
 

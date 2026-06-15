@@ -40,13 +40,13 @@ const seccionesHV = [
     documentos: [
       {id:"veh_tarjeta", label:"Tarjeta propiedad vehículo"},
       {id:"veh_trailer", label:"T. propiedad trailer (opcional)"},
-      {id:"veh_soat",    label:"SOAT"},
-      {id:"veh_rtm",     label:"RTM"},
-      {id:"veh_poliza",  label:"Póliza seguro todo riesgo"},
+      {id:"veh_soat",    label:"SOAT",                       conVencimiento:true},
+      {id:"veh_rtm",     label:"RTM",                        conVencimiento:true},
+      {id:"veh_poliza",  label:"Póliza seguro todo riesgo",  conVencimiento:true},
       {id:"veh_fotos",   label:"Foto frente"},
-      {id:"veh_fotos",   label:"Foto costado derecho"},
-      {id:"veh_fotos",   label:"Foto costado izquierdo"},
-      {id:"veh_fotos",   label:"Foto trasera"},
+      {id:"veh_fotos2",  label:"Foto costado derecho"},
+      {id:"veh_fotos3",  label:"Foto costado izquierdo"},
+      {id:"veh_fotos4",  label:"Foto trasera"},
     ],
     campos: [
       {id:"veh_satelital", label:"Empresa satelital", tipo:"text",     placeholder:"Nombre GPS"},
@@ -59,7 +59,7 @@ const seccionesHV = [
     documentos: [
       {id:"con_selfie",   label:"Foto tipo selfie"},
       {id:"con_cedula",   label:"Cédula (ambos lados)"},
-      {id:"con_licencia", label:"Licencia de conducir"},
+      {id:"con_licencia", label:"Licencia de conducir",   conVencimiento:true},
       {id:"con_banco",    label:"Cert. bancaria (opcional)"},
       {id:"con_arl",      label:"ARL"},
       {id:"con_segpens",  label:"Seguridad y pensión"},
@@ -1173,7 +1173,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         const estaSubiendo = subiendo[doc.id]||false;
                         const pct = progresoArchivo[doc.id]||0;
                         return (
-                          <div key={doc.id} style={styles.hvDocFila}>
+                          <div key={doc.id}>
+                            <div style={styles.hvDocFila}>
                             <div style={{flex:1}}>
                               <p style={styles.hvDocLabel}>{doc.label}</p>
                               {cargado&&(
@@ -1212,6 +1213,30 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                             {estaSubiendo&&(
                               <span style={styles.hvEstadoSubiendo}>Subiendo...</span>
                             )}
+                            </div>
+                          {doc.conVencimiento && (
+                            <div style={{display:"flex",alignItems:"center",gap:"8px",padding:"4px 0 8px",marginTop:"2px"}}>
+                              <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,whiteSpace:"nowrap"}}>Vence:</span>
+                              <input
+                                type="date"
+                                value={hvData[doc.id+"_venc"]||""}
+                                onChange={e=>actualizarHV(doc.id+"_venc",e.target.value)}
+                                style={{flex:1,padding:"5px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}}
+                              />
+                              {(()=>{
+                                const fv = hvData[doc.id+"_venc"];
+                                if (!fv) return null;
+                                const dias = Math.ceil((new Date(fv)-new Date())/(1000*60*60*24));
+                                const vencido = dias < 0;
+                                const proximo = dias >= 0 && dias <= 30;
+                                return (
+                                  <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,whiteSpace:"nowrap",color:vencido?t.colors.red:proximo?t.colors.amber:t.colors.green}}>
+                                    {vencido?`Venció hace ${Math.abs(dias)}d`:dias===0?"Vence hoy":`${dias}d`}
+                                  </span>
+                                );
+                              })()}
+                            </div>
+                          )}
                           </div>
                         );
                       })}
@@ -1308,4 +1333,3 @@ const styles = {
 };
 
 export default DetalleVehiculo;
-
