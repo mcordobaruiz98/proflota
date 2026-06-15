@@ -133,7 +133,7 @@ function Registro() {
               type="text"
               placeholder="Ingresa tu código de invitación"
               value={codigo}
-              onChange={(e) => { setCodigo(e.target.value.toUpperCase()); setErrores({ ...errores, codigo: null }); }}
+              onChange={(e) => { setCodigo(e.target.value.trim().toUpperCase()); setErrores({ ...errores, codigo: null }); }}
               style={styles.input}
             />
             {errores.codigo && <p style={styles.error}>{errores.codigo}</p>}
