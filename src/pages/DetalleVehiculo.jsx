@@ -85,11 +85,7 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [mesActual,  setMesActual]  = useState(hoy.getMonth());
   const [anioActual, setAnioActual] = useState(hoy.getFullYear());
 
-  const claveHVLocal = `hv_${id}`;
-  const [hvData, setHvData] = useState(() => {
-    const g = localStorage.getItem(claveHVLocal);
-    return g ? JSON.parse(g) : {};
-  });
+  const [hvData, setHvData] = useState(vehiculo?.hvData || {});
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({propietario:true,tenedor:false,vehiculo:false,conductor:false});
 
   const { subirArchivo, eliminarArchivo, progreso: progresoArchivo, subiendo } = useSubirArchivo();
@@ -111,7 +107,7 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [guardandoGF,    setGuardandoGF]    = useState(false);
 
 
-  const [kmOdometro,    setKmOdometro]    = useState(() => Number(localStorage.getItem(`km_${id}`))||0);
+  const [kmOdometro,    setKmOdometro]    = useState(vehiculo?.kmOdometro || 0);
   const [editandoKm,    setEditandoKm]    = useState(false);
   const [kmTemp,        setKmTemp]        = useState("");
   const [tipoMant,      setTipoMant]      = useState("Cambio de aceite");
@@ -124,7 +120,7 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const guardarKm = () => {
   const val = Number(kmTemp)||0;
   setKmOdometro(val);
-  localStorage.setItem(`km_${id}`, val);
+  onEditarVehiculo(vehiculo.firestoreId, { kmOdometro: val }).catch(()=>{});
   setEditandoKm(false);
   setKmTemp("");
 };
@@ -239,7 +235,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
   const actualizarHV = (clave, valor) => {
     const nuevo = {...hvData, [clave]:valor};
     setHvData(nuevo);
-    localStorage.setItem(claveHVLocal, JSON.stringify(nuevo));
+    onEditarVehiculo(vehiculo.firestoreId, { hvData: nuevo }).catch(()=>{});
   };
 
   const manejarArchivo = (e, docId) => {

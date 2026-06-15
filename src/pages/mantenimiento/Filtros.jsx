@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Trash2, Droplets, Wind, Fuel, Filter, Thermometer, Droplet } from "lucide-react";
 import { theme as t } from "../../styles/theme";
- 
+
 const TIPOS_FILTRO = [
   { id:"aceite",       label:"Filtro de aceite",       Icono:Droplets,     color:t.colors.amber },
   { id:"aire",         label:"Filtro de aire",         Icono:Wind,         color:t.colors.blue },
@@ -11,19 +11,15 @@ const TIPOS_FILTRO = [
   { id:"refrigerante", label:"Filtro de refrigerante", Icono:Thermometer,  color:t.colors.red },
   { id:"hidraulico",   label:"Filtro hidráulico",      Icono:Droplet,      color:"#3B82F6" },
 ];
- 
-function Filtros({ vehiculos, mostrarToast }) {
+
+function Filtros({ vehiculos, mostrarToast, onEditarVehiculo }) {
   const navigate = useNavigate();
   const { id }   = useParams();
- 
+
   const vehiculo   = vehiculos.find(v => String(v.firestoreId) === String(id));
-  const claveLocal = `filtros_${id}`;
- 
-  const [historial, setHistorial] = useState(() => {
-    const g = localStorage.getItem(claveLocal);
-    return g ? JSON.parse(g) : [];
-  });
- 
+
+  const [historial, setHistorial] = useState(vehiculo?.filtrosHistorial || []);
+
   const [tipoFiltro,  setTipoFiltro]  = useState("aceite");
   const [marca,       setMarca]       = useState("");
   const [referencia,  setReferencia]  = useState("");
@@ -34,29 +30,29 @@ function Filtros({ vehiculos, mostrarToast }) {
   const [nota,        setNota]        = useState("");
   const [mostrarForm, setMostrarForm] = useState(false);
   const [guardando,   setGuardando]   = useState(false);
- 
+
   const fmt = (n) => "$" + Math.round(n||0).toLocaleString("es-CO");
- 
+
   const guardar = () => {
     if (!kmCambio) { mostrarToast("Ingresa el km del cambio","error"); return; }
     setGuardando(true);
     const nuevo = { id:Date.now(), tipo:tipoFiltro, marca, referencia, km:Number(kmCambio), fecha, taller, costo:Number(costo)||0, nota };
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
-    localStorage.setItem(claveLocal, JSON.stringify(nuevos));
+    onEditarVehiculo(vehiculo.firestoreId, { filtrosHistorial: nuevos }).catch(()=>{});
     setMarca(""); setReferencia(""); setKmCambio(""); setTaller(""); setCosto(""); setNota("");
     setMostrarForm(false);
     mostrarToast("Filtro registrado","exito");
     setGuardando(false);
   };
- 
+
   const eliminar = (rid) => {
     const nuevos = historial.filter(r => r.id !== rid);
     setHistorial(nuevos);
-    localStorage.setItem(claveLocal, JSON.stringify(nuevos));
+    onEditarVehiculo(vehiculo.firestoreId, { filtrosHistorial: nuevos }).catch(()=>{});
     mostrarToast("Registro eliminado","info");
   };
- 
+
   const IconoFiltro = ({ tipo, size = 18 }) => {
     const tf = TIPOS_FILTRO.find(x => x.id === tipo);
     if (!tf) return null;
@@ -66,7 +62,7 @@ function Filtros({ vehiculos, mostrarToast }) {
       </div>
     );
   };
- 
+
   return (
     <div style={styles.pantalla}>
       <div style={styles.header}>
@@ -76,9 +72,9 @@ function Filtros({ vehiculos, mostrarToast }) {
         </button>
         <h1 style={styles.titulo}>Filtros</h1>
       </div>
- 
+
       <div style={styles.contenido}>
- 
+
         {/* RESUMEN POR TIPO */}
         <div style={styles.card}>
           <p style={styles.cardTitulo}>Último cambio por tipo</p>
@@ -106,7 +102,7 @@ function Filtros({ vehiculos, mostrarToast }) {
             );
           })}
         </div>
- 
+
         {/* BOTÓN AGREGAR */}
         {!mostrarForm && (
           <button
@@ -116,19 +112,19 @@ function Filtros({ vehiculos, mostrarToast }) {
             + Registrar cambio de filtro
           </button>
         )}
- 
+
         {/* FORMULARIO */}
         {mostrarForm && (
           <div style={styles.card}>
             <p style={styles.cardTitulo}>Nuevo cambio de filtro</p>
- 
+
             <div style={styles.campo}>
               <label style={styles.label}>Tipo de filtro</label>
               <select value={tipoFiltro} onChange={e=>setTipoFiltro(e.target.value)} style={styles.input}>
                 {TIPOS_FILTRO.map(tf=><option key={tf.id} value={tf.id}>{tf.label}</option>)}
               </select>
             </div>
- 
+
             <div style={styles.fila2}>
               <div style={styles.campo}>
                 <label style={styles.label}>Marca</label>
@@ -141,7 +137,7 @@ function Filtros({ vehiculos, mostrarToast }) {
                   onChange={e=>setReferencia(e.target.value)} style={styles.input}/>
               </div>
             </div>
- 
+
             <div style={styles.fila2}>
               <div style={styles.campo}>
                 <label style={styles.label}>Km al cambiar</label>
@@ -154,7 +150,7 @@ function Filtros({ vehiculos, mostrarToast }) {
                   onChange={e=>setFecha(e.target.value)} style={styles.input}/>
               </div>
             </div>
- 
+
             <div style={styles.fila2}>
               <div style={styles.campo}>
                 <label style={styles.label}>Taller</label>
@@ -167,13 +163,13 @@ function Filtros({ vehiculos, mostrarToast }) {
                   onChange={e=>setCosto(e.target.value)} style={styles.input}/>
               </div>
             </div>
- 
+
             <div style={styles.campo}>
               <label style={styles.label}>Nota</label>
               <input type="text" placeholder="Observaciones" value={nota}
                 onChange={e=>setNota(e.target.value)} style={styles.input}/>
             </div>
- 
+
             <div style={{display:"flex",gap:"8px"}}>
               <button
                 style={{flex:1,padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardando?0.75:1}}
@@ -190,7 +186,7 @@ function Filtros({ vehiculos, mostrarToast }) {
             </div>
           </div>
         )}
- 
+
         {/* HISTORIAL */}
         {historial.length > 0 && (
           <div style={styles.card}>
@@ -224,12 +220,12 @@ function Filtros({ vehiculos, mostrarToast }) {
             })}
           </div>
         )}
- 
+
       </div>
     </div>
   );
 }
- 
+
 const styles = {
   pantalla:   { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:     { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
@@ -243,5 +239,5 @@ const styles = {
   label:      { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
   input:      { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
 };
- 
+
 export default Filtros;

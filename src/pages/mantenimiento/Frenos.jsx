@@ -21,24 +21,17 @@ const ESTADOS = [
   { value:"cambiar",    label:"Cambiar urgente",  color:t.colors.red    },
 ];
 
-function Frenos({ vehiculos, mostrarToast }) {
+function Frenos({ vehiculos, mostrarToast, onEditarVehiculo }) {
   const navigate = useNavigate();
   const { id }   = useParams();
 
   const vehiculo   = vehiculos.find(v => String(v.firestoreId) === String(id));
   const tipoVeh    = vehiculo?.tipoVehiculo?.toUpperCase() || "";
   const ejes       = EJES_POR_VEHICULO[tipoVeh] || ["Eje delantero","Eje trasero"];
-  const claveLocal = `frenos_${id}`;
 
-  const [estadoEjes, setEstadoEjes] = useState(() => {
-    const g = localStorage.getItem(claveLocal);
-    return g ? JSON.parse(g) : {};
-  });
+  const [estadoEjes, setEstadoEjes] = useState(vehiculo?.frenosData || {});
 
-  const [historial,   setHistorial]   = useState(() => {
-    const g = localStorage.getItem(`frenos_hist_${id}`);
-    return g ? JSON.parse(g) : [];
-  });
+  const [historial,   setHistorial]   = useState(vehiculo?.frenosHistorial || []);
 
   const [ejeEdit,     setEjeEdit]     = useState(null);
   const [estadoSel,   setEstadoSel]   = useState("bueno");
@@ -61,7 +54,7 @@ function Frenos({ vehiculos, mostrarToast }) {
   const guardarEstadoEje = () => {
     const nuevos = { ...estadoEjes, [ejeEdit]: { estado:estadoSel, grosor, tipo, nota } };
     setEstadoEjes(nuevos);
-    localStorage.setItem(claveLocal, JSON.stringify(nuevos));
+    onEditarVehiculo(vehiculo.firestoreId, { frenosData: nuevos }).catch(()=>{});
     setEjeEdit(null);
     mostrarToast("Estado guardado","exito");
   };
@@ -81,7 +74,7 @@ function Frenos({ vehiculos, mostrarToast }) {
     const nuevo = { id:Date.now(), eje:ejeReg, km:Number(kmReg), fecha:fechaReg, taller:tallerReg, costo:Number(costoReg)||0 };
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
-    localStorage.setItem(`frenos_hist_${id}`, JSON.stringify(nuevos));
+    onEditarVehiculo(vehiculo.firestoreId, { frenosHistorial: nuevos }).catch(()=>{});
     setKmReg(""); setTallerReg(""); setCostoReg("");
     setMostrarForm(false);
     mostrarToast("Reparación registrada","exito");
@@ -91,7 +84,7 @@ function Frenos({ vehiculos, mostrarToast }) {
   const eliminarRep = (rid) => {
     const nuevos = historial.filter(r=>r.id!==rid);
     setHistorial(nuevos);
-    localStorage.setItem(`frenos_hist_${id}`, JSON.stringify(nuevos));
+    onEditarVehiculo(vehiculo.firestoreId, { frenosHistorial: nuevos }).catch(()=>{});
     mostrarToast("Registro eliminado","info");
   };
 

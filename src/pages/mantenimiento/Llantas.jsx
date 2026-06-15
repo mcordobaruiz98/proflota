@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
 import { theme as t } from "../../styles/theme";
-
+ 
 const CONFIGS_VEHICULO = {
   "TURBO SENCILLO":    { total: 4,  label: "Turbo 4 llantas" },
   "SENCILLO":          { total: 6,  label: "Sencillo" },
@@ -13,7 +13,7 @@ const CONFIGS_VEHICULO = {
   "TRACTOMULA 3S2":    { total: 18, label: "Tractomula 3S2" },
   "TRACTOMULA 3S3":    { total: 22, label: "Tractomula 3S3" },
 };
-
+ 
 const POSICIONES = {
   4:  ["Del. izq","Del. der","Tras. izq","Tras. der"],
   6:  ["Del. izq","Del. der","Tras. izq int","Tras. izq ext","Tras. der int","Tras. der ext"],
@@ -22,11 +22,11 @@ const POSICIONES = {
   18: ["Del. izq","Del. der","Trac1. izq int","Trac1. izq ext","Trac1. der int","Trac1. der ext","Trac2. izq int","Trac2. izq ext","Trac2. der int","Trac2. der ext","Rem1. izq int","Rem1. izq ext","Rem1. der int","Rem1. der ext","Rem2. izq int","Rem2. izq ext","Rem2. der int","Rem2. der ext"],
   22: ["Del. izq","Del. der","Trac1. izq int","Trac1. izq ext","Trac1. der int","Trac1. der ext","Trac2. izq int","Trac2. izq ext","Trac2. der int","Trac2. der ext","Rem1. izq int","Rem1. izq ext","Rem1. der int","Rem1. der ext","Rem2. izq int","Rem2. izq ext","Rem2. der int","Rem2. der ext","Rem3. izq int","Rem3. izq ext","Rem3. der int","Rem3. der ext"],
 };
-
+ 
 function estadoColor(e) {
   return e==="nueva"?"#0E7490":e==="ok"?"#16A34A":e==="warn"?"#D97706":"#DC2626";
 }
-
+ 
 function DiagramaLlantas({ total, llantas, onSelect, llantaActiva }) {
   const ejesPorTotal = {
     4:  [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:30},{n:4,x:170}] ],
@@ -36,12 +36,12 @@ function DiagramaLlantas({ total, llantas, onSelect, llantaActiva }) {
     18: [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}], [{n:7,x:18},{n:8,x:35},{n:9,x:165},{n:10,x:182}], [{n:11,x:18},{n:12,x:35},{n:13,x:165},{n:14,x:182}], [{n:15,x:18},{n:16,x:35},{n:17,x:165},{n:18,x:182}] ],
     22: [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}], [{n:7,x:18},{n:8,x:35},{n:9,x:165},{n:10,x:182}], [{n:11,x:18},{n:12,x:35},{n:13,x:165},{n:14,x:182}], [{n:15,x:18},{n:16,x:35},{n:17,x:165},{n:18,x:182}], [{n:19,x:18},{n:20,x:35},{n:21,x:165},{n:22,x:182}] ],
   };
-
+ 
   const ejes   = ejesPorTotal[total] || ejesPorTotal[6];
   const altura = 60 + ejes.length * 60;
   const yBase  = 40;
   const paso   = 60;
-
+ 
   return (
     <svg width="200" height={altura} viewBox={`0 0 200 ${altura}`} style={{display:"block",margin:"0 auto"}}>
   <rect x="65" y="10" width="70" height={altura-20} rx="6"
@@ -85,36 +85,32 @@ function DiagramaLlantas({ total, llantas, onSelect, llantaActiva }) {
 </svg>
   );
 }
-
-function Llantas({ vehiculos, onAgregar, mostrarToast }) {
+ 
+function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
   const navigate = useNavigate();
   const { id }   = useParams();
-
+ 
   const vehiculo   = vehiculos.find(v => String(v.firestoreId) === String(id));
   const tipoVeh    = vehiculo?.tipoVehiculo?.toUpperCase() || "";
   const cfgVeh     = CONFIGS_VEHICULO[tipoVeh] || { total: 6, label: tipoVeh };
   const totalLl    = cfgVeh.total;
   const posiciones = POSICIONES[totalLl] || [];
-
-  const claveLocal = `llantas_${id}`;
-  const [llantas,   setLlantas]   = useState(() => {
-    const g = localStorage.getItem(claveLocal);
-    return g ? JSON.parse(g) : {};
-  });
+ 
+  const [llantas,   setLlantas]   = useState(vehiculo?.llantasData || {});
   const [seleccionada, setSeleccionada] = useState(null);
   const [guardando,    setGuardando]    = useState(false);
-
+ 
   const [marca,  setMarca]  = useState("");
   const [ref,    setRef]    = useState("");
   const [prof,   setProf]   = useState("");
   const [kmMont, setKmMont] = useState("");
   const [estado, setEstado] = useState("ok");
   const [obs,    setObs]    = useState("");
-
+ 
   const guardarLocal = (nuevas) => {
-    localStorage.setItem(claveLocal, JSON.stringify(nuevas));
+    onEditarVehiculo(vehiculo.firestoreId, { llantasData: nuevas }).catch(()=>{});
   };
-
+ 
   const abrirDetalle = (n) => {
     setSeleccionada(n);
     const d = llantas[n] || {};
@@ -122,7 +118,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast }) {
     setProf(d.prof||""); setKmMont(d.km||"");
     setEstado(d.estado||"ok"); setObs(d.obs||"");
   };
-
+ 
   const guardarLlanta = () => {
     const nuevas = {
       ...llantas,
@@ -133,7 +129,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast }) {
     setSeleccionada(null);
     mostrarToast("Llanta guardada","exito");
   };
-
+ 
   if (!vehiculo) return (
     <div style={styles.pantalla}>
       <div style={styles.header}>
@@ -145,7 +141,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast }) {
       <p style={{textAlign:"center",padding:"40px",color:t.colors.textSecondary}}>Vehículo no encontrado.</p>
     </div>
   );
-
+ 
   return (
     <div style={styles.pantalla}>
       <div style={styles.header}>
@@ -155,16 +151,16 @@ function Llantas({ vehiculos, onAgregar, mostrarToast }) {
         </button>
         <h1 style={styles.titulo}>Llantas</h1>
       </div>
-
+ 
       <div style={styles.contenido}>
-
+ 
         {/* INFO VEHÍCULO */}
         <div style={styles.card}>
           <p style={styles.cardTitulo}>Vehículo</p>
           <p style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0}}>{vehiculo.placa}</p>
           <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0"}}>{cfgVeh.label} · {totalLl} llantas</p>
         </div>
-
+ 
         {/* DIAGRAMA */}
         <div style={styles.card}>
           <p style={styles.cardTitulo}>Toca una llanta para editar</p>
@@ -183,7 +179,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast }) {
             ))}
           </div>
         </div>
-
+ 
         {/* DETALLE LLANTA */}
         {seleccionada && (
           <div style={styles.card}>
@@ -245,7 +241,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast }) {
             </div>
           </div>
         )}
-
+ 
         {/* TABLA RESUMEN */}
         <div style={styles.card}>
           <p style={styles.cardTitulo}>Resumen de llantas</p>
@@ -272,12 +268,12 @@ function Llantas({ vehiculos, onAgregar, mostrarToast }) {
             );
           })}
         </div>
-
+ 
       </div>
     </div>
   );
 }
-
+ 
 const styles = {
   pantalla:   { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:     { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
@@ -291,5 +287,5 @@ const styles = {
   label:      { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
   input:      { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
 };
-
+ 
 export default Llantas;

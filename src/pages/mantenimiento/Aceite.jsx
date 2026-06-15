@@ -6,17 +6,13 @@ import { theme as t } from "../../styles/theme";
 const VISCOSIDADES = ["15W-40","20W-50","10W-40","5W-30","5W-40","15W-50","Otra"];
 const MARCAS_ACEITE = ["Mobil","Shell Rimula","Castrol","Chevron Delo","Valvoline","Kendall","Total","Otra"];
 
-function Aceite({ vehiculos, onAgregar, mostrarToast }) {
+function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
   const navigate = useNavigate();
   const { id }   = useParams();
 
   const vehiculo   = vehiculos.find(v => String(v.firestoreId) === String(id));
-  const claveLocal = `aceite_${id}`;
 
-  const [historial, setHistorial] = useState(() => {
-    const g = localStorage.getItem(claveLocal);
-    return g ? JSON.parse(g) : [];
-  });
+  const [historial, setHistorial] = useState(vehiculo?.aceiteHistorial || []);
 
   const [marca,       setMarca]       = useState("");
   const [referencia,  setReferencia]  = useState("");
@@ -40,7 +36,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast }) {
     const nuevo = { id:Date.now(), marca, referencia, viscosidad, galones:Number(galones)||0, km:Number(kmCambio), fecha, taller, telTaller, costo:Number(costo)||0, nota };
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
-    localStorage.setItem(claveLocal, JSON.stringify(nuevos));
+    onEditarVehiculo(vehiculo.firestoreId, { aceiteHistorial: nuevos }).catch(()=>{});
     setMarca(""); setReferencia(""); setGalones(""); setKmCambio(""); setTaller(""); setTelTaller(""); setCosto(""); setNota("");
     setMostrarForm(false);
     mostrarToast("Cambio de aceite registrado","exito");
@@ -50,7 +46,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast }) {
   const eliminar = (rid) => {
     const nuevos = historial.filter(r => r.id !== rid);
     setHistorial(nuevos);
-    localStorage.setItem(claveLocal, JSON.stringify(nuevos));
+    onEditarVehiculo(vehiculo.firestoreId, { aceiteHistorial: nuevos }).catch(()=>{});
     mostrarToast("Registro eliminado","info");
   };
 
