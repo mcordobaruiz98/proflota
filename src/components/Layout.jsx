@@ -2,10 +2,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {Home, Truck, Calculator, TrendingUp} from "lucide-react";
 import {theme as t} from "../styles/theme";
 
-// iOS standalone PWA detection
-const IOS_STANDALONE = !!(window.navigator.standalone);
-const SAFE_BOTTOM = IOS_STANDALONE ? 34 : 0;
-
 function Layout({ children }) {
   const navigate  = useNavigate();
   const location  = useLocation();
@@ -21,39 +17,41 @@ function Layout({ children }) {
   return (
     <div style={styles.contenedor}>
 
-      <div style={{paddingBottom: (72 + SAFE_BOTTOM) + "px"}}>
+      <div style={styles.pantalla}>
         {children}
       </div>
 
-      <nav style={{...styles.navbar, paddingBottom: SAFE_BOTTOM + "px"}}>
-  {tabs.map((tab) => {
-    const activo = ruta === tab.path;
-    return (
-      <button
-        key={tab.path}
-        style={{
-          ...styles.navBtn,
-          background: activo ? "#1E3A5F" : "transparent",
-          borderTop: activo ? `2px solid #22C55E` : "2px solid transparent",
-        }}
-        onClick={() => navigate(tab.path)}
-      >
-        <tab.Icono
-          size={22}
-          color={activo ? "#22C55E" : "#475569"}
-          strokeWidth={activo ? 2.5 : 1.8}
-        />
-        <span style={{
-          ...styles.navLabel,
-          color:      activo ? "#22C55E" : "#475569",
-          fontWeight: activo ? t.fonts.weightBold : t.fonts.weightNormal,
-        }}>
-          {tab.label}
-        </span>
-      </button>
-    );
-  })}
-</nav>
+      <nav style={styles.navbar}>
+        <div style={styles.navInner}>
+          {tabs.map((tab) => {
+            const activo = ruta === tab.path;
+            return (
+              <button
+                key={tab.path}
+                style={{
+                  ...styles.navBtn,
+                  background: activo ? "#1E3A5F" : "transparent",
+                  borderTop: activo ? `2px solid #22C55E` : "2px solid transparent",
+                }}
+                onClick={() => navigate(tab.path)}
+              >
+                <tab.Icono
+                  size={22}
+                  color={activo ? "#22C55E" : "#475569"}
+                  strokeWidth={activo ? 2.5 : 1.8}
+                />
+                <span style={{
+                  ...styles.navLabel,
+                  color:      activo ? "#22C55E" : "#475569",
+                  fontWeight: activo ? t.fonts.weightBold : t.fonts.weightNormal,
+                }}>
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
 
     </div>
   );
@@ -61,24 +59,27 @@ function Layout({ children }) {
 
 const styles = {
   contenedor: {
-    maxWidth:   "430px",
-    margin:     "0 auto",
-    minHeight:  "100dvh",
-    position:   "relative",
-    background: "#0A1A2F",
+    maxWidth:        "430px",
+    margin:          "0 auto",
+    minHeight:       "100dvh",
+    display:         "flex",
+    flexDirection:   "column",
+    background:      "#0A1A2F",
+  },
+  pantalla: {
+    flex:            1,
+    overflowY:       "auto",
+    WebkitOverflowScrolling: "touch",
   },
   navbar: {
-    position:        "fixed",
-    bottom:          0,
-    left:            "50%",
-    transform:       "translateX(-50%)",
-    width:           "100%",
-    maxWidth:        "430px",
+    flexShrink:      0,
     background:      "#0A1A2F",
-    borderTop:       '1px solid #1E3A5F',
-    display:         "flex",
-    zIndex:          100,
+    borderTop:       "1px solid #1E3A5F",
     boxShadow:       "0 -2px 10px rgba(0,0,0,0.15)",
+    paddingBottom:   "env(safe-area-inset-bottom, 0px)",
+  },
+  navInner: {
+    display:         "flex",
   },
   navBtn: {
     flex:            1,
@@ -92,11 +93,10 @@ const styles = {
     cursor:          "pointer",
   },
   navLabel: {
-    fontSize:      "9px",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
+    fontSize:        "9px",
+    textTransform:   "uppercase",
+    letterSpacing:   "0.05em",
   },
 };
 
 export default Layout;
-
