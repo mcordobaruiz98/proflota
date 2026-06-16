@@ -152,8 +152,10 @@ function AppContenido() {
         <RutaProtegida>
           <DetalleViaje
             viajes={viajes}
+            vehiculos={vehiculos}
             onEliminar={eliminarViaje}
             onEditar={editarViaje}
+            onEditarVehiculo={editarVehiculo}
             mostrarToast={mostrar}
           />
         </RutaProtegida>

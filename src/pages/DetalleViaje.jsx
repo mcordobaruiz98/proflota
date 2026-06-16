@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
-function DetalleViaje({ viajes = [], onEliminar, onEditar, mostrarToast }) {
+function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEditarVehiculo, mostrarToast }) {
   const navigate = useNavigate();
   const { id }   = useParams();
 
@@ -104,6 +104,14 @@ function DetalleViaje({ viajes = [], onEliminar, onEditar, mostrarToast }) {
   };
 
   const eliminarViaje = async () => {
+    // Restar km del odómetro
+    if (viaje.placa && viaje.kmT > 0) {
+      const veh = vehiculos.find(v => v.placa === viaje.placa);
+      if (veh && veh.kmOdometro) {
+        const nuevoKm = Math.max(0, (veh.kmOdometro || 0) - viaje.kmT);
+        onEditarVehiculo(veh.firestoreId, { kmOdometro: nuevoKm }).catch(()=>{});
+      }
+    }
     await onEliminar(viaje.firestoreId);
     mostrarToast("Viaje eliminado", "info");
     navigate(-1);
