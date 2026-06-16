@@ -1369,4 +1369,3 @@ const styles = {
   label:               { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
 };
 
-export default DetalleVehiculo;
