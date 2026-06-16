@@ -80,7 +80,7 @@ function Registro() {
           <label style={styles.label}>Nombre completo</label>
           <input
             type="text"
-            placeholder="Juan Pérez"
+            placeholder="Nombre y apellido"
             value={nombre}
             onChange={(e) => { setNombre(e.target.value); setErrores({ ...errores, nombre: null }); }}
             style={styles.input}
@@ -92,7 +92,7 @@ function Registro() {
           <label style={styles.label}>Correo electrónico</label>
           <input
             type="email"
-            placeholder="correo@ejemplo.com"
+            placeholder="Ingresa tu dirección de correo electrónico"
             value={correo}
             onChange={(e) => { setCorreo(e.target.value); setErrores({ ...errores, correo: null }); }}
             style={styles.input}
@@ -155,7 +155,7 @@ function Registro() {
           onClick={handleRegistro}
           disabled={cargando}
         >
-          {cargando ? "Creando cuenta..." : "Crear cuenta"}
+          {cargando ? "Creando cuenta..." : "CREAR CUENTA"}
         </button>
         </form>
 

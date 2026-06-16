@@ -69,7 +69,7 @@ function Login() {
           <label style={styles.label}>Correo electrónico</label>
           <input
             type="email"
-            placeholder="correo@ejemplo.com"
+            placeholder="Ingresa tu correo electrónico"
             value={correo}
             onChange={(e) => { setCorreo(e.target.value); setError(""); }}
             style={styles.input}
@@ -112,7 +112,7 @@ function Login() {
           type="submit"
           disabled={cargando}
         >
-          {cargando ? "Ingresando..." : "Ingresar"}
+          {cargando ? "Ingresando..." : "INGRESAR"}
         </button>
 
         <div style={styles.separador}>
@@ -146,7 +146,7 @@ function Login() {
           style={styles.btnRegistro}
           onClick={() => navigate("/registro")}
         >
-          Crea tu cuenta
+          CREAR CUENTA
         </button>
       </div>
 
