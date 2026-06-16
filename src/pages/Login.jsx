@@ -146,7 +146,7 @@ function Login() {
           style={styles.btnRegistro}
           onClick={() => navigate("/registro")}
         >
-          Crear cuenta gratis
+          Crea tu cuenta
         </button>
       </div>
 
