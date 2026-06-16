@@ -331,7 +331,7 @@ const guardarRutaFrecuente = async () => {
       style={{background:"none", border:"none", cursor:"pointer", fontSize:"14px", color:t.colors.green, padding:0}}
       onClick={()=>setRutaCargada(null)}
     >
-      ✕
+      
     </button>
   </div>
 )}
