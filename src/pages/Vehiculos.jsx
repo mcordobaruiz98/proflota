@@ -89,12 +89,19 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}
       <div style={styles.lista}>
         {vehiculosFiltrados.map((vehiculo) => {
           const viajesVeh  = viajes.filter((v) => v.placa === vehiculo.placa);
-          const gananciaTot = viajesVeh.reduce((s, v) => s + (v.neta || 0), 0);
+          const estado = vehiculo.estado || "disponible";
+          const ESTADOS = {
+            disponible:      { label:"Disponible",      color:t.colors.green,  bg:t.colors.greenSoft },
+            en_viaje:        { label:"En viaje",         color:t.colors.blue,   bg:t.colors.blueSoft },
+            en_taller:       { label:"En taller",        color:t.colors.amber,  bg:"#FEF3C7" },
+            esperando_carga: { label:"Esperando carga",  color:t.colors.textTertiary, bg:t.colors.bgSection },
+          };
+          const est = ESTADOS[estado] || ESTADOS.disponible;
           return (
             <div key={vehiculo.firestoreId} style={styles.tarjeta}>
 
               {/* Franja lateral */}
-              <div style={styles.tarjetaFranja} />
+              <div style={{...styles.tarjetaFranja, background:est.color}} />
 
               {/* Contenido */}
               <div
@@ -105,8 +112,8 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}
     <img src={vehiculo.fotoUrl} alt={vehiculo.placa}
       style={{width:"56px", height:"56px", objectFit:"cover", borderRadius:t.radius.md, flexShrink:0}}/>
   ) : (
-    <div style={styles.tarjetaIconoWrap}>
-      <Truck size={24} color={t.colors.blue} strokeWidth={1.8} />
+    <div style={{...styles.tarjetaIconoWrap, background:est.bg}}>
+      <Truck size={24} color={est.color} strokeWidth={1.8} />
     </div>
   )}
   <div style={styles.tarjetaInfo}>
@@ -116,21 +123,13 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}
       {vehiculo.tipoRemolque ? ` · ${vehiculo.tipoRemolque}` : ""}
     </p>
     <div style={styles.tarjetaStats}>
+      <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:est.color,background:est.bg,padding:"2px 8px",borderRadius:t.radius.full}}>
+        {est.label}
+      </span>
+      <span style={styles.tarjetaStatDot}>·</span>
       <span style={styles.tarjetaStat}>
         {viajesVeh.length} viaje{viajesVeh.length !== 1 ? "s" : ""}
       </span>
-      {viajesVeh.length > 0 && (
-        <>
-          <span style={styles.tarjetaStatDot}>·</span>
-          <span style={{
-            ...styles.tarjetaStat,
-            color: gananciaTot >= 0 ? t.colors.green : t.colors.red,
-            fontWeight: t.fonts.weightSemibold,
-          }}>
-            {fmt(gananciaTot)}
-          </span>
-        </>
-      )}
     </div>
   </div>
 </div>
@@ -198,5 +197,3 @@ const styles = {
 };
 
 export default Vehiculos;
-
-

@@ -388,6 +388,37 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
         </div>
       </div>
 
+      {/* ESTADO DEL VEHÍCULO */}
+      <div style={{background:t.colors.bgCard, padding:"0 16px 12px", display:"flex", gap:"6px"}}>
+        {[
+          {id:"disponible",      label:"Disponible",      color:t.colors.green},
+          {id:"en_viaje",        label:"En viaje",         color:t.colors.blue},
+          {id:"en_taller",       label:"En taller",        color:t.colors.amber},
+          {id:"esperando_carga", label:"Esperando",        color:t.colors.textTertiary},
+        ].map(e => {
+          const activo = (vehiculo.estado || "disponible") === e.id;
+          return (
+            <button
+              key={e.id}
+              style={{
+                flex:1, padding:"6px 4px", borderRadius:t.radius.sm, border:"none", cursor:"pointer",
+                fontSize:"10px", fontWeight:t.fonts.weightBold, textTransform:"uppercase", letterSpacing:"0.03em",
+                background: activo ? e.color+"22" : t.colors.bgSection,
+                color: activo ? e.color : t.colors.textTertiary,
+                border: activo ? `1.5px solid ${e.color}` : `1.5px solid transparent`,
+              }}
+              onClick={async()=>{
+                try {
+                  await onEditarVehiculo(vehiculo.firestoreId, { estado: e.id });
+                } catch(err){}
+              }}
+            >
+              {e.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* TABS */}
       <div style={styles.tabsWrap}>
         {tabs.map(tab => {
