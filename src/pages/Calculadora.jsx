@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Plus, X, ChevronDown } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
-const ADBLUE_RATIO = 0.18925;
+const DEFAULT_ADBLUE = 0.18925;
 
 function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, onGuardarRuta, onEliminarRuta, onEditarVehiculo, mostrarToast }) {
   const PEAJES_CO = peajes.length > 0 
@@ -19,6 +19,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   const [lugarCargue,      setLugarCargue]        = useState("");
   const [lugarDescargue,   setLugarDescargue]     = useState("");
   const [observaciones,    setObservaciones]      = useState("");
+  const [anticipoMonto,    setAnticipoMonto]      = useState("");
   const [placa,            setPlaca]              = useState("");
   const [tipoCarga,        setTipoCarga]          = useState("");
   const [producto,         setProducto]           = useState("");
@@ -111,7 +112,9 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
     galTotal = n(galManual);
   }
 
-  const adblLt    = galTotal * ADBLUE_RATIO;
+  const vehiculoSel = vehiculos.find(v => v.placa === placa);
+  const adblueRatio = vehiculoSel?.adblueRatio || DEFAULT_ADBLUE;
+  const adblLt    = galTotal * adblueRatio;
   const costoAcpm = galTotal * n(precioAcpm);
   const costoAdbl = adblLt   * n(precioAdblue);
   const costoComb = costoAcpm + costoAdbl;
@@ -176,6 +179,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
       remesa: remesa.trim(), pesoBascula: Number(pesoBascula)||0,
       lugarCargue: lugarCargue.trim(), lugarDescargue: lugarDescargue.trim(),
       observaciones: observaciones.trim(),
+      anticipoMonto: n(anticipoMonto),
       kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmT: kmTotal,
       ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
       tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(), fleteRetorno: n(fleteRetorno),
@@ -226,7 +230,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
     t: { [rutaGuardada.categoria || "VII"]: p.tarifa || 0 },
   })));
   // Datos adicionales
-  if (rutaGuardada.producto)        setProducto(rutaCargada.producto);
+  if (rutaGuardada.producto)        setProducto(rutaGuardada.producto);
   if (rutaGuardada.empresa)         setEmpresa(rutaGuardada.empresa);
   if (rutaGuardada.contactoEmpresa) setContactoEmpresa(rutaGuardada.contactoEmpresa);
   if (rutaGuardada.celularEmpresa)  setCelularEmpresa(rutaGuardada.celularEmpresa);
@@ -237,6 +241,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   if (rutaGuardada.porcCond)        setPorcCond(rutaGuardada.porcCond);
   if (rutaGuardada.carpado)         setCarpado(rutaGuardada.carpado);
   if (rutaGuardada.gastosViaje)     setGastosViaje(rutaGuardada.gastosViaje);
+  if (rutaGuardada.anticipoMonto)   setAnticipoMonto(rutaGuardada.anticipoMonto);
   // Descuentos de ley
   if (rutaGuardada.descRetefuente !== undefined) setDescRetefuente(rutaGuardada.descRetefuente);
   if (rutaGuardada.pctRetefuente)   setPctRetefuente(rutaGuardada.pctRetefuente);
@@ -286,6 +291,7 @@ const guardarRutaFrecuente = async () => {
     pctReteica:      pctReteica,
     descFopat:       descFopat,
     pctFopat:        pctFopat,
+    anticipoMonto:   n(anticipoMonto),
   };
 
   try {
@@ -581,6 +587,12 @@ const guardarRutaFrecuente = async () => {
     onChange={e=>setObservaciones(e.target.value)} style={styles.input}/>
 </div>
 
+<div style={styles.campo}>
+  <label style={styles.label}>Anticipo al conductor ($)</label>
+  <input type="number" placeholder="3000000" value={anticipoMonto}
+    onChange={e=>setAnticipoMonto(e.target.value)} style={styles.input}/>
+</div>
+
 
   {/* GUARDAR RUTA */}
 <div style={{marginTop:"10px", borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px"}}>
@@ -801,7 +813,7 @@ const guardarRutaFrecuente = async () => {
               <div style={styles.resumenFila}><span style={styles.resumenL}>Galones vacío</span><span style={styles.resumenV}>{fnD(galVac,2)} gal</span></div>
             </>}
             <div style={styles.resumenFila}><span style={styles.resumenL}>Total ACPM</span><span style={styles.resumenV}>{fnD(galTotal,2)} gal</span></div>
-            <div style={styles.resumenFila}><span style={styles.resumenL}>Adblue (18.9%)</span><span style={styles.resumenV}>{fnD(adblLt,2)} lt</span></div>
+            <div style={styles.resumenFila}><span style={styles.resumenL}>Adblue ({(adblueRatio*100).toFixed(1)}%)</span><span style={styles.resumenV}>{fnD(adblLt,2)} lt</span></div>
             <div style={{...styles.resumenFila, borderBottom:"none", paddingTop:"8px"}}>
               <span style={{...styles.resumenL, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary}}>Combustible + Adblue</span>
               <span style={{...styles.resumenV, color: t.colors.red, fontWeight: t.fonts.weightBold}}>{fmt(costoComb)}</span>

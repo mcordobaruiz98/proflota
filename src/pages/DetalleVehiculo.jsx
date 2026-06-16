@@ -279,6 +279,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
       propietario:   vehiculo.propietario    || "",
       tenedor:       vehiculo.tenedor        || "",
       fotoUrl:       vehiculo.fotoUrl        || "",
+      adblueRatio:   vehiculo.adblueRatio    || 0,
     });
     setEditando(true);
   };
@@ -299,6 +300,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
         placaRemolque: editData.placaRemolque.trim().toUpperCase(),
         propietario: editData.propietario.trim(),
         tenedor: editData.tenedor.trim(),
+        adblueRatio: editData.adblueRatio || 0,
       });
       mostrarToast("Vehículo actualizado","exito");
       setEditando(false);
@@ -465,6 +467,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   {label:"Modelo",           valor:vehiculo.modelo},
                   {label:"Propietario",      valor:vehiculo.propietario},
                   {label:"Tenedor",          valor:vehiculo.tenedor},
+                  {label:"Consumo Adblue",   valor:vehiculo.adblueRatio ? `${(vehiculo.adblueRatio*100).toFixed(1)}%` : "18.9% (default)"},
                 ].map((item,i,arr)=>(
                   <div key={item.label} style={{...styles.fila, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                     <span style={styles.filaLabel}>{item.label}</span>
@@ -532,6 +535,13 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   <label style={styles.label}>Tenedor</label>
                   <input type="text" value={editData.tenedor}
                     onChange={e=>setEditData({...editData,tenedor:e.target.value})} style={styles.input} />
+                </div>
+                <div style={styles.campo}>
+                  <label style={styles.label}>Consumo Adblue (%)</label>
+                  <input type="number" placeholder="18.9" step="0.1"
+                    value={editData.adblueRatio ? (editData.adblueRatio * 100).toFixed(1) : ""}
+                    onChange={e=>setEditData({...editData, adblueRatio: Number(e.target.value)/100 || 0})}
+                    style={styles.input} />
                 </div>
               </div>
             )}
