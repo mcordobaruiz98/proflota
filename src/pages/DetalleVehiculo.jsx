@@ -380,43 +380,34 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
           </div>
           <div style={styles.metricaSep} />
           <div style={styles.metrica}>
-            <p style={{...styles.metricaVal, color:gananciaNeta>=0?t.colors.green:t.colors.red}}>
-              {fmt(gananciaNeta)}
-            </p>
-            <p style={styles.metricaLabel}>Ganancia neta</p>
+            {(() => {
+              const estado = vehiculo.estado || "disponible";
+              const EST = {
+                disponible:      { label:"Disponible",     color:t.colors.green },
+                en_viaje:        { label:"En viaje",        color:t.colors.blue },
+                en_taller:       { label:"En taller",       color:t.colors.amber },
+                esperando_carga: { label:"Esperando carga", color:t.colors.textTertiary },
+              };
+              const estados = ["disponible","en_viaje","en_taller","esperando_carga"];
+              const e = EST[estado] || EST.disponible;
+              return (
+                <div
+                  style={{display:"flex",flexDirection:"column",alignItems:"center",cursor:"pointer"}}
+                  onClick={async()=>{
+                    const idx = estados.indexOf(estado);
+                    const siguiente = estados[(idx+1) % estados.length];
+                    try { await onEditarVehiculo(vehiculo.firestoreId, { estado: siguiente }); } catch(err){}
+                  }}
+                >
+                  <div style={{width:"40px",height:"40px",borderRadius:t.radius.sm,background:e.color+"22",display:"flex",alignItems:"center",justifyContent:"center",border:`1.5px solid ${e.color}`}}>
+                    <Truck size={22} color={e.color} strokeWidth={2} />
+                  </div>
+                  <p style={{fontSize:t.fonts.sizeXs,color:e.color,margin:"4px 0 0",fontWeight:t.fonts.weightBold}}>{e.label}</p>
+                </div>
+              );
+            })()}
           </div>
         </div>
-      </div>
-
-      {/* ESTADO DEL VEHÍCULO */}
-      <div style={{background:t.colors.bgCard, padding:"0 16px 12px", display:"flex", gap:"6px"}}>
-        {[
-          {id:"disponible",      label:"Disponible",      color:t.colors.green},
-          {id:"en_viaje",        label:"En viaje",         color:t.colors.blue},
-          {id:"en_taller",       label:"En taller",        color:t.colors.amber},
-          {id:"esperando_carga", label:"Esperando",        color:t.colors.textTertiary},
-        ].map(e => {
-          const activo = (vehiculo.estado || "disponible") === e.id;
-          return (
-            <button
-              key={e.id}
-              style={{
-                flex:1, padding:"6px 4px", borderRadius:t.radius.sm, border:"none", cursor:"pointer",
-                fontSize:"10px", fontWeight:t.fonts.weightBold, textTransform:"uppercase", letterSpacing:"0.03em",
-                background: activo ? e.color+"22" : t.colors.bgSection,
-                color: activo ? e.color : t.colors.textTertiary,
-                border: activo ? `1.5px solid ${e.color}` : `1.5px solid transparent`,
-              }}
-              onClick={async()=>{
-                try {
-                  await onEditarVehiculo(vehiculo.firestoreId, { estado: e.id });
-                } catch(err){}
-              }}
-            >
-              {e.label}
-            </button>
-          );
-        })}
       </div>
 
       {/* TABS */}
