@@ -217,7 +217,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
     t: { [rutaGuardada.categoria || "VII"]: p.tarifa || 0 },
   })));
   // Datos adicionales
-  if (rutaGuardada.producto)        setProducto(rutaCargada.producto);
+  if (rutaGuardada.producto)        setProducto(rutaGuardada.producto);
   if (rutaGuardada.empresa)         setEmpresa(rutaGuardada.empresa);
   if (rutaGuardada.contactoEmpresa) setContactoEmpresa(rutaGuardada.contactoEmpresa);
   if (rutaGuardada.celularEmpresa)  setCelularEmpresa(rutaGuardada.celularEmpresa);
