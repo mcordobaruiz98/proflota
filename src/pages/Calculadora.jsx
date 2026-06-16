@@ -12,6 +12,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   const navigate = useNavigate();
 
   const [fecha,            setFecha]              = useState(new Date().toISOString().slice(0,10));
+  const [fechaDescarga,    setFechaDescarga]      = useState("");
   const [mani,             setMani]               = useState("");
   const [remesa,           setRemesa]             = useState("");
   const [pesoBascula,      setPesoBascula]        = useState("");
@@ -170,7 +171,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
     if (!valorViaje)   { mostrarToast("Ingresa tonelaje y flete","error"); return; }
     setGuardando(true);
     await onGuardar({
-      fecha, mani, placa, tipoCarga, prod: producto,
+      fecha, fechaDescarga, mani, placa, tipoCarga, prod: producto,
       ruta: ruta.trim(), emp: empresa, condNom: conductor, contactoEmpresa, celularEmpresa,
       remesa: remesa.trim(), pesoBascula: Number(pesoBascula)||0,
       lugarCargue: lugarCargue.trim(), lugarDescargue: lugarDescargue.trim(),
@@ -394,10 +395,13 @@ const guardarRutaFrecuente = async () => {
       <div style={styles.card}>
         <div style={styles.fila2}>
           <div style={styles.campo}>
-            <label style={styles.label}>Fecha</label>
+            <label style={styles.label}>Fecha de cargue</label>
             <input type="date" value={fecha} onChange={e=>setFecha(e.target.value)} style={styles.input} />
           </div>
-
+          <div style={styles.campo}>
+            <label style={styles.label}>Fecha de descargue</label>
+            <input type="date" value={fechaDescarga} onChange={e=>setFechaDescarga(e.target.value)} style={styles.input} />
+          </div>
         </div>
         <div style={styles.fila2}>
           <div style={styles.campo}>
@@ -701,14 +705,11 @@ const guardarRutaFrecuente = async () => {
         
         {/* RETORNO */}
       <div style={{marginTop:"10px"}}>
-      <div style={{display:"flex", alignItems:"center", gap:"10px"}}>
-      <input
-        type="checkbox"
-        checked={tieneRetorno}
-        onChange={e=>setTieneRetorno(e.target.checked)}
-        style={{width:"18px",height:"18px",cursor:"pointer",accentColor:t.colors.blue}}
-      />
-        <label style={{...styles.label, textTransform:"none", letterSpacing:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightMedium}}>
+      <div style={{display:"flex", alignItems:"center", gap:"10px", cursor:"pointer"}} onClick={()=>setTieneRetorno(!tieneRetorno)}>
+      <div style={{width:"42px",height:"24px",borderRadius:"12px",background:tieneRetorno?t.colors.blue:"#1E3A5F",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+        <div style={{width:"20px",height:"20px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:tieneRetorno?"20px":"2px",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}} />
+      </div>
+        <label style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightMedium, color:t.colors.textPrimary, cursor:"pointer"}}>
         ¿Regresa con carga? (flete de retorno)
         </label>
       </div>
@@ -978,13 +979,10 @@ const guardarRutaFrecuente = async () => {
       padding:"10px 0",
       borderBottom: i===arr.length-1 ? "none" : `1px solid ${t.colors.borderLight}`,
     }}>
-      <div style={{display:"flex", alignItems:"center", gap:"10px"}}>
-        <input
-          type="checkbox"
-          checked={d.activo}
-          onChange={e=>d.setActivo(e.target.checked)}
-          style={{width:"18px", height:"18px", cursor:"pointer", accentColor:t.colors.blue}}
-        />
+      <div style={{display:"flex", alignItems:"center", gap:"10px", cursor:"pointer"}} onClick={()=>d.setActivo(!d.activo)}>
+        <div style={{width:"36px",height:"20px",borderRadius:"10px",background:d.activo?t.colors.blue:"#1E3A5F",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+          <div style={{width:"16px",height:"16px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:d.activo?"18px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
+        </div>
         <div>
           <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{d.label}</p>
           <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0"}}>{d.sub}</p>
@@ -1006,13 +1004,10 @@ const guardarRutaFrecuente = async () => {
 
   {/* OTRO */}
   <div style={{borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px", marginTop:"4px"}}>
-    <div style={{display:"flex", alignItems:"center", gap:"10px", marginBottom:"8px"}}>
-      <input
-        type="checkbox"
-        checked={descOtro}
-        onChange={e=>setDescOtro(e.target.checked)}
-        style={{width:"18px", height:"18px", cursor:"pointer", accentColor:t.colors.blue}}
-      />
+    <div style={{display:"flex", alignItems:"center", gap:"10px", marginBottom:"8px", cursor:"pointer"}} onClick={()=>setDescOtro(!descOtro)}>
+      <div style={{width:"36px",height:"20px",borderRadius:"10px",background:descOtro?t.colors.blue:"#1E3A5F",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+        <div style={{width:"16px",height:"16px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:descOtro?"18px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
+      </div>
       <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>Otro descuento</p>
     </div>
     {descOtro && (
