@@ -56,12 +56,13 @@ function Login() {
       {/* HERO */}
       <div style={styles.hero}>
         <div style={styles.logoWrap}>
-          <img src="/logo-naviraT.png" alt="Navira" style={{ height: "120px", objectFit: "contain" }} />
+          <img src="/logo-navira.png" alt="Navira" style={{ height: "80px", objectFit: "contain" }} />
+          <p style={styles.logoSub}>Controla tus fletes. Maximiza tus ganancias.</p>
         </div>
       </div>
 
       {/* CARD */}
-      <div style={styles.card}>
+      <form style={styles.card} onSubmit={e=>{e.preventDefault();handleLogin();}}>
 
         <h2 style={styles.cardTitulo}>Iniciar sesión</h2>
 
@@ -109,7 +110,7 @@ function Login() {
             ...styles.btnPrimario,
             opacity: cargando ? 0.75 : 1,
           }}
-          onClick={handleLogin}
+          type="submit"
           disabled={cargando}
         >
           {cargando ? "Ingresando..." : "Ingresar"}
@@ -123,6 +124,7 @@ function Login() {
 
         <button
           style={styles.btnGoogle}
+          type="button"
           onClick={handleGoogle}
           disabled={cargando}
         >
@@ -136,7 +138,7 @@ function Login() {
           Continuar con Google
         </button>
 
-      </div>
+      </form>
 
       {/* FOOTER */}
       <div style={styles.footer}>
@@ -145,7 +147,7 @@ function Login() {
           style={styles.btnRegistro}
           onClick={() => navigate("/registro")}
         >
-          Crear tu cuenta
+          Crear cuenta gratis
         </button>
       </div>
 
@@ -179,4 +181,3 @@ const styles = {
 };
 
 export default Login;
-
