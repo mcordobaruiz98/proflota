@@ -13,6 +13,11 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
 
   const [fecha,            setFecha]              = useState(new Date().toISOString().slice(0,10));
   const [mani,             setMani]               = useState("");
+  const [remesa,           setRemesa]             = useState("");
+  const [pesoBascula,      setPesoBascula]        = useState("");
+  const [lugarCargue,      setLugarCargue]        = useState("");
+  const [lugarDescargue,   setLugarDescargue]     = useState("");
+  const [observaciones,    setObservaciones]      = useState("");
   const [placa,            setPlaca]              = useState("");
   const [tipoCarga,        setTipoCarga]          = useState("");
   const [producto,         setProducto]           = useState("");
@@ -167,6 +172,9 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
     await onGuardar({
       fecha, mani, placa, tipoCarga, prod: producto,
       ruta: ruta.trim(), emp: empresa, condNom: conductor, contactoEmpresa, celularEmpresa,
+      remesa: remesa.trim(), pesoBascula: Number(pesoBascula)||0,
+      lugarCargue: lugarCargue.trim(), lugarDescargue: lugarDescargue.trim(),
+      observaciones: observaciones.trim(),
       kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmT: kmTotal,
       ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
       tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(), fleteRetorno: n(fleteRetorno),
@@ -217,11 +225,13 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
     t: { [rutaGuardada.categoria || "VII"]: p.tarifa || 0 },
   })));
   // Datos adicionales
-  if (rutaGuardada.producto)        setProducto(rutaGuardada.producto);
+  if (rutaGuardada.producto)        setProducto(rutaCargada.producto);
   if (rutaGuardada.empresa)         setEmpresa(rutaGuardada.empresa);
   if (rutaGuardada.contactoEmpresa) setContactoEmpresa(rutaGuardada.contactoEmpresa);
   if (rutaGuardada.celularEmpresa)  setCelularEmpresa(rutaGuardada.celularEmpresa);
   if (rutaGuardada.conductor)       setConductor(rutaGuardada.conductor);
+  if (rutaGuardada.lugarCargue)     setLugarCargue(rutaGuardada.lugarCargue);
+  if (rutaGuardada.lugarDescargue)  setLugarDescargue(rutaGuardada.lugarDescargue);
   if (rutaGuardada.modoConductor)   setModoConductor(rutaGuardada.modoConductor);
   if (rutaGuardada.porcCond)        setPorcCond(rutaGuardada.porcCond);
   if (rutaGuardada.carpado)         setCarpado(rutaGuardada.carpado);
@@ -262,6 +272,8 @@ const guardarRutaFrecuente = async () => {
     contactoEmpresa: contactoEmpresa,
     celularEmpresa:  celularEmpresa,
     conductor:       conductor,
+    lugarCargue:     lugarCargue.trim(),
+    lugarDescargue:  lugarDescargue.trim(),
     modoConductor:   modoConductor,
     porcCond:        n(porcCond),
     carpado:         n(carpado),
@@ -331,7 +343,7 @@ const guardarRutaFrecuente = async () => {
       style={{background:"none", border:"none", cursor:"pointer", fontSize:"14px", color:t.colors.green, padding:0}}
       onClick={()=>setRutaCargada(null)}
     >
-      
+      ✕
     </button>
   </div>
 )}
@@ -531,6 +543,38 @@ const guardarRutaFrecuente = async () => {
   <label style={styles.label}>Manifiesto</label>
   <input type="text" placeholder="123456789" value={mani}
     onChange={e=>setMani(e.target.value)} style={styles.input}/>
+</div>
+
+<div style={styles.fila2}>
+  <div style={styles.campo}>
+    <label style={styles.label}>N° Remesa</label>
+    <input type="text" placeholder="REM-001" value={remesa}
+      onChange={e=>setRemesa(e.target.value)} style={styles.input}/>
+  </div>
+  <div style={styles.campo}>
+    <label style={styles.label}>Peso báscula (ton)</label>
+    <input type="number" placeholder="34.5" value={pesoBascula}
+      onChange={e=>setPesoBascula(e.target.value)} style={styles.input}/>
+  </div>
+</div>
+
+<div style={styles.fila2}>
+  <div style={styles.campo}>
+    <label style={styles.label}>Lugar de cargue</label>
+    <input type="text" placeholder="Bodega X, Km 5" value={lugarCargue}
+      onChange={e=>setLugarCargue(e.target.value)} style={styles.input}/>
+  </div>
+  <div style={styles.campo}>
+    <label style={styles.label}>Lugar de descargue</label>
+    <input type="text" placeholder="Puerto Y" value={lugarDescargue}
+      onChange={e=>setLugarDescargue(e.target.value)} style={styles.input}/>
+  </div>
+</div>
+
+<div style={styles.campo}>
+  <label style={styles.label}>Observaciones</label>
+  <input type="text" placeholder="Novedades del viaje..." value={observaciones}
+    onChange={e=>setObservaciones(e.target.value)} style={styles.input}/>
 </div>
 
 
