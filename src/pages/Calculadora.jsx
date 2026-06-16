@@ -489,7 +489,7 @@ const guardarRutaFrecuente = async () => {
 }}
       style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
     >
-      <option value="__nueva__">+ Escribir nueva empresa</option>
+      <option value="__nueva__">Nueva empresa</option>
       {empresasFrecuentes.map((emp, i) => (
         <option key={i} value={emp}>{emp}</option>
       ))}
@@ -533,7 +533,7 @@ const guardarRutaFrecuente = async () => {
       }}
       style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
     >
-      <option value="__nuevo__">+ Escribir nuevo conductor</option>
+      <option value="__nuevo__">Nuevo conductor</option>
       {conductoresFrecuentes.map((c,i) => (
         <option key={i} value={c}>{c}</option>
       ))}
@@ -660,8 +660,8 @@ const guardarRutaFrecuente = async () => {
     onChange={e => setModoFlete(e.target.value)}
     style={styles.input}
   >
-    <option value="porTon">Por tonelada ($/ton)</option>
-    <option value="porViaje">Por viaje (valor fijo)</option>
+    <option value="porTon">Variable ($/Ton)</option>
+    <option value="porViaje">Fijo ($/Viaje)</option>
   </select>
 </div>
 
