@@ -28,6 +28,11 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
   const [fleteTon,  setFleteTon]  = useState("");
   const [kmCargado, setKmCargado] = useState("");
   const [kmVacio,   setKmVacio]   = useState("");
+  const [remesaE,   setRemesaE]   = useState("");
+  const [pesoBasE,  setPesoBasE]  = useState("");
+  const [lugarCE,   setLugarCE]   = useState("");
+  const [lugarDE,   setLugarDE]   = useState("");
+  const [obsE,      setObsE]      = useState("");
 
   const fmt = (n) => "$" + Math.round(n||0).toLocaleString("es-CO");
   const fnD = (n,d) => (Math.round((n||0)*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
@@ -44,6 +49,10 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       viaje.condNom ? `👤 *Conductor:* ${viaje.condNom}` : null,
       viaje.prod ? `📦 *Producto:* ${viaje.prod}` : null,
       viaje.ton ? `⚖️ *Toneladas:* ${viaje.ton}` : null,
+      viaje.pesoBascula ? `⚖️ *Peso báscula:* ${viaje.pesoBascula} ton` : null,
+      viaje.remesa ? `📄 *Remesa:* ${viaje.remesa}` : null,
+      viaje.lugarCargue ? `📍 *Cargue:* ${viaje.lugarCargue}` : null,
+      viaje.lugarDescargue ? `📍 *Descargue:* ${viaje.lugarDescargue}` : null,
       ``,
       `💰 *Valor flete:* ${fmt(viaje.vViaje || 0)}`,
       `⛽ *Combustible:* ${fmt(viaje.cComb || 0)}`,
@@ -74,6 +83,11 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
     setFleteTon(viaje.fleteTon || "");
     setKmCargado(viaje.kmCargado || "");
     setKmVacio(viaje.kmVacio || "");
+    setRemesaE(viaje.remesa || "");
+    setPesoBasE(viaje.pesoBascula || "");
+    setLugarCE(viaje.lugarCargue || "");
+    setLugarDE(viaje.lugarDescargue || "");
+    setObsE(viaje.observaciones || "");
     setEditando(true);
   };
 
@@ -90,6 +104,11 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
         kmCargado: parseFloat(kmCargado)||viaje.kmCargado,
         kmVacio:   parseFloat(kmVacio)  ||viaje.kmVacio,
         kmT: (parseFloat(kmCargado)||viaje.kmCargado||0) + (parseFloat(kmVacio)||viaje.kmVacio||0),
+        remesa: remesaE.trim(),
+        pesoBascula: parseFloat(pesoBasE) || 0,
+        lugarCargue: lugarCE.trim(),
+        lugarDescargue: lugarDE.trim(),
+        observaciones: obsE.trim(),
         vViaje: viaje.modoFlete === "porViaje"
           ? parseFloat(fleteTon)||viaje.vViaje
           : (parseFloat(ton)||viaje.ton) * (parseFloat(fleteTon)||viaje.fleteTon),
@@ -261,6 +280,30 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 <input type="number" value={kmVacio} onChange={e=>setKmVacio(e.target.value)} style={styles.input}/>
               </div>
             </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>N° Remesa</label>
+                <input type="text" value={remesaE} onChange={e=>setRemesaE(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Peso báscula (ton)</label>
+                <input type="number" value={pesoBasE} onChange={e=>setPesoBasE(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>Lugar de cargue</label>
+                <input type="text" value={lugarCE} onChange={e=>setLugarCE(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Lugar de descargue</label>
+                <input type="text" value={lugarDE} onChange={e=>setLugarDE(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.campo}>
+              <label style={styles.label}>Observaciones</label>
+              <input type="text" value={obsE} onChange={e=>setObsE(e.target.value)} style={styles.input}/>
+            </div>
 
             <div style={{display:"flex", gap:"8px", marginTop:"8px"}}>
               <button
@@ -378,8 +421,13 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 {viaje.carga&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Tipo de carga</span><span style={styles.filaValor}>{viaje.carga}</span></div>}
                 {viaje.prod&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Producto</span><span style={styles.filaValor}>{viaje.prod}</span></div>}
                 {viaje.condNom&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Conductor</span><span style={styles.filaValor}>{viaje.condNom}</span></div>}
+                {viaje.remesa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>N° Remesa</span><span style={styles.filaValor}>{viaje.remesa}</span></div>}
+                {viaje.pesoBascula>0&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Peso báscula</span><span style={styles.filaValor}>{viaje.pesoBascula} ton</span></div>}
+                {viaje.lugarCargue&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Lugar de cargue</span><span style={styles.filaValor}>{viaje.lugarCargue}</span></div>}
+                {viaje.lugarDescargue&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Lugar de descargue</span><span style={styles.filaValor}>{viaje.lugarDescargue}</span></div>}
                 {viaje.contactoEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Contacto empresa</span><span style={styles.filaValor}>{viaje.contactoEmpresa}</span></div>}
-                {viaje.celularEmpresa&&<div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Celular contacto</span><a href={`tel:${viaje.celularEmpresa}`} style={{...styles.filaValor,color:t.colors.blue,textDecoration:"none"}}>{viaje.celularEmpresa}</a></div>}
+                {viaje.celularEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Celular contacto</span><a href={`tel:${viaje.celularEmpresa}`} style={{...styles.filaValor,color:t.colors.blue,textDecoration:"none"}}>{viaje.celularEmpresa}</a></div>}
+                {viaje.observaciones&&<div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Observaciones</span><span style={{...styles.filaValor,color:t.colors.textSecondary,fontStyle:"italic"}}>{viaje.observaciones}</span></div>}
               </div>
             )}
 
