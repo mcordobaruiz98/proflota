@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
 import { theme as t } from "../../styles/theme";
- 
+
 const CONFIGS_VEHICULO = {
   "TURBO SENCILLO":    { total: 4,  label: "Turbo 4 llantas" },
   "SENCILLO":          { total: 6,  label: "Sencillo" },
@@ -13,20 +13,20 @@ const CONFIGS_VEHICULO = {
   "TRACTOMULA 3S2":    { total: 18, label: "Tractomula 3S2" },
   "TRACTOMULA 3S3":    { total: 22, label: "Tractomula 3S3" },
 };
- 
+
 const POSICIONES = {
   4:  ["Del. izq","Del. der","Tras. izq","Tras. der"],
   6:  ["Del. izq","Del. der","Tras. izq int","Tras. izq ext","Tras. der int","Tras. der ext"],
   10: ["Del. izq","Del. der","Med. izq int","Med. izq ext","Med. der int","Med. der ext","Tras. izq int","Tras. izq ext","Tras. der int","Tras. der ext"],
-  14: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Rem1. izq int","Rem1. izq ext","Rem1. der int","Rem1. der ext","Rem2. izq int","Rem2. izq ext","Rem2. der int","Rem2. der ext"],
-  18: ["Del. izq","Del. der","Trac1. izq int","Trac1. izq ext","Trac1. der int","Trac1. der ext","Trac2. izq int","Trac2. izq ext","Trac2. der int","Trac2. der ext","Rem1. izq int","Rem1. izq ext","Rem1. der int","Rem1. der ext","Rem2. izq int","Rem2. izq ext","Rem2. der int","Rem2. der ext"],
-  22: ["Del. izq","Del. der","Trac1. izq int","Trac1. izq ext","Trac1. der int","Trac1. der ext","Trac2. izq int","Trac2. izq ext","Trac2. der int","Trac2. der ext","Rem1. izq int","Rem1. izq ext","Rem1. der int","Rem1. der ext","Rem2. izq int","Rem2. izq ext","Rem2. der int","Rem2. der ext","Rem3. izq int","Rem3. izq ext","Rem3. der int","Rem3. der ext"],
+  14: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Rem. izq int","Rem. izq ext","Rem. der int","Rem. der ext"],
+  18: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Trac3 izq int","Trac3 izq ext","Trac3 der int","Trac3 der ext","Rem. izq int","Rem. izq ext","Rem. der int","Rem. der ext"],
+  22: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Trac3 izq int","Trac3 izq ext","Trac3 der int","Trac3 der ext","Rem1 izq int","Rem1 izq ext","Rem1 der int","Rem1 der ext","Rem2 izq int","Rem2 izq ext","Rem2 der int","Rem2 der ext"],
 };
- 
+
 function estadoColor(e) {
   return e==="nueva"?"#0E7490":e==="ok"?"#16A34A":e==="warn"?"#D97706":"#DC2626";
 }
- 
+
 function DiagramaLlantas({ total, llantas, onSelect, llantaActiva }) {
   const ejesPorTotal = {
     4:  [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:30},{n:4,x:170}] ],
@@ -36,43 +36,62 @@ function DiagramaLlantas({ total, llantas, onSelect, llantaActiva }) {
     18: [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}], [{n:7,x:18},{n:8,x:35},{n:9,x:165},{n:10,x:182}], [{n:11,x:18},{n:12,x:35},{n:13,x:165},{n:14,x:182}], [{n:15,x:18},{n:16,x:35},{n:17,x:165},{n:18,x:182}] ],
     22: [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}], [{n:7,x:18},{n:8,x:35},{n:9,x:165},{n:10,x:182}], [{n:11,x:18},{n:12,x:35},{n:13,x:165},{n:14,x:182}], [{n:15,x:18},{n:16,x:35},{n:17,x:165},{n:18,x:182}], [{n:19,x:18},{n:20,x:35},{n:21,x:165},{n:22,x:182}] ],
   };
- 
+
   const ejes   = ejesPorTotal[total] || ejesPorTotal[6];
   const altura = 60 + ejes.length * 60;
   const yBase  = 40;
   const paso   = 60;
- 
+
   return (
     <svg width="200" height={altura} viewBox={`0 0 200 ${altura}`} style={{display:"block",margin:"0 auto"}}>
-  <rect x="65" y="10" width="70" height={altura-20} rx="6"
-    fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1"/>
+  <defs>
+    <linearGradient id="chasisGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stopColor="#1E3A5F"/>
+      <stop offset="100%" stopColor="#0F2340"/>
+    </linearGradient>
+  </defs>
+  {/* Chasis - cuerpo principal */}
+  <rect x="68" y="10" width="64" height={altura-20} rx="8"
+    fill="url(#chasisGrad)" stroke="#2A5A8F" strokeWidth="1.5"/>
+  {/* Línea central del chasis */}
+  <line x1="100" y1="20" x2="100" y2={altura-20} stroke="#2A5A8F" strokeWidth="0.5" strokeDasharray="4 4"/>
+  {/* Cabina (parte superior) */}
+  <rect x="75" y="12" width="50" height="20" rx="4"
+    fill="#1565FF" fillOpacity="0.15" stroke="#1565FF" strokeWidth="0.8"/>
+  <circle cx="100" cy="22" r="4" fill="none" stroke="#1565FF" strokeWidth="0.8" opacity="0.5"/>
+
   {ejes.map((eje, ei) => {
     const y = yBase + ei * paso;
     return (
       <g key={ei}>
-        <line x1="20" x2="180" y1={y} y2={y} stroke="#D1D5DB" strokeWidth="1.5"/>
+        {/* Eje */}
+        <line x1="14" x2="186" y1={y} y2={y} stroke="#2A5A8F" strokeWidth="1.5"/>
+        {/* Llantas */}
         {eje.map(l => {
           const datos  = llantas[l.n] || {};
           const color  = estadoColor(datos.estado || "ok");
           const activo = llantaActiva === l.n;
-          const lw     = l.n <= 2 ? 10 : 8;
-          const lh     = l.n <= 2 ? 22 : 20;
+          const lw     = l.n <= 2 ? 12 : 10;
+          const lh     = l.n <= 2 ? 24 : 22;
           return (
             <g key={l.n} onClick={()=>onSelect(l.n)} style={{cursor:"pointer"}}>
               <rect
                 x={l.x - lw/2} y={y - lh/2}
-                width={lw} height={lh} rx="2"
+                width={lw} height={lh} rx="3"
                 fill={color}
-                stroke={activo ? "#fff" : "none"}
-                strokeWidth="2"
+                stroke={activo ? "#fff" : "#00000033"}
+                strokeWidth={activo ? 2.5 : 1}
+                filter={activo ? "drop-shadow(0 0 4px rgba(255,255,255,0.4))" : "none"}
               />
+              {/* Línea de labrado */}
+              <line x1={l.x-lw/2+2} x2={l.x+lw/2-2} y1={y} y2={y} stroke="rgba(0,0,0,0.2)" strokeWidth="1"/>
               <text
-                x={l.x > 100 ? l.x + 4 : l.x - 4}
-                y={y + 4}
+                x={l.x > 100 ? l.x + lw/2 + 4 : l.x - lw/2 - 4}
+                y={y + 3.5}
                 textAnchor={l.x > 100 ? "start" : "end"}
                 fontSize="9"
-                fontWeight="500"
-                fill="#000000"
+                fontWeight="600"
+                fill="#94A3B8"
               >
                 {l.n}
               </text>
@@ -85,32 +104,32 @@ function DiagramaLlantas({ total, llantas, onSelect, llantaActiva }) {
 </svg>
   );
 }
- 
+
 function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
   const navigate = useNavigate();
   const { id }   = useParams();
- 
+
   const vehiculo   = vehiculos.find(v => String(v.firestoreId) === String(id));
   const tipoVeh    = vehiculo?.tipoVehiculo?.toUpperCase() || "";
   const cfgVeh     = CONFIGS_VEHICULO[tipoVeh] || { total: 6, label: tipoVeh };
   const totalLl    = cfgVeh.total;
   const posiciones = POSICIONES[totalLl] || [];
- 
+
   const [llantas,   setLlantas]   = useState(vehiculo?.llantasData || {});
   const [seleccionada, setSeleccionada] = useState(null);
   const [guardando,    setGuardando]    = useState(false);
- 
+
   const [marca,  setMarca]  = useState("");
   const [ref,    setRef]    = useState("");
   const [prof,   setProf]   = useState("");
   const [kmMont, setKmMont] = useState("");
   const [estado, setEstado] = useState("ok");
   const [obs,    setObs]    = useState("");
- 
+
   const guardarLocal = (nuevas) => {
     onEditarVehiculo(vehiculo.firestoreId, { llantasData: nuevas }).catch(()=>{});
   };
- 
+
   const abrirDetalle = (n) => {
     setSeleccionada(n);
     const d = llantas[n] || {};
@@ -118,7 +137,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
     setProf(d.prof||""); setKmMont(d.km||"");
     setEstado(d.estado||"ok"); setObs(d.obs||"");
   };
- 
+
   const guardarLlanta = () => {
     const nuevas = {
       ...llantas,
@@ -129,7 +148,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
     setSeleccionada(null);
     mostrarToast("Llanta guardada","exito");
   };
- 
+
   if (!vehiculo) return (
     <div style={styles.pantalla}>
       <div style={styles.header}>
@@ -141,7 +160,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
       <p style={{textAlign:"center",padding:"40px",color:t.colors.textSecondary}}>Vehículo no encontrado.</p>
     </div>
   );
- 
+
   return (
     <div style={styles.pantalla}>
       <div style={styles.header}>
@@ -151,16 +170,16 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
         </button>
         <h1 style={styles.titulo}>Llantas</h1>
       </div>
- 
+
       <div style={styles.contenido}>
- 
+
         {/* INFO VEHÍCULO */}
         <div style={styles.card}>
           <p style={styles.cardTitulo}>Vehículo</p>
           <p style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0}}>{vehiculo.placa}</p>
           <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0"}}>{cfgVeh.label} · {totalLl} llantas</p>
         </div>
- 
+
         {/* DIAGRAMA */}
         <div style={styles.card}>
           <p style={styles.cardTitulo}>Toca una llanta para editar</p>
@@ -179,7 +198,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
             ))}
           </div>
         </div>
- 
+
         {/* DETALLE LLANTA */}
         {seleccionada && (
           <div style={styles.card}>
@@ -241,7 +260,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
             </div>
           </div>
         )}
- 
+
         {/* TABLA RESUMEN */}
         <div style={styles.card}>
           <p style={styles.cardTitulo}>Resumen de llantas</p>
@@ -268,12 +287,12 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
             );
           })}
         </div>
- 
+
       </div>
     </div>
   );
 }
- 
+
 const styles = {
   pantalla:   { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:     { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
@@ -287,5 +306,5 @@ const styles = {
   label:      { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
   input:      { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
 };
- 
+
 export default Llantas;

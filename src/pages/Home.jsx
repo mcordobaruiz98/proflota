@@ -9,7 +9,7 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
   const { usuario } = useAuth();
 
   const nombreSaludo = usuario?.displayName
-    ? usuario.displayName.split(" ")[0]
+    ? usuario.displayName.split(" ").slice(0, 2).join(" ")
     : "Usuario";
 
   const iniciales = usuario?.displayName
@@ -87,7 +87,10 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
       {/* HEADER */}
       <div style={styles.header}>
         <div>
-          <p style={styles.saludo}>Hola 👋</p>
+          <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+            <Truck size={14} color={t.colors.green} strokeWidth={2.5} />
+            <p style={styles.saludo}>Bienvenido</p>
+          </div>
           <p style={styles.nombre}>{nombreSaludo}</p>
         </div>
         <button style={styles.avatar} onClick={() => navigate("/perfil")}>
