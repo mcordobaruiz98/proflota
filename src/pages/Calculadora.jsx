@@ -457,7 +457,7 @@ const guardarRutaFrecuente = async () => {
       }}
       style={{...styles.input, marginBottom: "6px", color: t.colors.textPrimary}}
     >
-      <option value="__nuevo__">+ Escribir nuevo producto</option>
+      <option value="__nuevo__">Nuevo producto</option>
       {productosFrecuentes.map((p, i) => (
         <option key={i} value={p}>{p}</option>
       ))}
