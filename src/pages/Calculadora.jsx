@@ -5,7 +5,7 @@ import { theme as t } from "../styles/theme";
 
 const ADBLUE_RATIO = 0.18925;
 
-function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, onGuardarRuta, onEliminarRuta, mostrarToast }) {
+function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, onGuardarRuta, onEliminarRuta, onEditarVehiculo, mostrarToast }) {
   const PEAJES_CO = peajes.length > 0 
   ? [...peajes].sort((a, b) => a.n.localeCompare(b.n, 'es')) 
   : [];
@@ -192,6 +192,16 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
       }
     });
     mostrarToast("Viaje guardado correctamente","exito");
+
+    // Actualizar odómetro del vehículo automáticamente
+    if (placa && kmTotal > 0) {
+      const veh = vehiculos.find(v => v.placa === placa);
+      if (veh) {
+        const kmActual = veh.kmOdometro || 0;
+        onEditarVehiculo(veh.firestoreId, { kmOdometro: kmActual + kmTotal }).catch(()=>{});
+      }
+    }
+
     navigate(-1);
   };
 
@@ -929,7 +939,7 @@ const guardarRutaFrecuente = async () => {
           type="checkbox"
           checked={d.activo}
           onChange={e=>d.setActivo(e.target.checked)}
-          style={{width:"18px", height:"18px", cursor:"pointer", accentColor:t.colors.blueSoft}}
+          style={{width:"18px", height:"18px", cursor:"pointer", accentColor:t.colors.blue}}
         />
         <div>
           <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{d.label}</p>

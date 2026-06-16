@@ -202,6 +202,7 @@ function AppContenido() {
         onGuardar={agregarViaje}
         onGuardarRuta={agregarRuta}
         onEliminarRuta={eliminarRuta}
+        onEditarVehiculo={editarVehiculo}
         mostrarToast={mostrar}
       />
     </Layout>
