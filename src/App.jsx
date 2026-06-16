@@ -26,6 +26,7 @@ import Aceite           from "./pages/mantenimiento/Aceite";
 import Filtros          from "./pages/mantenimiento/Filtros";
 import Frenos           from "./pages/mantenimiento/Frenos";
 import HistorialMant    from "./pages/mantenimiento/HistorialMant";
+import Tanqueos         from "./pages/mantenimiento/Tanqueos";
 
 import { useAuth }      from "./hooks/useAuth";
 import { useFirestore } from "./hooks/useFirestore";
@@ -232,6 +233,12 @@ function AppContenido() {
 <Route path="/vehiculo/:id/frenos" element={
   <RutaProtegida>
     <Frenos vehiculos={vehiculos} mantenimientos={mantenimientos} onAgregar={agregarMantenimiento} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar}/>
+  </RutaProtegida>
+} />
+
+<Route path="/vehiculo/:id/tanqueos" element={
+  <RutaProtegida>
+    <Tanqueos vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar}/>
   </RutaProtegida>
 } />
 
