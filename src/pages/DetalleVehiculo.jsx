@@ -467,7 +467,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   {label:"Modelo",           valor:vehiculo.modelo},
                   {label:"Propietario",      valor:vehiculo.propietario},
                   {label:"Tenedor",          valor:vehiculo.tenedor},
-                  {label:"Consumo Adblue",   valor:vehiculo.adblueRatio ? `${(vehiculo.adblueRatio*100).toFixed(1)}%` : "18.9% (default)"},
+                  {label:"Consumo Adblue",   valor:vehiculo.adblueRatio ? `${(vehiculo.adblueRatio*100).toFixed(1)}%` : "18.9%"},
                 ].map((item,i,arr)=>(
                   <div key={item.label} style={{...styles.fila, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                     <span style={styles.filaLabel}>{item.label}</span>
