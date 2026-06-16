@@ -65,7 +65,7 @@ function Registro() {
 
       {/* TÍTULO */}
       <div style={styles.tituloWrap}>
-        <h1 style={styles.titulo}>Crea tu cuenta</h1>
+        <h1 style={styles.titulo}>Crea tu cuenta NAVIRA</h1>
         <p style={styles.sub}>
           Únete y empieza a controlar tus ganancias hoy.
         </p>
