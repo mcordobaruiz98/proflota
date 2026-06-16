@@ -414,7 +414,7 @@ const guardarRutaFrecuente = async () => {
             <label style={styles.label}>Placa vehículo</label>
             <select value={placa} onChange={e=>setPlaca(e.target.value)}
               style={{...styles.input, color: placa ? t.colors.textPrimary : t.colors.textTertiary}}>
-              <option value="">Sin asignar</option>
+              <option value="">Elige tu Vehículo</option>
               {vehiculos.map(v=>(
                 <option key={v.firestoreId} value={v.placa}>{v.placa} — {v.tipoVehiculo}</option>
               ))}
