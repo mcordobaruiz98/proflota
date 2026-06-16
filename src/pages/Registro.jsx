@@ -72,7 +72,8 @@ function Registro() {
       </div>
 
       {/* FORMULARIO */}
-      <div style={styles.card}>
+      <form style={styles.card} onSubmit={e=>{e.preventDefault(); handleRegistro();}}>
+
         <p style={styles.seccionLabel}>Tus datos</p>
 
         <div style={styles.campo}>
@@ -126,25 +127,23 @@ function Registro() {
               onChange={(e) => { setConfirmar(e.target.value); setErrores({ ...errores, confirmar: null }); }}
               style={{ ...styles.input, paddingRight: "44px" }}
             />
-
-        <div style={styles.campo}>
-          <label style={styles.label}>Código de acceso beta</label>
-             <input
-              type="text"
-              placeholder="Ingresa tu código de invitación"
-              value={codigo}
-              onChange={(e) => { setCodigo(e.target.value.trim().toUpperCase()); setErrores({ ...errores, codigo: null }); }}
-              style={styles.input}
-            />
-            {errores.codigo && <p style={styles.error}>{errores.codigo}</p>}
-          </div>
-
-        
-            <button style={styles.btnOjo} onClick={() => setVerConf(!verConf)}>
+            <button type="button" style={styles.btnOjo} onClick={() => setVerConf(!verConf)}>
               {verConf ? "●" : "○"}
             </button>
           </div>
           {errores.confirmar && <p style={styles.error}>{errores.confirmar}</p>}
+        </div>
+
+        <div style={styles.campo}>
+          <label style={styles.label}>Código de acceso beta</label>
+          <input
+            type="text"
+            placeholder="Ingresa tu código de invitación"
+            value={codigo}
+            onChange={(e) => { setCodigo(e.target.value.trim().toUpperCase()); setErrores({ ...errores, codigo: null }); }}
+            style={styles.input}
+          />
+          {errores.codigo && <p style={styles.error}>{errores.codigo}</p>}
         </div>
 
         {errores.general && (
@@ -158,8 +157,7 @@ function Registro() {
         >
           {cargando ? "Creando cuenta..." : "Crear cuenta"}
         </button>
-
-      </div>
+        </form>
 
       <p style={styles.version}>Navira v1.0</p>
 
