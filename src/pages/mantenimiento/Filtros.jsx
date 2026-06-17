@@ -26,6 +26,7 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo }) {
   const [kmCambio,    setKmCambio]    = useState("");
   const [fecha,       setFecha]       = useState(new Date().toISOString().slice(0,10));
   const [taller,      setTaller]      = useState("");
+  const [nitTaller,   setnitTaller]   = useState("");
   const [costo,       setCosto]       = useState("");
   const [nota,        setNota]        = useState("");
   const [mostrarForm, setMostrarForm] = useState(false);
@@ -40,7 +41,7 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo }) {
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
     onEditarVehiculo(vehiculo.firestoreId, { filtrosHistorial: nuevos }).catch(()=>{});
-    setMarca(""); setReferencia(""); setKmCambio(""); setTaller(""); setCosto(""); setNota("");
+    setMarca(""); setReferencia(""); setKmCambio(""); setTaller("");setnitTaller(""); setCosto(""); setNota("");
     setMostrarForm(false);
     mostrarToast("Filtro registrado","exito");
     setGuardando(false);
@@ -158,11 +159,18 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo }) {
                   onChange={e=>setTaller(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Costo ($)</label>
-                <input type="number" placeholder="45000" value={costo}
-                  onChange={e=>setCosto(e.target.value)} style={styles.input}/>
+                <label style={styles.label}>Nit Taller</label>
+                <input type="number" placeholder="111.222.333.-4" value={nitTaller}
+                  onChange={e=>setnitTaller(e.target.value)} style={styles.input}/>
               </div>
             </div>
+
+            <div style={styles.campo}>
+              <label  style={styles.label}>Costo</label>
+              <input type="number" placeholder="40000" value={costo}
+              onChange={e=>setCosto(e.target.value)} style={styles.input}/>
+              </div>
+
 
             <div style={styles.campo}>
               <label style={styles.label}>Nota</label>
