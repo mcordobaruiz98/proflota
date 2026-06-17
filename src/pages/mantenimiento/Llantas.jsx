@@ -27,81 +27,131 @@ function estadoColor(e) {
   return e==="nueva"?"#0E7490":e==="ok"?"#16A34A":e==="warn"?"#D97706":"#DC2626";
 }
 
-function DiagramaLlantas({ total, llantas, onSelect, llantaActiva }) {
-  const ejesPorTotal = {
+function DiagramaLlantas({ total, llantas, onSelect, llantaActiva, tipoVehiculo }) {
+  const tipo = (tipoVehiculo || "").toUpperCase();
+  const esTractomula = tipo.includes("TRACTOMULA") || tipo.includes("PATINETA");
+
+  // Definir ejes por cuerpo
+  const ejesCabezote = {
+    "TRACTOMULA 3S3": [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}], [{n:7,x:18},{n:8,x:35},{n:9,x:165},{n:10,x:182}] ],
+    "TRACTOMULA 3S2": [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}], [{n:7,x:18},{n:8,x:35},{n:9,x:165},{n:10,x:182}] ],
+    "PATINETA 2S3":   [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}] ],
+    "PATINETA 2S2":   [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}] ],
+  };
+  const ejesTrailer = {
+    "TRACTOMULA 3S3": [ [{n:11,x:18},{n:12,x:35},{n:13,x:165},{n:14,x:182}], [{n:15,x:18},{n:16,x:35},{n:17,x:165},{n:18,x:182}], [{n:19,x:18},{n:20,x:35},{n:21,x:165},{n:22,x:182}] ],
+    "TRACTOMULA 3S2": [ [{n:11,x:18},{n:12,x:35},{n:13,x:165},{n:14,x:182}], [{n:15,x:18},{n:16,x:35},{n:17,x:165},{n:18,x:182}] ],
+    "PATINETA 2S3":   [ [{n:7,x:18},{n:8,x:35},{n:9,x:165},{n:10,x:182}], [{n:11,x:18},{n:12,x:35},{n:13,x:165},{n:14,x:182}], [{n:15,x:18},{n:16,x:35},{n:17,x:165},{n:18,x:182}] ],
+    "PATINETA 2S2":   [ [{n:7,x:18},{n:8,x:35},{n:9,x:165},{n:10,x:182}], [{n:11,x:18},{n:12,x:35},{n:13,x:165},{n:14,x:182}] ],
+  };
+
+  // Vehículo sencillo (un solo cuerpo)
+  const ejesSencillo = {
     4:  [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:30},{n:4,x:170}] ],
     6:  [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}] ],
     10: [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}], [{n:7,x:18},{n:8,x:35},{n:9,x:165},{n:10,x:182}] ],
-    14: [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}], [{n:7,x:18},{n:8,x:35},{n:9,x:165},{n:10,x:182}], [{n:11,x:18},{n:12,x:35},{n:13,x:165},{n:14,x:182}] ],
-    18: [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}], [{n:7,x:18},{n:8,x:35},{n:9,x:165},{n:10,x:182}], [{n:11,x:18},{n:12,x:35},{n:13,x:165},{n:14,x:182}], [{n:15,x:18},{n:16,x:35},{n:17,x:165},{n:18,x:182}] ],
-    22: [ [{n:1,x:30},{n:2,x:170}], [{n:3,x:18},{n:4,x:35},{n:5,x:165},{n:6,x:182}], [{n:7,x:18},{n:8,x:35},{n:9,x:165},{n:10,x:182}], [{n:11,x:18},{n:12,x:35},{n:13,x:165},{n:14,x:182}], [{n:15,x:18},{n:16,x:35},{n:17,x:165},{n:18,x:182}], [{n:19,x:18},{n:20,x:35},{n:21,x:165},{n:22,x:182}] ],
   };
 
-  const ejes   = ejesPorTotal[total] || ejesPorTotal[6];
-  const altura = 60 + ejes.length * 60;
-  const yBase  = 40;
-  const paso   = 60;
+  const renderLlanta = (l, y) => {
+    const datos  = llantas[l.n] || {};
+    const color  = estadoColor(datos.estado || "ok");
+    const activo = llantaActiva === l.n;
+    const lw     = l.n <= 2 ? 12 : 10;
+    const lh     = l.n <= 2 ? 24 : 22;
+    return (
+      <g key={l.n} onClick={()=>onSelect(l.n)} style={{cursor:"pointer"}}>
+        <rect x={l.x-lw/2} y={y-lh/2} width={lw} height={lh} rx="3"
+          fill={color} stroke={activo?"#fff":"#00000033"} strokeWidth={activo?2.5:1}
+          filter={activo?"drop-shadow(0 0 4px rgba(255,255,255,0.4))":"none"} />
+        <line x1={l.x-lw/2+2} x2={l.x+lw/2-2} y1={y} y2={y} stroke="rgba(0,0,0,0.2)" strokeWidth="1"/>
+        <text x={l.x>100?l.x+lw/2+4:l.x-lw/2-4} y={y+3.5}
+          textAnchor={l.x>100?"start":"end"} fontSize="9" fontWeight="600" fill="#94A3B8">{l.n}</text>
+      </g>
+    );
+  };
 
-  return (
-    <svg width="200" height={altura} viewBox={`0 0 200 ${altura}`} style={{display:"block",margin:"0 auto"}}>
-  <defs>
-    <linearGradient id="chasisGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stopColor="#1E3A5F"/>
-      <stop offset="100%" stopColor="#0F2340"/>
-    </linearGradient>
-  </defs>
-  {/* Chasis - cuerpo principal */}
-  <rect x="68" y="10" width="64" height={altura-20} rx="8"
-    fill="url(#chasisGrad)" stroke="#2A5A8F" strokeWidth="1.5"/>
-  {/* Línea central del chasis */}
-  <line x1="100" y1="20" x2="100" y2={altura-20} stroke="#2A5A8F" strokeWidth="0.5" strokeDasharray="4 4"/>
-  {/* Cabina (parte superior) */}
-  <rect x="75" y="12" width="50" height="20" rx="4"
-    fill="#1565FF" fillOpacity="0.15" stroke="#1565FF" strokeWidth="0.8"/>
-  <circle cx="100" cy="22" r="4" fill="none" stroke="#1565FF" strokeWidth="0.8" opacity="0.5"/>
-
-  {ejes.map((eje, ei) => {
+  const renderEjes = (ejes, yBase, paso) => ejes.map((eje, ei) => {
     const y = yBase + ei * paso;
     return (
       <g key={ei}>
-        {/* Eje */}
         <line x1="14" x2="186" y1={y} y2={y} stroke="#2A5A8F" strokeWidth="1.5"/>
-        {/* Llantas */}
-        {eje.map(l => {
-          const datos  = llantas[l.n] || {};
-          const color  = estadoColor(datos.estado || "ok");
-          const activo = llantaActiva === l.n;
-          const lw     = l.n <= 2 ? 12 : 10;
-          const lh     = l.n <= 2 ? 24 : 22;
-          return (
-            <g key={l.n} onClick={()=>onSelect(l.n)} style={{cursor:"pointer"}}>
-              <rect
-                x={l.x - lw/2} y={y - lh/2}
-                width={lw} height={lh} rx="3"
-                fill={color}
-                stroke={activo ? "#fff" : "#00000033"}
-                strokeWidth={activo ? 2.5 : 1}
-                filter={activo ? "drop-shadow(0 0 4px rgba(255,255,255,0.4))" : "none"}
-              />
-              {/* Línea de labrado */}
-              <line x1={l.x-lw/2+2} x2={l.x+lw/2-2} y1={y} y2={y} stroke="rgba(0,0,0,0.2)" strokeWidth="1"/>
-              <text
-                x={l.x > 100 ? l.x + lw/2 + 4 : l.x - lw/2 - 4}
-                y={y + 3.5}
-                textAnchor={l.x > 100 ? "start" : "end"}
-                fontSize="9"
-                fontWeight="600"
-                fill="#94A3B8"
-              >
-                {l.n}
-              </text>
-            </g>
-          );
-        })}
+        {eje.map(l => renderLlanta(l, y))}
       </g>
     );
-  })}
-</svg>
+  });
+
+  if (esTractomula && ejesCabezote[tipo]) {
+    const cab = ejesCabezote[tipo];
+    const trl = ejesTrailer[tipo];
+    const paso = 55;
+    const cabAltura = 30 + cab.length * paso + 10;
+    const enganY = cabAltura + 20;
+    const trlStartY = enganY + 30;
+    const trlAltura = trl.length * paso + 20;
+    const totalAltura = trlStartY + trlAltura + 10;
+
+    return (
+      <svg width="200" height={totalAltura} viewBox={`0 0 200 ${totalAltura}`} style={{display:"block",margin:"0 auto"}}>
+        <defs>
+          <linearGradient id="cabGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#1E3A5F"/><stop offset="100%" stopColor="#0F2340"/>
+          </linearGradient>
+          <linearGradient id="trlGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#162D4A"/><stop offset="100%" stopColor="#0D1B2F"/>
+          </linearGradient>
+        </defs>
+
+        {/* CABEZOTE */}
+        <rect x="68" y="8" width="64" height={cabAltura-8} rx="8"
+          fill="url(#cabGrad)" stroke="#2A5A8F" strokeWidth="1.5"/>
+        {/* Cabina */}
+        <rect x="72" y="10" width="56" height="24" rx="6"
+          fill="#1565FF" fillOpacity="0.15" stroke="#1565FF" strokeWidth="0.8"/>
+        <rect x="82" y="15" width="36" height="10" rx="3"
+          fill="none" stroke="#1565FF" strokeWidth="0.5" opacity="0.4"/>
+        {/* Espejos */}
+        <rect x="58" y="14" width="8" height="4" rx="1.5" fill="#2A5A8F"/>
+        <rect x="134" y="14" width="8" height="4" rx="1.5" fill="#2A5A8F"/>
+        {/* Label */}
+        <text x="100" y={cabAltura-4} textAnchor="middle" fontSize="8" fill="#4A6A8F" fontWeight="600">CABEZOTE</text>
+
+        {renderEjes(cab, 50, paso)}
+
+        {/* ENGANCHE / QUINTA RUEDA */}
+        <line x1="90" x2="110" y1={enganY} y2={enganY} stroke="#2A5A8F" strokeWidth="2"/>
+        <circle cx="100" cy={enganY} r="6" fill="#0F2340" stroke="#1565FF" strokeWidth="1.5"/>
+        <circle cx="100" cy={enganY} r="2" fill="#1565FF"/>
+
+        {/* TRAILER */}
+        <rect x="62" y={trlStartY-10} width="76" height={trlAltura+10} rx="6"
+          fill="url(#trlGrad)" stroke="#2A5A8F" strokeWidth="1.5"/>
+        {/* Label */}
+        <text x="100" y={trlStartY} textAnchor="middle" fontSize="8" fill="#4A6A8F" fontWeight="600">TRAILER</text>
+
+        {renderEjes(trl, trlStartY + 18, paso)}
+      </svg>
+    );
+  }
+
+  // Vehículo sencillo
+  const ejes = ejesSencillo[total] || ejesSencillo[6];
+  const altura = 60 + ejes.length * 60;
+
+  return (
+    <svg width="200" height={altura} viewBox={`0 0 200 ${altura}`} style={{display:"block",margin:"0 auto"}}>
+      <defs>
+        <linearGradient id="chasisGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#1E3A5F"/><stop offset="100%" stopColor="#0F2340"/>
+        </linearGradient>
+      </defs>
+      <rect x="68" y="10" width="64" height={altura-20} rx="8"
+        fill="url(#chasisGrad)" stroke="#2A5A8F" strokeWidth="1.5"/>
+      <line x1="100" y1="20" x2="100" y2={altura-20} stroke="#2A5A8F" strokeWidth="0.5" strokeDasharray="4 4"/>
+      <rect x="75" y="12" width="50" height="20" rx="4"
+        fill="#1565FF" fillOpacity="0.15" stroke="#1565FF" strokeWidth="0.8"/>
+      <circle cx="100" cy="22" r="4" fill="none" stroke="#1565FF" strokeWidth="0.8" opacity="0.5"/>
+      {renderEjes(ejes, 40, 60)}
+    </svg>
   );
 }
 
@@ -188,6 +238,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
             llantas={llantas}
             onSelect={abrirDetalle}
             llantaActiva={seleccionada}
+            tipoVehiculo={vehiculo?.tipoVehiculo}
           />
           <div style={{display:"flex", gap:"12px", marginTop:"12px", flexWrap:"wrap", justifyContent:"center"}}>
             {[{e:"nueva",l:"Nueva",c:"#0E7490"},{e:"ok",l:"Buena",c:"#16A34A"},{e:"warn",l:"Desgastada",c:"#D97706"},{e:"bad",l:"Cambiar",c:"#DC2626"}].map(s=>(
