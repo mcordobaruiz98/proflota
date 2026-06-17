@@ -21,7 +21,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
   const [kmCambio,    setKmCambio]    = useState("");
   const [fecha,       setFecha]       = useState(new Date().toISOString().slice(0,10));
   const [taller,      setTaller]      = useState("");
-  const [telTaller,   setTelTaller]   = useState("");
+  const [nitTaller,   setnitTaller]   = useState("");
   const [costo,       setCosto]       = useState("");
   const [nota,        setNota]        = useState("");
   const [guardando,   setGuardando]   = useState(false);
@@ -33,11 +33,11 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
     if (!marca.trim()) { mostrarToast("Ingresa la marca del aceite","error"); return; }
     if (!kmCambio)     { mostrarToast("Ingresa el km del cambio","error"); return; }
     setGuardando(true);
-    const nuevo = { id:Date.now(), marca, referencia, viscosidad, galones:Number(galones)||0, km:Number(kmCambio), fecha, taller, telTaller, costo:Number(costo)||0, nota };
+    const nuevo = { id:Date.now(), marca, referencia, viscosidad, galones:Number(galones)||0, km:Number(kmCambio), fecha, taller, nitTaller, costo:Number(costo)||0, nota };
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
     onEditarVehiculo(vehiculo.firestoreId, { aceiteHistorial: nuevos }).catch(()=>{});
-    setMarca(""); setReferencia(""); setGalones(""); setKmCambio(""); setTaller(""); setTelTaller(""); setCosto(""); setNota("");
+    setMarca(""); setReferencia(""); setGalones(""); setKmCambio(""); setTaller(""); setnitTaller(""); setCosto(""); setNota("");
     setMostrarForm(false);
     mostrarToast("Cambio de aceite registrado","exito");
     setGuardando(false);
@@ -143,9 +143,9 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
 
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Tel. taller</label>
-                <input type="tel" placeholder="+57 300 000 0000" value={telTaller}
-                  onChange={e=>setTelTaller(e.target.value)} style={styles.input}/>
+                <label style={styles.label}>Nit taller</label>
+                <input type="number" placeholder="111.222.333-4" value={nitTaller}
+                  onChange={e=>setnitTaller(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
                 <label style={styles.label}>Costo ($)</label>
@@ -192,7 +192,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
                     {r.fecha} · {r.km.toLocaleString("es-CO")} km
                     {r.galones>0?` · ${r.galones} gal`:""}
                   </p>
-                  {r.taller&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{r.taller}{r.telTaller?` · ${r.telTaller}`:""}</p>}
+                  {r.taller&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{r.taller}{r.nitTaller?` · ${r.nitTaller}`:""}</p>}
                   {r.nota&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{r.nota}</p>}
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:"8px",marginLeft:"10px"}}>
