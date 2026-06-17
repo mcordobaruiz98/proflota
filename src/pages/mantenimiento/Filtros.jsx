@@ -166,7 +166,7 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo }) {
             </div>
 
             <div style={styles.campo}>
-              <label  style={styles.label}>Costo</label>
+              <label  style={styles.label}>Costo ($)</label>
               <input type="number" placeholder="40000" value={costo}
               onChange={e=>setCosto(e.target.value)} style={styles.input}/>
               </div>
