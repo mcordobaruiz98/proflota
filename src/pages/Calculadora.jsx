@@ -65,6 +65,18 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   const [fleteRetorno,     setFleteRetorno]       = useState("");
   const [tonelajeRetorno,  setTonelajeRetorno]    = useState("");
   const [modoFleteRetorno, setModoFleteRetorno]   = useState("porTon");
+  const [rutaRet,          setRutaRet]            = useState("");
+  const [tipoCargaRet,     setTipoCargaRet]       = useState("");
+  const [productoRet,      setProductoRet]        = useState("");
+  const [empresaRet,       setEmpresaRet]         = useState("");
+  const [contactoRet,      setContactoRet]        = useState("");
+  const [maniRet,          setManiRet]            = useState("");
+  const [remesaRet,        setRemesaRet]          = useState("");
+  const [pesoBasRet,       setPesoBasRet]         = useState("");
+  const [lugarCargueRet,   setLugarCargueRet]     = useState("");
+  const [lugarDescargueRet,setLugarDescargueRet]  = useState("");
+  const [fechaCargueRet,   setFechaCargueRet]     = useState("");
+  const [fechaDescargueRet,setFechaDescargueRet]  = useState("");
   const [mostrarRutas,     setMostrarRutas]       = useState(false);
   const [guardandoRuta,    setGuardandoRuta]      = useState(false);
   const [nombreRuta,       setNombreRuta]         = useState("");
@@ -183,7 +195,10 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
       anticipoMonto: n(anticipoMonto),
       kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmT: kmTotal,
       ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
-      tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(), fleteRetorno: n(fleteRetorno),
+      tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(tonelajeRetorno), fleteRetorno: n(fleteRetorno),
+      rutaRet: rutaRet.trim(), tipoCargaRet, productoRet, empresaRet, contactoRet, maniRet, remesaRet: remesaRet.trim(),
+      pesoBasRet: Number(pesoBasRet)||0, lugarCargueRet: lugarCargueRet.trim(), lugarDescargueRet: lugarDescargueRet.trim(),
+      fechaCargueRet, fechaDescargueRet,
       gTot: galTotal, galCargado: galCarg, galVacio: galVac,
       adlt: adblLt, cAcpm: costoAcpm, cAdbl: costoAdbl, cComb: costoComb,
       peajes: totPeajes,
@@ -735,6 +750,89 @@ const guardarRutaFrecuente = async () => {
 
         {tieneRetorno && (
         <div style={{marginTop:"12px", padding:"12px", background:t.colors.bgSection, borderRadius:t.radius.md}}>
+
+        <div style={styles.campo}>
+          <label style={styles.label}>Ruta retorno (Origen → Destino)</label>
+          <input type="text" placeholder="Cali – Barranquilla" value={rutaRet}
+            onChange={e=>setRutaRet(e.target.value)} style={styles.input} />
+        </div>
+
+        <div style={styles.fila2}>
+          <div style={styles.campo}>
+            <label style={styles.label}>Fecha cargue retorno</label>
+            <input type="date" value={fechaCargueRet} onChange={e=>setFechaCargueRet(e.target.value)} style={styles.input} />
+          </div>
+          <div style={styles.campo}>
+            <label style={styles.label}>Fecha descargue retorno</label>
+            <input type="date" value={fechaDescargueRet} onChange={e=>setFechaDescargueRet(e.target.value)} style={styles.input} />
+          </div>
+        </div>
+
+        <div style={styles.fila2}>
+          <div style={styles.campo}>
+            <label style={styles.label}>Lugar de cargue</label>
+            <input type="text" placeholder="Bodega, puerto..." value={lugarCargueRet}
+              onChange={e=>setLugarCargueRet(e.target.value)} style={styles.input} />
+          </div>
+          <div style={styles.campo}>
+            <label style={styles.label}>Lugar de descargue</label>
+            <input type="text" placeholder="Planta, bodega..." value={lugarDescargueRet}
+              onChange={e=>setLugarDescargueRet(e.target.value)} style={styles.input} />
+          </div>
+        </div>
+
+        <div style={styles.fila2}>
+          <div style={styles.campo}>
+            <label style={styles.label}>Tipo de carga</label>
+            <select value={tipoCargaRet} onChange={e=>setTipoCargaRet(e.target.value)} style={styles.input}>
+              <option value="">Seleccionar...</option>
+              <option value="GENERAL">General</option>
+              <option value="GRANEL">Granel</option>
+              <option value="LIQUIDOS">Líquidos</option>
+              <option value="CONTENEDOR">Contenedor</option>
+              <option value="REFRIGERADA">Refrigerada</option>
+              <option value="PELIGROSA">Peligrosa</option>
+            </select>
+          </div>
+          <div style={styles.campo}>
+            <label style={styles.label}>Producto</label>
+            <input type="text" placeholder="Carbón, arroz..." value={productoRet}
+              onChange={e=>setProductoRet(e.target.value)} style={styles.input} />
+          </div>
+        </div>
+
+        <div style={styles.fila2}>
+          <div style={styles.campo}>
+            <label style={styles.label}>Empresa</label>
+            <input type="text" placeholder="Nombre empresa" value={empresaRet}
+              onChange={e=>setEmpresaRet(e.target.value)} style={styles.input} />
+          </div>
+          <div style={styles.campo}>
+            <label style={styles.label}>Contacto</label>
+            <input type="text" placeholder="Nombre contacto" value={contactoRet}
+              onChange={e=>setContactoRet(e.target.value)} style={styles.input} />
+          </div>
+        </div>
+
+        <div style={styles.fila2}>
+          <div style={styles.campo}>
+            <label style={styles.label}>Manifiesto</label>
+            <input type="text" placeholder="MAN-001" value={maniRet}
+              onChange={e=>setManiRet(e.target.value)} style={styles.input} />
+          </div>
+          <div style={styles.campo}>
+            <label style={styles.label}>N° Remesa</label>
+            <input type="text" placeholder="REM-001" value={remesaRet}
+              onChange={e=>setRemesaRet(e.target.value)} style={styles.input} />
+          </div>
+        </div>
+
+        <div style={styles.campo}>
+          <label style={styles.label}>Peso báscula (ton)</label>
+          <input type="number" placeholder="34.5" value={pesoBasRet}
+            onChange={e=>setPesoBasRet(e.target.value)} style={styles.input} />
+        </div>
+
         <div style={styles.campo}>
         <label style={styles.label}>Modo de pago retorno</label>
         <select
