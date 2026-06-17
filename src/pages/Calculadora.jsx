@@ -726,8 +726,8 @@ const guardarRutaFrecuente = async () => {
           onChange={e=>setModoFleteRetorno(e.target.value)}
           style={styles.input}
         >
-          <option value="porTon">Por tonelada ($/ton)</option>
-          <option value="porViaje">Por viaje (valor fijo)</option>
+          <option value="porTon">Variable ($/Ton)</option>
+          <option value="porViaje">Fijo ($/Viaje)</option>
           </select>
         </div>
           <div style={styles.fila2}>
