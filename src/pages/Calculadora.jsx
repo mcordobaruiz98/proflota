@@ -1187,6 +1187,8 @@ const guardarRutaFrecuente = async () => {
           style={styles.input}
         />
       </div>
+
+      
       <div style={{display:"flex", gap:"8px"}}>
         <button
           style={{flex:1, padding:"10px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoRuta?0.75:1}}
