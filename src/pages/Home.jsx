@@ -108,9 +108,6 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
           }}>
             {fmt(gananciaMes)}
           </p>
-          <p style={styles.gananciaSub}>
-            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""} · {fmt(ingresosMes)} brutos
-          </p>
         </div>
         <div style={styles.gananciaDer}>
           <div style={styles.vehMetrica}>
