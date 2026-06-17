@@ -432,7 +432,7 @@ const guardarRutaFrecuente = async () => {
             <label style={styles.label}>Placa vehículo</label>
             <select value={placa} onChange={e=>setPlaca(e.target.value)}
               style={{...styles.input, color: placa ? t.colors.textPrimary : t.colors.textTertiary}}>
-              <option value="">Sin asignar</option>
+              <option value="">Escoge tu Vehículo</option>
               {vehiculos.map(v=>(
                 <option key={v.firestoreId} value={v.placa}>{v.placa} — {v.tipoVehiculo}</option>
               ))}
@@ -441,7 +441,7 @@ const guardarRutaFrecuente = async () => {
           <div style={styles.campo}>
   <label style={styles.label}>Tipo de carga</label>
   <select value={tipoCarga} onChange={e=>setTipoCarga(e.target.value)} style={styles.input}>
-    <option value="">— Seleccionar —</option>
+    <option value="">Seleccionar...</option>
     <option>Granel sólido</option>
     <option>Granel líquido</option>
     <option>Carga general</option>
@@ -475,7 +475,7 @@ const guardarRutaFrecuente = async () => {
       }}
       style={{...styles.input, marginBottom: "6px", color: t.colors.textPrimary}}
     >
-      <option value="__nuevo__">+ Escribir nuevo producto</option>
+      <option value="__nuevo__">Nuevo producto</option>
       {productosFrecuentes.map((p, i) => (
         <option key={i} value={p}>{p}</option>
       ))}
@@ -507,7 +507,7 @@ const guardarRutaFrecuente = async () => {
 }}
       style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
     >
-      <option value="__nueva__">+ Escribir nueva empresa</option>
+      <option value="__nueva__">Nueva empresa</option>
       {empresasFrecuentes.map((emp, i) => (
         <option key={i} value={emp}>{emp}</option>
       ))}
@@ -525,17 +525,6 @@ const guardarRutaFrecuente = async () => {
 
 </div>
 
-
-          <div style={styles.campo}>
-  <label style={styles.label}>Contacto empresa</label>
-  <input type="text" placeholder="Nombre del contacto" value={contactoEmpresa}
-    onChange={e => setContactoEmpresa(e.target.value)} style={styles.input} />
-</div>
-
-          <div style={styles.campo}>
-          <label style={styles.label}>Celular contacto</label>
-          <input type="tel" placeholder="+57 300 000 0000" value={celularEmpresa} onChange={e=>setCelularEmpresa(e.target.value)} style={styles.input} />
-          </div>
         </div>
         <div style={styles.campo}>
   <label style={styles.label}>Conductor</label>
@@ -551,7 +540,7 @@ const guardarRutaFrecuente = async () => {
       }}
       style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
     >
-      <option value="__nuevo__">+ Escribir nuevo conductor</option>
+      <option value="__nuevo__">Nuevo conductor +</option>
       {conductoresFrecuentes.map((c,i) => (
         <option key={i} value={c}>{c}</option>
       ))}
@@ -580,8 +569,8 @@ const guardarRutaFrecuente = async () => {
       onChange={e=>setRemesa(e.target.value)} style={styles.input}/>
   </div>
   <div style={styles.campo}>
-    <label style={styles.label}>Peso báscula (ton)</label>
-    <input type="number" placeholder="34.5" value={pesoBascula}
+    <label style={styles.label}>Peso báscula (Ton)</label>
+    <input type="number" placeholder="34" value={pesoBascula}
       onChange={e=>setPesoBascula(e.target.value)} style={styles.input}/>
   </div>
 </div>
@@ -624,8 +613,8 @@ const guardarRutaFrecuente = async () => {
     onChange={e => setModoFlete(e.target.value)}
     style={styles.input}
   >
-    <option value="porTon">Por tonelada ($/ton)</option>
-    <option value="porViaje">Por viaje (valor fijo)</option>
+    <option value="porTon">Variable ($/Ton)</option>
+    <option value="porViaje">Fijo ($/Viaje)</option>
   </select>
 </div>
 
@@ -728,31 +717,23 @@ const guardarRutaFrecuente = async () => {
             <label style={styles.label}>Tipo de carga</label>
             <select value={tipoCargaRet} onChange={e=>setTipoCargaRet(e.target.value)} style={styles.input}>
               <option value="">Seleccionar...</option>
-              <option value="GENERAL">General</option>
-              <option value="GRANEL">Granel</option>
-              <option value="LIQUIDOS">Líquidos</option>
-              <option value="CONTENEDOR">Contenedor</option>
-              <option value="REFRIGERADA">Refrigerada</option>
-              <option value="PELIGROSA">Peligrosa</option>
-            </select>
+              <option>Granel sólido</option>
+              <option>Granel líquido</option>
+              <option>Carga general</option>
+              <option>Contenedor cargado</option>
+              <option>Contenedor vacío</option>
+              <option>Carga refrigerada</option>
+              <option>Sin carga</option>
+              <option>Carga peligrosa</option>
+              <option>Carga sobredimensionada</option>
+              <option>Ganado</option>
+              <option>Vehículos</option>
+              </select>
           </div>
           <div style={styles.campo}>
             <label style={styles.label}>Producto</label>
             <input type="text" placeholder="Carbón, arroz..." value={productoRet}
               onChange={e=>setProductoRet(e.target.value)} style={styles.input} />
-          </div>
-        </div>
-
-        <div style={styles.fila2}>
-          <div style={styles.campo}>
-            <label style={styles.label}>Empresa</label>
-            <input type="text" placeholder="Nombre empresa" value={empresaRet}
-              onChange={e=>setEmpresaRet(e.target.value)} style={styles.input} />
-          </div>
-          <div style={styles.campo}>
-            <label style={styles.label}>Contacto</label>
-            <input type="text" placeholder="Nombre contacto" value={contactoRet}
-              onChange={e=>setContactoRet(e.target.value)} style={styles.input} />
           </div>
         </div>
 
@@ -782,8 +763,8 @@ const guardarRutaFrecuente = async () => {
           onChange={e=>setModoFleteRetorno(e.target.value)}
           style={styles.input}
         >
-          <option value="porTon">Por tonelada ($/ton)</option>
-          <option value="porViaje">Por viaje (valor fijo)</option>
+          <option value="porTon">Variable ($/ton)</option>
+          <option value="porViaje">Fijo ($/Viaje)</option>
           </select>
         </div>
           <div style={styles.fila2}>
@@ -894,7 +875,7 @@ const guardarRutaFrecuente = async () => {
         <div style={styles.filaAgregar}>
           <select value={selP} onChange={e=>setSelP(e.target.value)}
             style={{...styles.input, flex:1, marginBottom:0}}>
-            <option value="">— Seleccionar peaje —</option>
+            <option value="">Seleccionar peaje...</option>
             {peajesFiltrados.map(p=>(
               <option key={p.c} value={p.c}>
                 {p.n} ({p.d}) — ${(obtenerTarifa(p, categoria)).toLocaleString("es-CO")}
