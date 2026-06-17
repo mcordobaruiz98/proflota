@@ -20,7 +20,6 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   const [lugarCargue,      setLugarCargue]        = useState("");
   const [lugarDescargue,   setLugarDescargue]     = useState("");
   const [observaciones,    setObservaciones]      = useState("");
-  const [anticipoMonto,    setAnticipoMonto]      = useState("");
   const [placa,            setPlaca]              = useState(location.state?.placa || "");
   const [tipoCarga,        setTipoCarga]          = useState("");
   const [producto,         setProducto]           = useState("");
@@ -192,7 +191,6 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
       remesa: remesa.trim(), pesoBascula: Number(pesoBascula)||0,
       lugarCargue: lugarCargue.trim(), lugarDescargue: lugarDescargue.trim(),
       observaciones: observaciones.trim(),
-      anticipoMonto: n(anticipoMonto),
       kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmT: kmTotal,
       ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
       tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(tonelajeRetorno), fleteRetorno: n(fleteRetorno),
@@ -260,7 +258,6 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   if (rutaGuardada.carpado)         setCarpado(rutaGuardada.carpado);
   if (rutaGuardada.gastosViaje)     setGastosViaje(rutaGuardada.gastosViaje);
   if (rutaGuardada.extrasList)      setExtras(rutaGuardada.extrasList);
-  if (rutaGuardada.anticipoMonto)   setAnticipoMonto(rutaGuardada.anticipoMonto);
   // Descuentos de ley
   if (rutaGuardada.descRetefuente !== undefined) setDescRetefuente(rutaGuardada.descRetefuente);
   if (rutaGuardada.pctRetefuente)   setPctRetefuente(rutaGuardada.pctRetefuente);
@@ -313,7 +310,6 @@ const guardarRutaFrecuente = async () => {
     pctReteica:      pctReteica,
     descFopat:       descFopat,
     pctFopat:        pctFopat,
-    anticipoMonto:   n(anticipoMonto),
   };
 
   try {
@@ -608,13 +604,6 @@ const guardarRutaFrecuente = async () => {
   <input type="text" placeholder="Novedades del viaje..." value={observaciones}
     onChange={e=>setObservaciones(e.target.value)} style={styles.input}/>
 </div>
-
-<div style={styles.campo}>
-  <label style={styles.label}>Anticipo al conductor ($)</label>
-  <input type="number" placeholder="3000000" value={anticipoMonto}
-    onChange={e=>setAnticipoMonto(e.target.value)} style={styles.input}/>
-</div>
-
 
   {/* GUARDAR RUTA */}
 <div style={{marginTop:"10px", borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px"}}>
