@@ -236,6 +236,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   setRuta(rutaGuardada.ruta);
   setKmCargado(rutaGuardada.kmCargado || "");
   setKmVacio(rutaGuardada.kmVacio || "");
+  setFleteTon(rutaGuardada.fleteTon || "");
   setRendCargado(rutaGuardada.rendCargado || "");
   setRendVacio(rutaGuardada.rendVacio || "");
   setGalManual(rutaGuardada.galManual || "");
@@ -282,6 +283,7 @@ const guardarRutaFrecuente = async () => {
     ruta:        ruta.trim(),
     kmCargado:   n(kmCargado),
     kmVacio:     n(kmVacio),
+    fleteTon:    n(fleteTon),
     rendCargado: n(rendCargado),
     rendVacio:   n(rendVacio),
     galManual:   n(galManual),
