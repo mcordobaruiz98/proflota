@@ -605,53 +605,6 @@ const guardarRutaFrecuente = async () => {
     onChange={e=>setObservaciones(e.target.value)} style={styles.input}/>
 </div>
 
-  {/* GUARDAR RUTA */}
-<div style={{marginTop:"10px", borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px"}}>
-  {!mostrarGuardar ? (
-    <button
-      style={{
-        width:"100%", padding:"9px", background:"none",
-        border:`1.5px dashed ${t.colors.blueBorder}`,
-        borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm,
-        color:t.colors.blue, cursor:"pointer",
-        display:"flex", alignItems:"center", justifyContent:"center", gap:"6px",
-        fontWeight:t.fonts.weightSemibold
-      }}
-      onClick={()=>setMostrarGuardar(true)}
-    >
-      + Guardar como ruta frecuente
-    </button>
-  ) : (
-    <div>
-      <div style={styles.campo}>
-        <label style={styles.label}>Nombre de la ruta</label>
-        <input
-          type="text"
-          placeholder="Ej: Barranquilla - Bogotá"
-          value={nombreRuta}
-          onChange={e=>setNombreRuta(e.target.value)}
-          style={styles.input}
-        />
-      </div>
-      <div style={{display:"flex", gap:"8px"}}>
-        <button
-          style={{flex:1, padding:"10px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoRuta?0.75:1}}
-          onClick={guardarRutaFrecuente}
-          disabled={guardandoRuta}
-        >
-          {guardandoRuta?"Guardando...":"Guardar ruta"}
-        </button>
-        <button
-          style={{padding:"10px 14px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, cursor:"pointer"}}
-          onClick={()=>{setMostrarGuardar(false);setNombreRuta("");}}
-        >
-          Cancelar
-        </button>
-      </div>
-    </div>
-  )}
-</div>
-
 </div>
         <div style={styles.fila2}>
           <div style={styles.campo}>
@@ -1205,6 +1158,53 @@ const guardarRutaFrecuente = async () => {
             <div style={{...styles.barraRelleno, width:`${Math.min(Math.max(margen,0),100)}%`, background: margenColor}} />
           </div>
         </>}
+
+          {/* GUARDAR RUTA */}
+<div style={{marginTop:"10px", borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px"}}>
+  {!mostrarGuardar ? (
+    <button
+      style={{
+        width:"100%", padding:"9px", background:"none",
+        border:`1.5px dashed ${t.colors.blueBorder}`,
+        borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm,
+        color:t.colors.blue, cursor:"pointer",
+        display:"flex", alignItems:"center", justifyContent:"center", gap:"6px",
+        fontWeight:t.fonts.weightSemibold
+      }}
+      onClick={()=>setMostrarGuardar(true)}
+    >
+      + Guardar como ruta frecuente
+    </button>
+  ) : (
+    <div>
+      <div style={styles.campo}>
+        <label style={styles.label}>Nombre de la ruta</label>
+        <input
+          type="text"
+          placeholder="Ej: Barranquilla - Bogotá"
+          value={nombreRuta}
+          onChange={e=>setNombreRuta(e.target.value)}
+          style={styles.input}
+        />
+      </div>
+      <div style={{display:"flex", gap:"8px"}}>
+        <button
+          style={{flex:1, padding:"10px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoRuta?0.75:1}}
+          onClick={guardarRutaFrecuente}
+          disabled={guardandoRuta}
+        >
+          {guardandoRuta?"Guardando...":"Guardar ruta"}
+        </button>
+        <button
+          style={{padding:"10px 14px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, cursor:"pointer"}}
+          onClick={()=>{setMostrarGuardar(false);setNombreRuta("");}}
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  )}
+</div>
 
         <button
           style={{...styles.btnGuardar, opacity: guardando?0.75:1}}
