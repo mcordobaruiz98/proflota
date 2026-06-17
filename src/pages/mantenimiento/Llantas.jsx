@@ -18,9 +18,9 @@ const POSICIONES = {
   4:  ["Del. izq","Del. der","Tras. izq","Tras. der"],
   6:  ["Del. izq","Del. der","Tras. izq int","Tras. izq ext","Tras. der int","Tras. der ext"],
   10: ["Del. izq","Del. der","Med. izq int","Med. izq ext","Med. der int","Med. der ext","Tras. izq int","Tras. izq ext","Tras. der int","Tras. der ext"],
-  14: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Rem. izq int","Rem. izq ext","Rem. der int","Rem. der ext"],
-  18: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Trac3 izq int","Trac3 izq ext","Trac3 der int","Trac3 der ext","Rem. izq int","Rem. izq ext","Rem. der int","Rem. der ext"],
-  22: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Trac3 izq int","Trac3 izq ext","Trac3 der int","Trac3 der ext","Rem1 izq int","Rem1 izq ext","Rem1 der int","Rem1 der ext","Rem2 izq int","Rem2 izq ext","Rem2 der int","Rem2 der ext"],
+  14: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Rem1 izq int","Rem1 izq ext","Rem1 der int","Rem1 der ext","Rem2 izq int","Rem2 izq ext","Rem2 der int","Rem2 der ext"],
+  18: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Rem1 izq int","Rem1 izq ext","Rem1 der int","Rem1 der ext","Rem2 izq int","Rem2 izq ext","Rem2 der int","Rem2 der ext"],
+  22: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Rem1 izq int","Rem1 izq ext","Rem1 der int","Rem1 der ext","Rem2 izq int","Rem2 izq ext","Rem2 der int","Rem2 der ext","Rem3 izq int","Rem3 izq ext","Rem3 der int","Rem3 der ext"],
 };
 
 function estadoColor(e) {
