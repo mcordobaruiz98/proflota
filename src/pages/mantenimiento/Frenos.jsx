@@ -8,10 +8,10 @@ const EJES_POR_VEHICULO = {
   "SENCILLO":        ["Eje delantero","Eje trasero"],
   "TURBO":           ["Eje delantero","Eje trasero"],
   "DOBLETROQUE":     ["Eje delantero","Eje medio","Eje trasero"],
-  "PATINETA 2S2":    ["Eje delantero","Eje tracción 1","Eje tracción 2","Eje remolque"],
+  "PATINETA 2S2":    ["Eje delantero","Eje tracción 1","Eje remolque 1","Eje remolque 2"],
   "PATINETA 2S3":    ["Eje delantero","Eje tracción 1","Eje tracción 2","Eje remolque 1","Eje remolque 2"],
-  "TRACTOMULA 3S2":  ["Eje delantero","Eje tracción 1","Eje tracción 2","Eje tracción 3","Eje remolque"],
-  "TRACTOMULA 3S3":  ["Eje delantero","Eje tracción 1","Eje tracción 2","Eje tracción 3","Eje remolque 1","Eje remolque 2"],
+  "TRACTOMULA 3S2":  ["Eje delantero","Eje tracción 1","Eje tracción 2","Eje remolque 1","Eje remolque 2"],
+  "TRACTOMULA 3S3":  ["Eje delantero","Eje tracción 1","Eje tracción 2","Remolque 1","Eje remolque 2","Eje remolque 2"],
 };
 
 const ESTADOS = [
