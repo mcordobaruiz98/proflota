@@ -20,6 +20,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   const [lugarCargue,      setLugarCargue]        = useState("");
   const [lugarDescargue,   setLugarDescargue]     = useState("");
   const [observaciones,    setObservaciones]      = useState("");
+  const [anticipoMonto,    setAnticipoMonto]      = useState("");
   const [placa,            setPlaca]              = useState(location.state?.placa || "");
   const [tipoCarga,        setTipoCarga]          = useState("");
   const [producto,         setProducto]           = useState("");
@@ -179,6 +180,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
       remesa: remesa.trim(), pesoBascula: Number(pesoBascula)||0,
       lugarCargue: lugarCargue.trim(), lugarDescargue: lugarDescargue.trim(),
       observaciones: observaciones.trim(),
+      anticipoMonto: n(anticipoMonto),
       kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmT: kmTotal,
       ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
       tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(), fleteRetorno: n(fleteRetorno),
@@ -223,6 +225,8 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   setKmVacio(rutaGuardada.kmVacio || "");
   setRendCargado(rutaGuardada.rendCargado || "");
   setRendVacio(rutaGuardada.rendVacio || "");
+  if (rutaGuardada.precioAcpm)   setPrecioAcpm(rutaGuardada.precioAcpm);
+  if (rutaGuardada.precioAdblue) setPrecioAdblue(rutaGuardada.precioAdblue);
   setCategoria(rutaGuardada.categoria || "VII");
   setPeajesRuta((rutaGuardada.peajesRuta || []).map(p => ({
     c: p.c, n: p.n, d: p.d, iv: p.iv || false,
@@ -240,6 +244,8 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   if (rutaGuardada.porcCond)        setPorcCond(rutaGuardada.porcCond);
   if (rutaGuardada.carpado)         setCarpado(rutaGuardada.carpado);
   if (rutaGuardada.gastosViaje)     setGastosViaje(rutaGuardada.gastosViaje);
+  if (rutaGuardada.extrasList)      setExtras(rutaGuardada.extrasList);
+  if (rutaGuardada.anticipoMonto)   setAnticipoMonto(rutaGuardada.anticipoMonto);
   // Descuentos de ley
   if (rutaGuardada.descRetefuente !== undefined) setDescRetefuente(rutaGuardada.descRetefuente);
   if (rutaGuardada.pctRetefuente)   setPctRetefuente(rutaGuardada.pctRetefuente);
@@ -265,6 +271,8 @@ const guardarRutaFrecuente = async () => {
     kmVacio:     n(kmVacio),
     rendCargado: n(rendCargado),
     rendVacio:   n(rendVacio),
+    precioAcpm:  n(precioAcpm),
+    precioAdblue: n(precioAdblue),
     peajesRuta:  peajesRuta.map(p => ({
       c: p.c, n: p.n, d: p.d, iv: p.iv || false,
       tarifa: p.t ? obtenerTarifa(p, categoria) : (p.tarifa || 0),
@@ -282,6 +290,7 @@ const guardarRutaFrecuente = async () => {
     porcCond:        n(porcCond),
     carpado:         n(carpado),
     gastosViaje:     n(gastosViaje),
+    extrasList:      extras,
     // Descuentos de ley
     descRetefuente:  descRetefuente,
     pctRetefuente:   pctRetefuente,
@@ -289,6 +298,7 @@ const guardarRutaFrecuente = async () => {
     pctReteica:      pctReteica,
     descFopat:       descFopat,
     pctFopat:        pctFopat,
+    anticipoMonto:   n(anticipoMonto),
   };
 
   try {
@@ -411,7 +421,7 @@ const guardarRutaFrecuente = async () => {
             <label style={styles.label}>Placa vehículo</label>
             <select value={placa} onChange={e=>setPlaca(e.target.value)}
               style={{...styles.input, color: placa ? t.colors.textPrimary : t.colors.textTertiary}}>
-              <option value="">Elige tu vehículo</option>
+              <option value="">Sin asignar</option>
               {vehiculos.map(v=>(
                 <option key={v.firestoreId} value={v.placa}>{v.placa} — {v.tipoVehiculo}</option>
               ))}
@@ -454,7 +464,7 @@ const guardarRutaFrecuente = async () => {
       }}
       style={{...styles.input, marginBottom: "6px", color: t.colors.textPrimary}}
     >
-      <option value="__nuevo__">Nuevo producto</option>
+      <option value="__nuevo__">+ Escribir nuevo producto</option>
       {productosFrecuentes.map((p, i) => (
         <option key={i} value={p}>{p}</option>
       ))}
@@ -486,7 +496,7 @@ const guardarRutaFrecuente = async () => {
 }}
       style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
     >
-      <option value="__nueva__">Nueva empresa</option>
+      <option value="__nueva__">+ Escribir nueva empresa</option>
       {empresasFrecuentes.map((emp, i) => (
         <option key={i} value={emp}>{emp}</option>
       ))}
@@ -530,7 +540,7 @@ const guardarRutaFrecuente = async () => {
       }}
       style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
     >
-      <option value="__nuevo__">Nuevo conductor</option>
+      <option value="__nuevo__">+ Escribir nuevo conductor</option>
       {conductoresFrecuentes.map((c,i) => (
         <option key={i} value={c}>{c}</option>
       ))}
@@ -582,6 +592,12 @@ const guardarRutaFrecuente = async () => {
   <label style={styles.label}>Observaciones</label>
   <input type="text" placeholder="Novedades del viaje..." value={observaciones}
     onChange={e=>setObservaciones(e.target.value)} style={styles.input}/>
+</div>
+
+<div style={styles.campo}>
+  <label style={styles.label}>Anticipo al conductor ($)</label>
+  <input type="number" placeholder="3000000" value={anticipoMonto}
+    onChange={e=>setAnticipoMonto(e.target.value)} style={styles.input}/>
 </div>
 
 
@@ -651,8 +667,8 @@ const guardarRutaFrecuente = async () => {
     onChange={e => setModoFlete(e.target.value)}
     style={styles.input}
   >
-    <option value="porTon">Variable ($/Ton)</option>
-    <option value="porViaje">Fijo ($/Viaje)</option>
+    <option value="porTon">Por tonelada ($/ton)</option>
+    <option value="porViaje">Por viaje (valor fijo)</option>
   </select>
 </div>
 
@@ -726,8 +742,8 @@ const guardarRutaFrecuente = async () => {
           onChange={e=>setModoFleteRetorno(e.target.value)}
           style={styles.input}
         >
-          <option value="porTon">Variable ($/Ton)</option>
-          <option value="porViaje">Fijo ($/Viaje)</option>
+          <option value="porTon">Por tonelada ($/ton)</option>
+          <option value="porViaje">Por viaje (valor fijo)</option>
           </select>
         </div>
           <div style={styles.fila2}>
