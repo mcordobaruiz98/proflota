@@ -1160,7 +1160,7 @@ const guardarRutaFrecuente = async () => {
         </>}
 
           {/* GUARDAR RUTA */}
-<div style={{marginTop:"20px", borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px"}}>
+<div style={{marginTop:"10px", borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px"}}>
   {!mostrarGuardar ? (
     <button
       style={{
