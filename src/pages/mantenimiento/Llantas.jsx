@@ -18,9 +18,9 @@ const POSICIONES = {
   4:  ["Del. izq","Del. der","Tras. izq","Tras. der"],
   6:  ["Del. izq","Del. der","Tras. izq int","Tras. izq ext","Tras. der int","Tras. der ext"],
   10: ["Del. izq","Del. der","Med. izq int","Med. izq ext","Med. der int","Med. der ext","Tras. izq int","Tras. izq ext","Tras. der int","Tras. der ext"],
-  14: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Rem1 izq int","Rem1 izq ext","Rem1 der int","Rem1 der ext","Rem2 izq int","Rem2 izq ext","Rem2 der int","Rem2 der ext"],
-  18: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Rem1 izq int","Rem1 izq ext","Rem1 der int","Rem1 der ext","Rem2 izq int","Rem2 izq ext","Rem2 der int","Rem2 der ext"],
-  22: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Rem1 izq int","Rem1 izq ext","Rem1 der int","Rem1 der ext","Rem2 izq int","Rem2 izq ext","Rem2 der int","Rem2 der ext","Rem3 izq int","Rem3 izq ext","Rem3 der int","Rem3 der ext"],
+  14: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Rem. izq int","Rem. izq ext","Rem. der int","Rem. der ext"],
+  18: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Trac3 izq int","Trac3 izq ext","Trac3 der int","Trac3 der ext","Rem. izq int","Rem. izq ext","Rem. der int","Rem. der ext"],
+  22: ["Del. izq","Del. der","Trac. izq int","Trac. izq ext","Trac. der int","Trac. der ext","Trac2 izq int","Trac2 izq ext","Trac2 der int","Trac2 der ext","Trac3 izq int","Trac3 izq ext","Trac3 der int","Trac3 der ext","Rem1 izq int","Rem1 izq ext","Rem1 der int","Rem1 der ext","Rem2 izq int","Rem2 izq ext","Rem2 der int","Rem2 der ext"],
 };
 
 function estadoColor(e) {
@@ -173,6 +173,8 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
   const [ref,    setRef]    = useState("");
   const [prof,   setProf]   = useState("");
   const [kmMont, setKmMont] = useState("");
+  const [fechaMont, setFechaMont] = useState(new Date().toISOString().slice(0,10));
+  const [valor,    setValor]    = useState("");
   const [estado, setEstado] = useState("ok");
   const [obs,    setObs]    = useState("");
 
@@ -185,13 +187,15 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
     const d = llantas[n] || {};
     setMarca(d.marca||""); setRef(d.ref||"");
     setProf(d.prof||""); setKmMont(d.km||"");
+    setFechaMont(d.fecha || new Date().toISOString().slice(0,10));
+    setValor(d.valor || "");
     setEstado(d.estado||"ok"); setObs(d.obs||"");
   };
 
   const guardarLlanta = () => {
     const nuevas = {
       ...llantas,
-      [seleccionada]: { marca, ref, prof, km: kmMont, estado, obs }
+      [seleccionada]: { marca, ref, prof, km: kmMont, fecha: fechaMont, valor: Number(valor) || 0, estado, obs }
     };
     setLlantas(nuevas);
     guardarLocal(nuevas);
@@ -279,16 +283,53 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
                 <input type="number" placeholder="120000" value={kmMont}
                   onChange={e=>setKmMont(e.target.value)} style={styles.input}/>
               </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Fecha de montaje</label>
+                <input type="date" value={fechaMont}
+                  onChange={e=>setFechaMont(e.target.value)} style={styles.input}/>
+              </div>
             </div>
-            <div style={styles.campo}>
-              <label style={styles.label}>Estado</label>
-              <select value={estado} onChange={e=>setEstado(e.target.value)} style={styles.input}>
-                <option value="nueva">Nueva</option>
-                <option value="ok">Buena</option>
-                <option value="warn">Desgastada</option>
-                <option value="bad">Cambiar — requiere reemplazo</option>
-              </select>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>Valor llanta ($)</label>
+                <input type="number" placeholder="1200000" value={valor}
+                  onChange={e=>setValor(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Estado</label>
+                <select value={estado} onChange={e=>setEstado(e.target.value)} style={styles.input}>
+                  <option value="nueva">Nueva</option>
+                  <option value="ok">Buena</option>
+                  <option value="warn">Desgastada</option>
+                  <option value="bad">Cambiar — requiere reemplazo</option>
+                </select>
+              </div>
             </div>
+
+            {/* Vida útil y costo/km calculados */}
+            {kmMont && (vehiculo?.kmOdometro || 0) > 0 && (()=>{
+              const vidaUtil = (vehiculo?.kmOdometro || 0) - Number(kmMont);
+              const costoKm = vidaUtil > 0 && Number(valor) > 0 ? Number(valor) / vidaUtil : 0;
+              if (vidaUtil <= 0) return null;
+              return (
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}}>
+                  <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"10px",textAlign:"center"}}>
+                    <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"0 0 2px"}}>Vida útil</p>
+                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:t.colors.green,margin:0}}>
+                      {vidaUtil.toLocaleString("es-CO")} km
+                    </p>
+                  </div>
+                  {costoKm > 0 && (
+                    <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"10px",textAlign:"center"}}>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"0 0 2px"}}>Costo/km</p>
+                      <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:t.colors.amber,margin:0}}>
+                        ${costoKm.toFixed(1)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
             <div style={styles.campo}>
               <label style={styles.label}>Observaciones</label>
               <input type="text" placeholder="Reparada, pinchada, etc." value={obs}
@@ -330,7 +371,19 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
                     <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>
                       Llanta {n} — {posiciones[n-1]||""}
                     </p>
-                    {d.marca&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>{d.marca}{d.ref?` · ${d.ref}`:""}</p>}
+                    {d.marca&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>
+                      {d.marca}{d.ref?` · ${d.ref}`:""}{d.fecha?` · ${d.fecha}`:""}
+                    </p>}
+                    {d.km && (vehiculo?.kmOdometro||0) > Number(d.km) && (()=>{
+                      const vida = (vehiculo?.kmOdometro||0) - Number(d.km);
+                      const cKm = vida > 0 && d.valor > 0 ? d.valor / vida : 0;
+                      return (
+                        <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
+                          {vida.toLocaleString("es-CO")} km rodados
+                          {cKm > 0 ? ` · $${cKm.toFixed(1)}/km` : ""}
+                        </p>
+                      );
+                    })()}
                   </div>
                 </div>
                 <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightSemibold,color,whiteSpace:"nowrap"}}>{estadoLabel}</span>
