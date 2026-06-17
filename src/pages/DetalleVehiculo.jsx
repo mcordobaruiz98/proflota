@@ -467,7 +467,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   {label:"Modelo",           valor:vehiculo.modelo},
                   {label:"Propietario",      valor:vehiculo.propietario},
                   {label:"Tenedor",          valor:vehiculo.tenedor},
-                  {label:"Consumo Adblue",   valor:vehiculo.adblueRatio ? `${(vehiculo.adblueRatio*100).toFixed(1)}%` : "18.9%"},
+                  {label:"Consumo Adblue",   valor:vehiculo.adblueRatio ? `${(vehiculo.adblueRatio*100).toFixed(1)}%` : "18.9% (default)"},
                 ].map((item,i,arr)=>(
                   <div key={item.label} style={{...styles.fila, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                     <span style={styles.filaLabel}>{item.label}</span>
@@ -551,6 +551,12 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
         {/* ── VIAJES ── */}
         {tabActivo==="viajes" && (
           <div>
+            <button
+              style={{width:"100%",padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",marginBottom:"10px"}}
+              onClick={()=>navigate("/calculadora",{state:{placa:vehiculo.placa}})}
+            >
+              + Agregar viaje
+            </button>
             <div style={styles.chips}>
               {[{id:"todos",label:"Todos"},{id:"mes",label:"Este mes"},{id:"semana",label:"Esta semana"}].map(f=>(
                 <button key={f.id} style={{...styles.chip,...(filtro===f.id?styles.chipActivo:{})}} onClick={()=>setFiltro(f.id)}>
