@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth }     from "../hooks/useAuth";
 import { theme as t }  from "../styles/theme";
-import {Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake, AlertCircle} from "lucide-react";
+import {Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake, AlertCircle, Wrench} from "lucide-react";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
 function Home({ vehiculos = [], viajes = [], cargando}) {
@@ -68,7 +68,7 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
   { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Cartera",     Icono: AlertCircle, ruta: "/cartera",     color: "#0F2340", border: "#1E3A5F", iconColor: vencidos.length > 0 ? "#EF4444" : "#22C55E" },
   { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
-  { label: "Empresas",    Icono: Handshake,   ruta: "/empresas",    color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
+  { label: "Mant.",       Icono: Wrench,      ruta: "/vehiculos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
 ];
 
   if (cargando) return (
