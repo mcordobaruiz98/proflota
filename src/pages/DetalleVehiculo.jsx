@@ -107,6 +107,8 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [gastoDesc,     setGastoDesc]     = useState("");
   const [gastoMonto,    setGastoMonto]    = useState("");
   const [gastoFecha,    setGastoFecha]    = useState(new Date().toISOString().slice(0,10));
+  const [gastoTaller,   setGastoTaller]   = useState("");
+  const [gastoNit,      setGastoNit]      = useState("");
   const [guardandoGasto,setGuardandoGasto]= useState(false);
   const [verFormGasto,  setVerFormGasto]  = useState(false);
 
@@ -889,12 +891,12 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                       <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"12px"}}>
                         <div style={styles.campo}>
                           <label style={styles.label}>Descripción</label>
-                          <input type="text" placeholder="Ej: Lavada, parqueadero extra..."
+                          <input type="text" placeholder="Ej: Reparación, repuesto, lavada..."
                             value={gastoDesc} onChange={e=>setGastoDesc(e.target.value)} style={styles.input} />
                         </div>
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
                           <div style={styles.campo}>
-                            <label style={styles.label}>Monto</label>
+                            <label style={styles.label}>Monto ($)</label>
                             <input type="number" placeholder="500000"
                               value={gastoMonto} onChange={e=>setGastoMonto(e.target.value)} style={styles.input} />
                           </div>
@@ -904,6 +906,41 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                               onChange={e=>setGastoFecha(e.target.value)} style={styles.input} />
                           </div>
                         </div>
+                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+                          <div style={styles.campo}>
+                            <label style={styles.label}>Taller / Proveedor</label>
+                            <input type="text" placeholder="Nombre del taller"
+                              value={gastoTaller} onChange={e=>setGastoTaller(e.target.value)} style={styles.input} />
+                          </div>
+                          <div style={styles.campo}>
+                            <label style={styles.label}>NIT</label>
+                            <input type="text" placeholder="900.123.456-7"
+                              value={gastoNit} onChange={e=>setGastoNit(e.target.value)} style={styles.input} />
+                          </div>
+                        </div>
+                        <div style={styles.campo}>
+                          <label style={styles.label}>Adjuntar factura (opcional)</label>
+                          <label style={{display:"flex",alignItems:"center",gap:"8px",padding:"10px 12px",borderRadius:t.radius.sm,border:`1.5px dashed ${t.colors.border}`,cursor:"pointer",fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold}}>
+                            <Upload size={14} color={t.colors.blue} />
+                            {subiendo ? `Subiendo... ${progresoArchivo}%` : "Seleccionar archivo"}
+                            <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{display:"none"}}
+                              onChange={e=>{
+                                const archivo = e.target.files[0];
+                                if (!archivo) return;
+                                const ruta = `gastos/${id}/${Date.now()}_${archivo.name}`;
+                                subirArchivo(archivo, ruta, "gastoFactura", (url) => {
+                                  setGastoDesc(prev => prev); // keep form open
+                                  // Store URL temporarily on the form
+                                  e.target.dataset.facturaUrl = url;
+                                  e.target.dataset.facturaRuta = ruta;
+                                  e.target.dataset.facturaNombre = archivo.name;
+                                  mostrarToast("Factura adjuntada","exito");
+                                });
+                              }}
+                              id="facturaGastoInput"
+                            />
+                          </label>
+                        </div>
                         <button
                           style={{width:"100%",padding:"11px",background:t.colors.blue,color:"#fff",border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardandoGasto?0.75:1}}
                           disabled={guardandoGasto}
@@ -911,6 +948,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                             if (!gastoDesc.trim()) { mostrarToast("Ingresa una descripción","error"); return; }
                             if (!gastoMonto || Number(gastoMonto)<=0) { mostrarToast("Ingresa un monto válido","error"); return; }
                             setGuardandoGasto(true);
+                            const fileInput = document.getElementById("facturaGastoInput");
                             try {
                               await onAgregarGasto({
                                 vehiculoId: id,
@@ -918,9 +956,15 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                                 descripcion: gastoDesc.trim(),
                                 monto: Number(gastoMonto),
                                 fecha: gastoFecha,
+                                taller: gastoTaller.trim(),
+                                nit: gastoNit.trim(),
+                                facturaUrl: fileInput?.dataset?.facturaUrl || null,
+                                facturaRuta: fileInput?.dataset?.facturaRuta || null,
+                                facturaNombre: fileInput?.dataset?.facturaNombre || null,
                               });
                               mostrarToast("Gasto registrado","exito");
                               setGastoDesc(""); setGastoMonto(""); setGastoFecha(new Date().toISOString().slice(0,10));
+                              setGastoTaller(""); setGastoNit("");
                               setVerFormGasto(false);
                             } catch(err) {
                               mostrarToast("Error al guardar","error");
@@ -941,12 +985,22 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                     )}
 
                     {gastosMesVeh.map((g, i, arr) => (
-                      <div key={g.firestoreId} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                      <div key={g.firestoreId} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                         <div style={{flex:1,minWidth:0}}>
                           <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>{g.descripcion}</p>
-                          <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{g.fecha}</p>
+                          <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
+                            {g.fecha}
+                            {g.taller?` · ${g.taller}`:""}
+                            {g.nit?` · NIT: ${g.nit}`:""}
+                          </p>
+                          {g.facturaUrl && (
+                            <a href={g.facturaUrl} target="_blank" rel="noreferrer"
+                              style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"4px",marginTop:"4px"}}>
+                              <Eye size={12}/> Ver factura
+                            </a>
+                          )}
                         </div>
-                        <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                        <div style={{display:"flex",alignItems:"center",gap:"8px",marginLeft:"10px"}}>
                           <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.red}}>-{fmt(g.monto)}</span>
                           <button
                             style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
