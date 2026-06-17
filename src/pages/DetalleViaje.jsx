@@ -15,6 +15,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
   const [verFormAnticipo, setVerFormAnticipo] = useState(false);
   const [antDesc,         setAntDesc]         = useState("");
   const [antMonto,        setAntMonto]        = useState("");
+  const [retornoE,        setRetornoE]        = useState(false);
+  const [fleteRetE,       setFleteRetE]       = useState("");
 
   const [fecha,     setFecha]     = useState("");
   const [ruta,      setRuta]      = useState("");
@@ -89,6 +91,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
     setLugarCE(viaje.lugarCargue || "");
     setLugarDE(viaje.lugarDescargue || "");
     setObsE(viaje.observaciones || "");
+    setRetornoE(viaje.tieneRetorno || false);
+    setFleteRetE(viaje.valorViajeRetorno || "");
     setEditando(true);
   };
 
@@ -96,6 +100,13 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
     if (!ruta.trim()) { mostrarToast("Ingresa la ruta del viaje", "error"); return; }
     setGuardando(true);
     try {
+      const nuevoVViaje = viaje.modoFlete === "porViaje"
+          ? parseFloat(fleteTon)||viaje.vViaje
+          : (parseFloat(ton)||viaje.ton) * (parseFloat(fleteTon)||viaje.fleteTon);
+      const nuevoRetorno = retornoE ? (parseFloat(fleteRetE) || 0) : 0;
+      const totalIngresos = nuevoVViaje + nuevoRetorno;
+      const totalGastos = viaje.total || 0;
+
       await onEditar(viaje.firestoreId, {
         fecha, ruta: ruta.trim(), mani,
         placa, emp, carga: tipoCarga,
@@ -110,9 +121,11 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
         lugarCargue: lugarCE.trim(),
         lugarDescargue: lugarDE.trim(),
         observaciones: obsE.trim(),
-        vViaje: viaje.modoFlete === "porViaje"
-          ? parseFloat(fleteTon)||viaje.vViaje
-          : (parseFloat(ton)||viaje.ton) * (parseFloat(fleteTon)||viaje.fleteTon),
+        vViaje: totalIngresos,
+        tieneRetorno: retornoE,
+        valorViajeRetorno: nuevoRetorno,
+        valorViajeIda: nuevoVViaje,
+        neta: totalIngresos - totalGastos,
       });
       mostrarToast("Viaje actualizado", "exito");
       setEditando(false);
@@ -304,6 +317,23 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
             <div style={styles.campo}>
               <label style={styles.label}>Observaciones</label>
               <input type="text" value={obsE} onChange={e=>setObsE(e.target.value)} style={styles.input}/>
+            </div>
+
+            {/* Flete de retorno */}
+            <div style={{marginBottom:"12px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:"10px",cursor:"pointer",marginBottom:retornoE?"10px":"0"}} onClick={()=>setRetornoE(!retornoE)}>
+                <div style={{width:"36px",height:"20px",borderRadius:"10px",background:retornoE?t.colors.blue:"#1E3A5F",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                  <div style={{width:"16px",height:"16px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:retornoE?"18px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
+                </div>
+                <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textPrimary}}>Flete de retorno</span>
+              </div>
+              {retornoE && (
+                <div style={styles.campo}>
+                  <label style={styles.label}>Valor flete retorno ($)</label>
+                  <input type="number" placeholder="2500000" value={fleteRetE}
+                    onChange={e=>setFleteRetE(e.target.value)} style={styles.input}/>
+                </div>
+              )}
             </div>
 
             <div style={{display:"flex", gap:"8px", marginTop:"8px"}}>
