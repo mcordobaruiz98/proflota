@@ -33,18 +33,19 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo }) {
 
   const [historial,   setHistorial]   = useState(vehiculo?.frenosHistorial || []);
 
-  const [ejeEdit,     setEjeEdit]     = useState(null);
-  const [estadoSel,   setEstadoSel]   = useState("bueno");
-  const [grosor,      setGrosor]      = useState("");
-  const [tipo,        setTipo]        = useState("");
-  const [nota,        setNota]        = useState("");
-  const [mostrarForm, setMostrarForm] = useState(false);
-  const [ejeReg,      setEjeReg]      = useState(ejes[0]);
-  const [kmReg,       setKmReg]       = useState("");
-  const [fechaReg,    setFechaReg]    = useState(new Date().toISOString().slice(0,10));
-  const [tallerReg,   setTallerReg]   = useState("");
-  const [costoReg,    setCostoReg]    = useState("");
-  const [guardando,   setGuardando]   = useState(false);
+  const [ejeEdit,       setEjeEdit]     = useState(null);
+  const [estadoSel,     setEstadoSel]   = useState("bueno");
+  const [grosor,        setGrosor]      = useState("");
+  const [tipo,          setTipo]        = useState("");
+  const [nota,          setNota]        = useState("");
+  const [mostrarForm,   setMostrarForm] = useState(false);
+  const [ejeReg,        setEjeReg]      = useState(ejes[0]);
+  const [kmReg,         setKmReg]       = useState("");
+  const [fechaReg,      setFechaReg]    = useState(new Date().toISOString().slice(0,10));
+  const [tallerReg,     setTallerReg]   = useState("");
+  const [nitTallReg,    setnitTallReg]  = useState("");
+  const [costoReg,      setCostoReg]    = useState("");
+  const [guardando,     setGuardando]   = useState(false);
 
   const fmt = (n) => "$" + Math.round(n||0).toLocaleString("es-CO");
 
@@ -71,11 +72,11 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo }) {
   const guardarReparacion = () => {
     if (!kmReg) { mostrarToast("Ingresa el km","error"); return; }
     setGuardando(true);
-    const nuevo = { id:Date.now(), eje:ejeReg, km:Number(kmReg), fecha:fechaReg, taller:tallerReg, costo:Number(costoReg)||0 };
+    const nuevo = { id:Date.now(), eje:ejeReg, km:Number(kmReg), fecha:fechaReg, taller:tallerReg, nitTaller:Number(nitTallReg), costo:Number(costoReg)||0 };
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
     onEditarVehiculo(vehiculo.firestoreId, { frenosHistorial: nuevos }).catch(()=>{});
-    setKmReg(""); setTallerReg(""); setCostoReg("");
+    setKmReg(""); setTallerReg(""); setnitTallReg(""); setCostoReg("");
     setMostrarForm(false);
     mostrarToast("Reparación registrada","exito");
     setGuardando(false);
@@ -209,11 +210,18 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo }) {
                   onChange={e=>setTallerReg(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
+                <label style={styles.label}>Nit Taller</label>
+                <input type="number" placeholder="111.222.333-4" value={nitTallReg}
+                  onChange={e=>setnitTallReg(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+
+            <div style={styles.campo}>
                 <label style={styles.label}>Costo ($)</label>
                 <input type="number" placeholder="500000" value={costoReg}
                   onChange={e=>setCostoReg(e.target.value)} style={styles.input}/>
               </div>
-            </div>
+
             <div style={{display:"flex",gap:"8px"}}>
               <button
                 style={{flex:1,padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardando?0.75:1}}
