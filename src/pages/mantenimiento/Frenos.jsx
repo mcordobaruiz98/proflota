@@ -8,10 +8,10 @@ const EJES_POR_VEHICULO = {
   "SENCILLO":        ["Eje delantero","Eje trasero"],
   "TURBO":           ["Eje delantero","Eje trasero"],
   "DOBLETROQUE":     ["Eje delantero","Eje medio","Eje trasero"],
-  "PATINETA 2S2":    ["Eje delantero","Eje tracción 1","Eje remolque 1","Eje remolque 2"],
-  "PATINETA 2S3":    ["Eje delantero","Eje tracción 1","Eje tracción 2","Eje remolque 1","Eje remolque 2"],
-  "TRACTOMULA 3S2":  ["Eje delantero","Eje tracción 1","Eje tracción 2","Eje remolque 1","Eje remolque 2"],
-  "TRACTOMULA 3S3":  ["Eje delantero","Eje tracción 1","Eje tracción 2","Remolque 1","Eje remolque 2","Eje remolque 2"],
+  "PATINETA 2S2":    ["Eje delantero izq","Eje delantero der","Eje tracción 1 izq","Eje tracción 1 der","Eje remolque 1 izq","Eje remolque 1 der","Eje remolque 2 izq","Eje remolque 2 der"],
+  "PATINETA 2S3":    ["Eje delantero izq","Eje delantero der","Eje tracción 1 izq","Eje tracción 1 der","Eje remolque 1 izq","Eje remolque 1 der","Eje remolque 2 izq","Eje remolque 2 der","Eje remolque 3 izq","Eje remolque 3 der"],
+  "TRACTOMULA 3S2":  ["Eje delantero izq","Eje delantero der","Eje tracción 1 izq","Eje tracción 1 der","Eje tracción 2 izq","Eje tracción 2 der","Eje remolque 1 izq","Eje remolque 1 der","Eje remolque 2 izq","Eje remolque 2 der"],
+  "TRACTOMULA 3S3":  ["Eje delantero izq","Eje delantero der","Eje tracción 1 izq","Eje tracción 1 der","Eje tracción 2 izq","Eje tracción 2 der","Eje remolque 1 izq","Eje remolque 1 der","Eje remolque 2 izq","Eje remolque 2 der","Eje remolque 3 izq","Eje remolque 3 der"],
 };
 
 const ESTADOS = [
