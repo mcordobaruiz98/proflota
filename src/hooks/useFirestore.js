@@ -17,6 +17,7 @@ export function useFirestore(uid) {
   const [configMant,     setConfigMant]     = useState([]);
   const [gastosVehiculo, setGastosVehiculo] = useState([]);
   const [gastosFijos,    setGastosFijos]    = useState([]);
+  const [conductores,   setConductores]   = useState([]);
 
   const rutaVehiculos = uid ? `usuarios/${uid}/vehiculos`     : null;
   const rutaViajes    = uid ? `usuarios/${uid}/viajes`        : null;
@@ -26,6 +27,7 @@ export function useFirestore(uid) {
   const rutaConfigMant = uid ? `usuarios/${uid}/config_mant` : null;
   const rutaGastos     = uid ? `usuarios/${uid}/gastos_vehiculo` : null;
   const rutaGastosFijos = uid ? `usuarios/${uid}/gastos_fijos` : null;
+  const rutaConductores = uid ? `usuarios/${uid}/conductores` : null;
 
   useEffect(() => {
     if (!rutaVehiculos) return;
@@ -191,8 +193,29 @@ const eliminarConfigMant = async (firestoreId) => {
     await deleteDoc(doc(db, rutaGastosFijos, firestoreId));
   };
 
+  // CONDUCTORES
+  useEffect(() => {
+    if (!rutaConductores) return;
+    const unsub = onSnapshot(collection(db, rutaConductores), (snap) => {
+      setConductores(snap.docs.map(d => ({ firestoreId: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, [rutaConductores]);
+
+  const agregarConductor = async (datos) => {
+    const datosLimpios = JSON.parse(JSON.stringify(datos));
+    await addDoc(collection(db, rutaConductores), { ...datosLimpios, creadoEn: new Date().toISOString() });
+  };
+  const editarConductor = async (firestoreId, datos) => {
+    const datosLimpios = JSON.parse(JSON.stringify(datos));
+    await updateDoc(doc(db, rutaConductores, firestoreId), datosLimpios);
+  };
+  const eliminarConductor = async (firestoreId) => {
+    await deleteDoc(doc(db, rutaConductores, firestoreId));
+  };
+
   return {
-    vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, gastosVehiculo, gastosFijos, cargando,
+    vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, gastosVehiculo, gastosFijos, conductores, cargando,
     agregarVehiculo, eliminarVehiculo, editarVehiculo,
     agregarViaje,    eliminarViaje,    editarViaje,
     agregarEmpresa,  eliminarEmpresa,
@@ -201,5 +224,6 @@ const eliminarConfigMant = async (firestoreId) => {
     agregarConfigMant, eliminarConfigMant,
     agregarGasto, eliminarGasto,
     agregarGastoFijo, eliminarGastoFijo,
+    agregarConductor, editarConductor, eliminarConductor,
   };
 }
