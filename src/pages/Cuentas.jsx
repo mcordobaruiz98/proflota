@@ -91,11 +91,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           <p style={styles.headerSub}>Resumen financiero</p>
           <h1 style={styles.titulo}>Cuentas</h1>
         </div>
-        <button style={styles.btnHistorial} onClick={() => navigate("/viajes")}>
-          <History size={16} color={t.colors.blue} strokeWidth={2} />
-          Historial
-        </button>
-        <button style={{...styles.btnHistorial, marginLeft:"6px"}} onClick={()=>{
+        <button style={styles.btnHistorial} onClick={()=>{
           const w = window.open("","_blank","width=800,height=600");
           w.document.write(`<!DOCTYPE html><html><head><title>Resumen ${MESES[mes]} ${anio}</title>
           <style>
@@ -341,28 +337,6 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             <button style={styles.btnCalcular} onClick={()=>navigate("/calculadora")}>
               Calcular flete
             </button>
-          </div>
-        )}
-
-        {/* VIAJES DEL MES */}
-        {viajesMes.length > 0 && (
-          <div style={styles.card}>
-            <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
-            {[...viajesMes].reverse().map((viaje,i,arr) => (
-              <div
-                key={viaje.firestoreId}
-                style={{...styles.viajeFilaMes, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`, cursor:"pointer"}}
-                onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
-              >
-                <div style={{flex:1}}>
-                  <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{viaje.ruta||"Sin ruta"}</p>
-                  <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0"}}>{viaje.fecha||""}{viaje.placa?` · ${viaje.placa}`:""}</p>
-                </div>
-                <p style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, margin:0, color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
-                  {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
-                </p>
-              </div>
-            ))}
           </div>
         )}
 
