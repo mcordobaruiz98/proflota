@@ -161,6 +161,7 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo }) {
   const [grosor,      setGrosor]      = useState("");
   const [tipo,        setTipo]        = useState("");
   const [nota,        setNota]        = useState("");
+  const [fechaFreno,  setFechaFreno]  = useState(new Date().toISOString().slice(0,10));
   const [mostrarForm, setMostrarForm] = useState(false);
   const [ejeReg,      setEjeReg]      = useState(ejes[0]);
   const [kmReg,       setKmReg]       = useState("");
@@ -174,7 +175,7 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo }) {
   const labelEstado = (e) => ESTADOS.find(x=>x.value===e)?.label || "Sin registro";
 
   const guardarEstadoEje = () => {
-    const nuevos = { ...estadoEjes, [ejeEdit]: { estado:estadoSel, grosor, tipo, nota } };
+    const nuevos = { ...estadoEjes, [ejeEdit]: { estado:estadoSel, grosor, tipo, nota, fecha:fechaFreno } };
     setEstadoEjes(nuevos);
     onEditarVehiculo(vehiculo.firestoreId, { frenosData: nuevos }).catch(()=>{});
     setEjeEdit(null);
@@ -187,6 +188,7 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo }) {
     setGrosor(d.grosor||"");
     setTipo(d.tipo||"");
     setNota(d.nota||"");
+    setFechaFreno(d.fecha || new Date().toISOString().slice(0,10));
     setEjeEdit(eje);
   };
 
@@ -259,7 +261,7 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo }) {
                     <div style={{width:"10px",height:"10px",borderRadius:"2px",background:d.estado?color:t.colors.textTertiary,flexShrink:0}}/>
                     <div>
                       <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>{eje}</p>
-                      {d.grosor&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>Grosor: {d.grosor} mm{d.tipo?` · ${d.tipo}`:""}</p>}
+                      {d.grosor&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>Grosor: {d.grosor} mm{d.tipo?` · ${d.tipo}`:""}{d.fecha?` · ${d.fecha}`:""}</p>}
                     </div>
                   </div>
                   <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
@@ -293,10 +295,17 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo }) {
                           onChange={e=>setTipo(e.target.value)} style={styles.input}/>
                       </div>
                     </div>
-                    <div style={styles.campo}>
-                      <label style={styles.label}>Nota</label>
-                      <input type="text" placeholder="Observaciones" value={nota}
-                        onChange={e=>setNota(e.target.value)} style={styles.input}/>
+                    <div style={styles.fila2}>
+                      <div style={styles.campo}>
+                        <label style={styles.label}>Fecha</label>
+                        <input type="date" value={fechaFreno}
+                          onChange={e=>setFechaFreno(e.target.value)} style={styles.input}/>
+                      </div>
+                      <div style={styles.campo}>
+                        <label style={styles.label}>Nota</label>
+                        <input type="text" placeholder="Observaciones" value={nota}
+                          onChange={e=>setNota(e.target.value)} style={styles.input}/>
+                      </div>
                     </div>
                     <div style={{display:"flex",gap:"8px"}}>
                       <button style={{flex:1,padding:"10px",background:t.colors.blue,color:"#fff",border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer"}}
@@ -407,4 +416,3 @@ const styles = {
 };
 
 export default Frenos;
-
