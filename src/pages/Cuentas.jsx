@@ -153,6 +153,10 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
           Exportar
         </button>
+        <button style={{...styles.btnHistorial, marginLeft:"6px"}} onClick={()=>navigate("/comparativo")}>
+          <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
+          Comparar
+        </button>
       </div>
 
       {/* NAV MES */}

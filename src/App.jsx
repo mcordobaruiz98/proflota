@@ -20,6 +20,7 @@ import Configuracion    from "./pages/Configuracion";
 import AyudaSoporte     from "./pages/AyudaSoporte";
 import AcercaDe         from "./pages/AcercaDe";
 import Cartera          from "./pages/Cartera";
+import Comparativo      from "./pages/Comparativo";
 import Toast            from "./components/Toast";
 import Llantas          from "./pages/mantenimiento/Llantas";
 import Aceite           from "./pages/mantenimiento/Aceite";
@@ -190,6 +191,17 @@ function AppContenido() {
             vehiculos={vehiculos}
             onEditar={editarViaje}
             mostrarToast={mostrar}
+          />
+        </RutaProtegida>
+      } />
+
+      <Route path="/comparativo" element={
+        <RutaProtegida>
+          <Comparativo
+            vehiculos={vehiculos}
+            viajes={viajes}
+            gastosFijos={gastosFijos}
+            gastosVehiculo={gastosVehiculo}
           />
         </RutaProtegida>
       } />
