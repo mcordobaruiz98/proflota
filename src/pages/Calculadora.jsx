@@ -1,6 +1,6 @@
-import { use, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Save, Plus, X, ChevronDown } from "lucide-react";
+import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronUp } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
 const DEFAULT_ADBLUE = 0.18925;
@@ -81,7 +81,11 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   const [nombreRuta,       setNombreRuta]         = useState("");
   const [mostrarGuardar,   setMostrarGuardar]     = useState(false);
   const [rutaCargada,      setRutaCargada]        = useState(null);
-
+  const [secDatos,         setSecDatos]           = useState(true);
+  const [secComb,          setSecComb]            = useState(false);
+  const [secPeajes,        setSecPeajes]          = useState(false);
+  const [secCostos,        setSecCostos]          = useState(false);
+  const [secDesc,          setSecDesc]            = useState(false);
 
   const n   = (v) => parseFloat(v) || 0;
   const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
@@ -419,7 +423,11 @@ const guardarRutaFrecuente = async () => {
 )}
 
       {/* ── DATOS DEL VIAJE ── */}
-      <div style={styles.seccionLabel}>Datos del viaje</div>
+      <div style={styles.seccionHeader} onClick={()=>setSecDatos(!secDatos)}>
+        <span style={styles.seccionLabel}>Datos del viaje</span>
+        {secDatos ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
+      </div>
+      {secDatos && (<div style={{padding:"0 20px"}}>
       <div style={styles.card}>
         <div style={styles.fila2}>
           <div style={styles.campo}>
@@ -559,8 +567,9 @@ const guardarRutaFrecuente = async () => {
       style={styles.input}
     />
   )}
+</div>
 
-  <div style={styles.campo}>
+<div style={styles.campo}>
   <label style={styles.label}>Manifiesto</label>
   <input type="text" placeholder="123456789" value={mani}
     onChange={e=>setMani(e.target.value)} style={styles.input}/>
@@ -598,7 +607,6 @@ const guardarRutaFrecuente = async () => {
     onChange={e=>setObservaciones(e.target.value)} style={styles.input}/>
 </div>
 
-</div>
         <div style={styles.fila2}>
           <div style={styles.campo}>
             <label style={styles.label}>Km cargado</label>
@@ -802,7 +810,11 @@ const guardarRutaFrecuente = async () => {
 </div>
 
       {/* ── COMBUSTIBLE ── */}
-      <div style={styles.seccionLabel}>Combustible / Adblue</div>
+      <div style={styles.seccionHeader} onClick={()=>setSecComb(!secComb)}>
+        <span style={styles.seccionLabel}>Combustible / Adblue</span>
+        {secComb ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
+      </div>
+      {secComb && (<div style={{padding:"0 20px"}}>
       <div style={styles.card}>
         <div style={styles.campo}>
           <label style={styles.label}>Modo de cálculo</label>
@@ -853,9 +865,15 @@ const guardarRutaFrecuente = async () => {
           </div>
         )}
       </div>
+ 
+      </div>)}
 
       {/* ── PEAJES ── */}
-      <div style={styles.seccionLabel}>Peajes de ruta</div>
+      <div style={styles.seccionHeader} onClick={()=>setSecPeajes(!secPeajes)}>
+        <span style={styles.seccionLabel}>Peajes de ruta</span>
+        {secPeajes ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
+      </div>
+      {secPeajes && (<div style={{padding:"0 20px"}}>
       <div style={styles.card}>
         <div style={styles.campo}>
           <label style={styles.label}>Categoría del vehículo</label>
@@ -879,7 +897,7 @@ const guardarRutaFrecuente = async () => {
         <div style={styles.filaAgregar}>
           <select value={selP} onChange={e=>setSelP(e.target.value)}
             style={{...styles.input, flex:1, marginBottom:0}}>
-            <option value="">Seleccionar peaje...</option>
+            <option value="">— Seleccionar peaje —</option>
             {peajesFiltrados.map(p=>(
               <option key={p.c} value={p.c}>
                 {p.n} ({p.d}) — ${(obtenerTarifa(p, categoria)).toLocaleString("es-CO")}
@@ -890,7 +908,7 @@ const guardarRutaFrecuente = async () => {
             <Plus size={16} color="#fff" strokeWidth={2.5} />
           </button>
         </div>
-
+ 
         {peajesRuta.length > 0 && (
           <div style={styles.peajesTags}>
             {peajesRuta.map(p=>{
@@ -913,15 +931,21 @@ const guardarRutaFrecuente = async () => {
             })}
           </div>
         )}
-
+ 
         <div style={styles.totalPeajesRow}>
           <span style={styles.totalPeajesL}>Total peajes</span>
           <span style={styles.totalPeajesV}>{fmt(totPeajes)}</span>
         </div>
       </div>
+ 
+      </div>)}
 
       {/* ── COSTOS ── */}
-      <div style={styles.seccionLabel}>Costos del viaje</div>
+      <div style={styles.seccionHeader} onClick={()=>setSecCostos(!secCostos)}>
+        <span style={styles.seccionLabel}>Costos del viaje</span>
+        {secCostos ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
+      </div>
+      {secCostos && (<div style={{padding:"0 20px"}}>
       <div style={styles.card}>
         <div style={styles.campo}>
   <label style={styles.label}>Modo de pago conductor</label>
@@ -937,7 +961,7 @@ const guardarRutaFrecuente = async () => {
     <option value="fijo">Valor fijo ($)</option>
   </select>
 </div>
-
+ 
 <div style={styles.fila2}>
   <div style={styles.campo}>
     {modoConductor === "porcentaje" ? (
@@ -964,7 +988,7 @@ const guardarRutaFrecuente = async () => {
           <label style={styles.label}>Gastos de viaje</label>
           <input type="number" placeholder="30000" value={gastosViaje} onChange={e=>setGastosViaje(e.target.value)} style={styles.input} />
         </div>
-
+ 
         {extras.map((e,i)=>(
           <div key={i} style={styles.extraFila}>
             <span style={{fontSize: t.fonts.sizeSm, color: t.colors.textSecondary}}>{e.n}</span>
@@ -976,7 +1000,7 @@ const guardarRutaFrecuente = async () => {
             </div>
           </div>
         ))}
-
+ 
         <div style={styles.fila2}>
           <input type="text" placeholder="Nombre del costo" value={nuevoNom}
             onChange={e=>setNuevoNom(e.target.value)}
@@ -990,14 +1014,20 @@ const guardarRutaFrecuente = async () => {
           Agregar costo
         </button>
       </div>
+ 
+      </div>)}
 
       {/* ── DESCUENTOS DE LEY ── */}
-<div style={styles.seccionLabel}>Descuentos de ley</div>
+<div style={styles.seccionHeader} onClick={()=>setSecDesc(!secDesc)}>
+  <span style={styles.seccionLabel}>Descuentos de ley</span>
+  {secDesc ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
+</div>
+{secDesc && (<div style={{padding:"0 20px"}}>
 <div style={styles.card}>
   <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 14px"}}>
     Activa los descuentos que aplique la empresa sobre el valor del viaje.
   </p>
-
+ 
   {[
     {
       id:"retefuente", label:"Retención en la fuente", sub:"Sobre valor del viaje",
@@ -1045,7 +1075,7 @@ const guardarRutaFrecuente = async () => {
       </div>
     </div>
   ))}
-
+ 
   {/* OTRO */}
   <div style={{borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px", marginTop:"4px"}}>
     <div style={{display:"flex", alignItems:"center", gap:"10px", marginBottom:"8px", cursor:"pointer"}} onClick={()=>setDescOtro(!descOtro)}>
@@ -1081,7 +1111,7 @@ const guardarRutaFrecuente = async () => {
       </div>
     )}
   </div>
-
+ 
   {/* TOTAL DESCUENTOS */}
   {totalDesc > 0 && (
     <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", borderTop:`1px solid ${t.colors.border}`, paddingTop:"10px", marginTop:"8px"}}>
@@ -1090,6 +1120,8 @@ const guardarRutaFrecuente = async () => {
     </div>
   )}
 </div>  
+ 
+      </div>)} 
 
       {/* ── RESULTADO ── */}
       <div style={styles.seccionLabel}>Resultado del viaje</div>
@@ -1117,7 +1149,8 @@ const guardarRutaFrecuente = async () => {
           </p>
         </div>
 
-        {valorViaje > 0 && <>
+        {valorViaje > 0 && (
+          <>
           {[
             {l:`ACPM (${fnD(galTotal,1)} gal)`,  v: costoAcpm},
             {l:`Adblue (${fnD(adblLt,1)} lt)`,   v: costoAdbl},
@@ -1142,7 +1175,8 @@ const guardarRutaFrecuente = async () => {
           <div style={styles.barraFondo}>
             <div style={{...styles.barraRelleno, width:`${Math.min(Math.max(margen,0),100)}%`, background: margenColor}} />
           </div>
-        </>}
+          </>
+        )}
 
           {/* GUARDAR RUTA */}
 <div style={{marginTop:"10px", borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px", marginBottom:"12px"}}>
@@ -1211,7 +1245,8 @@ const styles = {
   header:           { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
   btnVolver:        { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
   titulo:           { fontSize:"18px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
-  seccionLabel:     { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", padding:"16px 20px 8px" },
+  seccionLabel:     { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", padding:"0" },
+  seccionHeader:    { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"14px 20px 8px", cursor:"pointer" },
   card:             { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", margin:"0 16px 4px", boxShadow:t.shadows.card },
   campo:            { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
   fila2:            { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },
@@ -1249,7 +1284,6 @@ const styles = {
   barraRelleno:     { height:"100%", borderRadius:"3px", transition:"width 0.4s ease" },
   btnGuardar:       { width:"100%", padding:"15px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" },
 };
-
 
 // v2 - fix conductor
 export default Calculadora;
