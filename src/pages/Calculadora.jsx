@@ -808,6 +808,7 @@ const guardarRutaFrecuente = async () => {
     </div>
   )}
 </div>
+</div>)}
 
       {/* ── COMBUSTIBLE ── */}
       <div style={styles.seccionHeader} onClick={()=>setSecComb(!secComb)}>
