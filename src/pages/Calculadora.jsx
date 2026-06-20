@@ -1125,7 +1125,9 @@ const guardarRutaFrecuente = async () => {
       </div>)} 
 
       {/* ── RESULTADO ── */}
-      <div style={styles.seccionLabel}>Resultado del viaje</div>
+      <div style={{...styles.seccionHeader, cursor:"default"}}>
+        <span style={styles.seccionLabel}>Resultado del viaje</span>
+      </div>
       <div style={styles.card}>
         <div style={styles.fila2}>
           <div style={styles.metCard}>
