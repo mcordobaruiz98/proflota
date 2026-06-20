@@ -4,7 +4,7 @@ import { theme as t }  from "../styles/theme";
 import {Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake, AlertCircle, Wrench} from "lucide-react";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
-function Home({ vehiculos = [], viajes = [], cargando}) {
+function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [], conductores = [], cargando}) {
   const navigate = useNavigate();
   const { usuario } = useAuth();
 
@@ -62,6 +62,41 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
   });
   docsAlerta.sort((a,b) => a.dias - b.dias);
 
+  // Alertas de mantenimiento por km
+  const mantAlerta = [];
+  vehiculos.forEach(v => {
+    const configs = configMant.filter(c => c.placa === v.placa);
+    configs.forEach(c => {
+      const ultimoMant = mantenimientos
+        .filter(m => m.placa === v.placa && m.tipo === c.tipo)
+        .sort((a,b) => (b.km||0) - (a.km||0))[0];
+      const kmUltimo = ultimoMant?.km || 0;
+      const kmActual = v.kmOdometro || 0;
+      const kmFaltantes = (kmUltimo + (c.intervalo||0)) - kmActual;
+      if (kmFaltantes <= 500) {
+        mantAlerta.push({
+          placa: v.placa,
+          tipo: c.tipo || c.nombre || "Servicio",
+          kmFaltantes,
+          vencido: kmFaltantes <= 0,
+          vehiculoId: v.firestoreId,
+        });
+      }
+    });
+  });
+  mantAlerta.sort((a,b) => a.kmFaltantes - b.kmFaltantes);
+
+  // Alertas de licencias de conductores
+  const licAlerta = [];
+  conductores.forEach(c => {
+    if (!c.licVence) return;
+    const dias = Math.ceil((new Date(c.licVence) - new Date()) / (1000*60*60*24));
+    if (dias <= 30) {
+      licAlerta.push({ nombre: c.nombre, dias, vencido: dias < 0 });
+    }
+  });
+  licAlerta.sort((a,b) => a.dias - b.dias);
+
   const accesos = [
   { label: "Vehículos",   Icono: Truck,       ruta: "/vehiculos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Cuentas",     Icono: TrendingUp,  ruta: "/cuentas",     color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
@@ -109,7 +144,7 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
             {fmt(gananciaMes)}
           </p>
           <p style={styles.gananciaSub}>
-            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""}
+            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""} · {fmt(ingresosMes)} brutos
           </p>
         </div>
         <div style={styles.gananciaDer}>
@@ -176,6 +211,46 @@ function Home({ vehiculos = [], viajes = [], cargando}) {
               </span>
               <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:d.vencido?t.colors.red:d.dias<=7?t.colors.amber:t.colors.textSecondary}}>
                 {d.vencido?`Venció hace ${Math.abs(d.dias)}d`:d.dias===0?"Vence hoy":`Vence en ${d.dias}d`}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ALERTA MANTENIMIENTOS POR KM */}
+      {mantAlerta.length > 0 && (
+        <div style={{margin:"0 16px 10px",padding:"12px 16px",background:mantAlerta.some(m=>m.vencido)?"#FEF2F2":"#FEF3C7",border:`1.5px solid ${mantAlerta.some(m=>m.vencido)?"#EF444433":"#F59E0B33"}`,borderRadius:t.radius.lg}}>
+          <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
+            <Wrench size={18} color={mantAlerta.some(m=>m.vencido)?t.colors.red:t.colors.amber} strokeWidth={2} />
+            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:mantAlerta.some(m=>m.vencido)?t.colors.red:t.colors.amber,margin:0}}>Mantenimientos pendientes</p>
+          </div>
+          {mantAlerta.map((m,i) => (
+            <div key={`${m.placa}-${m.tipo}-${i}`}
+              style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0",cursor:"pointer"}}
+              onClick={()=>navigate(`/vehiculo/${m.vehiculoId}`,{state:{tab:"mant"}})}>
+              <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>{m.tipo} · {m.placa}</span>
+              <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:m.vencido?t.colors.red:t.colors.amber}}>
+                {m.vencido?`Pasado ${Math.abs(m.kmFaltantes).toLocaleString("es-CO")} km`:`Faltan ${m.kmFaltantes.toLocaleString("es-CO")} km`}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ALERTA LICENCIAS CONDUCTORES */}
+      {licAlerta.length > 0 && (
+        <div style={{margin:"0 16px 10px",padding:"12px 16px",background:licAlerta.some(l=>l.vencido)?"#FEF2F2":"#FEF3C7",border:`1.5px solid ${licAlerta.some(l=>l.vencido)?"#EF444433":"#F59E0B33"}`,borderRadius:t.radius.lg}}>
+          <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
+            <AlertCircle size={18} color={licAlerta.some(l=>l.vencido)?t.colors.red:t.colors.amber} strokeWidth={2} />
+            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:licAlerta.some(l=>l.vencido)?t.colors.red:t.colors.amber,margin:0}}>Licencias de conducir</p>
+          </div>
+          {licAlerta.map((l,i) => (
+            <div key={`lic-${i}`}
+              style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0",cursor:"pointer"}}
+              onClick={()=>navigate("/conductores")}>
+              <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>{l.nombre}</span>
+              <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:l.vencido?t.colors.red:t.colors.amber}}>
+                {l.vencido?`Vencida hace ${Math.abs(l.dias)}d`:`Vence en ${l.dias}d`}
               </span>
             </div>
           ))}

@@ -22,6 +22,7 @@ import AcercaDe         from "./pages/AcercaDe";
 import Cartera          from "./pages/Cartera";
 import Comparativo      from "./pages/Comparativo";
 import Conductores      from "./pages/Conductores";
+import Conductores      from "./pages/Conductores";
 import Toast            from "./components/Toast";
 import Llantas          from "./pages/mantenimiento/Llantas";
 import Aceite           from "./pages/mantenimiento/Aceite";
@@ -63,7 +64,7 @@ function AppContenido() {
       <Route path="/" element={
         <RutaProtegida>
           <Layout>
-            <Home vehiculos={vehiculos} viajes={viajes} cargando={cargando}/>
+            <Home vehiculos={vehiculos} viajes={viajes} configMant={configMant} mantenimientos={mantenimientos} conductores={conductores} cargando={cargando}/>
           </Layout>
         </RutaProtegida>
       } />
@@ -204,6 +205,18 @@ function AppContenido() {
             viajes={viajes}
             gastosFijos={gastosFijos}
             gastosVehiculo={gastosVehiculo}
+          />
+        </RutaProtegida>
+      } />
+
+      <Route path="/conductores" element={
+        <RutaProtegida>
+          <Conductores
+            conductores={conductores}
+            onAgregar={agregarConductor}
+            onEditar={editarConductor}
+            onEliminar={eliminarConductor}
+            mostrarToast={mostrar}
           />
         </RutaProtegida>
       } />
