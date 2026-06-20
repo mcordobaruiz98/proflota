@@ -4,7 +4,7 @@ import { theme as t }  from "../styles/theme";
 import {Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake, AlertCircle, Wrench} from "lucide-react";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
-function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [], conductores = [], cargando}) {
+function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [], conductores = [], gastosFijos = [], cargando}) {
   const navigate = useNavigate();
   const { usuario } = useAuth();
 
@@ -32,6 +32,13 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
   const gananciaMes  = viajesMes.reduce((s, v) => s + (v.neta   || 0), 0);
   const ingresosMes  = viajesMes.reduce((s, v) => s + (v.vViaje || 0), 0);
   const recientes    = viajes.slice(0, 4);
+
+  // Punto de equilibrio
+  const totalPE = gastosFijos.reduce((s, g) => {
+    const monto = g.monto || 0;
+    return s + (g.periodicidad === "anual" ? monto / 12 : monto);
+  }, 0);
+  const pctPE = totalPE > 0 ? Math.min(Math.round((gananciaMes / totalPE) * 100), 999) : 0;
 
   // Cartera - viajes pendientes y vencidos
   const pendientes = viajes.filter(v => v.estadoPago !== "pagado");
@@ -144,8 +151,19 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             {fmt(gananciaMes)}
           </p>
           <p style={styles.gananciaSub}>
-            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""} 
+            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""} · {fmt(ingresosMes)} brutos
           </p>
+          {totalPE > 0 && (
+            <div style={{marginTop:"8px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"4px"}}>
+                <span style={{fontSize:"10px",color:"#065F46",fontWeight:"600"}}>Punto de equilibrio</span>
+                <span style={{fontSize:"10px",color:pctPE>=100?"#065F46":"#7F1D1D",fontWeight:"700"}}>{pctPE}%</span>
+              </div>
+              <div style={{height:"4px",borderRadius:"2px",background:"rgba(0,0,0,0.15)",overflow:"hidden"}}>
+                <div style={{height:"100%",borderRadius:"2px",width:`${Math.min(pctPE,100)}%`,background:pctPE>=100?"#065F46":pctPE>=60?"#D97706":"#DC2626",transition:"width 0.4s"}}/>
+              </div>
+            </div>
+          )}
         </div>
         <div style={styles.gananciaDer}>
           <div style={styles.vehMetrica}>

@@ -63,7 +63,7 @@ function AppContenido() {
       <Route path="/" element={
         <RutaProtegida>
           <Layout>
-            <Home vehiculos={vehiculos} viajes={viajes} configMant={configMant} mantenimientos={mantenimientos} conductores={conductores} cargando={cargando}/>
+            <Home vehiculos={vehiculos} viajes={viajes} configMant={configMant} mantenimientos={mantenimientos} conductores={conductores} gastosFijos={gastosFijos} cargando={cargando}/>
           </Layout>
         </RutaProtegida>
       } />
@@ -138,6 +138,7 @@ function AppContenido() {
   configMant={configMant}
   gastosVehiculo={gastosVehiculo}
   gastosFijos={gastosFijos}
+  conductores={conductores}
   onAgregarMant={agregarMantenimiento}
   onEliminarMant={eliminarMantenimiento}
   onAgregarConfig={agregarConfigMant}

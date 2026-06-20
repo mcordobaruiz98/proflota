@@ -404,21 +404,34 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
 
         {/* GRÁFICA */}
         <div style={styles.card}>
-          <p style={styles.cardTitulo}>Evolución últimos 6 meses</p>
-          <div style={styles.grafica}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
+            <p style={styles.cardTitulo}>Evolución últimos 6 meses</p>
+            {(() => {
+              const actual = ultimos6[5]?.neta || 0;
+              const anterior = ultimos6[4]?.neta || 0;
+              const diff = actual - anterior;
+              if (anterior === 0 && actual === 0) return null;
+              return (
+                <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:diff>=0?t.colors.green:t.colors.red}}>
+                  {diff>=0?"↑":"↓"} {diff!==0?fmtCorto(Math.abs(diff)):"="} vs mes anterior
+                </span>
+              );
+            })()}
+          </div>
+          <div style={{...styles.grafica, height:"140px"}}>
             {ultimos6.map((m,i) => {
               const pct    = Math.abs(m.neta)/maxGrafica;
-              const altura = Math.max(pct*100, m.neta!==0?4:0);
-              const color  = m.activo ? t.colors.blue : m.neta>=0 ? t.colors.greenBorder : t.colors.redBorder;
+              const altura = Math.max(pct*100, m.neta!==0?6:0);
+              const color  = m.activo ? t.colors.blue : m.neta>=0 ? t.colors.green : t.colors.red;
               return (
                 <div key={i} style={styles.graficaCol}>
-                  <p style={{fontSize:"9px", color:t.colors.textTertiary, margin:"0 0 4px", textAlign:"center"}}>
+                  <p style={{fontSize:"10px", color:m.activo?t.colors.blue:t.colors.textTertiary, margin:"0 0 4px", textAlign:"center", fontWeight:m.activo?t.fonts.weightBold:t.fonts.weightNormal}}>
                     {m.neta!==0?fmtCorto(m.neta):""}
                   </p>
                   <div style={styles.graficaBarraWrap}>
-                    <div style={{...styles.graficaBarra, height:`${altura}%`, background:color}} />
+                    <div style={{...styles.graficaBarra, height:`${altura}%`, background:color, opacity:m.activo?1:0.7}} />
                   </div>
-                  <p style={{fontSize:"10px", color:m.activo?t.colors.blue:t.colors.textTertiary, fontWeight:m.activo?t.fonts.weightBold:t.fonts.weightNormal, margin:"6px 0 0", textAlign:"center"}}>
+                  <p style={{fontSize:"11px", color:m.activo?t.colors.blue:t.colors.textTertiary, fontWeight:m.activo?t.fonts.weightBold:t.fonts.weightNormal, margin:"6px 0 0", textAlign:"center"}}>
                     {m.mes}
                   </p>
                 </div>
