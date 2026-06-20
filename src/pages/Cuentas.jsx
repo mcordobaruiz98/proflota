@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, History, TrendingUp, TrendingDown, FileDown, ArrowUpNarrowWide } from "lucide-react";
+import { ArrowLeft, History, TrendingUp, TrendingDown, FileDown, ChartColumnStacked } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
@@ -311,7 +311,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           Exportar
         </button>
         <button style={{...styles.btnHistorial, marginLeft:"6px"}} onClick={()=>navigate("/comparativo")}>
-          <ArrowUpNarrowWide size={16} color={t.colors.blue} strokeWidth={2} />
+          <ChartColumnStacked size={16} color={t.colors.blue} strokeWidth={2} />
           Comparar
         </button>
       </div>
