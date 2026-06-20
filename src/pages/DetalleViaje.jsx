@@ -17,6 +17,10 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
   const [antMonto,        setAntMonto]        = useState("");
   const [retornoE,        setRetornoE]        = useState(false);
   const [fleteRetE,       setFleteRetE]       = useState("");
+  const [verBitacora,     setVerBitacora]     = useState(false);
+  const [bitTipo,         setBitTipo]         = useState("");
+  const [bitNota,         setBitNota]         = useState("");
+  const [bitUbicacion,    setBitUbicacion]    = useState("");
 
   const [fecha,     setFecha]     = useState("");
   const [ruta,      setRuta]      = useState("");
@@ -497,6 +501,121 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 ))}
               </div>
             )}
+
+            {/* BITÁCORA DEL VIAJE */}
+            <div style={styles.card}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
+                <div style={styles.cardHeader}>
+                  <Clock size={16} color={t.colors.blue} strokeWidth={2} />
+                  <p style={styles.cardTitulo}>Bitácora del viaje</p>
+                </div>
+                <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}>
+                  {(viaje.bitacora||[]).length} evento{(viaje.bitacora||[]).length!==1?"s":""}
+                </span>
+              </div>
+
+              {/* Botones de evento rápido */}
+              {!verBitacora && (
+                <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginBottom:"10px"}}>
+                  {[
+                    {id:"cargue",    label:"Cargue",    emoji:"📦"},
+                    {id:"descargue", label:"Descargue", emoji:"📤"},
+                    {id:"reten",     label:"Retén",     emoji:"🛑"},
+                    {id:"espera",    label:"Espera",    emoji:"⏳"},
+                    {id:"descanso",  label:"Descanso",  emoji:"😴"},
+                    {id:"comida",    label:"Comida",    emoji:"🍽️"},
+                    {id:"tanqueo",   label:"Tanqueo",   emoji:"⛽"},
+                    {id:"incidente", label:"Incidente", emoji:"⚠️"},
+                    {id:"otro",      label:"Otro",      emoji:"📝"},
+                  ].map(ev=>(
+                    <button key={ev.id}
+                      style={{padding:"6px 10px",borderRadius:t.radius.full,border:`1.5px solid ${t.colors.border}`,background:"none",fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,cursor:"pointer",display:"flex",alignItems:"center",gap:"4px"}}
+                      onClick={()=>{setBitTipo(ev.id);setVerBitacora(true);}}
+                    >
+                      {ev.emoji} {ev.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Formulario inline */}
+              {verBitacora && (
+                <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"10px"}}>
+                  <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:"0 0 10px"}}>
+                    {bitTipo==="cargue"?"📦 Cargue":bitTipo==="descargue"?"📤 Descargue":bitTipo==="reten"?"🛑 Retén":bitTipo==="espera"?"⏳ Espera":bitTipo==="descanso"?"😴 Descanso":bitTipo==="comida"?"🍽️ Comida":bitTipo==="tanqueo"?"⛽ Tanqueo":bitTipo==="incidente"?"⚠️ Incidente":"📝 Otro"}
+                  </p>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"8px"}}>
+                    <input type="text" placeholder="Ubicación" value={bitUbicacion}
+                      onChange={e=>setBitUbicacion(e.target.value)}
+                      style={{padding:"8px 10px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}} />
+                    <input type="text" placeholder="Nota (opcional)" value={bitNota}
+                      onChange={e=>setBitNota(e.target.value)}
+                      style={{padding:"8px 10px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}} />
+                  </div>
+                  <div style={{display:"flex",gap:"6px"}}>
+                    <button
+                      style={{flex:1,padding:"8px",background:t.colors.green,border:"none",borderRadius:t.radius.sm,color:"#fff",fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,cursor:"pointer"}}
+                      onClick={async()=>{
+                        const evento = {
+                          id: Date.now(),
+                          tipo: bitTipo,
+                          fecha: new Date().toISOString().slice(0,10),
+                          hora: new Date().toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"}),
+                          ubicacion: bitUbicacion.trim(),
+                          nota: bitNota.trim(),
+                        };
+                        const nuevos = [...(viaje.bitacora||[]), evento];
+                        try {
+                          await onEditar(viaje.firestoreId, { bitacora: nuevos });
+                          setBitTipo(""); setBitNota(""); setBitUbicacion(""); setVerBitacora(false);
+                          mostrarToast("Evento registrado","exito");
+                        } catch(err) { mostrarToast("Error","error"); }
+                      }}
+                    >Registrar</button>
+                    <button
+                      style={{padding:"8px 12px",background:"none",border:`1px solid ${t.colors.border}`,borderRadius:t.radius.sm,color:t.colors.textSecondary,fontSize:t.fonts.sizeXs,cursor:"pointer"}}
+                      onClick={()=>{setVerBitacora(false);setBitTipo("");setBitNota("");setBitUbicacion("");}}
+                    >✕</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Lista de eventos */}
+              {(viaje.bitacora||[]).length > 0 && (
+                <div>
+                  {[...(viaje.bitacora||[])].sort((a,b)=>b.id-a.id).map((ev,i,arr)=>{
+                    const emojis = {cargue:"📦",descargue:"📤",reten:"🛑",espera:"⏳",descanso:"😴",comida:"🍽️",tanqueo:"⛽",incidente:"⚠️",otro:"📝"};
+                    return (
+                      <div key={ev.id} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"8px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                        <div style={{display:"flex",gap:"8px",flex:1}}>
+                          <span style={{fontSize:"16px"}}>{emojis[ev.tipo]||"📝"}</span>
+                          <div>
+                            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>
+                              {ev.tipo.charAt(0).toUpperCase()+ev.tipo.slice(1)}
+                            </p>
+                            <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
+                              {ev.fecha} · {ev.hora}{ev.ubicacion?` · ${ev.ubicacion}`:""}
+                            </p>
+                            {ev.nota&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0",fontStyle:"italic"}}>{ev.nota}</p>}
+                          </div>
+                        </div>
+                        <button
+                          style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
+                          onClick={async()=>{
+                            const nuevos = (viaje.bitacora||[]).filter(e=>e.id!==ev.id);
+                            try {
+                              await onEditar(viaje.firestoreId, { bitacora: nuevos });
+                            } catch(err){}
+                          }}
+                        >
+                          <Trash2 size={12} color={t.colors.textTertiary} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* ANTICIPOS AL CONDUCTOR */}
             <div style={styles.card}>
