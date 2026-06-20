@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send } from "lucide-react";
+import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send, Container } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
 function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEditarVehiculo, mostrarToast }) {
@@ -541,7 +541,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
               {!verBitacora && (
                 <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginBottom:"10px"}}>
                   {[
-                    {id:"cargue",    label:"Cargue",    emoji:"📦"},
+                    {id:"cargue",    label:"Cargue",    emoji: Container},
                     {id:"descargue", label:"Descargue", emoji:"📤"},
                     {id:"reten",     label:"Retén",     emoji:"🛑"},
                     {id:"espera",    label:"Espera",    emoji:"⏳"},
