@@ -213,18 +213,6 @@ function AppContenido() {
         <RutaProtegida>
           <Conductores
             conductores={conductores}
-            onAgregar={agregarConductor}
-            onEditar={editarConductor}
-            onEliminar={eliminarConductor}
-            mostrarToast={mostrar}
-          />
-        </RutaProtegida>
-      } />
-
-      <Route path="/conductores" element={
-        <RutaProtegida>
-          <Conductores
-            conductores={conductores}
             vehiculos={vehiculos}
             onAgregar={agregarConductor}
             onEditar={editarConductor}
