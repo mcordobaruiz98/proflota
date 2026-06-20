@@ -693,6 +693,26 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               </div>
             )}
 
+            {/* Viajes del mes */}
+            {viajesMes.length>0&&(
+              <div style={styles.card}>
+                <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
+                {[...viajesMes].reverse().map((viaje,i,arr)=>(
+                  <div key={viaje.firestoreId}
+                    style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`,cursor:"pointer"}}
+                    onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
+                  >
+                    <div>
+                      <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,margin:0,color:t.colors.textPrimary}}>{viaje.ruta||"Sin ruta"}</p>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{viaje.fecha||""}</p>
+                    </div>
+                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,margin:0,color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
+                      {fmt(viaje.neta||0)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* ── GASTOS Y FACTURAS DEL VEHÍCULO ── */}
             {(() => {
@@ -1160,22 +1180,27 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     <div style={styles.card}>
       <p style={styles.cardTitulo}>Agregar ítem de mantenimiento</p>
       <div style={styles.campo}>
-        <label style={styles.label}>Nombre</label>
+        <label style={styles.label}>Nombre del servicio</label>
         <input type="text" placeholder="Ej: Cambio de aceite, Filtro de aire..."
           value={tipoMant} onChange={e=>setTipoMant(e.target.value)} style={styles.input}/>
       </div>
       <div style={styles.fila2}>
         <div style={styles.campo}>
-          <label style={styles.label}>Intervalo (km)</label>
+          <label style={styles.label}>Cada cuántos km</label>
           <input type="number" placeholder="15000" value={kmMant}
             onChange={e=>setKmMant(e.target.value)} style={styles.input}/>
         </div>
         <div style={styles.campo}>
-          <label style={styles.label}>Alerta a (km antes)</label>
+          <label style={styles.label}>Alertar antes de (km)</label>
           <input type="number" placeholder="2000" value={costoMant}
             onChange={e=>setCostoMant(e.target.value)} style={styles.input}/>
         </div>
       </div>
+      {(kmMant || costoMant) && (
+        <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"0 0 10px",fontStyle:"italic"}}>
+          Se realizará cada {Number(kmMant||15000).toLocaleString("es-CO")} km. Alerta cuando falten {Number(costoMant||2000).toLocaleString("es-CO")} km.
+        </p>
+      )}
       <button
         style={{width:"100%", padding:"12px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoMant?0.75:1}}
         onClick={async()=>{
