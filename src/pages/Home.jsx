@@ -144,7 +144,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             {fmt(gananciaMes)}
           </p>
           <p style={styles.gananciaSub}>
-            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""} · {fmt(ingresosMes)} brutos
+            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""} 
           </p>
         </div>
         <div style={styles.gananciaDer}>
