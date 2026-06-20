@@ -1,1423 +1,851 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, Wrench, Camera, Edit2, Save, X, CircleDot, Droplets, Filter, Disc, ClipboardList, Fuel } from "lucide-react";
-import { useSubirArchivo } from "../hooks/useSubirArchivo";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
+function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEditarVehiculo, mostrarToast }) {
+  const navigate = useNavigate();
+  const { id }   = useParams();
 
-const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  const viaje = viajes.find(v => String(v.firestoreId) === String(id));
 
-const seccionesHV = [
-  {
-    id: "propietario", titulo: "Documentos propietario",
-    documentos: [
-      {id:"prop_cedula", label:"Cédula o C. Comercio"},
-      {id:"prop_rut",    label:"RUT"},
-      {id:"prop_banco",  label:"Certificación bancaria"},
-    ],
-    campos: [
-      {id:"prop_dir",    label:"Dirección",  tipo:"text",  placeholder:"Cra. 1 # 2-3"},
-      {id:"prop_tel",    label:"Teléfono",   tipo:"tel",   placeholder:"+57 300 000 0000"},
-      {id:"prop_correo", label:"Correo",     tipo:"email", placeholder:"correo@ejemplo.com"},
-    ],
-  },
-  {
-    id: "tenedor", titulo: "Documentos tenedor",
-    documentos: [
-      {id:"ten_cedula",   label:"Cédula o C. Comercio"},
-      {id:"ten_rut",      label:"RUT"},
-      {id:"ten_banco",    label:"Certificación bancaria"},
-      {id:"ten_contrato", label:"Contrato compraventa (opcional)"},
-    ],
-    campos: [
-      {id:"ten_dir",    label:"Dirección", tipo:"text",  placeholder:"Cra. 1 # 2-3"},
-      {id:"ten_tel",    label:"Teléfono",  tipo:"tel",   placeholder:"+57 300 000 0000"},
-      {id:"ten_correo", label:"Correo",    tipo:"email", placeholder:"correo@ejemplo.com"},
-    ],
-  },
-  {
-    id: "vehiculo", titulo: "Documentos vehículo",
-    documentos: [
-      {id:"veh_tarjeta", label:"Tarjeta propiedad vehículo"},
-      {id:"veh_trailer", label:"T. propiedad trailer (opcional)"},
-      {id:"veh_soat",    label:"SOAT",                       conVencimiento:true},
-      {id:"veh_rtm",     label:"RTM",                        conVencimiento:true},
-      {id:"veh_poliza",  label:"Póliza seguro todo riesgo",  conVencimiento:true},
-      {id:"veh_fotos",   label:"Foto frente"},
-      {id:"veh_fotos2",  label:"Foto costado derecho"},
-      {id:"veh_fotos3",  label:"Foto costado izquierdo"},
-      {id:"veh_fotos4",  label:"Foto trasera"},
-    ],
-    campos: [
-      {id:"veh_satelital", label:"Empresa satelital", tipo:"text",     placeholder:"Nombre GPS"},
-      {id:"veh_usuario",   label:"Usuario",           tipo:"text",     placeholder:"usuario123"},
-      {id:"veh_pass",      label:"Contraseña",        tipo:"text", placeholder:"••••••••"},
-    ],
-  },
-  {
-    id: "conductor", titulo: "Documentos conductor",
-    documentos: [
-      {id:"con_selfie",   label:"Foto tipo selfie"},
-      {id:"con_cedula",   label:"Cédula (ambos lados)"},
-      {id:"con_licencia", label:"Licencia de conducir",   conVencimiento:true},
-      {id:"con_banco",    label:"Cert. bancaria (opcional)"},
-      {id:"con_arl",      label:"ARL"},
-      {id:"con_segpens",  label:"Seguridad y pensión"},
-    ],
-    campos: [
-      {id:"con_dir",    label:"Dirección",          tipo:"text",  placeholder:"Cra. 1 # 2-3"},
-      {id:"con_tel",    label:"Teléfono",            tipo:"tel",   placeholder:"+57 300 000 0000"},
-      {id:"con_correo", label:"Correo electrónico",  tipo:"email", placeholder:"correo@ejemplo.com"},
-      {id:"con_ref",    label:"Referencia familiar", tipo:"text",  placeholder:"Nombre y teléfono"},
-      {id:"con_telref", label:"Telefono referencia familiar", tipo:"tel", placeholder:"+57 300 000 0000"},
-    ],
-  },
-];
+  const [editando,        setEditando]        = useState(false);
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false);
+  const [guardando,       setGuardando]       = useState(false);
+  const [verFormAnticipo, setVerFormAnticipo] = useState(false);
+  const [antDesc,         setAntDesc]         = useState("");
+  const [antMonto,        setAntMonto]        = useState("");
+  const [retornoE,        setRetornoE]        = useState(false);
+  const [fleteRetE,       setFleteRetE]       = useState("");
+  const [verBitacora,     setVerBitacora]     = useState(false);
+  const [bitTipo,         setBitTipo]         = useState("");
+  const [bitNota,         setBitNota]         = useState("");
+  const [bitUbicacion,    setBitUbicacion]    = useState("");
 
-function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], gastosVehiculo = [], gastosFijos = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, onAgregarGasto, onEliminarGasto, onAgregarGastoFijo, onEliminarGastoFijo, mostrarToast }) {
-  const navigate  = useNavigate();
-  const { id }    = useParams();
-  const location  = useLocation();
-  const vehiculo  = vehiculos.find(v => String(v.firestoreId) === String(id));
-  const [tabActivo, setTabActivo] = useState(location.state?.tab || "info");
-  const [filtro,    setFiltro]    = useState("todos");
-  const [busquedaH, setBusquedaH] = useState("");
-  const hoy = new Date();
-  const [mesActual,  setMesActual]  = useState(hoy.getMonth());
-  const [anioActual, setAnioActual] = useState(hoy.getFullYear());
+  const [fecha,     setFecha]     = useState("");
+  const [ruta,      setRuta]      = useState("");
+  const [mani,      setMani]      = useState("");
+  const [placa,     setPlaca]     = useState("");
+  const [emp,       setEmp]       = useState("");
+  const [tipoCarga, setTipoCarga] = useState("");
+  const [prod,      setProd]      = useState("");
+  const [condNom,   setCondNom]   = useState("");
+  const [ton,       setTon]       = useState("");
+  const [fleteTon,  setFleteTon]  = useState("");
+  const [kmCargado, setKmCargado] = useState("");
+  const [kmVacio,   setKmVacio]   = useState("");
+  const [remesaE,   setRemesaE]   = useState("");
+  const [pesoBasE,  setPesoBasE]  = useState("");
+  const [lugarCE,   setLugarCE]   = useState("");
+  const [lugarDE,   setLugarDE]   = useState("");
+  const [obsE,      setObsE]      = useState("");
 
-  const [hvData, setHvData] = useState(vehiculo?.hvData || {});
-  const [hvCargado, setHvCargado] = useState(false);
+  const fmt = (n) => "$" + Math.round(n||0).toLocaleString("es-CO");
+  const fnD = (n,d) => (Math.round((n||0)*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
 
-  // Sincronizar hvData cuando el vehículo carga de Firestore
-  useEffect(() => {
-    if (vehiculo?.hvData && !hvCargado) {
-      setHvData(vehiculo.hvData);
-      setHvCargado(true);
+  const compartirWhatsApp = () => {
+    if (!viaje) return;
+    const lineas = [
+      `🚛 *Resumen de viaje — NAVIRA*`,
+      ``,
+      `📍 *Ruta:* ${viaje.ruta || "—"}`,
+      `📅 *Fecha cargue:* ${viaje.fecha || "—"}`,
+      viaje.fechaDescarga ? `📅 *Fecha descargue:* ${viaje.fechaDescarga}` : null,
+      `🚗 *Placa:* ${viaje.placa || "—"}`,
+      viaje.emp ? `🏢 *Empresa:* ${viaje.emp}` : null,
+      viaje.condNom ? `👤 *Conductor:* ${viaje.condNom}` : null,
+      viaje.prod ? `📦 *Producto:* ${viaje.prod}` : null,
+      viaje.ton ? `⚖️ *Toneladas:* ${viaje.ton}` : null,
+      viaje.pesoBascula ? `⚖️ *Peso báscula:* ${viaje.pesoBascula} ton` : null,
+      viaje.remesa ? `📄 *Remesa:* ${viaje.remesa}` : null,
+      viaje.lugarCargue ? `📍 *Cargue:* ${viaje.lugarCargue}` : null,
+      viaje.lugarDescargue ? `📍 *Descargue:* ${viaje.lugarDescargue}` : null,
+      ``,
+      `💰 *Valor flete:* ${fmt(viaje.vViaje || 0)}`,
+      `⛽ *Combustible:* ${fmt(viaje.cComb || 0)}`,
+      `🛣️ *Peajes:* ${fmt(viaje.peajes || 0)}`,
+      `👤 *Conductor:* ${fmt(viaje.conductor || 0)}`,
+      (viaje.carp || viaje.gv2 || viaje.extras) ? `📋 *Otros gastos:* ${fmt((viaje.carp||0)+(viaje.gv2||0)+(viaje.extras||0))}` : null,
+      ``,
+      `📊 *Total gastos:* ${fmt(viaje.total || 0)}`,
+      `✅ *Ganancia neta:* ${fmt(viaje.neta || 0)}`,
+      ``,
+      `_Generado por Navira — Inteligencia en Movimiento_`,
+    ].filter(Boolean).join("\n");
+
+    const url = `https://wa.me/?text=${encodeURIComponent(lineas)}`;
+    window.open(url, "_blank");
+  };
+
+  const abrirEdicion = () => {
+    setFecha(viaje.fecha || "");
+    setRuta(viaje.ruta || "");
+    setMani(viaje.mani || "");
+    setPlaca(viaje.placa || "");
+    setEmp(viaje.emp || "");
+    setTipoCarga(viaje.carga || viaje.tipoCarga || "");
+    setProd(viaje.prod || "");
+    setCondNom(viaje.condNom || "");
+    setTon(viaje.ton || "");
+    setFleteTon(viaje.fleteTon || "");
+    setKmCargado(viaje.kmCargado || "");
+    setKmVacio(viaje.kmVacio || "");
+    setRemesaE(viaje.remesa || "");
+    setPesoBasE(viaje.pesoBascula || "");
+    setLugarCE(viaje.lugarCargue || "");
+    setLugarDE(viaje.lugarDescargue || "");
+    setObsE(viaje.observaciones || "");
+    setRetornoE(viaje.tieneRetorno || false);
+    setFleteRetE(viaje.valorViajeRetorno || "");
+    setEditando(true);
+  };
+
+  const guardarEdicion = async () => {
+    if (!ruta.trim()) { mostrarToast("Ingresa la ruta del viaje", "error"); return; }
+    setGuardando(true);
+    try {
+      const nuevoVViaje = viaje.modoFlete === "porViaje"
+          ? parseFloat(fleteTon)||viaje.vViaje
+          : (parseFloat(ton)||viaje.ton) * (parseFloat(fleteTon)||viaje.fleteTon);
+      const nuevoRetorno = retornoE ? (parseFloat(fleteRetE) || 0) : 0;
+      const totalIngresos = nuevoVViaje + nuevoRetorno;
+      const totalGastos = viaje.total || 0;
+
+      await onEditar(viaje.firestoreId, {
+        fecha, ruta: ruta.trim(), mani,
+        placa, emp, carga: tipoCarga,
+        prod, condNom,
+        ton:       parseFloat(ton)     || viaje.ton,
+        fleteTon:  parseFloat(fleteTon)|| viaje.fleteTon,
+        kmCargado: parseFloat(kmCargado)||viaje.kmCargado,
+        kmVacio:   parseFloat(kmVacio)  ||viaje.kmVacio,
+        kmT: (parseFloat(kmCargado)||viaje.kmCargado||0) + (parseFloat(kmVacio)||viaje.kmVacio||0),
+        remesa: remesaE.trim(),
+        pesoBascula: parseFloat(pesoBasE) || 0,
+        lugarCargue: lugarCE.trim(),
+        lugarDescargue: lugarDE.trim(),
+        observaciones: obsE.trim(),
+        vViaje: totalIngresos,
+        tieneRetorno: retornoE,
+        valorViajeRetorno: nuevoRetorno,
+        valorViajeIda: nuevoVViaje,
+        neta: totalIngresos - totalGastos,
+      });
+      mostrarToast("Viaje actualizado", "exito");
+      setEditando(false);
+    } catch(err) {
+      mostrarToast("Error al guardar", "error");
+    } finally {
+      setGuardando(false);
     }
-  }, [vehiculo?.hvData]);
-  const [seccionesAbiertas, setSeccionesAbiertas] = useState({propietario:true,tenedor:false,vehiculo:false,conductor:false});
+  };
 
-  const { subirArchivo, eliminarArchivo, progreso: progresoArchivo, subiendo } = useSubirArchivo();
-
-  const [editando,      setEditando]      = useState(false);
-  const [editData,      setEditData]      = useState({});
-  const [guardandoEdit, setGuardandoEdit] = useState(false);
-
-  const [gastoDesc,     setGastoDesc]     = useState("");
-  const [gastoMonto,    setGastoMonto]    = useState("");
-  const [gastoFecha,    setGastoFecha]    = useState(new Date().toISOString().slice(0,10));
-  const [gastoTaller,   setGastoTaller]   = useState("");
-  const [gastoNit,      setGastoNit]      = useState("");
-  const [guardandoGasto,setGuardandoGasto]= useState(false);
-  const [verFormGasto,  setVerFormGasto]  = useState(false);
-
-  const [gfNombre,       setGfNombre]       = useState("");
-  const [gfMonto,        setGfMonto]        = useState("");
-  const [gfPeriodo,      setGfPeriodo]      = useState("mensual");
-  const [verFormGF,      setVerFormGF]      = useState(false);
-  const [guardandoGF,    setGuardandoGF]    = useState(false);
-
-
-  const [kmOdometro,    setKmOdometro]    = useState(vehiculo?.kmOdometro || 0);
-
-  useEffect(() => {
-    if (vehiculo?.kmOdometro && !kmOdometro) {
-      setKmOdometro(vehiculo.kmOdometro);
+  const eliminarViaje = async () => {
+    // Restar km del odómetro
+    if (viaje.placa && viaje.kmT > 0) {
+      const veh = vehiculos.find(v => v.placa === viaje.placa);
+      if (veh && veh.kmOdometro) {
+        const nuevoKm = Math.max(0, (veh.kmOdometro || 0) - viaje.kmT);
+        onEditarVehiculo(veh.firestoreId, { kmOdometro: nuevoKm }).catch(()=>{});
+      }
     }
-  }, [vehiculo?.kmOdometro]);
-  const [editandoKm,    setEditandoKm]    = useState(false);
-  const [kmTemp,        setKmTemp]        = useState("");
-  const [tipoMant,      setTipoMant]      = useState("Cambio de aceite");
-  const [kmMant,        setKmMant]        = useState("");
-  const [costoMant,     setCostoMant]     = useState("");
-  const [fechaMant,     setFechaMant]     = useState(new Date().toISOString().slice(0,10));
-  const [notaMant,      setNotaMant]      = useState("");
-  const [guardandoMant, setGuardandoMant] = useState(false);
+    await onEliminar(viaje.firestoreId);
+    mostrarToast("Viaje eliminado", "info");
+    navigate(-1);
+  };
 
-  const guardarKm = () => {
-  const val = Number(kmTemp)||0;
-  setKmOdometro(val);
-  onEditarVehiculo(vehiculo.firestoreId, { kmOdometro: val }).catch(()=>{});
-  setEditandoKm(false);
-  setKmTemp("");
-};
-
-const guardarMantenimiento = async () => {
-  if (!kmMant) { mostrarToast("Ingresa el km al realizar el mantenimiento", "error"); return; }
-  setGuardandoMant(true);
-  try {
-    await onAgregarMant({
-      vehiculoId: id,
-      placa: vehiculo.placa,
-      tipo: tipoMant,
-      km: Number(kmMant),
-      costo: Number(costoMant)||0,
-      fecha: fechaMant,
-      nota: notaMant.trim(),
-    });
-    mostrarToast("Mantenimiento registrado", "exito");
-    setKmMant(""); setCostoMant(""); setNotaMant("");
-  } catch(err) {
-    mostrarToast("Error al guardar", "error");
-  } finally {
-    setGuardandoMant(false);
-  }
-};
-
-const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
-
-  const kmActual = viajes
-  .filter(v => v.placa === vehiculo?.placa)
-  .reduce((max, v) => Math.max(max, v.kmT || 0), 0);
-
-  const fmt  = (n) => "$" + Math.round(n).toLocaleString("es-CO");
-  const fnD  = (n,d) => (Math.round(n*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
-
-  if (!vehiculo) {
+  if (!viaje) {
     return (
       <div style={styles.pantalla}>
         <div style={styles.header}>
-          <button style={styles.btnVolver} onClick={()=>navigate("/vehiculos")}>
+          <button style={styles.btnVolver} onClick={()=>navigate(-1)}>
             <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
             <span>Volver</span>
           </button>
         </div>
-        <div style={styles.noEncontrado}>
-          <Truck size={48} color={t.colors.textTertiary} strokeWidth={1.5} />
-          <p style={{marginTop:"12px", color:t.colors.textSecondary}}>Vehículo no encontrado.</p>
+        <div style={{textAlign:"center",padding:"60px 20px",color:t.colors.textSecondary}}>
+          <p>Viaje no encontrado.</p>
         </div>
       </div>
     );
   }
 
-  const viajesVehiculo = viajes.filter(v => v.placa === vehiculo.placa);
-  const totalViajes    = viajesVehiculo.length;
-  const gananciaNeta   = viajesVehiculo.reduce((s,v)=>s+(v.neta||0),0);
+  const margen      = viaje.mrg || 0;
+  const margenColor = margen>=40?t.colors.green:margen>=20?t.colors.amber:t.colors.red;
+  const positivo    = (viaje.neta||0) >= 0;
 
-  // Tab Viajes
-  const hoyFiltro = new Date();
-  const viajesFiltrados = viajesVehiculo.filter(v => {
-    const f = new Date(v.fecha);
-    if (filtro==="mes")    return f.getMonth()===hoyFiltro.getMonth()&&f.getFullYear()===hoyFiltro.getFullYear();
-    if (filtro==="semana") { const h=new Date(); h.setDate(hoyFiltro.getDate()-7); return f>=h; }
-    return true;
-  });
-
-  // Tab Cuentas
-  const viajesMes    = viajesVehiculo.filter(v => { const f=new Date(v.fecha); return f.getMonth()===mesActual&&f.getFullYear()===anioActual; });
-  const ingresosMes  = viajesMes.reduce((s,v)=>s+(v.vViaje||0),0);
-  const gastosMes    = viajesMes.reduce((s,v)=>s+(v.total||0),0);
-  const netaMes      = viajesMes.reduce((s,v)=>s+(v.neta||0),0);
-  const acpmMes      = viajesMes.reduce((s,v)=>s+(v.cAcpm||0),0);
-  const adblMes      = viajesMes.reduce((s,v)=>s+(v.cAdbl||0),0);
-  const peajesMes    = viajesMes.reduce((s,v)=>s+(v.peajes||0),0);
-  const conductorMes = viajesMes.reduce((s,v)=>s+(v.conductor||0),0);
-  const otrosMes     = viajesMes.reduce((s,v)=>s+(v.carp||0)+(v.gv2||0)+(v.extras||0),0);
-
-  // Punto de equilibrio = gastos fijos mensualizados de este vehículo
-  const gfVehiculo   = gastosFijos.filter(g => g.vehiculoId === id);
-  const puntoEquilibrio = gfVehiculo.reduce((s, g) => {
-    const monto = g.monto || 0;
-    return s + (g.periodicidad === "anual" ? monto / 12 : monto);
-  }, 0);
-  const progresoPE   = puntoEquilibrio > 0 ? Math.min((netaMes / puntoEquilibrio) * 100, 150) : 0;
-  const progresoPEColor = progresoPE >= 100 ? t.colors.green : progresoPE >= 60 ? t.colors.amber : t.colors.red;
-
-  const cambiarMes = (dir) => {
-    let m=mesActual+dir, a=anioActual;
-    if (m>11){m=0;a++;}
-    if (m<0){m=11;a--;}
-    setMesActual(m); setAnioActual(a);
-  };
-
-  // Tab Historial
-  const viajesBuscados = viajesVehiculo.filter(v => {
-    const q = busquedaH.toLowerCase();
-    if (!q) return true;
-    return (v.ruta||"").toLowerCase().includes(q)||(v.mani||"").toLowerCase().includes(q);
-  }).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
-
-  const viajesAgrupadosPorMes = viajesBuscados.reduce((grupos,viaje)=>{
-    const f  = new Date(viaje.fecha);
-    const et = `${MESES[f.getMonth()]} ${f.getFullYear()}`;
-    const ex = grupos.find(g=>g.etiqueta===et);
-    if (ex) ex.viajes.push(viaje);
-    else grupos.push({etiqueta:et, viajes:[viaje]});
-    return grupos;
-  },[]);
-
-  // Hoja de vida
-  const actualizarHV = (clave, valor) => {
-    const nuevo = {...hvData, [clave]:valor};
-    setHvData(nuevo);
-    onEditarVehiculo(vehiculo.firestoreId, { hvData: nuevo }).catch(()=>{});
-  };
-
-  const manejarArchivo = (e, docId) => {
-    const archivo = e.target.files[0];
-    if (!archivo) return;
-    const ruta = `vehiculos/${id}/${docId}_${Date.now()}`;
-    subirArchivo(archivo, ruta, docId, (url) => {
-      actualizarHV(docId, {estado:"cargado", url, ruta, nombre:archivo.name});
-    });
-  };
-
-  const manejarEliminar = (docId) => {
-    const doc = hvData[docId];
-    if (!doc||!doc.ruta) { actualizarHV(docId,"pendiente"); return; }
-    if (!window.confirm("¿Eliminar este documento?")) return;
-    eliminarArchivo(doc.ruta, ()=>actualizarHV(docId,"pendiente"));
-  };
-
-  const iniciarEdicion = () => {
-    setEditData({
-      tipoVehiculo:  vehiculo.tipoVehiculo  || "",
-      tipoRemolque:  vehiculo.tipoRemolque  || "",
-      placa:         vehiculo.placa          || "",
-      placaRemolque: vehiculo.placaRemolque  || "",
-      marca:         vehiculo.marca          || "",
-      modelo:        vehiculo.modelo         || "",
-      propietario:   vehiculo.propietario    || "",
-      tenedor:       vehiculo.tenedor        || "",
-      fotoUrl:       vehiculo.fotoUrl        || "",
-      adblueRatio:   vehiculo.adblueRatio    || 0,
-    });
-    setEditando(true);
-  };
-
-  const guardarEdicion = async () => {
-    if (!editData.tipoVehiculo) { mostrarToast("Selecciona el tipo de vehículo","error"); return; }
-    if (!editData.placa.trim()) { mostrarToast("La placa es obligatoria","error"); return; }
-    if (!editData.propietario.trim()) { mostrarToast("El propietario es obligatorio","error"); return; }
-    const placaNueva = editData.placa.trim().toUpperCase();
-    if (placaNueva !== vehiculo.placa && vehiculos.find(v => v.placa.toLowerCase() === placaNueva.toLowerCase())) {
-      mostrarToast("Ya existe un vehículo con esa placa","error"); return;
-    }
-    setGuardandoEdit(true);
-    try {
-      await onEditarVehiculo(vehiculo.firestoreId, {
-        ...editData,
-        placa: placaNueva,
-        placaRemolque: editData.placaRemolque.trim().toUpperCase(),
-        propietario: editData.propietario.trim(),
-        tenedor: editData.tenedor.trim(),
-        adblueRatio: editData.adblueRatio || 0,
-      });
-      mostrarToast("Vehículo actualizado","exito");
-      setEditando(false);
-    } catch(err) {
-      mostrarToast("Error al guardar","error");
-    } finally {
-      setGuardandoEdit(false);
-    }
-  };
-
-  const cambiarFotoVehiculo = async (e) => {
-    const archivo = e.target.files[0];
-    if (!archivo) return;
-    const ruta = `vehiculos/${Date.now()}_${archivo.name}`;
-    subirArchivo(archivo, ruta, "fotoVehiculo", async (url) => {
-      try {
-        await onEditarVehiculo(vehiculo.firestoreId, { fotoUrl: url });
-        mostrarToast("Foto actualizada","exito");
-      } catch(err) {
-        mostrarToast("Error al cambiar foto","error");
-      }
-    });
-  };
-
-  const contarDocumentos = (seccion) => {
-    const total   = seccion.documentos.length;
-    const cargados= seccion.documentos.filter(d=>hvData[d.id]&&hvData[d.id].estado==="cargado").length;
-    return {total, cargados};
-  };
-
-  const tabs = [
-  {id:"info",      label:"Info",    Icono:Info},
-  {id:"viajes",    label:"Viajes",  Icono:Route},
-  {id:"cuentas",   label:"Cuentas", Icono:TrendingUp},
-  {id:"historial", label:"Historial",Icono:Clock},
-  {id:"mant",      label:"Mant.",   Icono:Wrench},
-  {id:"hvida",     label:"H.Vida",  Icono:FileText},
-];
+  const gastos = [
+    {label:"ACPM",               valor:viaje.cAcpm,     detalle:viaje.gTot?`${fnD(viaje.gTot,1)} gal`:null, color:"#3B82F6"},
+    {label:"Adblue",             valor:viaje.cAdbl,     detalle:viaje.adlt?`${fnD(viaje.adlt,1)} lt`:null,  color:"#8B5CF6"},
+    {label:"Peajes",             valor:viaje.peajes,    detalle:null,                                        color:t.colors.amber},
+    {label:"Conductor",          valor:viaje.conductor, detalle:viaje.pcond&&viaje.pcond<=100?`${viaje.pcond}%`:null, color:t.colors.green},
+    {label:"Carpado/Descarpado", valor:viaje.carp,      detalle:null,                                        color:"#06B6D4"},
+    {label:"Gastos de viaje",    valor:viaje.gv2,       detalle:null,                                        color:"#EC4899"},
+    {label:"Otros gastos",       valor:viaje.extras,    detalle:null,                                        color:t.colors.textTertiary},
+    {label:"Retención en la fuente", valor:viaje.descuentos?.retefuente||0, detalle:null, color:t.colors.red},
+    {label:"Reteica",            valor:viaje.descuentos?.reteica||0,    detalle:null, color:t.colors.red},
+    {label:"FOPAT",              valor:viaje.descuentos?.fopat||0,      detalle:null, color:t.colors.red},
+    {label:viaje.descuentos?.nombreOtro||"Otro descuento", valor:viaje.descuentos?.otro||0, detalle:null, color:t.colors.red},
+  ].filter(g=>g.valor>0);
 
   return (
     <div style={styles.pantalla}>
 
       {/* HEADER */}
       <div style={styles.header}>
-        <button style={styles.btnVolver} onClick={()=>navigate("/vehiculos")}>
+        <button style={styles.btnVolver} onClick={()=>navigate(-1)}>
           <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
-          <span>Vehículos</span>
+          <span>Volver</span>
         </button>
-      </div>
-
-      {/* BLOQUE SUPERIOR */}
-      <div style={styles.bloqueTop}>
-        <div style={styles.vehiculoFila}>
-          <div style={{position:"relative"}}>
-            {vehiculo.fotoUrl ? (
-              <img src={vehiculo.fotoUrl} alt={vehiculo.placa} style={{width:"50px",height:"50px",borderRadius:t.radius.md,objectFit:"cover"}} />
-            ) : (
-              <div style={styles.vehiculoIconoWrap}>
-                <Truck size={26} color={t.colors.blue} strokeWidth={1.8} />
-              </div>
-            )}
-            <label style={{position:"absolute",bottom:"-4px",right:"-4px",width:"22px",height:"22px",borderRadius:"50%",background:t.colors.blue,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",border:`2px solid ${t.colors.bgCard}`}}>
-              <Camera size={11} color="#fff" strokeWidth={2.5} />
-              <input type="file" accept="image/*" style={{display:"none"}} onChange={cambiarFotoVehiculo} />
-            </label>
-          </div>
-          <div>
-            <p style={styles.vehiculoPlaca}>{vehiculo.placa}</p>
-            <p style={styles.vehiculoTipo}>
-              {vehiculo.tipoVehiculo}
-              {vehiculo.tipoRemolque?` · ${vehiculo.tipoRemolque}`:""}
-            </p>
-          </div>
-        </div>
-        <div style={styles.metricas}>
-          <div style={styles.metrica}>
-            <p style={styles.metricaVal}>{totalViajes}</p>
-            <p style={styles.metricaLabel}>Viajes totales</p>
-          </div>
-          <div style={styles.metricaSep} />
-          <div style={styles.metrica}>
-            {(() => {
-              const estado = vehiculo.estado || "disponible";
-              const EST = {
-                disponible:      { label:"Disponible",     color:t.colors.green },
-                en_viaje:        { label:"En viaje",        color:t.colors.blue },
-                en_taller:       { label:"En taller",       color:t.colors.amber },
-                esperando_carga: { label:"Esperando carga", color:t.colors.textTertiary },
-              };
-              const estados = ["disponible","en_viaje","en_taller","esperando_carga"];
-              const e = EST[estado] || EST.disponible;
-              return (
-                <div
-                  style={{display:"flex",flexDirection:"column",alignItems:"center",cursor:"pointer"}}
-                  onClick={async()=>{
-                    const idx = estados.indexOf(estado);
-                    const siguiente = estados[(idx+1) % estados.length];
-                    try { await onEditarVehiculo(vehiculo.firestoreId, { estado: siguiente }); } catch(err){}
-                  }}
-                >
-                  <div style={{width:"40px",height:"40px",borderRadius:t.radius.sm,background:e.color+"22",display:"flex",alignItems:"center",justifyContent:"center",border:`1.5px solid ${e.color}`}}>
-                    <Truck size={22} color={e.color} strokeWidth={2} />
-                  </div>
-                  <p style={{fontSize:t.fonts.sizeXs,color:e.color,margin:"4px 0 0",fontWeight:t.fonts.weightBold}}>{e.label}</p>
-                </div>
-              );
-            })()}
-          </div>
-        </div>
-      </div>
-
-      {/* TABS */}
-      <div style={styles.tabsWrap}>
-        {tabs.map(tab => {
-          const activo = tabActivo===tab.id;
-          return (
-            <button
-              key={tab.id}
-              style={{...styles.tab, ...(activo?styles.tabActivo:{})}}
-              onClick={()=>setTabActivo(tab.id)}
-            >
-              <tab.Icono size={14} color={activo?t.colors.blue:t.colors.textTertiary} strokeWidth={activo?2.5:1.8} />
-              <span style={{color:activo?t.colors.blue:t.colors.textTertiary, 
-                fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.04em",
-                fontWeight: activo ? t.fonts.weightBold : t.fonts.weightMedium,
-              }}>{tab.label}</span>
+        <div style={{display:"flex", gap:"8px"}}>
+          {!editando && (
+            <>
+              <button
+                style={{background:"#25D366",border:"none",borderRadius:t.radius.sm,padding:"8px",cursor:"pointer",display:"flex",alignItems:"center"}}
+                onClick={compartirWhatsApp}
+                title="Compartir por WhatsApp"
+              >
+                <Send size={16} color="#fff" strokeWidth={2} />
+              </button>
+              <button style={styles.btnEditar} onClick={abrirEdicion}>
+                <Edit3 size={16} color={t.colors.blue} strokeWidth={2} />
+                <span style={{fontSize:t.fonts.sizeXs, color:t.colors.blue, fontWeight:t.fonts.weightSemibold}}>Editar</span>
+              </button>
+            </>
+          )}
+          {!confirmarEliminar ? (
+            <button style={styles.btnEliminar} onClick={()=>setConfirmarEliminar(true)}>
+              <Trash2 size={18} color={t.colors.red} strokeWidth={2} />
             </button>
-          );
-        })}
+          ) : (
+            <div style={{display:"flex", gap:"6px", alignItems:"center"}}>
+              <button
+                style={{padding:"8px 12px", background:t.colors.redSoft, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.red, cursor:"pointer"}}
+                onClick={eliminarViaje}
+              >
+                Confirmar
+              </button>
+              <button
+                style={{padding:"8px 12px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, cursor:"pointer", color:t.colors.textSecondary}}
+                onClick={()=>setConfirmarEliminar(false)}
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* CONTENIDO */}
-      <div style={styles.contenido}>
-
-        {/* ── INFO ── */}
-        {tabActivo==="info" && (
+      {/* MODO EDICIÓN */}
+      {editando && (
+        <div style={styles.contenido}>
           <div style={styles.card}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
-              <p style={{...styles.cardTitulo,margin:0}}>Información del vehículo</p>
-              {!editando ? (
-                <button style={{display:"flex",alignItems:"center",gap:"5px",padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,cursor:"pointer"}} onClick={iniciarEdicion}>
-                  <Edit2 size={12} /> Editar
-                </button>
-              ) : (
-                <div style={{display:"flex",gap:"6px"}}>
-                  <button style={{display:"flex",alignItems:"center",gap:"4px",padding:"6px 12px",background:t.colors.green,border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:"#fff",cursor:"pointer",opacity:guardandoEdit?0.75:1}} onClick={guardarEdicion} disabled={guardandoEdit}>
-                    <Save size={12} /> {guardandoEdit?"Guardando...":"Guardar"}
-                  </button>
-                  <button style={{display:"flex",alignItems:"center",gap:"4px",padding:"6px 12px",background:"none",border:`1px solid ${t.colors.border}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,cursor:"pointer"}} onClick={()=>setEditando(false)}>
-                    <X size={12} /> Cancelar
-                  </button>
+            <p style={styles.cardTituloEdit}>Editar datos del viaje</p>
+
+            <div style={styles.campo}>
+              <label style={styles.label}>Fecha</label>
+              <input type="date" value={fecha} onChange={e=>setFecha(e.target.value)} style={styles.input}/>
+            </div>
+            <div style={styles.campo}>
+              <label style={styles.label}>Ruta</label>
+              <input type="text" placeholder="Origen – Destino" value={ruta} onChange={e=>setRuta(e.target.value)} style={styles.input}/>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>Manifiesto</label>
+                <input type="text" value={mani} onChange={e=>setMani(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Placa</label>
+                <input type="text" value={placa} onChange={e=>setPlaca(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.campo}>
+              <label style={styles.label}>Empresa</label>
+              <input type="text" value={emp} onChange={e=>setEmp(e.target.value)} style={styles.input}/>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>Tipo de carga</label>
+                <input type="text" value={tipoCarga} onChange={e=>setTipoCarga(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Producto</label>
+                <input type="text" value={prod} onChange={e=>setProd(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.campo}>
+              <label style={styles.label}>Conductor</label>
+              <input type="text" value={condNom} onChange={e=>setCondNom(e.target.value)} style={styles.input}/>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>Toneladas</label>
+                <input type="number" value={ton} onChange={e=>setTon(e.target.value)} step="0.01" style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Flete ($/ton o total)</label>
+                <input type="number" value={fleteTon} onChange={e=>setFleteTon(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>Km cargado</label>
+                <input type="number" value={kmCargado} onChange={e=>setKmCargado(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Km vacío</label>
+                <input type="number" value={kmVacio} onChange={e=>setKmVacio(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>N° Remesa</label>
+                <input type="text" value={remesaE} onChange={e=>setRemesaE(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Peso báscula (ton)</label>
+                <input type="number" value={pesoBasE} onChange={e=>setPesoBasE(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>Lugar de cargue</label>
+                <input type="text" value={lugarCE} onChange={e=>setLugarCE(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Lugar de descargue</label>
+                <input type="text" value={lugarDE} onChange={e=>setLugarDE(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.campo}>
+              <label style={styles.label}>Observaciones</label>
+              <input type="text" value={obsE} onChange={e=>setObsE(e.target.value)} style={styles.input}/>
+            </div>
+
+            {/* Flete de retorno */}
+            <div style={{marginBottom:"12px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:"10px",cursor:"pointer",marginBottom:retornoE?"10px":"0"}} onClick={()=>setRetornoE(!retornoE)}>
+                <div style={{width:"36px",height:"20px",borderRadius:"10px",background:retornoE?t.colors.blue:"#1E3A5F",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                  <div style={{width:"16px",height:"16px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:retornoE?"18px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
+                </div>
+                <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textPrimary}}>Flete de retorno</span>
+              </div>
+              {retornoE && (
+                <div style={styles.campo}>
+                  <label style={styles.label}>Valor flete retorno ($)</label>
+                  <input type="number" placeholder="2500000" value={fleteRetE}
+                    onChange={e=>setFleteRetE(e.target.value)} style={styles.input}/>
                 </div>
               )}
             </div>
 
-            {!editando ? (
-              <>
-                {[
-                  {label:"Tipo de vehículo", valor:vehiculo.tipoVehiculo},
-                  {label:"Tipo de remolque", valor:vehiculo.tipoRemolque},
-                  {label:"Placa vehículo",   valor:vehiculo.placa},
-                  {label:"Placa remolque",   valor:vehiculo.placaRemolque},
-                  {label:"Marca",            valor:vehiculo.marca},
-                  {label:"Modelo",           valor:vehiculo.modelo},
-                  {label:"Propietario",      valor:vehiculo.propietario},
-                  {label:"Tenedor",          valor:vehiculo.tenedor},
-                  {label:"Consumo Adblue",   valor:vehiculo.adblueRatio ? `${(vehiculo.adblueRatio*100).toFixed(1)}%` : "18.9% (default)"},
-                ].map((item,i,arr)=>(
-                  <div key={item.label} style={{...styles.fila, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
-                    <span style={styles.filaLabel}>{item.label}</span>
-                    <span style={styles.filaValor}>{item.valor||"—"}</span>
+            <div style={{display:"flex", gap:"8px", marginTop:"8px"}}>
+              <button
+                style={{flex:1, padding:"13px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px", opacity:guardando?0.75:1}}
+                onClick={guardarEdicion}
+                disabled={guardando}
+              >
+                <Save size={16} color="#fff" strokeWidth={2}/>
+                {guardando?"Guardando...":"Guardar cambios"}
+              </button>
+              <button
+                style={{padding:"13px 16px", background:"none", border:`1.5px solid ${t.colors.border}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, cursor:"pointer", color:t.colors.textSecondary}}
+                onClick={()=>setEditando(false)}
+              >
+                <X size={16} strokeWidth={2}/>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODO VISTA */}
+      {!editando && (
+        <>
+          {/* HERO */}
+          <div style={styles.hero}>
+            <p style={styles.heroRuta}>{viaje.ruta||"Sin ruta"}</p>
+            <div style={styles.heroPills}>
+              {viaje.fecha&&<span style={styles.pill}>📅 {viaje.fecha}</span>}
+              {viaje.placa&&<span style={styles.pill}>🚚 {viaje.placa}</span>}
+              {viaje.condNom&&<span style={styles.pill}>👤 {viaje.condNom}</span>}
+              {viaje.mani&&<span style={styles.pill}>📄 Man. {viaje.mani}</span>}
+              {viaje.emp&&<span style={styles.pill}>🏢 {viaje.emp}</span>}
+            </div>
+          </div>
+
+          <div style={styles.contenido}>
+
+            {/* MÉTRICAS KPI */}
+            <div style={styles.dosColumnas}>
+              <div style={styles.kpiCard}>
+                <p style={styles.kpiLabel}>Valor viaje</p>
+                <p style={{...styles.kpiVal, color:t.colors.blue}}>{fmt(viaje.vViaje)}</p>
+              </div>
+              <div style={{...styles.kpiCard, background:positivo?t.colors.greenSoft:t.colors.redSoft, border:`1.5px solid ${positivo?t.colors.greenBorder:t.colors.redBorder}`}}>
+                <p style={styles.kpiLabel}>Ganancia neta</p>
+                <p style={{...styles.kpiVal, color:positivo?t.colors.green:t.colors.red}}>{fmt(viaje.neta)}</p>
+              </div>
+            </div>
+            <div style={styles.dosColumnas}>
+              <div style={styles.kpiCard}>
+                <p style={styles.kpiLabel}>Total gastos</p>
+                <p style={{...styles.kpiVal, color:t.colors.red}}>{fmt(viaje.total)}</p>
+              </div>
+              <div style={styles.kpiCard}>
+                <p style={styles.kpiLabel}>Margen neto</p>
+                <p style={{...styles.kpiVal, color:margenColor}}>{margen.toFixed(1)}%</p>
+                <div style={{height:"4px",borderRadius:"2px",background:t.colors.bgSection,overflow:"hidden",marginTop:"8px"}}>
+                  <div style={{height:"100%",borderRadius:"2px",background:margenColor,width:`${Math.min(margen,100)}%`}} />
+                </div>
+              </div>
+            </div>
+
+            {/* DESGLOSE */}
+            {gastos.length>0&&(
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <Receipt size={16} color={t.colors.blue} strokeWidth={2} />
+                  <p style={styles.cardTitulo}>Desglose de gastos</p>
+                </div>
+                {gastos.map((g,i,arr)=>(
+                  <div key={g.label} style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                    <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+                      <div style={{width:"28px",height:"28px",borderRadius:"50%",background:g.color+"22",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                        <div style={{width:"8px",height:"8px",borderRadius:"50%",background:g.color}} />
+                      </div>
+                      <div>
+                        <span style={styles.filaLabel}>{g.label}</span>
+                        {g.detalle&&<span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}> · {g.detalle}</span>}
+                      </div>
+                    </div>
+                    <span style={styles.filaValor}>{fmt(g.valor)}</span>
                   </div>
                 ))}
-              </>
-            ) : (
-              <div>
-                <div style={styles.campo}>
-                  <label style={styles.label}>Tipo de vehículo *</label>
-                  <select value={editData.tipoVehiculo} onChange={e=>setEditData({...editData,tipoVehiculo:e.target.value})}
-                    style={{...styles.input, color:editData.tipoVehiculo?t.colors.textPrimary:t.colors.textTertiary}}>
-                    <option value="">Seleccionar...</option>
-                    {["CUATRO MANOS","DOBLETROQUE","PATINETA 2S2","PATINETA 2S3","SENCILLO","TRACTOMULA 3S2","TRACTOMULA 3S3","TURBO","TURBO SENCILLO","VOLQUETA","OTRO"].map(o=>(
-                      <option key={o} value={o}>{o.charAt(0)+o.slice(1).toLowerCase()}</option>
-                    ))}
-                  </select>
-                </div>
-                <div style={styles.campo}>
-                  <label style={styles.label}>Tipo de remolque</label>
-                  <select value={editData.tipoRemolque} onChange={e=>setEditData({...editData,tipoRemolque:e.target.value})}
-                    style={{...styles.input, color:editData.tipoRemolque?t.colors.textPrimary:t.colors.textTertiary}}>
-                    <option value="">Sin remolque</option>
-                    {["BOTELLERO","CAMA BAJA","CISTERNA","CONTENEDOR","CARROCERIA","FURGON","FURGON REFRIGERADO","NIÑERA","PLANCHA","PORTA CONTENEDORES","VOLCO AUTODESCARGABLE","OTRO"].map(o=>(
-                      <option key={o} value={o}>{o.charAt(0)+o.slice(1).toLowerCase()}</option>
-                    ))}
-                  </select>
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
-                  <div style={styles.campo}>
-                    <label style={styles.label}>Placa vehículo *</label>
-                    <input type="text" value={editData.placa} maxLength={6}
-                      onChange={e=>setEditData({...editData,placa:e.target.value.toUpperCase()})} style={styles.input} />
-                  </div>
-                  <div style={styles.campo}>
-                    <label style={styles.label}>Placa remolque</label>
-                    <input type="text" value={editData.placaRemolque}
-                      onChange={e=>setEditData({...editData,placaRemolque:e.target.value.toUpperCase()})} style={styles.input} />
-                  </div>
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
-                  <div style={styles.campo}>
-                    <label style={styles.label}>Marca</label>
-                    <select value={editData.marca} onChange={e=>setEditData({...editData,marca:e.target.value})}
-                      style={{...styles.input, color:editData.marca?t.colors.textPrimary:t.colors.textTertiary}}>
-                      <option value="">Seleccionar...</option>
-                      {["AUTOCAR","ASTRA","BERLIET","BARREIROS","BElAZ","BYD","C.C.C","CATERPILLAR","CARIBE","CHANGAN","CHANGFENG","CITROEN","CHERY","CHEVROLET","CMC","DAEWOO","DAF","DAIHATSU","DFSK","DONGFENG","FAW","FORD","FOTON","FOTON AUMAN","FIAT","FREIGHTLINER","FUTONG","FWD","GMC","HINO","HITACHI","HYUNDAI","INTERNATIONAL","ISUZU","IVECO","JAC","JMC","KAMAZ","KENWORTH","KIA","KING LONG","KOMATSU","KRAZ","LIUGONG","MACK","MAN","MARCOPOLO","MASSEY FERGUSON","MAZDA","MERCEDES BENZ","MITSUBISHI","MG","NISSAN","PEGASSO","PEUGEOT","PETERBILT","RAM","RENAULT","SCANIA","SHACMAN","SINOTRUK","SITRACK","VOLKSWAGEN","VOLVO","WESTERN STAR","YUTONG","OTRO"].map(o=>(
-                        <option key={o} value={o}>{o}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div style={styles.campo}>
-                    <label style={styles.label}>Modelo (año)</label>
-                    <input type="number" value={editData.modelo} min="1970" max="2100"
-                      onChange={e=>setEditData({...editData,modelo:e.target.value})} style={styles.input} />
-                  </div>
-                </div>
-                <div style={styles.campo}>
-                  <label style={styles.label}>Propietario *</label>
-                  <input type="text" value={editData.propietario}
-                    onChange={e=>setEditData({...editData,propietario:e.target.value})} style={styles.input} />
-                </div>
-                <div style={styles.campo}>
-                  <label style={styles.label}>Tenedor</label>
-                  <input type="text" value={editData.tenedor}
-                    onChange={e=>setEditData({...editData,tenedor:e.target.value})} style={styles.input} />
-                </div>
-                <div style={styles.campo}>
-                  <label style={styles.label}>Consumo Adblue (%)</label>
-                  <input type="number" placeholder="18.9" step="0.1"
-                    value={editData.adblueRatio ? (editData.adblueRatio * 100).toFixed(1) : ""}
-                    onChange={e=>setEditData({...editData, adblueRatio: Number(e.target.value)/100 || 0})}
-                    style={styles.input} />
-                </div>
               </div>
             )}
-          </div>
-        )}
 
-        {/* ── VIAJES ── */}
-        {tabActivo==="viajes" && (
-          <div>
-            <button
-              style={{width:"100%",padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",marginBottom:"10px"}}
-              onClick={()=>navigate("/calculadora",{state:{placa:vehiculo.placa}})}
-            >
-              + Agregar viaje
-            </button>
-            <div style={styles.chips}>
-              {[{id:"todos",label:"Todos"},{id:"mes",label:"Este mes"},{id:"semana",label:"Esta semana"}].map(f=>(
-                <button key={f.id} style={{...styles.chip,...(filtro===f.id?styles.chipActivo:{})}} onClick={()=>setFiltro(f.id)}>
-                  {f.label}
-                </button>
-              ))}
-            </div>
-            {viajesFiltrados.length===0?(
-              <div style={styles.vacio}>
-                <Route size={40} color={t.colors.textTertiary} strokeWidth={1.5} />
-                <p style={styles.vacioTexto}>Sin viajes registrados</p>
-                <p style={styles.vacioSub}>Los viajes aparecerán aquí cuando uses la calculadora.</p>
-              </div>
-            ):(
-              viajesFiltrados.map(viaje=>{
-                const ok=(viaje.mrg||0)>=25;
-                return (
-                  <div key={viaje.firestoreId} style={styles.tarjetaViaje} onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}>
-                    <div style={{...styles.tarjetaFranja, background:ok?t.colors.green:t.colors.amber}} />
-                    <div style={styles.tarjetaViajeContenido}>
-                      <div style={{flex:1, minWidth:0}}>
-                        <p style={styles.tarjetaRuta}>{viaje.ruta||"Sin ruta"}</p>
-                        <p style={styles.tarjetaMeta}>{viaje.fecha||""}{viaje.empresa?` · ${viaje.empresa}`:""}</p>
-                      </div>
-                      <p style={{...styles.tarjetaNeta, color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
-                        {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        )}
-
-        {/* ── CUENTAS ── */}
-        {tabActivo==="cuentas" && (
-          <div>
-            {/* Nav mes */}
-            <div style={styles.navMes}>
-              <button style={styles.btnMes} onClick={()=>cambiarMes(-1)}>‹</button>
-              <p style={styles.labelMes}>{MESES[mesActual]} {anioActual}</p>
-              <button style={styles.btnMes} onClick={()=>cambiarMes(1)}>›</button>
-            </div>
-
-            {/* Punto de equilibrio */}
+            {/* INDICADORES */}
             <div style={styles.card}>
-              <p style={styles.cardTitulo}>Punto de equilibrio</p>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:"12px"}}>
-                <div>
-                  <p style={{fontSize:"28px",fontWeight:t.fonts.weightBlack,margin:0,color:netaMes>=puntoEquilibrio?t.colors.green:netaMes>0?t.colors.amber:t.colors.red}}>
-                    {fmt(netaMes)}
-                  </p>
-                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"4px 0 0"}}>Ganancia neta del mes</p>
+              <div style={styles.cardHeader}>
+                <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
+                <p style={styles.cardTitulo}>Indicadores del viaje</p>
+              </div>
+              <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                <span style={styles.filaLabel}>Recorrido total</span>
+                <span style={styles.filaValor}>{viaje.kmT?viaje.kmT.toLocaleString("es-CO")+" km":"—"}</span>
+              </div>
+              <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                <span style={styles.filaLabel}>Costo por km</span>
+                <span style={styles.filaValor}>{viaje.kmT&&viaje.total?fmt(viaje.total/viaje.kmT)+"/km":"—"}</span>
+              </div>
+              <div style={{...styles.fila,borderBottom:"none"}}>
+                <span style={styles.filaLabel}>Tonelaje</span>
+                <span style={styles.filaValor}>{viaje.ton?fnD(viaje.ton,2)+" ton":"—"}</span>
+              </div>
+            </div>
+
+            {/* DATOS */}
+            {(viaje.carga||viaje.prod||viaje.condNom||viaje.contactoEmpresa||viaje.celularEmpresa)&&(
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <Package size={16} color={t.colors.blue} strokeWidth={2} />
+                  <p style={styles.cardTitulo}>Datos del viaje</p>
                 </div>
-                {puntoEquilibrio > 0 && (
-                  <div style={{textAlign:"right"}}>
-                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,margin:0,color:t.colors.textPrimary}}>{fmt(puntoEquilibrio)}</p>
-                    <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>Meta gastos fijos</p>
+                {viaje.carga&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Tipo de carga</span><span style={styles.filaValor}>{viaje.carga}</span></div>}
+                {viaje.prod&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Producto</span><span style={styles.filaValor}>{viaje.prod}</span></div>}
+                {viaje.condNom&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Conductor</span><span style={styles.filaValor}>{viaje.condNom}</span></div>}
+                {viaje.remesa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>N° Remesa</span><span style={styles.filaValor}>{viaje.remesa}</span></div>}
+                {viaje.pesoBascula>0&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Peso báscula</span><span style={styles.filaValor}>{viaje.pesoBascula} ton</span></div>}
+                {viaje.lugarCargue&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Lugar de cargue</span><span style={styles.filaValor}>{viaje.lugarCargue}</span></div>}
+                {viaje.lugarDescargue&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Lugar de descargue</span><span style={styles.filaValor}>{viaje.lugarDescargue}</span></div>}
+                {viaje.contactoEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Contacto empresa</span><span style={styles.filaValor}>{viaje.contactoEmpresa}</span></div>}
+                {viaje.celularEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Celular contacto</span><a href={`tel:${viaje.celularEmpresa}`} style={{...styles.filaValor,color:t.colors.blue,textDecoration:"none"}}>{viaje.celularEmpresa}</a></div>}
+                {viaje.observaciones&&<div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Observaciones</span><span style={{...styles.filaValor,color:t.colors.textSecondary,fontStyle:"italic"}}>{viaje.observaciones}</span></div>}
+              </div>
+            )}
+
+            {/* PEAJES */}
+            {viaje.peajesDetalle&&viaje.peajesDetalle.length>0&&(
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <Route size={16} color={t.colors.blue} strokeWidth={2} />
+                  <p style={styles.cardTitulo}>Peajes ({viaje.peajesDetalle.length})</p>
+                </div>
+                {viaje.peajesDetalle.map((p,i,arr)=>(
+                  <div key={i} style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                    <div>
+                      <span style={styles.filaLabel}>{p.n}</span>
+                      <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}> · {p.d}</span>
+                      {p.iv&&<span style={{fontSize:"10px",background:t.colors.greenSoft,color:t.colors.green,padding:"2px 6px",borderRadius:t.radius.full,marginLeft:"6px"}}>Ida y vuelta</span>}
+                    </div>
+                    <span style={styles.filaValor}>{fmt(p.total)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* OTROS GASTOS */}
+            {viaje.extrasList&&viaje.extrasList.length>0&&(
+              <div style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <Fuel size={16} color={t.colors.blue} strokeWidth={2} />
+                  <p style={styles.cardTitulo}>Otros gastos</p>
+                </div>
+                {viaje.extrasList.map((e,i,arr)=>(
+                  <div key={i} style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                    <span style={styles.filaLabel}>{e.n}</span>
+                    <span style={styles.filaValor}>{fmt(e.valor||e.v||0)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* BITÁCORA DEL VIAJE */}
+            <div style={styles.card}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
+                <div style={styles.cardHeader}>
+                  <Clock size={16} color={t.colors.blue} strokeWidth={2} />
+                  <p style={styles.cardTitulo}>Bitácora del viaje</p>
+                </div>
+                <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}>
+                  {(viaje.bitacora||[]).length} evento{(viaje.bitacora||[]).length!==1?"s":""}
+                </span>
+              </div>
+
+              {/* Botones de evento rápido */}
+              {!verBitacora && (
+                <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginBottom:"10px"}}>
+                  {[
+                    {id:"cargue",    label:"Cargue",    emoji:"📦"},
+                    {id:"descargue", label:"Descargue", emoji:"📤"},
+                    {id:"reten",     label:"Retén",     emoji:"🛑"},
+                    {id:"espera",    label:"Espera",    emoji:"⏳"},
+                    {id:"descanso",  label:"Descanso",  emoji:"😴"},
+                    {id:"comida",    label:"Comida",    emoji:"🍽️"},
+                    {id:"tanqueo",   label:"Tanqueo",   emoji:"⛽"},
+                    {id:"incidente", label:"Incidente", emoji:"⚠️"},
+                    {id:"otro",      label:"Otro",      emoji:"📝"},
+                  ].map(ev=>(
+                    <button key={ev.id}
+                      style={{padding:"6px 10px",borderRadius:t.radius.full,border:`1.5px solid ${t.colors.border}`,background:"none",fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,cursor:"pointer",display:"flex",alignItems:"center",gap:"4px"}}
+                      onClick={()=>{setBitTipo(ev.id);setVerBitacora(true);}}
+                    >
+                      {ev.emoji} {ev.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Formulario inline */}
+              {verBitacora && (
+                <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"10px"}}>
+                  <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:"0 0 10px"}}>
+                    {bitTipo==="cargue"?"📦 Cargue":bitTipo==="descargue"?"📤 Descargue":bitTipo==="reten"?"🛑 Retén":bitTipo==="espera"?"⏳ Espera":bitTipo==="descanso"?"😴 Descanso":bitTipo==="comida"?"🍽️ Comida":bitTipo==="tanqueo"?"⛽ Tanqueo":bitTipo==="incidente"?"⚠️ Incidente":"📝 Otro"}
+                  </p>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"8px"}}>
+                    <input type="text" placeholder="Ubicación" value={bitUbicacion}
+                      onChange={e=>setBitUbicacion(e.target.value)}
+                      style={{padding:"8px 10px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}} />
+                    <input type="text" placeholder="Nota (opcional)" value={bitNota}
+                      onChange={e=>setBitNota(e.target.value)}
+                      style={{padding:"8px 10px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}} />
+                  </div>
+                  <div style={{display:"flex",gap:"6px"}}>
+                    <button
+                      style={{flex:1,padding:"8px",background:t.colors.green,border:"none",borderRadius:t.radius.sm,color:"#fff",fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,cursor:"pointer"}}
+                      onClick={async()=>{
+                        const evento = {
+                          id: Date.now(),
+                          tipo: bitTipo,
+                          fecha: new Date().toISOString().slice(0,10),
+                          hora: new Date().toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"}),
+                          ubicacion: bitUbicacion.trim(),
+                          nota: bitNota.trim(),
+                        };
+                        const nuevos = [...(viaje.bitacora||[]), evento];
+                        try {
+                          await onEditar(viaje.firestoreId, { bitacora: nuevos });
+                          setBitTipo(""); setBitNota(""); setBitUbicacion(""); setVerBitacora(false);
+                          mostrarToast("Evento registrado","exito");
+                        } catch(err) { mostrarToast("Error","error"); }
+                      }}
+                    >Registrar</button>
+                    <button
+                      style={{padding:"8px 12px",background:"none",border:`1px solid ${t.colors.border}`,borderRadius:t.radius.sm,color:t.colors.textSecondary,fontSize:t.fonts.sizeXs,cursor:"pointer"}}
+                      onClick={()=>{setVerBitacora(false);setBitTipo("");setBitNota("");setBitUbicacion("");}}
+                    >✕</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Lista de eventos */}
+              {(viaje.bitacora||[]).length > 0 && (
+                <div>
+                  {[...(viaje.bitacora||[])].sort((a,b)=>b.id-a.id).map((ev,i,arr)=>{
+                    const emojis = {cargue:"📦",descargue:"📤",reten:"🛑",espera:"⏳",descanso:"😴",comida:"🍽️",tanqueo:"⛽",incidente:"⚠️",otro:"📝"};
+                    return (
+                      <div key={ev.id} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"8px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                        <div style={{display:"flex",gap:"8px",flex:1}}>
+                          <span style={{fontSize:"16px"}}>{emojis[ev.tipo]||"📝"}</span>
+                          <div>
+                            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>
+                              {ev.tipo.charAt(0).toUpperCase()+ev.tipo.slice(1)}
+                            </p>
+                            <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
+                              {ev.fecha} · {ev.hora}{ev.ubicacion?` · ${ev.ubicacion}`:""}
+                            </p>
+                            {ev.nota&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0",fontStyle:"italic"}}>{ev.nota}</p>}
+                          </div>
+                        </div>
+                        <button
+                          style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
+                          onClick={async()=>{
+                            const nuevos = (viaje.bitacora||[]).filter(e=>e.id!==ev.id);
+                            try {
+                              await onEditar(viaje.firestoreId, { bitacora: nuevos });
+                            } catch(err){}
+                          }}
+                        >
+                          <Trash2 size={12} color={t.colors.textTertiary} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* ANTICIPOS AL CONDUCTOR */}
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <Receipt size={16} color={t.colors.amber} strokeWidth={2} />
+                <p style={styles.cardTitulo}>Anticipo al conductor</p>
+              </div>
+
+              {/* Monto entregado */}
+              <div style={{...styles.fila, borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                <span style={styles.filaLabel}>Entregado</span>
+                <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                  <span style={{color:t.colors.textTertiary,fontSize:t.fonts.sizeXs}}>$</span>
+                  <input
+                    type="number"
+                    value={viaje.anticipoMonto || ""}
+                    placeholder="0"
+                    onChange={async(e)=>{
+                      const val = Number(e.target.value) || 0;
+                      try { await onEditar(viaje.firestoreId, { anticipoMonto: val }); } catch(err){}
+                    }}
+                    style={{width:"120px",padding:"4px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,textAlign:"right"}}
+                  />
+                </div>
+              </div>
+
+              {/* Gastos del anticipo */}
+              {(viaje.anticipoGastos || []).map((g, i, arr) => (
+                <div key={i} style={{...styles.fila, borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                  <span style={styles.filaLabel}>{g.descripcion}</span>
+                  <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                    <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(g.monto)}</span>
+                    <button
+                      style={{background:"none",border:"none",cursor:"pointer",padding:"2px"}}
+                      onClick={async()=>{
+                        const nuevos = (viaje.anticipoGastos||[]).filter((_,idx)=>idx!==i);
+                        try { await onEditar(viaje.firestoreId, { anticipoGastos: nuevos }); } catch(err){}
+                      }}
+                    >
+                      <Trash2 size={12} color={t.colors.textTertiary} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Agregar gasto */}
+              <div style={{padding:"8px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                {!verFormAnticipo ? (
+                  <button
+                    style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,background:"none",border:"none",cursor:"pointer",fontWeight:t.fonts.weightSemibold}}
+                    onClick={()=>setVerFormAnticipo(true)}
+                  >
+                    + Agregar gasto del conductor
+                  </button>
+                ) : (
+                  <div style={{display:"flex",gap:"6px",alignItems:"flex-end"}}>
+                    <div style={{flex:1}}>
+                      <input type="text" placeholder="Descripción" value={antDesc}
+                        onChange={e=>setAntDesc(e.target.value)}
+                        style={{width:"100%",padding:"6px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs,marginBottom:"4px"}} />
+                      <input type="number" placeholder="Monto" value={antMonto}
+                        onChange={e=>setAntMonto(e.target.value)}
+                        style={{width:"100%",padding:"6px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}} />
+                    </div>
+                    <button
+                      style={{padding:"6px 10px",background:t.colors.green,border:"none",borderRadius:t.radius.sm,color:"#fff",fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,cursor:"pointer",whiteSpace:"nowrap"}}
+                      onClick={async()=>{
+                        if (!antDesc.trim()) { mostrarToast("Ingresa descripción","error"); return; }
+                        if (!antMonto || Number(antMonto)<=0) { mostrarToast("Ingresa monto","error"); return; }
+                        const nuevos = [...(viaje.anticipoGastos||[]), { descripcion: antDesc.trim(), monto: Number(antMonto) }];
+                        try {
+                          await onEditar(viaje.firestoreId, { anticipoGastos: nuevos });
+                          setAntDesc(""); setAntMonto(""); setVerFormAnticipo(false);
+                        } catch(err) { mostrarToast("Error","error"); }
+                      }}
+                    >✓</button>
+                    <button
+                      style={{padding:"6px 8px",background:"none",border:`1px solid ${t.colors.border}`,borderRadius:t.radius.sm,color:t.colors.textTertiary,fontSize:t.fonts.sizeXs,cursor:"pointer"}}
+                      onClick={()=>{setVerFormAnticipo(false);setAntDesc("");setAntMonto("");}}
+                    >✕</button>
                   </div>
                 )}
               </div>
 
-              {puntoEquilibrio > 0 ? (
-                <div>
-                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
-                    <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightSemibold,color:progresoPEColor}}>
-                      {progresoPE >= 100 ? `✓ Equilibrio superado (${progresoPE.toFixed(0)}%)` : `${progresoPE.toFixed(0)}% del equilibrio`}
+              {/* Saldo */}
+              {(viaje.anticipoMonto > 0) && (() => {
+                const entregado = viaje.anticipoMonto || 0;
+                const gastado = (viaje.anticipoGastos||[]).reduce((s,g)=>s+g.monto, 0);
+                const saldo = entregado - gastado;
+                return (
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0"}}>
+                    <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>
+                      {saldo >= 0 ? "Conductor debe devolver" : "Se le debe al conductor"}
                     </span>
-                    <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}>
-                      {netaMes >= puntoEquilibrio ? `+${fmt(netaMes - puntoEquilibrio)} utilidad` : `Faltan ${fmt(puntoEquilibrio - netaMes)}`}
+                    <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:saldo>=0?t.colors.amber:t.colors.red}}>
+                      {fmt(Math.abs(saldo))}
                     </span>
                   </div>
-                  <div style={styles.barraFondo}>
-                    <div style={{...styles.barraRelleno, width:`${Math.min(progresoPE, 100)}%`, background:progresoPEColor}} />
-                  </div>
+                );
+              })()}
+            </div>
+
+            {/* ESTADO DE PAGO */}
+            <div style={{...styles.card, border:`1.5px solid ${
+              viaje.estadoPago==="pagado"?t.colors.greenBorder:
+              (() => {
+                const dias = Math.floor((new Date() - new Date(viaje.fecha))/(1000*60*60*24));
+                const plazo = viaje.diasPago || 30;
+                return dias > plazo ? t.colors.redBorder : t.colors.border;
+              })()
+            }`}}>
+              <div style={styles.cardHeader}>
+                {viaje.estadoPago==="pagado"
+                  ? <CheckCircle size={16} color={t.colors.green} strokeWidth={2} />
+                  : <Clock size={16} color={t.colors.amber} strokeWidth={2} />
+                }
+                <p style={styles.cardTitulo}>Estado de pago</p>
+              </div>
+
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                <span style={styles.filaLabel}>Estado</span>
+                <button
+                  style={{
+                    padding:"6px 14px",
+                    borderRadius:t.radius.full,
+                    border:"none",
+                    fontSize:t.fonts.sizeXs,
+                    fontWeight:t.fonts.weightBold,
+                    cursor:"pointer",
+                    background: viaje.estadoPago==="pagado" ? t.colors.greenSoft : t.colors.amberSoft || "#FEF3C7",
+                    color: viaje.estadoPago==="pagado" ? t.colors.green : t.colors.amber,
+                  }}
+                  onClick={async()=>{
+                    const nuevo = viaje.estadoPago==="pagado" ? "pendiente" : "pagado";
+                    try {
+                      await onEditar(viaje.firestoreId, {
+                        estadoPago: nuevo,
+                        fechaPago: nuevo==="pagado" ? new Date().toISOString().slice(0,10) : null,
+                      });
+                      mostrarToast(nuevo==="pagado"?"Viaje marcado como pagado":"Viaje marcado como pendiente","exito");
+                    } catch(err) {
+                      mostrarToast("Error al actualizar","error");
+                    }
+                  }}
+                >
+                  {viaje.estadoPago==="pagado" ? "✓ Pagado" : "⏳ Pendiente"}
+                </button>
+              </div>
+
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
+                <span style={styles.filaLabel}>Plazo de pago</span>
+                <select
+                  value={viaje.diasPago || 30}
+                  onChange={async(e)=>{
+                    try {
+                      await onEditar(viaje.firestoreId, { diasPago: Number(e.target.value) });
+                    } catch(err) {}
+                  }}
+                  style={{padding:"4px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}}
+                >
+                  <option value={0}>Contado</option>
+                  <option value={15}>15 días</option>
+                  <option value={30}>30 días</option>
+                  <option value={45}>45 días</option>
+                  <option value={60}>60 días</option>
+                  <option value={90}>90 días</option>
+                </select>
+              </div>
+
+              {viaje.estadoPago==="pagado" && viaje.fechaPago && (
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0"}}>
+                  <span style={styles.filaLabel}>Fecha de pago</span>
+                  <span style={{...styles.filaValor, color:t.colors.green}}>{viaje.fechaPago}</span>
                 </div>
-              ) : (
-                <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:0}}>
-                  Configura tus gastos fijos abajo para calcular el punto de equilibrio
-                </p>
+              )}
+
+              {viaje.estadoPago!=="pagado" && (
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0"}}>
+                  <span style={styles.filaLabel}>Vencimiento</span>
+                  {(() => {
+                    const plazo = viaje.diasPago || 30;
+                    const fechaViaje = new Date(viaje.fecha);
+                    const vencimiento = new Date(fechaViaje);
+                    vencimiento.setDate(vencimiento.getDate() + plazo);
+                    const hoy = new Date();
+                    const diasRestantes = Math.ceil((vencimiento - hoy)/(1000*60*60*24));
+                    const vencido = diasRestantes < 0;
+                    return (
+                      <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:vencido?t.colors.red:diasRestantes<=7?t.colors.amber:t.colors.textSecondary}}>
+                        {vencido ? `Vencido hace ${Math.abs(diasRestantes)} días` : `En ${diasRestantes} días`}
+                      </span>
+                    );
+                  })()}
+                </div>
               )}
             </div>
 
-            {/* Ingresos y gastos */}
-            <div style={styles.dosColumnas}>
-              <div style={styles.metricaCard}>
-                <p style={styles.metricaCardLabel}>Ingresos brutos</p>
-                <p style={{...styles.metricaCardVal,color:t.colors.blue}}>{fmt(ingresosMes)}</p>
-              </div>
-              <div style={styles.metricaCard}>
-                <p style={styles.metricaCardLabel}>Total gastos</p>
-                <p style={{...styles.metricaCardVal,color:t.colors.red}}>{fmt(gastosMes)}</p>
-              </div>
-            </div>
-
-            {/* Distribución */}
-            {gastosMes>0&&(
-              <div style={styles.card}>
-                <p style={styles.cardTitulo}>Distribución de gastos</p>
-                {[
-                  {label:"ACPM",      valor:acpmMes,      color:"#3B82F6"},
-                  {label:"Adblue",    valor:adblMes,      color:"#8B5CF6"},
-                  {label:"Peajes",    valor:peajesMes,    color:t.colors.amber},
-                  {label:"Conductor", valor:conductorMes, color:t.colors.green},
-                  {label:"Otros",     valor:otrosMes,     color:t.colors.textTertiary},
-                ].filter(item=>item.valor>0).map(item=>{
-                  const pct=Math.round((item.valor/gastosMes)*100);
-                  return (
-                    <div key={item.label} style={{marginBottom:"12px"}}>
-                      <div style={{display:"flex",justifyContent:"space-between",marginBottom:"5px"}}>
-                        <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>{item.label}</span>
-                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold}}>
-                          {fmt(item.valor)} <span style={{color:t.colors.textTertiary,fontWeight:t.fonts.weightNormal}}>{pct}%</span>
-                        </span>
-                      </div>
-                      <div style={{height:"5px",borderRadius:"3px",background:t.colors.bgSection,overflow:"hidden"}}>
-                        <div style={{height:"100%",borderRadius:"3px",background:item.color,width:`${pct}%`,transition:"width 0.4s ease"}} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Estado vacío */}
-            {viajesMes.length===0&&(
-              <div style={styles.vacio}>
-                <TrendingUp size={40} color={t.colors.textTertiary} strokeWidth={1.5} />
-                <p style={styles.vacioTexto}>Sin datos este mes</p>
-                <p style={styles.vacioSub}>Registra viajes para ver tus cuentas aquí.</p>
-              </div>
-            )}
-
-
-            {/* ── GASTOS Y FACTURAS DEL VEHÍCULO ── */}
-            {(() => {
-              const gastosMesVeh = gastosVehiculo.filter(g => {
-                if (g.vehiculoId !== id) return false;
-                const f = new Date(g.fecha);
-                return f.getMonth() === mesActual && f.getFullYear() === anioActual;
-              });
-              const totalGastosAdicionales = gastosMesVeh.reduce((s, g) => s + (g.monto || 0), 0);
-              const utilidadReal = netaMes - puntoEquilibrio - totalGastosAdicionales;
-
-              return (
-                <>
-                  {/* Balance / Utilidad real */}
-                  <div style={{...styles.card, border:`1.5px solid ${utilidadReal >= 0 ? t.colors.greenBorder : t.colors.redBorder}`}}>
-                    <p style={styles.cardTitulo}>Utilidad real del mes</p>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
-                      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Ganancia neta viajes</span>
-                      <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:netaMes>=0?t.colors.green:t.colors.red}}>{fmt(netaMes)}</span>
-                    </div>
-                    {puntoEquilibrio > 0 && (
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
-                        <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos fijos (P.E.)</span>
-                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(puntoEquilibrio)}</span>
-                      </div>
-                    )}
-                    {totalGastosAdicionales > 0 && (
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
-                        <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos adicionales</span>
-                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(totalGastosAdicionales)}</span>
-                      </div>
-                    )}
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0 0"}}>
-                      <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Utilidad</span>
-                      <span style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:utilidadReal>=0?t.colors.green:t.colors.red}}>
-                        {fmt(utilidadReal)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* ── GASTOS FIJOS (configuración) ── */}
-                  <div style={styles.card}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
-                      <div>
-                        <p style={{...styles.cardTitulo,margin:0}}>Gastos fijos mensuales</p>
-                        <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>Definen tu punto de equilibrio</p>
-                      </div>
-                      <button
-                        style={{padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,cursor:"pointer"}}
-                        onClick={()=>setVerFormGF(!verFormGF)}
-                      >
-                        {verFormGF ? "Cancelar" : "+ Agregar"}
-                      </button>
-                    </div>
-
-                    {verFormGF && (
-                      <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"12px"}}>
-                        <div style={styles.campo}>
-                          <label style={styles.label}>Nombre del gasto</label>
-                          <select value={gfNombre} onChange={e=>setGfNombre(e.target.value)} style={styles.input}>
-                            <option value="">Seleccionar o escribir...</option>
-                            {["Cuota del camión","Seguro","Parqueadero","GPS / Rastreo","SOAT","Tecnomecánica","Impuestos","Lavadas","Administración"].map(o=>(
-                              <option key={o} value={o}>{o}</option>
-                            ))}
-                            <option value="__otro__">+ Otro gasto</option>
-                          </select>
-                        </div>
-                        {gfNombre === "__otro__" && (
-                          <div style={styles.campo}>
-                            <label style={styles.label}>Nombre personalizado</label>
-                            <input type="text" placeholder="Ej: Peaje fijo mensual" value=""
-                              onChange={e=>setGfNombre(e.target.value)} style={styles.input} />
-                          </div>
-                        )}
-                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
-                          <div style={styles.campo}>
-                            <label style={styles.label}>Monto ($)</label>
-                            <input type="number" placeholder="2500000" value={gfMonto}
-                              onChange={e=>setGfMonto(e.target.value)} style={styles.input} />
-                          </div>
-                          <div style={styles.campo}>
-                            <label style={styles.label}>Periodicidad</label>
-                            <select value={gfPeriodo} onChange={e=>setGfPeriodo(e.target.value)} style={styles.input}>
-                              <option value="mensual">Mensual</option>
-                              <option value="anual">Anual (÷12)</option>
-                            </select>
-                          </div>
-                        </div>
-                        <button
-                          style={{width:"100%",padding:"11px",background:t.colors.blue,color:"#fff",border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardandoGF?0.75:1}}
-                          disabled={guardandoGF}
-                          onClick={async()=>{
-                            if (!gfNombre.trim() || gfNombre==="__otro__") { mostrarToast("Ingresa el nombre del gasto","error"); return; }
-                            if (!gfMonto || Number(gfMonto)<=0) { mostrarToast("Ingresa un monto válido","error"); return; }
-                            setGuardandoGF(true);
-                            try {
-                              await onAgregarGastoFijo({
-                                vehiculoId: id,
-                                placa: vehiculo.placa,
-                                nombre: gfNombre.trim(),
-                                monto: Number(gfMonto),
-                                periodicidad: gfPeriodo,
-                              });
-                              mostrarToast("Gasto fijo registrado","exito");
-                              setGfNombre(""); setGfMonto(""); setGfPeriodo("mensual");
-                              setVerFormGF(false);
-                            } catch(err) {
-                              mostrarToast("Error al guardar","error");
-                            } finally {
-                              setGuardandoGF(false);
-                            }
-                          }}
-                        >
-                          Guardar gasto fijo
-                        </button>
-                      </div>
-                    )}
-
-                    {gfVehiculo.length === 0 && !verFormGF && (
-                      <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textTertiary,textAlign:"center",padding:"12px 0",margin:0}}>
-                        Sin gastos fijos configurados
-                      </p>
-                    )}
-
-                    {gfVehiculo.map((g, i, arr) => {
-                      const mensual = g.periodicidad === "anual" ? (g.monto || 0) / 12 : (g.monto || 0);
-                      return (
-                        <div key={g.firestoreId} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
-                          <div style={{flex:1,minWidth:0}}>
-                            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>{g.nombre}</p>
-                            <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
-                              {g.periodicidad === "anual" ? `${fmt(g.monto)}/año → ${fmt(mensual)}/mes` : `${fmt(g.monto)}/mes`}
-                            </p>
-                          </div>
-                          <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-                            <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.amber}}>{fmt(mensual)}</span>
-                            <button
-                              style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
-                              onClick={async()=>{
-                                try {
-                                  await onEliminarGastoFijo(g.firestoreId);
-                                  mostrarToast("Gasto fijo eliminado","exito");
-                                } catch(err) {
-                                  mostrarToast("Error al eliminar","error");
-                                }
-                              }}
-                            >
-                              <Trash2 size={14} color={t.colors.textTertiary} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    {gfVehiculo.length > 0 && (
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0 0",marginTop:"6px",borderTop:`1.5px solid ${t.colors.border}`}}>
-                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Punto de equilibrio</span>
-                        <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:t.colors.amber}}>{fmt(puntoEquilibrio)}/mes</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ── GASTOS ADICIONALES (manuales del mes) ── */}
-                  <div style={styles.card}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
-                      <p style={{...styles.cardTitulo,margin:0}}>Gastos adicionales</p>
-                      <button
-                        style={{padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,cursor:"pointer"}}
-                        onClick={()=>setVerFormGasto(!verFormGasto)}
-                      >
-                        {verFormGasto ? "Cancelar" : "+ Agregar"}
-                      </button>
-                    </div>
-
-                    {verFormGasto && (
-                      <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"12px"}}>
-                        <div style={styles.campo}>
-                          <label style={styles.label}>Descripción</label>
-                          <input type="text" placeholder="Ej: Reparación, repuesto, lavada..."
-                            value={gastoDesc} onChange={e=>setGastoDesc(e.target.value)} style={styles.input} />
-                        </div>
-                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
-                          <div style={styles.campo}>
-                            <label style={styles.label}>Monto ($)</label>
-                            <input type="number" placeholder="500000"
-                              value={gastoMonto} onChange={e=>setGastoMonto(e.target.value)} style={styles.input} />
-                          </div>
-                          <div style={styles.campo}>
-                            <label style={styles.label}>Fecha</label>
-                            <input type="date" value={gastoFecha}
-                              onChange={e=>setGastoFecha(e.target.value)} style={styles.input} />
-                          </div>
-                        </div>
-                        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
-                          <div style={styles.campo}>
-                            <label style={styles.label}>Taller / Proveedor</label>
-                            <input type="text" placeholder="Nombre del taller"
-                              value={gastoTaller} onChange={e=>setGastoTaller(e.target.value)} style={styles.input} />
-                          </div>
-                          <div style={styles.campo}>
-                            <label style={styles.label}>NIT</label>
-                            <input type="text" placeholder="900.123.456-7"
-                              value={gastoNit} onChange={e=>setGastoNit(e.target.value)} style={styles.input} />
-                          </div>
-                        </div>
-                        <div style={styles.campo}>
-                          <label style={styles.label}>Adjuntar factura (opcional)</label>
-                          <label style={{display:"flex",alignItems:"center",gap:"8px",padding:"10px 12px",borderRadius:t.radius.sm,border:`1.5px dashed ${t.colors.border}`,cursor:"pointer",fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold}}>
-                            <Upload size={14} color={t.colors.blue} />
-                            {subiendo ? `Subiendo... ${progresoArchivo}%` : "Seleccionar archivo"}
-                            <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{display:"none"}}
-                              onChange={e=>{
-                                const archivo = e.target.files[0];
-                                if (!archivo) return;
-                                const ruta = `gastos/${id}/${Date.now()}_${archivo.name}`;
-                                subirArchivo(archivo, ruta, "gastoFactura", (url) => {
-                                  setGastoDesc(prev => prev); // keep form open
-                                  // Store URL temporarily on the form
-                                  e.target.dataset.facturaUrl = url;
-                                  e.target.dataset.facturaRuta = ruta;
-                                  e.target.dataset.facturaNombre = archivo.name;
-                                  mostrarToast("Factura adjuntada","exito");
-                                });
-                              }}
-                              id="facturaGastoInput"
-                            />
-                          </label>
-                        </div>
-                        <button
-                          style={{width:"100%",padding:"11px",background:t.colors.blue,color:"#fff",border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardandoGasto?0.75:1}}
-                          disabled={guardandoGasto}
-                          onClick={async()=>{
-                            if (!gastoDesc.trim()) { mostrarToast("Ingresa una descripción","error"); return; }
-                            if (!gastoMonto || Number(gastoMonto)<=0) { mostrarToast("Ingresa un monto válido","error"); return; }
-                            setGuardandoGasto(true);
-                            const fileInput = document.getElementById("facturaGastoInput");
-                            try {
-                              await onAgregarGasto({
-                                vehiculoId: id,
-                                placa: vehiculo.placa,
-                                descripcion: gastoDesc.trim(),
-                                monto: Number(gastoMonto),
-                                fecha: gastoFecha,
-                                taller: gastoTaller.trim(),
-                                nit: gastoNit.trim(),
-                                facturaUrl: fileInput?.dataset?.facturaUrl || null,
-                                facturaRuta: fileInput?.dataset?.facturaRuta || null,
-                                facturaNombre: fileInput?.dataset?.facturaNombre || null,
-                              });
-                              mostrarToast("Gasto registrado","exito");
-                              setGastoDesc(""); setGastoMonto(""); setGastoFecha(new Date().toISOString().slice(0,10));
-                              setGastoTaller(""); setGastoNit("");
-                              setVerFormGasto(false);
-                            } catch(err) {
-                              mostrarToast("Error al guardar","error");
-                            } finally {
-                              setGuardandoGasto(false);
-                            }
-                          }}
-                        >
-                          Guardar gasto
-                        </button>
-                      </div>
-                    )}
-
-                    {gastosMesVeh.length === 0 && !verFormGasto && (
-                      <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textTertiary,textAlign:"center",padding:"12px 0",margin:0}}>
-                        Sin gastos adicionales este mes
-                      </p>
-                    )}
-
-                    {gastosMesVeh.map((g, i, arr) => (
-                      <div key={g.firestoreId} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
-                        <div style={{flex:1,minWidth:0}}>
-                          <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>{g.descripcion}</p>
-                          <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
-                            {g.fecha}
-                            {g.taller?` · ${g.taller}`:""}
-                            {g.nit?` · NIT: ${g.nit}`:""}
-                          </p>
-                          {g.facturaUrl && (
-                            <a href={g.facturaUrl} target="_blank" rel="noreferrer"
-                              style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"4px",marginTop:"4px"}}>
-                              <Eye size={12}/> Ver factura
-                            </a>
-                          )}
-                        </div>
-                        <div style={{display:"flex",alignItems:"center",gap:"8px",marginLeft:"10px"}}>
-                          <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.red}}>-{fmt(g.monto)}</span>
-                          <button
-                            style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
-                            onClick={async()=>{
-                              try {
-                                await onEliminarGasto(g.firestoreId);
-                                mostrarToast("Gasto eliminado","exito");
-                              } catch(err) {
-                                mostrarToast("Error al eliminar","error");
-                              }
-                            }}
-                          >
-                            <Trash2 size={14} color={t.colors.textTertiary} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              );
-            })()}
-
           </div>
-        )}
-
-        {/* ── HISTORIAL ── */}
-        {tabActivo==="historial" && (
-          <div>
-            <div style={styles.buscadorWrap}>
-              <input type="text" placeholder="Buscar por ruta o manifiesto..."
-                value={busquedaH} onChange={e=>setBusquedaH(e.target.value)} style={styles.buscadorInput} />
-            </div>
-
-            {viajesVehiculo.length===0&&(
-              <div style={styles.vacio}>
-                <Clock size={40} color={t.colors.textTertiary} strokeWidth={1.5} />
-                <p style={styles.vacioTexto}>Sin historial todavía</p>
-                <p style={styles.vacioSub}>Los viajes guardados aparecerán aquí.</p>
-              </div>
-            )}
-
-            {viajesVehiculo.length>0&&viajesBuscados.length===0&&(
-              <div style={styles.vacio}>
-                <p style={styles.vacioTexto}>Sin resultados</p>
-                <p style={styles.vacioSub}>No hay viajes con "{busquedaH}"</p>
-              </div>
-            )}
-
-            {viajesAgrupadosPorMes.map(grupo=>(
-              <div key={grupo.etiqueta} style={{marginBottom:"6px"}}>
-                <p style={styles.grupoMes}>{grupo.etiqueta}</p>
-                {grupo.viajes.map(viaje=>{
-                  const ok=(viaje.mrg||0)>=25;
-                  return (
-                    <div key={viaje.firestoreId} style={styles.tarjetaViaje} onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}>
-                      <div style={{...styles.tarjetaFranja,background:ok?t.colors.green:t.colors.amber}} />
-                      <div style={styles.tarjetaViajeContenido}>
-                        <div style={{flex:1,minWidth:0}}>
-                          <p style={styles.tarjetaRuta}>{viaje.ruta||"Sin ruta"}</p>
-                          <p style={styles.tarjetaMeta}>
-                            {viaje.fecha||""}
-                            {viaje.ton?` · ${fnD(viaje.ton,1)} ton`:""}
-                            {viaje.mani?` · Man. ${viaje.mani}`:""}
-                          </p>
-                        </div>
-                        <p style={{...styles.tarjetaNeta,color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
-                          {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* ── MANTENIMIENTO ── */}
-{tabActivo==="mant" && (
-  <div>
-
-    {/* ODÓMETRO */}
-    <div style={styles.card}>
-      <p style={styles.cardTitulo}>Odómetro actual</p>
-      {!editandoKm ? (
-        <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-          <div>
-            <p style={{fontSize:"28px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:0}}>
-              {(kmOdometro||kmActual).toLocaleString("es-CO")} km
-            </p>
-            <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"4px 0 0"}}>
-              Actualiza el km cada vez que tanqueas
-            </p>
-          </div>
-          <button
-            style={{padding:"8px 14px", background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.blue, cursor:"pointer"}}
-            onClick={()=>{setEditandoKm(true); setKmTemp(String(kmOdometro||kmActual));}}
-          >
-            Actualizar
-          </button>
-        </div>
-      ) : (
-        <div>
-          <input type="number" value={kmTemp} onChange={e=>setKmTemp(e.target.value)}
-            placeholder="Km actual" style={{...styles.input, marginBottom:"8px"}} autoFocus />
-          <div style={{display:"flex", gap:"8px"}}>
-            <button style={{flex:1, padding:"10px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer"}}
-              onClick={guardarKm}>Guardar</button>
-            <button style={{padding:"10px 14px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, cursor:"pointer", color:t.colors.textSecondary, fontSize:t.fonts.sizeSm}}
-              onClick={()=>setEditandoKm(false)}>Cancelar</button>
-          </div>
-        </div>
+        </>
       )}
-    </div>
-
-    {/* ALERTAS PERSONALIZADAS */}
-    {configMant.filter(c => c.vehiculoId === id).length > 0 && (
-      <div style={styles.card}>
-        <p style={styles.cardTitulo}>Alertas de mantenimiento</p>
-        {configMant.filter(c => c.vehiculoId === id).map(item => {
-          const ultimoMant = mantVehiculo
-            .filter(m => m.configId === item.firestoreId)
-            .sort((a,b) => b.km - a.km)[0];
-          const ultimoKm    = ultimoMant ? ultimoMant.km : 0;
-          const proximoKm   = ultimoKm + item.intervalo;
-          const kmRef       = kmOdometro || kmActual;
-          const kmFaltantes = proximoKm - kmRef;
-          const pct         = Math.max(0, Math.min(100, ((item.intervalo - kmFaltantes) / item.intervalo) * 100));
-          const vencido     = kmFaltantes <= 0;
-          const proximo     = kmFaltantes > 0 && kmFaltantes <= (item.alerta || 2000);
-          const estado      = vencido ? "vencido" : proximo ? "proximo" : "ok";
-          const colorMap    = {
-            vencido: {bg:t.colors.redSoft,   border:t.colors.redBorder,   text:t.colors.red,   label:"Vencido"},
-            proximo: {bg:t.colors.amberSoft, border:"#FDE68A",            text:t.colors.amber, label:"Próximo"},
-            ok:      {bg:t.colors.greenSoft, border:t.colors.greenBorder, text:t.colors.green, label:"Al día"},
-          };
-          const c = colorMap[estado];
-          return (
-            <div key={item.firestoreId} style={{marginBottom:"14px"}}>
-              <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"8px"}}>
-                <div style={{flex:1,minWidth:0}}>
-                  <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{item.nombre}</p>
-                  <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0"}}>
-                    {vencido ? `Venció hace ${Math.abs(kmFaltantes).toLocaleString("es-CO")} km` : `Faltan ${kmFaltantes.toLocaleString("es-CO")} km`}
-                    {` · Cada ${item.intervalo.toLocaleString("es-CO")} km`}
-                  </p>
-                </div>
-                <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
-                  <span style={{fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, padding:"3px 10px", borderRadius:t.radius.full, background:c.bg, color:c.text, border:`0.5px solid ${c.border}`, whiteSpace:"nowrap"}}>
-                    {c.label}
-                  </span>
-                  <button
-                    style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
-                    onClick={async()=>{
-                      try {
-                        await onEliminarConfig(item.firestoreId);
-                        mostrarToast("Alerta eliminada","exito");
-                      } catch(err) {
-                        mostrarToast("Error al eliminar","error");
-                      }
-                    }}
-                  >
-                    <Trash2 size={14} color={t.colors.textTertiary} />
-                  </button>
-                </div>
-              </div>
-              <div style={{height:"5px", borderRadius:"3px", background:t.colors.bgSection, overflow:"hidden"}}>
-                <div style={{height:"100%", borderRadius:"3px", background:c.text, width:`${Math.round(pct)}%`, transition:"width 0.4s ease"}} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    )}
-
-    {/* AGREGAR ALERTA */}
-    <div style={styles.card}>
-      <p style={styles.cardTitulo}>Agregar ítem de mantenimiento</p>
-      <div style={styles.campo}>
-        <label style={styles.label}>Nombre</label>
-        <input type="text" placeholder="Ej: Cambio de aceite, Filtro de aire..."
-          value={tipoMant} onChange={e=>setTipoMant(e.target.value)} style={styles.input}/>
-      </div>
-      <div style={styles.fila2}>
-        <div style={styles.campo}>
-          <label style={styles.label}>Intervalo (km)</label>
-          <input type="number" placeholder="15000" value={kmMant}
-            onChange={e=>setKmMant(e.target.value)} style={styles.input}/>
-        </div>
-        <div style={styles.campo}>
-          <label style={styles.label}>Alerta a (km antes)</label>
-          <input type="number" placeholder="2000" value={costoMant}
-            onChange={e=>setCostoMant(e.target.value)} style={styles.input}/>
-        </div>
-      </div>
-      <button
-        style={{width:"100%", padding:"12px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoMant?0.75:1}}
-        onClick={async()=>{
-          if (!tipoMant.trim()) { mostrarToast("Ingresa el nombre del ítem","error"); return; }
-          setGuardandoMant(true);
-          await onAgregarConfig({
-            vehiculoId: id,
-            placa: vehiculo.placa,
-            nombre: tipoMant.trim(),
-            intervalo: Number(kmMant)||15000,
-            alerta: Number(costoMant)||2000,
-          });
-          setTipoMant(""); setKmMant(""); setCostoMant("");
-          mostrarToast("Ítem agregado","exito");
-          setGuardandoMant(false);
-        }}
-        disabled={guardandoMant}
-      >
-        + Agregar ítem
-      </button>
-    </div>
-
-    {/* MÓDULOS DE DETALLE */}
-    <div style={styles.card}>
-      <p style={styles.cardTitulo}>Módulos de detalle</p>
-      {[
-        {label:"Llantas",  sub:"Diagrama y estado por posición", ruta:`/vehiculo/${id}/llantas`,       Icono:CircleDot,     color:t.colors.textSecondary},
-        {label:"Aceite",   sub:"Marca, viscosidad y cambios",    ruta:`/vehiculo/${id}/aceite`,        Icono:Droplets,      color:t.colors.amber},
-        {label:"Filtros",  sub:"Aire, combustible, lubricación", ruta:`/vehiculo/${id}/filtros`,       Icono:Filter,        color:t.colors.blue},
-        {label:"Frenos",   sub:"Estado por eje",                 ruta:`/vehiculo/${id}/frenos`,        Icono:Disc,          color:t.colors.red},
-        {label:"Tanqueos", sub:"Consumo real vs estimado",       ruta:`/vehiculo/${id}/tanqueos`,      Icono:Fuel,          color:t.colors.green},
-        {label:"Historial",sub:"Todos los mantenimientos",       ruta:`/vehiculo/${id}/historial-mant`,Icono:ClipboardList, color:t.colors.textSecondary},
-      ].map((item,i,arr)=>(
-        <div
-          key={item.ruta}
-          style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 0", borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`, cursor:"pointer"}}
-          onClick={()=>navigate(item.ruta)}
-        >
-          <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
-            <div style={{width:"36px",height:"36px",borderRadius:t.radius.sm,background:t.colors.bgSection,display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <item.Icono size={18} color={item.color} strokeWidth={1.8} />
-            </div>
-            <div>
-              <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{item.label}</p>
-              <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0"}}>{item.sub}</p>
-            </div>
-          </div>
-          <span style={{color:t.colors.textTertiary, fontSize:"18px"}}>›</span>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-  
-        {/* ── HOJA DE VIDA ── */}
-        {tabActivo==="hvida" && (
-          <div>
-            {seccionesHV.map(seccion=>{
-              const {total,cargados} = contarDocumentos(seccion);
-              const completa = cargados===total;
-              const abierta  = seccionesAbiertas[seccion.id];
-              return (
-                <div key={seccion.id} style={styles.hvSeccion}>
-                  <button style={styles.hvCabecera}
-                    onClick={()=>setSeccionesAbiertas(prev=>({...prev,[seccion.id]:!prev[seccion.id]}))}>
-                    <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
-                      <span style={{...styles.hvBadge,background:completa?t.colors.greenSoft:t.colors.amberSoft,color:completa?t.colors.green:t.colors.amber,border:`1px solid ${completa?t.colors.greenBorder:"#FDE68A"}`}}>
-                        {cargados}/{total}
-                      </span>
-                      <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary}}>{seccion.titulo}</span>
-                    </div>
-                    {abierta
-                      ? <ChevronUp  size={16} color={t.colors.textTertiary} />
-                      : <ChevronDown size={16} color={t.colors.textTertiary} />
-                    }
-                  </button>
-
-                  {abierta&&(
-                    <div style={{padding:"0 16px 16px"}}>
-                      {seccion.documentos.map(doc=>{
-                        const datos   = hvData[doc.id];
-                        const cargado = datos&&datos.estado==="cargado";
-                        const estaSubiendo = subiendo[doc.id]||false;
-                        const pct = progresoArchivo[doc.id]||0;
-                        return (
-                          <div key={doc.id}>
-                            <div style={styles.hvDocFila}>
-                            <div style={{flex:1}}>
-                              <p style={styles.hvDocLabel}>{doc.label}</p>
-                              {cargado&&(
-                                <div style={{marginTop:"4px"}}>
-                                  <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>
-                                    📎 {datos.nombre}
-                                  </span>
-                                  <div style={{display:"flex",gap:"6px"}}>
-                                    <a href={datos.url} target="_blank" rel="noreferrer" style={styles.hvBtnVer}>
-                                      <Eye size={12} color={t.colors.blue} /> Ver
-                                    </a>
-                                    <button style={styles.hvBtnEliminar} onClick={()=>manejarEliminar(doc.id)}>
-                                      <Trash2 size={12} color={t.colors.red} /> Eliminar
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                              {estaSubiendo&&(
-                                <div style={{display:"flex",alignItems:"center",gap:"8px",marginTop:"6px"}}>
-                                  <div style={{flex:1,height:"4px",background:t.colors.bgSection,borderRadius:"2px",overflow:"hidden"}}>
-                                    <div style={{height:"100%",background:t.colors.blue,borderRadius:"2px",width:`${pct}%`}} />
-                                  </div>
-                                  <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>{pct}%</span>
-                                </div>
-                              )}
-                            </div>
-                            {!cargado&&!estaSubiendo&&(
-                              <label style={styles.hvBtnSubir}>
-                                <Upload size={12} color={t.colors.blue} /> Subir
-                                <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{display:"none"}} onChange={e=>manejarArchivo(e,doc.id)} />
-                              </label>
-                            )}
-                            {cargado&&!estaSubiendo&&(
-                              <span style={styles.hvEstadoCargado}>✓ Cargado</span>
-                            )}
-                            {estaSubiendo&&(
-                              <span style={styles.hvEstadoSubiendo}>Subiendo...</span>
-                            )}
-                            </div>
-                          {doc.conVencimiento && (
-                            <div style={{display:"flex",alignItems:"center",gap:"8px",padding:"4px 0 8px",marginTop:"2px"}}>
-                              <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,whiteSpace:"nowrap"}}>Vence:</span>
-                              <input
-                                type="date"
-                                value={hvData[doc.id+"_venc"]||""}
-                                onChange={e=>actualizarHV(doc.id+"_venc",e.target.value)}
-                                style={{flex:1,padding:"5px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}}
-                              />
-                              {(()=>{
-                                const fv = hvData[doc.id+"_venc"];
-                                if (!fv) return null;
-                                const dias = Math.ceil((new Date(fv)-new Date())/(1000*60*60*24));
-                                const vencido = dias < 0;
-                                const proximo = dias >= 0 && dias <= 30;
-                                return (
-                                  <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,whiteSpace:"nowrap",color:vencido?t.colors.red:proximo?t.colors.amber:t.colors.green}}>
-                                    {vencido?`Venció hace ${Math.abs(dias)}d`:dias===0?"Vence hoy":`${dias}d`}
-                                  </span>
-                                );
-                              })()}
-                            </div>
-                          )}
-                          </div>
-                        );
-                      })}
-
-                      {seccion.campos.length>0&&<div style={{height:"1px",background:t.colors.borderLight,margin:"8px 0 14px"}} />}
-
-                      {seccion.campos.map(campo=>(
-                        <div key={campo.id} style={{display:"flex",flexDirection:"column",gap:"5px",marginBottom:"10px"}}>
-                          <label style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightSemibold,color:t.colors.textSecondary,textTransform:"uppercase",letterSpacing:"0.05em"}}>{campo.label}</label>
-                          <input type={campo.tipo} placeholder={campo.placeholder}
-                            value={hvData[campo.id]||""}
-                            onChange={e=>actualizarHV(campo.id,e.target.value)}
-                            style={styles.input} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-      </div>
     </div>
   );
 }
 
 const styles = {
-  pantalla:            { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary },
-  header:              { display:"flex", alignItems:"center", padding:"16px 20px 8px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:           { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
-  noEncontrado:        { textAlign:"center", padding:"60px 20px", color:t.colors.textSecondary },
-  bloqueTop:           { background:t.colors.bgCard, padding:"16px", borderBottom:`1px solid ${t.colors.borderLight}` },
-  vehiculoFila:        { display:"flex", alignItems:"center", gap:"12px", marginBottom:"16px" },
-  vehiculoIconoWrap:   { width:"50px", height:"50px", background:t.colors.blueSoft, borderRadius:t.radius.md, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 },
-  vehiculoPlaca:       { fontSize:"22px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:0, letterSpacing:"0.04em" },
-  vehiculoTipo:        { fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"3px 0 0" },
-  metricas:            { display:"flex", alignItems:"center", borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"14px" },
-  metrica:             { flex:1, textAlign:"center" },
-  metricaVal:          { fontSize:"20px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
-  metricaLabel:        { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"3px 0 0" },
-  metricaSep:          { width:"1px", height:"32px", background:t.colors.borderLight },
-  tabsWrap:            { display:"flex", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}`, overflowX:"auto" },
-  tab:                 { flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:"4px", padding:"12px 2px 10px", border:"none", background:"none", cursor:"pointer", borderBottom:"2px solid transparent", minWidth:"0" },
-  tabActivo:           { borderBottom:`2px solid ${t.colors.blue}`, background:"#1E3A5F" },
-  contenido:           { padding:"12px 16px 80px" },
-  card:                { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
-  cardTitulo:          { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" },
-  fila:                { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0" },
-  filaLabel:           { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary },
-  filaValor:           { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary },
-  chips:               { display:"flex", gap:"8px", marginBottom:"12px" },
-  chip:                { padding:"6px 14px", borderRadius:t.radius.full, border:`1.5px solid ${t.colors.border}`, background:t.colors.bgCard, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, cursor:"pointer" },
-  chipActivo:          { background:t.colors.blue, color:"#fff", border:`1.5px solid ${t.colors.blue}` },
-  vacio:               { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"40px 20px", textAlign:"center", marginBottom:"10px", boxShadow:t.shadows.card },
-  vacioTexto:          { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"10px 0 6px" },
-  vacioSub:            { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, margin:0 },
-  tarjetaViaje:        { background:t.colors.bgCard, borderRadius:t.radius.lg, marginBottom:"8px", display:"flex", overflow:"hidden", boxShadow:t.shadows.card, cursor:"pointer" },
-  tarjetaFranja:       { width:"4px", flexShrink:0 },
-  tarjetaViajeContenido:{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 14px", flex:1 },
-  tarjetaRuta:         { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" },
-  tarjetaMeta:         { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"3px 0 0" },
-  tarjetaNeta:         { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, marginLeft:"10px", flexShrink:0 },
-  navMes:              { display:"flex", justifyContent:"space-between", alignItems:"center", background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"10px 16px", marginBottom:"10px", boxShadow:t.shadows.card },
-  btnMes:              { background:"none", border:"none", fontSize:"22px", color:t.colors.blue, cursor:"pointer", padding:"0 8px" },
-  labelMes:            { fontSize:"15px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
-  btnMeta:             { background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, padding:"6px 12px", fontSize:t.fonts.sizeXs, color:t.colors.blue, fontWeight:t.fonts.weightBold, cursor:"pointer" },
-  editarMeta:          { marginTop:"14px", background:t.colors.bgSection, borderRadius:t.radius.sm, padding:"12px" },
-  input:               { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
-  btnGuardarMeta:      { flex:1, padding:"9px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, cursor:"pointer" },
-  btnCancelarMeta:     { flex:1, padding:"9px", background:"none", color:t.colors.textSecondary, border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, cursor:"pointer" },
-  barraFondo:          { height:"6px", borderRadius:"3px", background:t.colors.bgSection, overflow:"hidden" },
-  barraRelleno:        { height:"100%", borderRadius:"3px", transition:"width 0.4s ease" },
-  dosColumnas:         { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" },
-  metricaCard:         { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", boxShadow:t.shadows.card },
-  metricaCardLabel:    { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 6px", textTransform:"uppercase", letterSpacing:"0.05em" },
-  metricaCardVal:      { fontSize:"18px", fontWeight:t.fonts.weightBold, margin:0 },
-  buscadorWrap:        { background:t.colors.bgCard, border:`1.5px solid ${t.colors.border}`, borderRadius:t.radius.md, padding:"11px 14px", marginBottom:"12px", boxShadow:t.shadows.card },
-  buscadorInput:       { width:"100%", border:"none", outline:"none", fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, background:"transparent" },
-  grupoMes:            { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.07em", margin:"0 0 8px" },
-  hvSeccion:           { background:t.colors.bgCard, borderRadius:t.radius.lg, marginBottom:"10px", overflow:"hidden", boxShadow:t.shadows.card },
-  hvCabecera:          { width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:"14px 16px", background:"none", border:"none", cursor:"pointer" },
-  hvBadge:             { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, padding:"3px 8px", borderRadius:t.radius.full },
-  hvDocFila:           { display:"flex", justifyContent:"space-between", alignItems:"flex-start", paddingBottom:"12px", marginBottom:"12px", borderBottom:`1px solid ${t.colors.borderLight}` },
-  hvDocLabel:          { fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, margin:0, fontWeight:t.fonts.weightMedium },
-  hvBtnVer:            { display:"inline-flex", alignItems:"center", gap:"4px", fontSize:t.fonts.sizeXs, color:t.colors.blue, textDecoration:"none", padding:"3px 8px", border:`1px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, background:t.colors.blueSoft },
-  hvBtnEliminar:       { display:"inline-flex", alignItems:"center", gap:"4px", fontSize:t.fonts.sizeXs, color:t.colors.red, padding:"3px 8px", border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, background:t.colors.redSoft, cursor:"pointer" },
-  hvBtnSubir:          { display:"inline-flex", alignItems:"center", gap:"4px", padding:"6px 12px", borderRadius:t.radius.full, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, cursor:"pointer", background:t.colors.blueSoft, color:t.colors.blue, border:`1.5px solid ${t.colors.blueBorder}`, whiteSpace:"nowrap", flexShrink:0 },
-  hvEstadoCargado:     { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.green, whiteSpace:"nowrap", flexShrink:0 },
-  hvEstadoSubiendo:    { fontSize:t.fonts.sizeXs, color:t.colors.amber, whiteSpace:"nowrap", flexShrink:0 },
-  campo:               { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"12px" },
-  label:               { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
+  pantalla:        { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary },
+  header:          { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
+  btnVolver:       { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  btnEditar:       { display:"flex", alignItems:"center", gap:"6px", padding:"8px 12px", background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, cursor:"pointer" },
+  btnEliminar:     { background:t.colors.redSoft, border:`1.5px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, padding:"8px", cursor:"pointer", display:"flex", alignItems:"center" },
+  hero:            { background:t.colors.bgCard, padding:"16px 20px", borderBottom:`1px solid ${t.colors.borderLight}` },
+  heroRuta:        { fontSize:"20px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:"0 0 10px", letterSpacing:"-0.3px" },
+  heroPills:       { display:"flex", flexWrap:"wrap", gap:"6px" },
+  pill:            { fontSize:"11px", background:t.colors.bgSection, color:t.colors.textSecondary, padding:"4px 10px", borderRadius:t.radius.full },
+  contenido:       { padding:"12px 16px 30px" },
+  dosColumnas:     { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" },
+  kpiCard:         { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", boxShadow:t.shadows.card, border:`1.5px solid ${t.colors.border}` },
+  kpiLabel:        { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 6px", textTransform:"uppercase", letterSpacing:"0.05em" },
+  kpiVal:          { fontSize:"17px", fontWeight:t.fonts.weightBold, margin:0 },
+  card:            { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
+  cardTitulo:      { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:0 },
+  cardTituloEdit:  { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 16px" },
+  cardHeader:      { display:"flex", alignItems:"center", gap:"8px", marginBottom:"12px" },
+  fila:            { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0" },
+  filaLabel:       { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary },
+  filaValor:       { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary },
+  campo:           { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
+  fila2:           { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },
+  label:           { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
+  input:           { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
 };
 
-export default DetalleVehiculo;
+export default DetalleViaje;
