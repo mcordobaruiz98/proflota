@@ -151,7 +151,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             {fmt(gananciaMes)}
           </p>
           <p style={styles.gananciaSub}>
-            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""}
+            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""} · {fmt(ingresosMes)} brutos
           </p>
           {totalPE > 0 && (
             <div style={{marginTop:"8px"}}>
@@ -172,6 +172,43 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
           </div>
         </div>
       </div>
+
+      {/* ONBOARDING — primer uso */}
+      {vehiculos.length === 0 && viajes.length === 0 && (
+        <div style={{margin:"0 16px 10px"}}>
+          <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"20px",boxShadow:t.shadows.card}}>
+            <p style={{fontSize:"16px",fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:"0 0 4px",textAlign:"center"}}>
+              ¡Bienvenido a NAVIRA!
+            </p>
+            <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"0 0 16px",textAlign:"center"}}>
+              Configura tu flota en 3 pasos y empieza a controlar tu operación.
+            </p>
+
+            {[
+              {num:"1",titulo:"Registra tu vehículo",sub:"Placa, tipo, marca y modelo",ruta:"/agregar-vehiculo",btn:"Agregar vehículo",color:t.colors.green},
+              {num:"2",titulo:"Configura gastos fijos",sub:"Cuota, seguro, GPS — tu punto de equilibrio",ruta:null,btn:null,color:t.colors.blue},
+              {num:"3",titulo:"Calcula tu primer viaje",sub:"Ruta, flete, peajes — sabe cuánto te queda",ruta:"/calculadora",btn:null,color:t.colors.amber},
+            ].map((paso,i,arr)=>(
+              <div key={paso.num} style={{display:"flex",gap:"12px",padding:"12px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                <div style={{width:"32px",height:"32px",borderRadius:"50%",background:paso.color+"22",border:`1.5px solid ${paso.color}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <span style={{fontSize:"14px",fontWeight:t.fonts.weightBlack,color:paso.color}}>{paso.num}</span>
+                </div>
+                <div style={{flex:1}}>
+                  <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:0}}>{paso.titulo}</p>
+                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{paso.sub}</p>
+                </div>
+              </div>
+            ))}
+
+            <button
+              style={{width:"100%",padding:"13px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",marginTop:"12px"}}
+              onClick={()=>navigate("/agregar-vehiculo")}
+            >
+              Empezar → Registrar mi primer vehículo
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ALERTA CARTERA VENCIDA */}
       {vencidos.length > 0 && (
