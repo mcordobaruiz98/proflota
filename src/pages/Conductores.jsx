@@ -82,7 +82,7 @@ function Conductores({ conductores = [], onAgregar, onEditar, onEliminar, mostra
             <p style={styles.cardTitulo}>{editId ? "Editar conductor" : "Nuevo conductor"}</p>
             <div style={styles.campo}>
               <label style={styles.label}>Nombre completo</label>
-              <input type="text" placeholder="Juan Pérez González" value={nombre}
+              <input type="text" placeholder="Nombre del conductor" value={nombre}
                 onChange={e => setNombre(e.target.value)} style={styles.input} />
             </div>
             <div style={styles.fila2}>
@@ -106,7 +106,7 @@ function Conductores({ conductores = [], onAgregar, onEditar, onEliminar, mostra
               <div style={styles.campo}>
                 <label style={styles.label}>Categoría</label>
                 <select value={catLic} onChange={e => setCatLic(e.target.value)} style={styles.input}>
-                  <option value="">Seleccionar</option>
+                  <option value="">Seleccionar...</option>
                   <option value="C1">C1</option>
                   <option value="C2">C2</option>
                   <option value="C3">C3</option>
