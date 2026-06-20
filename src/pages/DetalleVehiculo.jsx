@@ -712,27 +712,6 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               </div>
             )}
 
-            {/* Viajes del mes */}
-            {viajesMes.length>0&&(
-              <div style={styles.card}>
-                <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
-                {[...viajesMes].reverse().map((viaje,i,arr)=>(
-                  <div key={viaje.firestoreId}
-                    style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`,cursor:"pointer"}}
-                    onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
-                  >
-                    <div>
-                      <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,margin:0,color:t.colors.textPrimary}}>{viaje.ruta||"Sin ruta"}</p>
-                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{viaje.fecha||""}</p>
-                    </div>
-                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,margin:0,color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
-                      {fmt(viaje.neta||0)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-
             {/* ── GASTOS Y FACTURAS DEL VEHÍCULO ── */}
             {(() => {
               const gastosMesVeh = gastosVehiculo.filter(g => {
