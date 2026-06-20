@@ -205,6 +205,7 @@ function Perfil({ mostrarToast }) {
       {/* OTRAS OPCIONES */}
 <div style={styles.card}>
   {[
+    {label:"Conductores",        ruta:"/conductores"},
     {label:"Configuración",     ruta:"/configuracion"},
     {label:"Ayuda y soporte",   ruta:"/ayuda"},
     {label:"Acerca de",         ruta:"/acerca"},
@@ -238,4 +239,3 @@ const styles = {
 };
 
 export default Perfil;
-

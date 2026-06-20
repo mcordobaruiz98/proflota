@@ -21,6 +21,8 @@ import AyudaSoporte     from "./pages/AyudaSoporte";
 import AcercaDe         from "./pages/AcercaDe";
 import Cartera          from "./pages/Cartera";
 import Comparativo      from "./pages/Comparativo";
+import Conductores      from "./pages/Conductores";
+import Conductores      from "./pages/Conductores";
 import Toast            from "./components/Toast";
 import Llantas          from "./pages/mantenimiento/Llantas";
 import Aceite           from "./pages/mantenimiento/Aceite";
@@ -38,7 +40,7 @@ function AppContenido() {
   const { toasts, mostrar, cerrar } = useToast();
 
  const {
-  vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, gastosVehiculo, gastosFijos, cargando,
+  vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, gastosVehiculo, gastosFijos, conductores, cargando,
   agregarVehiculo, eliminarVehiculo, editarVehiculo,
   agregarViaje,    eliminarViaje,    editarViaje,
   agregarEmpresa,  eliminarEmpresa,
@@ -47,6 +49,7 @@ function AppContenido() {
   agregarConfigMant,    eliminarConfigMant,
   agregarGasto, eliminarGasto,
   agregarGastoFijo, eliminarGastoFijo,
+  agregarConductor, editarConductor, eliminarConductor,
 } = useFirestore(usuario?.uid);
 
   return (
@@ -202,6 +205,31 @@ function AppContenido() {
             viajes={viajes}
             gastosFijos={gastosFijos}
             gastosVehiculo={gastosVehiculo}
+          />
+        </RutaProtegida>
+      } />
+
+      <Route path="/conductores" element={
+        <RutaProtegida>
+          <Conductores
+            conductores={conductores}
+            onAgregar={agregarConductor}
+            onEditar={editarConductor}
+            onEliminar={eliminarConductor}
+            mostrarToast={mostrar}
+          />
+        </RutaProtegida>
+      } />
+
+      <Route path="/conductores" element={
+        <RutaProtegida>
+          <Conductores
+            conductores={conductores}
+            vehiculos={vehiculos}
+            onAgregar={agregarConductor}
+            onEditar={editarConductor}
+            onEliminar={eliminarConductor}
+            mostrarToast={mostrar}
           />
         </RutaProtegida>
       } />
