@@ -236,51 +236,6 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
     navigate(-1);
   };
 
-  // Limpiar formulario
-    setFecha(new Date().toISOString().slice(0,10)); setFechaDescarga("");
-    setMani(""); setRemesa(""); setPesoBascula(""); setLugarCargue(""); setLugarDescargue("");
-    setObservaciones(""); setPlaca(""); setTipoCarga(""); setProducto(""); setRuta("");
-    setEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio("");
-    setTonelaje(""); setFleteTon(""); setTieneRetorno(false); setFleteRetorno("");
-    setTonelajeRetorno(""); setRutaRet(""); setEmpresaRet(""); setProductoRet("");
-    setContactoRet(""); setManiRet(""); setRemesaRet(""); setPesoBasRet("");
-    setLugarCargueRet(""); setLugarDescargueRet(""); setFechaCargueRet(""); setFechaDescargueRet("");
-    setExtras([]); setPorcCond(""); setCarpado(""); setGastosViaje("");
-    setPeajesRuta([]); setRutaCargada(null);
- 
-    setGuardando(false);
-    navigate(-1);
-  };
- 
-    const cargarRuta = (rutaGuardada) => {
-    setRuta(rutaGuardada.ruta);
-    setKmCargado(rutaGuardada.kmCargado || "");
-    setKmVacio(rutaGuardada.kmVacio || "");
-    setRendCargado(rutaGuardada.rendCargado || "");
-    setRendVacio(rutaGuardada.rendVacio || "");
-    if (rutaGuardada.precioAcpm)   setPrecioAcpm(rutaGuardada.precioAcpm);
-    if (rutaGuardada.precioAdblue) setPrecioAdblue(rutaGuardada.precioAdblue);
-    setCategoria(rutaGuardada.categoria || "VII");
-    setPeajesRuta((rutaGuardada.peajesRuta || []).map(p => ({
-      c: p.c, n: p.n, d: p.d, iv: p.iv || false,
-      t: { [rutaGuardada.categoria || "VII"]: p.tarifa || 0 },
-      })));
-
-      const cargarRuta = (rutaGuardada) => {
-      setRuta(rutaGuardada.ruta);
-      setKmCargado(rutaGuardada.kmCargado || "");
-      setKmVacio(rutaGuardada.kmVacio || "");
-      setFleteTon(rutaGuardada.fleteTon || "");
-      setRendCargado(rutaGuardada.rendCargado || "");
-      setRendVacio(rutaGuardada.rendVacio || "");
-      setGalManual(rutaGuardada.galManual || "");
-      if (rutaGuardada.precioAcpm)   setPrecioAcpm(rutaGuardada.precioAcpm);
-      if (rutaGuardada.precioAdblue) setPrecioAdblue(rutaGuardada.precioAdblue);
-      setCategoria(rutaGuardada.categoria || "VII");
-      setPeajesRuta((rutaGuardada.peajesRuta || []).map(p => ({
-      c: p.c, n: p.n, d: p.d, iv: p.iv || false,
-       t: { [rutaGuardada.categoria || "VII"]: p.tarifa || 0 },
-        })));
 
   // Datos adicionales
   if (rutaGuardada.producto)        setProducto(rutaGuardada.producto);
@@ -1272,7 +1227,7 @@ const guardarRutaFrecuente = async () => {
 
     </div>
   );
-}
+
 
 const styles = {
   pantalla:         { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
