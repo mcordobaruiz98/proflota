@@ -246,7 +246,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
     setContactoRet(""); setManiRet(""); setRemesaRet(""); setPesoBasRet("");
     setLugarCargueRet(""); setLugarDescargueRet(""); setFechaCargueRet(""); setFechaDescargueRet("");
     setExtras([]); setPorcCond(""); setCarpado(""); setGastosViaje("");
-    setAnticipoMonto(""); setPeajesRuta([]); setRutaCargada(null);
+    setPeajesRuta([]); setRutaCargada(null);
  
     setGuardando(false);
     navigate(-1);
