@@ -37,7 +37,7 @@ function AcercaDe() {
         {/* TÉRMINOS */}
         <div style={styles.seccion}>
           <button style={styles.cabecera} onClick={()=>toggle("terminos")}>
-            <span style={styles.cabeceraTexto}>Términos y condiciones</span>
+            <span style={styles.cabeceraTexto}>Términos y Condiciones</span>
             {abierto.terminos
               ? <ChevronUp size={16} color={t.colors.textTertiary}/>
               : <ChevronDown size={16} color={t.colors.textTertiary}/>
@@ -46,6 +46,8 @@ function AcercaDe() {
           {abierto.terminos && (
             <div style={styles.cuerpo}>
               {[
+                {texto:"Estos Términos y Condiciones regulan el uso de la aplicación NAVIRA (en adelante \"la Aplicación\"), desarrollada y operada por MARIO ALEJANDRO CORDOBA RUIZ, identificado con celula 1.017.255.866, con domicilio en Barranquilla, Colombia (en adelante \"NAVIRA\" o \"NOSOTROS\")"},
+                {texto:"Al registrarse al usar la Aplicación, usted (en adelante \"el Usuario\"), acepta estos terminos en su totalidad. Si no está de acuerdo, no haga uso de la Aplicación"},
                 {titulo:"1. Aceptación", texto:"Al usar esta aplicación aceptas estos términos. Si no estás de acuerdo, no uses la app."},
                 {titulo:"2. Uso de la app", texto:"Navira es una herramienta de apoyo para la gestión de flotas de transporte de carga. Las decisiones financieras y operativas son responsabilidad exclusiva del usuario."},
                 {titulo:"3. Versión Beta", texto:"Esta es una versión beta. Puede contener errores. El equipo de Navira no se hace responsable por pérdidas derivadas del uso de la app."},
