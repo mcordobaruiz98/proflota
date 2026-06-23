@@ -59,7 +59,7 @@ function AyudaSoporte() {
             <span style={styles.filaIcono}>📧</span>
             <div>
               <p style={styles.filaLabel}>Correo de soporte</p>
-              <p style={styles.filaSub}>soporte@Navira.com</p>
+              <p style={styles.filaSub}>Naviralatam@gmail.com</p>
             </div>
           </div>
         </div>
@@ -68,7 +68,7 @@ function AyudaSoporte() {
             <span style={styles.filaIcono}>💬</span>
             <div>
               <p style={styles.filaLabel}>WhatsApp</p>
-              <p style={styles.filaSub}>+57 300 000 0000</p>
+              <p style={styles.filaSub}>+57 301 658 7224</p>
             </div>
           </div>
         </div>
