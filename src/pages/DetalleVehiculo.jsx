@@ -713,6 +713,27 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               </div>
             )}
 
+            {/* Viajes del mes */}
+            {viajesMes.length>0&&(
+              <div style={styles.card}>
+                <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
+                {[...viajesMes].reverse().map((viaje,i,arr)=>(
+                  <div key={viaje.firestoreId}
+                    style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`,cursor:"pointer"}}
+                    onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
+                  >
+                    <div>
+                      <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,margin:0,color:t.colors.textPrimary}}>{viaje.ruta||"Sin ruta"}</p>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{viaje.fecha||""}</p>
+                    </div>
+                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,margin:0,color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
+                      {fmt(viaje.neta||0)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* ── GASTOS Y FACTURAS DEL VEHÍCULO ── */}
             {(() => {
               const gastosMesVeh = gastosVehiculo.filter(g => {
@@ -773,7 +794,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                           <label style={styles.label}>Nombre del gasto</label>
                           <select value={gfNombre} onChange={e=>setGfNombre(e.target.value)} style={styles.input}>
                             <option value="">Seleccionar o escribir...</option>
-                            {["Cuota del camión","Seguro","Parqueadero","GPS / Rastreo","SOAT","Tecnomecánica","Impuestos","Lavadas","Administración","Seguridad/Salud-Pensión"].map(o=>(
+                            {["Cuota del camión","Seguro","Parqueadero","GPS / Rastreo","SOAT","Tecnomecánica","Impuestos","Lavadas","Administración"].map(o=>(
                               <option key={o} value={o}>{o}</option>
                             ))}
                             <option value="__otro__">+ Otro gasto</option>
@@ -782,7 +803,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         {gfNombre === "__otro__" && (
                           <div style={styles.campo}>
                             <label style={styles.label}>Nombre personalizado</label>
-                            <input type="text" placeholder="Ej: Peaje fijo mensual" value=""
+                            <input type="text" placeholder="Ej: Peaje fijo mensual" value={gfCustom}
                               onChange={e=>setGfCustom(e.target.value)} style={styles.input} />
                           </div>
                         )}
@@ -805,14 +826,14 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                           disabled={guardandoGF}
                           onClick={async()=>{
                             const nombreFinal = gfNombre === "__otro__" ? gfCustom.trim() : gfNombre.trim();
-                            if (!nombreFinal) { mostrarToast("Ingresa el nombre del gasto","error");return;}
-                            if (!gfMonto || Number(gfMonto)<=0) {mostrarToast("Ingresa un monto válido","error") }
+                            if (!nombreFinal) { mostrarToast("Ingresa el nombre del gasto","error"); return; }
+                            if (!gfMonto || Number(gfMonto)<=0) { mostrarToast("Ingresa un monto válido","error"); return; }
                             setGuardandoGF(true);
                             try {
                               await onAgregarGastoFijo({
                                 vehiculoId: id,
                                 placa: vehiculo.placa,
-                                nombre: gfNombre.trim(),
+                                nombre: nombreFinal,
                                 monto: Number(gfMonto),
                                 periodicidad: gfPeriodo,
                               });
