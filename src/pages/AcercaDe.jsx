@@ -119,7 +119,7 @@ function AcercaDe() {
                 {texto:"En cumplimiento de la Ley 1581 de 2012 (Ley de Protección de Datos Personales), el Decreto 1377 de 2013 y demás normativa vigente en Colombia, Mario Alejandro Cordoba Ruiz, identificado con NIT/Cédula 1.017.255.866, con domicilio en Barranquilla, Atlántico, Colombia, en calidad de Responsable del Tratamiento de datos personales, presenta la siguiente Política de Privacidad para la aplicación NAVIRA."},
                 {titulo:"1. Responsables del tratamiento", texto:"Responsable: Mario Alejandro Cordoba Ruiz. NIT/Cédula: 1.017.255.866, Barranquilla/ Atlantico, Colombia. Correo electronico: naviralatam@gmail.com. Teléfono/WhatsApp:+57 301 658 7224"},
                 {titulo:"2. Datos personales que recopilamos", texto:"NAVIRA recopila los siguientes datos personales según las funcionalidades que el Usuario utilice:"},
-                {subtitulo:"2.1. El Usuario es responsable de mantener la confidencialidad de sus credenciales de acceso (correo electrónico y contraseña)."},
+                {textSecondary:"2.1. Datos de registro: Nombre completo, correo electronico, contraseña (almacenada de forma cifrada por Firebase Authentication), foto de perfil (si inicia sesión con Google)."},
                 {texto:"2.2. Durante el período de prueba (Beta), el acceso requiere un código de invitación proporcionado por NAVIRA"},
                 {texto:"2.3. El Usuario debe ser mayor de edad."},
                 {texto:"2.4. Cada cuenta es personal e intransferible."},
