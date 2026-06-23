@@ -48,7 +48,7 @@ function AcercaDe() {
               {[
                 {texto:"Estos Términos y Condiciones regulan el uso de la aplicación NAVIRA (en adelante \"la Aplicación\"), desarrollada y operada por MARIO ALEJANDRO CORDOBA RUIZ, identificado con celula 1.017.255.866, con domicilio en Barranquilla, Colombia (en adelante \"NAVIRA\" o \"NOSOTROS\")"},
                 {texto:"Al registrarse al usar la Aplicación, usted (en adelante \"el Usuario\"), acepta estos terminos en su totalidad. Si no está de acuerdo, no haga uso de la Aplicación"},
-                {titulo:"1. Aceptación", texto:"Al usar esta aplicación aceptas estos términos. Si no estás de acuerdo, no uses la app."},
+                {titulo:"1. Descripción", texto:"NAVIRA es una aplicación web progresiva (PWA) diseñada para la gestión administrativa de flotas de transporte de carga por carretera en Colombia. Sus funciones incluyen entre otras: * Cálculo de costos y rentabilidades de viajes. * Registros y seguimientos de vehículos. * Control de mantenimiento preventivo. * Gestión de cartera y cuentas por cobrar. * Generación de informes financieros."},
                 {titulo:"2. Uso de la app", texto:"Navira es una herramienta de apoyo para la gestión de flotas de transporte de carga. Las decisiones financieras y operativas son responsabilidad exclusiva del usuario."},
                 {titulo:"3. Versión Beta", texto:"Esta es una versión beta. Puede contener errores. El equipo de Navira no se hace responsable por pérdidas derivadas del uso de la app."},
                 {titulo:"4. Datos", texto:"Tus datos son tuyos. No los vendemos ni compartimos con terceros. Los usamos únicamente para hacer funcionar la app."},
