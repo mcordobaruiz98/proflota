@@ -113,6 +113,7 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [verFormGasto,  setVerFormGasto]  = useState(false);
 
   const [gfNombre,       setGfNombre]       = useState("");
+  const [gfCustom,       setGfCustom]       = useState("");
   const [gfMonto,        setGfMonto]        = useState("");
   const [gfPeriodo,      setGfPeriodo]      = useState("mensual");
   const [verFormGF,      setVerFormGF]      = useState(false);
@@ -781,7 +782,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         {gfNombre === "__otro__" && (
                           <div style={styles.campo}>
                             <label style={styles.label}>Nombre personalizado</label>
-                            <input type="text" placeholder="Ej: Peaje fijo mensual" value=""
+                            <input type="text" placeholder="Ej: Peaje fijo mensual" value="gfCustom"
                               onChange={e=>setGfCustom(e.target.value)} style={styles.input} />
                           </div>
                         )}
@@ -803,8 +804,9 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                           style={{width:"100%",padding:"11px",background:t.colors.blue,color:"#fff",border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardandoGF?0.75:1}}
                           disabled={guardandoGF}
                           onClick={async()=>{
-                            if (!gfNombre.trim() || gfNombre==="__otro__") { mostrarToast("Ingresa el nombre del gasto","error"); return; }
-                            if (!gfMonto || Number(gfMonto)<=0) { mostrarToast("Ingresa un monto válido","error"); return; }
+                            const nombreFinal = gfNombre === "__otro__" ? gfCustom.trim() : gfNombre.trim();
+                            if (!nombreFinal) { mostrarToast("Ingresa el nombre del gasto","error");return;}
+                            if (!gfMonto || Number(gfMonto)<=0) {mostrarToast("Ingresa un monto válido","error") }
                             setGuardandoGF(true);
                             try {
                               await onAgregarGastoFijo({
@@ -815,7 +817,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                                 periodicidad: gfPeriodo,
                               });
                               mostrarToast("Gasto fijo registrado","exito");
-                              setGfNombre(""); setGfMonto(""); setGfPeriodo("mensual");
+                              setGfNombre(""); setGfCustom(""); setGfMonto(""); setGfPeriodo("mensual");
                               setVerFormGF(false);
                             } catch(err) {
                               mostrarToast("Error al guardar","error");
