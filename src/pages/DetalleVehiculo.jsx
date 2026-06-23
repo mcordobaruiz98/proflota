@@ -782,7 +782,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         {gfNombre === "__otro__" && (
                           <div style={styles.campo}>
                             <label style={styles.label}>Nombre personalizado</label>
-                            <input type="text" placeholder="Ej: Peaje fijo mensual" value="gfCustom"
+                            <input type="text" placeholder="Ej: Peaje fijo mensual" value=""
                               onChange={e=>setGfCustom(e.target.value)} style={styles.input} />
                           </div>
                         )}
