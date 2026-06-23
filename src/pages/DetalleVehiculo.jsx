@@ -772,7 +772,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                           <label style={styles.label}>Nombre del gasto</label>
                           <select value={gfNombre} onChange={e=>setGfNombre(e.target.value)} style={styles.input}>
                             <option value="">Seleccionar o escribir...</option>
-                            {["Cuota del camión","Seguro","Parqueadero","GPS / Rastreo","SOAT","Tecnomecánica","Impuestos","Lavadas","Administración"].map(o=>(
+                            {["Cuota del camión","Seguro","Parqueadero","GPS / Rastreo","SOAT","Tecnomecánica","Impuestos","Lavadas","Administración","Seguridad/Salud-Pensión"].map(o=>(
                               <option key={o} value={o}>{o}</option>
                             ))}
                             <option value="__otro__">+ Otro gasto</option>
@@ -781,8 +781,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         {gfNombre === "__otro__" && (
                           <div style={styles.campo}>
                             <label style={styles.label}>Nombre personalizado</label>
-                            <input type="text" placeholder="Ej: Peaje fijo mensual" value=""
-                              onChange={e=>setGfNombre(e.target.value)} style={styles.input} />
+                            <input type="text" placeholder="Ej: Peaje fijo mensual" value="gfCustom"
+                              onChange={e=>setGfCustom(e.target.value)} style={styles.input} />
                           </div>
                         )}
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>

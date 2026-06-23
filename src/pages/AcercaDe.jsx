@@ -107,7 +107,7 @@ function AcercaDe() {
         {/* PRIVACIDAD */}
         <div style={styles.seccion}>
           <button style={styles.cabecera} onClick={()=>toggle("privacidad")}>
-            <span style={styles.cabeceraTexto}>Política de privacidad</span>
+            <span style={styles.cabeceraTexto}>Política de Privacidad y Tratamiento de Datos Personales</span>
             {abierto.privacidad
               ? <ChevronUp size={16} color={t.colors.textTertiary}/>
               : <ChevronDown size={16} color={t.colors.textTertiary}/>
@@ -116,8 +116,16 @@ function AcercaDe() {
           {abierto.privacidad && (
             <div style={styles.cuerpo}>
               {[
-                {titulo:"1. Datos que recolectamos", texto:"Correo electrónico para autenticación. Datos de vehículos, viajes y gastos que tú mismo ingresas. Fotos de vehículos que tú mismo subes."},
-                {titulo:"2. Cómo usamos tus datos", texto:"Para mostrarte tu información dentro de la app y calcular tus ganancias y gastos. No usamos tus datos para publicidad."},
+                {texto:"En cumplimiento de la Ley 1581 de 2012 (Ley de Protección de Datos Personales), el Decreto 1377 de 2013 y demás normativa vigente en Colombia, Mario Alejandro Cordoba Ruiz, identificado con NIT/Cédula 1.017.255.866, con domicilio en Barranquilla, Atlántico, Colombia, en calidad de Responsable del Tratamiento de datos personales, presenta la siguiente Política de Privacidad para la aplicación NAVIRA."},
+                {titulo:"1. Responsables del tratamiento", texto:"Responsable: Mario Alejandro Cordoba Ruiz. NIT/Cédula: 1.017.255.866, Barranquilla/ Atlantico, Colombia. Correo electronico: naviralatam@gmail.com. Teléfono/WhatsApp:+57 301 658 7224"},
+                {titulo:"2. Datos personales que recopilamos", texto:"NAVIRA recopila los siguientes datos personales según las funcionalidades que el Usuario utilice:"},
+                {subtitulo:"2.1. El Usuario es responsable de mantener la confidencialidad de sus credenciales de acceso (correo electrónico y contraseña)."},
+                {texto:"2.2. Durante el período de prueba (Beta), el acceso requiere un código de invitación proporcionado por NAVIRA"},
+                {texto:"2.3. El Usuario debe ser mayor de edad."},
+                {texto:"2.4. Cada cuenta es personal e intransferible."},
+                {texto:"2.5. El Usuario es responsable de mantener la confidencialidad de sus credenciales de acceso (correo electrónico y contraseña)."},
+                {texto:"2.6. Durante el período de prueba (Beta), el acceso requiere un código de invitación proporcionado por NAVIRA"},
+                {texto:"2.7. El Usuario debe ser mayor de edad."},
                 {titulo:"3. Almacenamiento", texto:"Tus datos se almacenan en Firebase (Google) con cifrado. Solo tú puedes acceder a ellos."},
                 {titulo:"4. Tus derechos", texto:"Puedes solicitar la eliminación de tus datos en cualquier momento escribiéndonos."},
                 {titulo:"5. Cookies", texto:"No usamos cookies de rastreo."},
