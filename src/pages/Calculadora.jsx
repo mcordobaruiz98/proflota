@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronUp } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
 const DEFAULT_ADBLUE = 0.18925;
 
-function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, onGuardarRuta, onEliminarRuta, onEditarVehiculo, mostrarToast }) {
+function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores = [], onGuardar, onGuardarRuta, onEliminarRuta, onEditarVehiculo, mostrarToast }) {
   const PEAJES_CO = peajes.length > 0 
   ? [...peajes].sort((a, b) => a.n.localeCompare(b.n, 'es')) 
   : [];
@@ -86,6 +86,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   const [secPeajes,        setSecPeajes]          = useState(false);
   const [secCostos,        setSecCostos]          = useState(false);
   const [secDesc,          setSecDesc]            = useState(false);
+
 
   const n   = (v) => parseFloat(v) || 0;
   const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
@@ -233,6 +234,19 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
       }
     }
 
+    // Limpiar formulario
+    setFecha(new Date().toISOString().slice(0,10)); setFechaDescarga("");
+    setMani(""); setRemesa(""); setPesoBascula(""); setLugarCargue(""); setLugarDescargue("");
+    setObservaciones(""); setPlaca(""); setTipoCarga(""); setProducto(""); setRuta("");
+    setEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio("");
+    setTonelaje(""); setFleteTon(""); setTieneRetorno(false); setFleteRetorno("");
+    setTonelajeRetorno(""); setRutaRet(""); setEmpresaRet(""); setProductoRet("");
+    setContactoRet(""); setManiRet(""); setRemesaRet(""); setPesoBasRet("");
+    setLugarCargueRet(""); setLugarDescargueRet(""); setFechaCargueRet(""); setFechaDescargueRet("");
+    setExtras([]); setPorcCond(""); setCarpado(""); setGastosViaje("");
+    setPeajesRuta([]); setRutaCargada(null);
+
+    setGuardando(false);
     navigate(-1);
   };
 
@@ -240,10 +254,8 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], onGuardar, on
   setRuta(rutaGuardada.ruta);
   setKmCargado(rutaGuardada.kmCargado || "");
   setKmVacio(rutaGuardada.kmVacio || "");
-  setFleteTon(rutaGuardada.fleteTon || "");
   setRendCargado(rutaGuardada.rendCargado || "");
   setRendVacio(rutaGuardada.rendVacio || "");
-  setGalManual(rutaGuardada.galManual || "");
   if (rutaGuardada.precioAcpm)   setPrecioAcpm(rutaGuardada.precioAcpm);
   if (rutaGuardada.precioAdblue) setPrecioAdblue(rutaGuardada.precioAdblue);
   setCategoria(rutaGuardada.categoria || "VII");
@@ -287,10 +299,8 @@ const guardarRutaFrecuente = async () => {
     ruta:        ruta.trim(),
     kmCargado:   n(kmCargado),
     kmVacio:     n(kmVacio),
-    fleteTon:    n(fleteTon),
     rendCargado: n(rendCargado),
     rendVacio:   n(rendVacio),
-    galManual:   n(galManual),
     precioAcpm:  n(precioAcpm),
     precioAdblue: n(precioAdblue),
     peajesRuta:  peajesRuta.map(p => ({
@@ -444,7 +454,7 @@ const guardarRutaFrecuente = async () => {
             <label style={styles.label}>Placa vehículo</label>
             <select value={placa} onChange={e=>setPlaca(e.target.value)}
               style={{...styles.input, color: placa ? t.colors.textPrimary : t.colors.textTertiary}}>
-              <option value="">Escoge tu Vehículo</option>
+              <option value="">Escoge tu vehículo</option>
               {vehiculos.map(v=>(
                 <option key={v.firestoreId} value={v.placa}>{v.placa} — {v.tipoVehiculo}</option>
               ))}
@@ -453,7 +463,7 @@ const guardarRutaFrecuente = async () => {
           <div style={styles.campo}>
   <label style={styles.label}>Tipo de carga</label>
   <select value={tipoCarga} onChange={e=>setTipoCarga(e.target.value)} style={styles.input}>
-    <option value="">Seleccionar...</option>
+    <option value="">— Seleccionar... —</option>
     <option>Granel sólido</option>
     <option>Granel líquido</option>
     <option>Carga general</option>
@@ -536,40 +546,26 @@ const guardarRutaFrecuente = async () => {
 )}
 
 </div>
-
+    
         </div>
         <div style={styles.campo}>
   <label style={styles.label}>Conductor</label>
-  {conductoresFrecuentes.length > 0 && (
-    <select
-      value={conductoresFrecuentes.includes(conductor) ? conductor : "__nuevo__"}
-      onChange={e => {
-        if (e.target.value === "__nuevo__") {
-          setConductor("");
-        } else {
-          setConductor(e.target.value);
-        }
-      }}
-      style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
-    >
-      <option value="__nuevo__">Nuevo conductor +</option>
-      {conductoresFrecuentes.map((c,i) => (
-        <option key={i} value={c}>{c}</option>
-      ))}
-    </select>
-  )}
-  {(!conductoresFrecuentes.includes(conductor) || conductoresFrecuentes.length === 0) && (
-    <input
-      type="text"
-      placeholder="Nombre del conductor"
-      value={conductor}
-      onChange={e => setConductor(e.target.value)}
-      style={styles.input}
-    />
-  )}
+  <select
+    value={conductor}
+    onChange={e => setConductor(e.target.value)}
+    style={{...styles.input, color: conductor ? t.colors.textPrimary : t.colors.textTertiary}}
+  >
+    <option value="">Seleccionar conductor</option>
+    {conductores.map(c => (
+      <option key={c.firestoreId} value={c.nombre}>{c.nombre}{c.catLic ? ` · Cat ${c.catLic}` : ""}</option>
+    ))}
+    {conductoresFrecuentes.filter(cf => !conductores.some(c => c.nombre === cf)).map((c,i) => (
+      <option key={`freq-${i}`} value={c}>{c}</option>
+    ))}
+  </select>
 </div>
 
-<div style={styles.campo}>
+  <div style={styles.campo}>
   <label style={styles.label}>Manifiesto</label>
   <input type="text" placeholder="123456789" value={mani}
     onChange={e=>setMani(e.target.value)} style={styles.input}/>
@@ -582,8 +578,8 @@ const guardarRutaFrecuente = async () => {
       onChange={e=>setRemesa(e.target.value)} style={styles.input}/>
   </div>
   <div style={styles.campo}>
-    <label style={styles.label}>Peso báscula (Ton)</label>
-    <input type="number" placeholder="34" value={pesoBascula}
+    <label style={styles.label}>Peso báscula (ton)</label>
+    <input type="number" placeholder="34.5" value={pesoBascula}
       onChange={e=>setPesoBascula(e.target.value)} style={styles.input}/>
   </div>
 </div>
@@ -729,23 +725,31 @@ const guardarRutaFrecuente = async () => {
             <label style={styles.label}>Tipo de carga</label>
             <select value={tipoCargaRet} onChange={e=>setTipoCargaRet(e.target.value)} style={styles.input}>
               <option value="">Seleccionar...</option>
-              <option>Granel sólido</option>
-              <option>Granel líquido</option>
-              <option>Carga general</option>
-              <option>Contenedor cargado</option>
-              <option>Contenedor vacío</option>
-              <option>Carga refrigerada</option>
-              <option>Sin carga</option>
-              <option>Carga peligrosa</option>
-              <option>Carga sobredimensionada</option>
-              <option>Ganado</option>
-              <option>Vehículos</option>
-              </select>
+              <option value="GENERAL">General</option>
+              <option value="GRANEL">Granel</option>
+              <option value="LIQUIDOS">Líquidos</option>
+              <option value="CONTENEDOR">Contenedor</option>
+              <option value="REFRIGERADA">Refrigerada</option>
+              <option value="PELIGROSA">Peligrosa</option>
+            </select>
           </div>
           <div style={styles.campo}>
             <label style={styles.label}>Producto</label>
             <input type="text" placeholder="Carbón, arroz..." value={productoRet}
               onChange={e=>setProductoRet(e.target.value)} style={styles.input} />
+          </div>
+        </div>
+
+        <div style={styles.fila2}>
+          <div style={styles.campo}>
+            <label style={styles.label}>Empresa</label>
+            <input type="text" placeholder="Nombre empresa" value={empresaRet}
+              onChange={e=>setEmpresaRet(e.target.value)} style={styles.input} />
+          </div>
+          <div style={styles.campo}>
+            <label style={styles.label}>Contacto</label>
+            <input type="text" placeholder="Nombre contacto" value={contactoRet}
+              onChange={e=>setContactoRet(e.target.value)} style={styles.input} />
           </div>
         </div>
 
@@ -775,7 +779,7 @@ const guardarRutaFrecuente = async () => {
           onChange={e=>setModoFleteRetorno(e.target.value)}
           style={styles.input}
         >
-          <option value="porTon">Variable ($/ton)</option>
+          <option value="porTon">Variable ($/Ton)</option>
           <option value="porViaje">Fijo ($/Viaje)</option>
           </select>
         </div>
@@ -808,7 +812,8 @@ const guardarRutaFrecuente = async () => {
     </div>
   )}
 </div>
-</div>)}
+
+      </div>)}
 
       {/* ── COMBUSTIBLE ── */}
       <div style={styles.seccionHeader} onClick={()=>setSecComb(!secComb)}>
@@ -866,7 +871,7 @@ const guardarRutaFrecuente = async () => {
           </div>
         )}
       </div>
- 
+
       </div>)}
 
       {/* ── PEAJES ── */}
@@ -909,7 +914,7 @@ const guardarRutaFrecuente = async () => {
             <Plus size={16} color="#fff" strokeWidth={2.5} />
           </button>
         </div>
- 
+
         {peajesRuta.length > 0 && (
           <div style={styles.peajesTags}>
             {peajesRuta.map(p=>{
@@ -932,13 +937,13 @@ const guardarRutaFrecuente = async () => {
             })}
           </div>
         )}
- 
+
         <div style={styles.totalPeajesRow}>
           <span style={styles.totalPeajesL}>Total peajes</span>
           <span style={styles.totalPeajesV}>{fmt(totPeajes)}</span>
         </div>
       </div>
- 
+
       </div>)}
 
       {/* ── COSTOS ── */}
@@ -962,7 +967,7 @@ const guardarRutaFrecuente = async () => {
     <option value="fijo">Valor fijo ($)</option>
   </select>
 </div>
- 
+
 <div style={styles.fila2}>
   <div style={styles.campo}>
     {modoConductor === "porcentaje" ? (
@@ -989,7 +994,7 @@ const guardarRutaFrecuente = async () => {
           <label style={styles.label}>Gastos de viaje</label>
           <input type="number" placeholder="30000" value={gastosViaje} onChange={e=>setGastosViaje(e.target.value)} style={styles.input} />
         </div>
- 
+
         {extras.map((e,i)=>(
           <div key={i} style={styles.extraFila}>
             <span style={{fontSize: t.fonts.sizeSm, color: t.colors.textSecondary}}>{e.n}</span>
@@ -1001,7 +1006,7 @@ const guardarRutaFrecuente = async () => {
             </div>
           </div>
         ))}
- 
+
         <div style={styles.fila2}>
           <input type="text" placeholder="Nombre del costo" value={nuevoNom}
             onChange={e=>setNuevoNom(e.target.value)}
@@ -1015,7 +1020,7 @@ const guardarRutaFrecuente = async () => {
           Agregar costo
         </button>
       </div>
- 
+
       </div>)}
 
       {/* ── DESCUENTOS DE LEY ── */}
@@ -1028,7 +1033,7 @@ const guardarRutaFrecuente = async () => {
   <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 14px"}}>
     Activa los descuentos que aplique la empresa sobre el valor del viaje.
   </p>
- 
+
   {[
     {
       id:"retefuente", label:"Retención en la fuente", sub:"Sobre valor del viaje",
@@ -1076,7 +1081,7 @@ const guardarRutaFrecuente = async () => {
       </div>
     </div>
   ))}
- 
+
   {/* OTRO */}
   <div style={{borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px", marginTop:"4px"}}>
     <div style={{display:"flex", alignItems:"center", gap:"10px", marginBottom:"8px", cursor:"pointer"}} onClick={()=>setDescOtro(!descOtro)}>
@@ -1112,7 +1117,7 @@ const guardarRutaFrecuente = async () => {
       </div>
     )}
   </div>
- 
+
   {/* TOTAL DESCUENTOS */}
   {totalDesc > 0 && (
     <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", borderTop:`1px solid ${t.colors.border}`, paddingTop:"10px", marginTop:"8px"}}>
@@ -1121,8 +1126,8 @@ const guardarRutaFrecuente = async () => {
     </div>
   )}
 </div>  
- 
-      </div>)} 
+
+      </div>)}
 
       {/* ── RESULTADO ── */}
       <div style={{...styles.seccionHeader, cursor:"default"}}>
@@ -1152,13 +1157,12 @@ const guardarRutaFrecuente = async () => {
           </p>
         </div>
 
-        {valorViaje > 0 && (
-          <>
+        {valorViaje > 0 && <>
           {[
             {l:`ACPM (${fnD(galTotal,1)} gal)`,  v: costoAcpm},
             {l:`Adblue (${fnD(adblLt,1)} lt)`,   v: costoAdbl},
             {l:"Peajes",                          v: totPeajes},
-            {l: modoConductor === "porcentaje" ?  "Conductor (" + n(porcCond) + "%)" : "Conductor (valor fijo", v: costoConduct},
+            {l: modoConductor === "porcentaje" ?  "Conductor (" + n(porcCond) + "%)" : "Conductor (valor fijo)", v: costoConduct},
             {l:"Carpado/Descarpado",              v: n(carpado)},
             {l:"Gastos de viaje",                 v: n(gastosViaje)},
             {l:"Otros gastos",                    v: totExtras},
@@ -1178,56 +1182,32 @@ const guardarRutaFrecuente = async () => {
           <div style={styles.barraFondo}>
             <div style={{...styles.barraRelleno, width:`${Math.min(Math.max(margen,0),100)}%`, background: margenColor}} />
           </div>
-          </>
-        )}
+        </>}
 
-          {/* GUARDAR RUTA */}
-<div style={{marginTop:"10px", borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px", marginBottom:"12px"}}>
-  {!mostrarGuardar ? (
-    <button
-      style={{
-        width:"100%", padding:"9px", background:"none",
-        border:`1.5px dashed ${t.colors.blueBorder}`,
-        borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm,
-        color:t.colors.blue, cursor:"pointer",
-        display:"flex", alignItems:"center", justifyContent:"center", gap:"6px",
-        fontWeight:t.fonts.weightSemibold
-      }}
-      onClick={()=>setMostrarGuardar(true)}
-    >
-      + Guardar como ruta frecuente
-    </button>
-  ) : (
-    <div>
-      <div style={styles.campo}>
-        <label style={styles.label}>Nombre de la ruta</label>
-        <input
-          type="text"
-          placeholder="Ej: Barranquilla - Bogotá"
-          value={nombreRuta}
-          onChange={e=>setNombreRuta(e.target.value)}
-          style={styles.input}
-        />
-      </div>
-
-      <div style={{display:"flex", gap:"8px"}}>
-        <button
-          style={{flex:1, padding:"10px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoRuta?0.75:1}}
-          onClick={guardarRutaFrecuente}
-          disabled={guardandoRuta}
-        >
-          {guardandoRuta?"Guardando...":"Guardar ruta"}
-        </button>
-        <button
-          style={{padding:"10px 14px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, cursor:"pointer"}}
-          onClick={()=>{setMostrarGuardar(false);setNombreRuta("");}}
-        >
-          Cancelar
-        </button>
-      </div>
-    </div>
-  )}
-</div>
+        {/* GUARDAR RUTA */}
+        <div style={{borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px", marginBottom:"12px"}}>
+          {!mostrarGuardar ? (
+            <button
+              style={{width:"100%", padding:"9px", background:"none", border:`1.5px dashed ${t.colors.blueBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, color:t.colors.blue, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px", fontWeight:t.fonts.weightSemibold}}
+              onClick={()=>setMostrarGuardar(true)}
+            >+ Guardar como ruta frecuente</button>
+          ) : (
+            <div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Nombre de la ruta</label>
+                <input type="text" placeholder="Ej: Barranquilla - Bogotá" value={nombreRuta} onChange={e=>setNombreRuta(e.target.value)} style={styles.input} />
+              </div>
+              <div style={{display:"flex", gap:"8px"}}>
+                <button style={{flex:1, padding:"10px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoRuta?0.75:1}} onClick={guardarRutaFrecuente} disabled={guardandoRuta}>
+                  {guardandoRuta?"Guardando...":"Guardar ruta"}
+                </button>
+                <button style={{padding:"10px 14px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, cursor:"pointer"}} onClick={()=>{setMostrarGuardar(false);setNombreRuta("");}}>
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         <button
           style={{...styles.btnGuardar, opacity: guardando?0.75:1}}
@@ -1287,6 +1267,7 @@ const styles = {
   barraRelleno:     { height:"100%", borderRadius:"3px", transition:"width 0.4s ease" },
   btnGuardar:       { width:"100%", padding:"15px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" },
 };
+
 
 // v2 - fix conductor
 export default Calculadora;
