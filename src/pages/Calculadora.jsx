@@ -36,7 +36,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [galManual,        setGalManual]          = useState("");
   const [precioAcpm,       setPrecioAcpm]         = useState(() => localStorage.getItem("ultimo_acpm") || "");
   const [precioAdblue,     setPrecioAdblue]       = useState(() => localStorage.getItem("ultimo_adblue") ||"");
-  const [categoria,        setCategoria]          = useState("auto");
+  const [categoria,        setCategoria]          = useState("VII");
   const [busquedaP,        setBusquedaP]          = useState("");
   const [selP,             setSelP]               = useState("");
   const [peajesRuta,       setPeajesRuta]         = useState([]);
