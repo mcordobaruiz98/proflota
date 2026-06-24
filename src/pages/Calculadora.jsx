@@ -463,7 +463,7 @@ const guardarRutaFrecuente = async () => {
           <div style={styles.campo}>
   <label style={styles.label}>Tipo de carga</label>
   <select value={tipoCarga} onChange={e=>setTipoCarga(e.target.value)} style={styles.input}>
-    <option value="">— Seleccionar... —</option>
+    <option value=""> Seleccionar... </option>
     <option>Granel sólido</option>
     <option>Granel líquido</option>
     <option>Carga general</option>
@@ -737,7 +737,7 @@ const guardarRutaFrecuente = async () => {
           <div style={styles.campo}>
             <label style={styles.label}>Tipo de carga</label>
             <select value={tipoCargaRet} onChange={e=>setTipoCargaRet(e.target.value)} style={styles.input}>
-              <option value="">Seleccionar... —</option>
+              <option value=""> Seleccionar... </option>
                <option>Granel sólido</option>
                <option>Granel líquido</option>
                <option>Carga general</option>
