@@ -30,7 +30,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [kmVacio,          setKmVacio]            = useState("");
   const [tonelaje,         setTonelaje]           = useState("");
   const [fleteTon,         setFleteTon]           = useState("");
-  const [modoComb,         setModoComb]           = useState("auto");
+  const [modoComb,         setModoComb]           = useState("VII");
   const [rendCargado,      setRendCargado]        = useState("");
   const [rendVacio,        setRendVacio]          = useState("");
   const [galManual,        setGalManual]          = useState("");
