@@ -52,7 +52,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [descRetefuente,   setDescRetefuente]     = useState(false);
   const [pctRetefuente,    setPctRetefuente]      = useState(1);
   const [descReteica,      setDescReteica]        = useState(false);
-  const [pctReteica,       setPctReteica]         = useState(1);
+  const [pctReteica,       setPctReteica]         = useState(0.8);
   const [descFopat,        setDescFopat]          = useState(false);
   const [pctFopat,         setPctFopat]           = useState(0.1);
   const [descOtro,         setDescOtro]           = useState(false);
