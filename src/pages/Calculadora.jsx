@@ -672,7 +672,7 @@ const guardarRutaFrecuente = async () => {
                 <div>
                   <p style={{fontSize:t.fonts.sizeXs,color:"#92400E",fontWeight:t.fonts.weightBold,margin:0}}>¿Seguro que es $/ton?</p>
                   <p style={{fontSize:t.fonts.sizeXs,color:"#92400E",margin:"2px 0 0"}}>
-                    El flete por tonelada normalmente es entre $40.000 y $200.000/ton. Si el valor es el total del viaje, cambia a modo "Por viaje (valor fijo)".
+                    El flete por tonelada normalmente es entre $40.000 y $300.000/ton. Si el valor es el total del viaje, cambia a modo "Fijo ($/Viaje)".
                   </p>
                 </div>
               </div>
