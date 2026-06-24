@@ -1060,7 +1060,7 @@ const guardarRutaFrecuente = async () => {
       val:valRetefuente,
     },
     {
-      id:"reteica", label:"Reteica", sub:"Varía por municipio. (",
+      id:"reteica", label:"Reteica", sub:"Varía por municipio.",
       activo:descReteica, setActivo:setDescReteica,
       pct:pctReteica,     setPct:setPctReteica,
       val:valReteica,
