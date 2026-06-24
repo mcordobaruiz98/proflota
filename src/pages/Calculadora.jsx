@@ -737,13 +737,18 @@ const guardarRutaFrecuente = async () => {
           <div style={styles.campo}>
             <label style={styles.label}>Tipo de carga</label>
             <select value={tipoCargaRet} onChange={e=>setTipoCargaRet(e.target.value)} style={styles.input}>
-              <option value="">Seleccionar...</option>
-              <option value="GENERAL">General</option>
-              <option value="GRANEL">Granel</option>
-              <option value="LIQUIDOS">Líquidos</option>
-              <option value="CONTENEDOR">Contenedor</option>
-              <option value="REFRIGERADA">Refrigerada</option>
-              <option value="PELIGROSA">Peligrosa</option>
+              <option value="">— Seleccionar... —</option>
+               <option>Granel sólido</option>
+               <option>Granel líquido</option>
+               <option>Carga general</option>
+               <option>Contenedor cargado</option>
+               <option>Contenedor vacío</option>
+               <option>Carga refrigerada</option>
+               <option>Sin carga</option>
+               <option>Carga peligrosa</option>
+               <option>Carga sobredimensionada</option>
+               <option>Ganado</option>
+               <option>Vehículos</option>
             </select>
           </div>
           <div style={styles.campo}>
@@ -1055,7 +1060,7 @@ const guardarRutaFrecuente = async () => {
       val:valRetefuente,
     },
     {
-      id:"reteica", label:"Reteica", sub:"Varía por municipio",
+      id:"reteica", label:"Reteica", sub:"Varía por municipio. (",
       activo:descReteica, setActivo:setDescReteica,
       pct:pctReteica,     setPct:setPctReteica,
       val:valReteica,
