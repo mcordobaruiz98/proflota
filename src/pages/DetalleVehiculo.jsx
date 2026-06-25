@@ -1042,7 +1042,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
             })()}
  
           </div>
-        )}
+        )} 
 
         {/* ── HISTORIAL ── */}
         {tabActivo==="historial" && (
