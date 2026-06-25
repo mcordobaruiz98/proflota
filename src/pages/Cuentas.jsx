@@ -225,10 +225,11 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             return `
               <p style="font-size:14px;font-weight:700;margin:15px 0 8px;color:#1a1a1a">${placa}</p>
               <table>
-                <tr><th>Fecha</th><th>Ruta</th><th>Empresa</th><th>Flete</th><th>Gastos</th><th>Neta</th></tr>
+                <tr><th>Fecha</th><th>Ruta</th><th>Manifiesto</th><th>Empresa</th><th>Flete</th><th>Gastos</th><th>Neta</th></tr>
                 ${vjs.map(v=>`<tr>
                   <td>${v.fecha||"—"}</td>
                   <td>${v.ruta||"—"}</td>
+                  <td>${v.manifiesto||"—"}</td>
                   <td>${v.emp||"—"}</td>
                   <td>${fmt(v.vViaje||0)}</td>
                   <td style="color:#dc2626">${fmt(v.total||0)}</td>
