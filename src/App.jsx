@@ -46,7 +46,7 @@ function AppContenido() {
   agregarRuta,     eliminarRuta,
   agregarMantenimiento, eliminarMantenimiento,
   agregarConfigMant,    eliminarConfigMant,
-  agregarGasto, eliminarGasto,
+  agregarGasto, editarGasto, eliminarGasto,
   agregarGastoFijo, eliminarGastoFijo,
   agregarConductor, editarConductor, eliminarConductor,
 } = useFirestore(usuario?.uid);
@@ -145,6 +145,7 @@ function AppContenido() {
   onEliminarConfig={eliminarConfigMant}
   onEditarVehiculo={editarVehiculo}
   onAgregarGasto={agregarGasto}
+  onEditarGasto={editarGasto}
   onEliminarGasto={eliminarGasto}
   onAgregarGastoFijo={agregarGastoFijo}
   onEliminarGastoFijo={eliminarGastoFijo}

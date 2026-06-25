@@ -74,7 +74,7 @@ const seccionesHV = [
   },
 ];
 
-function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], gastosVehiculo = [], gastosFijos = [], conductores = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, onAgregarGasto, onEliminarGasto, onAgregarGastoFijo, onEliminarGastoFijo, mostrarToast }) {
+function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], gastosVehiculo = [], gastosFijos = [], conductores = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, onAgregarGasto, onEditarGato, onEliminarGasto, onAgregarGastoFijo, onEliminarGastoFijo, mostrarToast }) {
   const navigate  = useNavigate();
   const { id }    = useParams();
   const location  = useLocation();
@@ -109,6 +109,7 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [gastoFecha,    setGastoFecha]    = useState(new Date().toISOString().slice(0,10));
   const [gastoTaller,   setGastoTaller]   = useState("");
   const [gastoNit,      setGastoNit]      = useState("");
+  const [gastoEditId,   setGastoEditId]   = useState("null");
   const [guardandoGasto,setGuardandoGasto]= useState(false);
   const [verFormGasto,  setVerFormGasto]  = useState(false);
 
@@ -886,7 +887,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         {verFormGasto ? "Cancelar" : "+ Agregar"}
                       </button>
                     </div>
-
+ 
                     {verFormGasto && (
                       <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"12px"}}>
                         <div style={styles.campo}>
@@ -949,22 +950,28 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                             if (!gastoMonto || Number(gastoMonto)<=0) { mostrarToast("Ingresa un monto válido","error"); return; }
                             setGuardandoGasto(true);
                             const fileInput = document.getElementById("facturaGastoInput");
+                            const datos = {
+                              vehiculoId: id,
+                              placa: vehiculo.placa,
+                              descripcion: gastoDesc.trim(),
+                              monto: Number(gastoMonto),
+                              fecha: gastoFecha,
+                              taller: gastoTaller.trim(),
+                              nit: gastoNit.trim(),
+                              facturaUrl: fileInput?.dataset?.facturaUrl || null,
+                              facturaRuta: fileInput?.dataset?.facturaRuta || null,
+                              facturaNombre: fileInput?.dataset?.facturaNombre || null,
+                            };
                             try {
-                              await onAgregarGasto({
-                                vehiculoId: id,
-                                placa: vehiculo.placa,
-                                descripcion: gastoDesc.trim(),
-                                monto: Number(gastoMonto),
-                                fecha: gastoFecha,
-                                taller: gastoTaller.trim(),
-                                nit: gastoNit.trim(),
-                                facturaUrl: fileInput?.dataset?.facturaUrl || null,
-                                facturaRuta: fileInput?.dataset?.facturaRuta || null,
-                                facturaNombre: fileInput?.dataset?.facturaNombre || null,
-                              });
-                              mostrarToast("Gasto registrado","exito");
+                              if (gastoEditId) {
+                                await onEditarGasto(gastoEditId, datos);
+                                mostrarToast("Gasto actualizado","exito");
+                              } else {
+                                await onAgregarGasto(datos);
+                                mostrarToast("Gasto registrado","exito");
+                              }
                               setGastoDesc(""); setGastoMonto(""); setGastoFecha(new Date().toISOString().slice(0,10));
-                              setGastoTaller(""); setGastoNit("");
+                              setGastoTaller(""); setGastoNit(""); setGastoEditId(null);
                               setVerFormGasto(false);
                             } catch(err) {
                               mostrarToast("Error al guardar","error");
@@ -973,17 +980,17 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                             }
                           }}
                         >
-                          Guardar gasto
+                          {gastoEditId ? "Actualizar gasto" : "Guardar gasto"}
                         </button>
                       </div>
                     )}
-
+ 
                     {gastosMesVeh.length === 0 && !verFormGasto && (
                       <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textTertiary,textAlign:"center",padding:"12px 0",margin:0}}>
                         Sin gastos adicionales este mes
                       </p>
                     )}
-
+ 
                     {gastosMesVeh.map((g, i, arr) => (
                       <div key={g.firestoreId} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                         <div style={{flex:1,minWidth:0}}>
@@ -1004,6 +1011,17 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                           <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.red}}>-{fmt(g.monto)}</span>
                           <button
                             style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
+                            onClick={()=>{
+                              setGastoDesc(g.descripcion||""); setGastoMonto(g.monto||"");
+                              setGastoFecha(g.fecha||new Date().toISOString().slice(0,10));
+                              setGastoTaller(g.taller||""); setGastoNit(g.nit||"");
+                              setGastoEditId(g.firestoreId); setVerFormGasto(true);
+                            }}
+                          >
+                            <Edit2 size={14} color={t.colors.blue} />
+                          </button>
+                          <button
+                            style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
                             onClick={async()=>{
                               try {
                                 await onEliminarGasto(g.firestoreId);
@@ -1022,7 +1040,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 </>
               );
             })()}
-
+ 
           </div>
         )}
 

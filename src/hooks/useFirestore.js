@@ -181,6 +181,10 @@ const eliminarConfigMant = async (firestoreId) => {
     const datosLimpios = JSON.parse(JSON.stringify(datos));
     await addDoc(collection(db, rutaGastos), { ...datosLimpios, creadoEn: new Date().toISOString() });
   };
+  const editarGasto = async (firestoreId, datos) => {
+    const datosLimpios = JSON.parse(JSON.stringify(datos));
+    await updateDoc(doc(db, rutaGastos, firestoreId), datosLimpios);
+  };
   const eliminarGasto = async (firestoreId) => {
     await deleteDoc(doc(db, rutaGastos, firestoreId));
   };
@@ -222,7 +226,7 @@ const eliminarConfigMant = async (firestoreId) => {
     agregarRuta,     eliminarRuta,
     agregarMantenimiento, eliminarMantenimiento,
     agregarConfigMant, eliminarConfigMant,
-    agregarGasto, eliminarGasto,
+    agregarGasto, editarGasto, eliminarGasto,
     agregarGastoFijo, eliminarGastoFijo,
     agregarConductor, editarConductor, eliminarConductor,
   };
