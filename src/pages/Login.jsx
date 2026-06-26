@@ -10,6 +10,7 @@ function Login() {
   const [correo,     setCorreo]     = useState("");
   const [contrasena, setContrasena] = useState("");
   const [verPass,    setVerPass]    = useState(false);
+  const [codigoBeta, setCodigoBeta] = useState("");
   const [error,      setError]      = useState("");
   const [cargando,   setCargando]   = useState(false);
 
@@ -41,10 +42,14 @@ function Login() {
   const handleGoogle = async () => {
     setCargando(true); setError("");
     try {
-      await loginGoogle();
+      await loginGoogle(codigoBeta);
       navigate("/");
     } catch (e) {
-      setError("Error al iniciar sesión con Google");
+      if (e.code === "auth/codigo-invalido") {
+        setError("Código de acceso beta inválido. Ingresa el código para continuar.");
+      } else {
+        setError("Error al iniciar sesión con Google");
+      }
     } finally {
       setCargando(false);
     }
@@ -56,7 +61,8 @@ function Login() {
       {/* HERO */}
       <div style={styles.hero}>
         <div style={styles.logoWrap}>
-          <img src="/logo-naviraT.png" alt="Navira" style={{ height: "120px", objectFit: "contain" }} />
+          <img src="/logo-navira.png" alt="Navira" style={{ height: "80px", objectFit: "contain" }} />
+          <p style={styles.logoSub}>Controla tus fletes. Maximiza tus ganancias.</p>
         </div>
       </div>
 
@@ -69,7 +75,7 @@ function Login() {
           <label style={styles.label}>Correo electrónico</label>
           <input
             type="email"
-            placeholder="Ingresa tu correo electrónico"
+            placeholder="correo@ejemplo.com"
             value={correo}
             onChange={(e) => { setCorreo(e.target.value); setError(""); }}
             style={styles.input}
@@ -112,13 +118,26 @@ function Login() {
           type="submit"
           disabled={cargando}
         >
-          {cargando ? "Ingresando..." : "INGRESAR"}
+          {cargando ? "Ingresando..." : "Ingresar"}
         </button>
 
         <div style={styles.separador}>
           <div style={styles.separadorLinea} />
           <span style={styles.separadorTexto}>o continúa con</span>
           <div style={styles.separadorLinea} />
+        </div>
+
+        <div style={{margin:"16px 0 10px",borderTop:`1px solid ${t.colors.borderLight}`,paddingTop:"16px"}}>
+          <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,textAlign:"center",margin:"0 0 10px"}}>
+            ¿Primera vez? Ingresa tu código beta
+          </p>
+          <input
+            type="text"
+            placeholder="Código de acceso beta"
+            value={codigoBeta}
+            onChange={e=>setCodigoBeta(e.target.value.trim().toUpperCase())}
+            style={{...styles.input,textAlign:"center",marginBottom:"12px",letterSpacing:"2px",fontWeight:"bold"}}
+          />
         </div>
 
         <button
@@ -146,7 +165,7 @@ function Login() {
           style={styles.btnRegistro}
           onClick={() => navigate("/registro")}
         >
-          CREAR CUENTA
+          Crear cuenta gratis
         </button>
       </div>
 

@@ -11,6 +11,7 @@ import {
   sendPasswordResetEmail,
   EmailAuthProvider,
   reauthenticateWithCredential,
+  deleteUser,
 } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 import { getDoc, doc } from "firebase/firestore";
@@ -48,8 +49,17 @@ export function useAuth() {
   };
 
   // Login con Google
-  const loginGoogle = async () => {
+  const loginGoogle = async (codigoBeta) => {
     const resultado = await signInWithPopup(auth, googleProvider);
+    const esNuevo = resultado._tokenResponse?.isNewUser || false;
+    if (esNuevo) {
+      const snap = await getDoc(doc(db, "codigos_beta", "principal"));
+      if (!snap.exists() || snap.data().codigo !== (codigoBeta || "").toUpperCase().trim()) {
+        await deleteUser(resultado.user);
+        throw { code: "auth/codigo-invalido" };
+      }
+      await updateProfile(resultado.user, { displayName: resultado.user.displayName });
+    }
     return resultado.user;
   };
 
