@@ -225,18 +225,18 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             return `
               <p style="font-size:14px;font-weight:700;margin:15px 0 8px;color:#1a1a1a">${placa}</p>
               <table>
-                <tr><th>Fecha</th><th>Ruta</th><th>Manifiesto</th><th>Empresa</th><th>Flete</th><th>Gastos</th><th>Neta</th></tr>
+                <tr><th>Fecha</th><th>Manifiesto</th><th>Ruta</th><th>Empresa</th><th>Flete</th><th>Gastos</th><th>Neta</th></tr>
                 ${vjs.map(v=>`<tr>
                   <td>${v.fecha||"—"}</td>
+                  <td>${v.mani||"—"}</td>
                   <td>${v.ruta||"—"}</td>
-                  <td>${v.manifiesto||"—"}</td>
                   <td>${v.emp||"—"}</td>
                   <td>${fmt(v.vViaje||0)}</td>
                   <td style="color:#dc2626">${fmt(v.total||0)}</td>
                   <td class="${(v.neta||0)>=0?"verde":"rojo"}">${fmt(v.neta||0)}</td>
                 </tr>`).join("")}
                 <tr class="subtotal">
-                  <td colspan="3"><strong>${vjs.length} viaje${vjs.length!==1?"s":""} · ${subKm.toLocaleString("es-CO")} km</strong></td>
+                  <td colspan="4"><strong>${vjs.length} viaje${vjs.length!==1?"s":""} · ${subKm.toLocaleString("es-CO")} km</strong></td>
                   <td>${fmt(subIngresos)}</td>
                   <td style="color:#dc2626">${fmt(subGastos)}</td>
                   <td class="${subNeta>=0?"verde":"rojo"}">${fmt(subNeta)}</td>
