@@ -61,7 +61,7 @@ function Login() {
       {/* HERO */}
       <div style={styles.hero}>
         <div style={styles.logoWrap}>
-          <img src="/logo-naviraT.png" alt="Navira" style={{ height: "80px", objectFit: "contain" }} />
+          <img src="/logo-naviraT.png" alt="Navira" style={{ height: "120px", objectFit: "contain" }} />
           
         </div>
       </div>
