@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, History, TrendingUp, TrendingDown, FileDown, ChartColumnStacked } from "lucide-react";
+import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
@@ -12,6 +12,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
   const hoy = new Date();
   const [mes,  setMes]  = useState(hoy.getMonth());
   const [anio, setAnio] = useState(hoy.getFullYear());
+  const [verViajesMes, setVerViajesMes] = useState(false);
 
   const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
   const fmtCorto = (n) => {
@@ -308,11 +309,11 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           w.document.close();
           setTimeout(()=>w.print(), 500);
         }}>
-          <FileDown size={16} color={t.colors.blue} strokeWidth={2} />
+          <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
           Exportar
         </button>
         <button style={{...styles.btnHistorial, marginLeft:"6px"}} onClick={()=>navigate("/comparativo")}>
-          <ChartColumnStacked size={16} color={t.colors.blue} strokeWidth={2} />
+          <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
           Comparar
         </button>
       </div>
@@ -518,8 +519,11 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
         {/* VIAJES DEL MES */}
         {viajesMes.length > 0 && (
           <div style={styles.card}>
-            <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
-            {[...viajesMes].reverse().map((viaje,i,arr) => (
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setVerViajesMes(!verViajesMes)}>
+              <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
+              {verViajesMes ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
+            </div>
+            {verViajesMes && [...viajesMes].reverse().map((viaje,i,arr) => (
               <div
                 key={viaje.firestoreId}
                 style={{...styles.viajeFilaMes, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`, cursor:"pointer"}}
