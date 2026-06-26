@@ -516,10 +516,6 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
         )}
 
         {/* VIAJES DEL MES */}
-        <div style={styles.seccionHeader} onClick={()=>viajesMes(!viajesMes)}>
-                <span style={styles.seccionLabel}>VIAJES DEL MES</span>
-                {viajesMes ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
-              </div>
         {viajesMes.length > 0 && (
           <div style={styles.card}>
             <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
