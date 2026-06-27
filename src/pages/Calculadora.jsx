@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronUp } from "lucide-react";
 import { theme as t } from "../styles/theme";
+import { sanitizar, validarNumero } from "../utils/validar";
 
 const DEFAULT_ADBLUE = 0.18925;
 
@@ -20,6 +21,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [lugarCargue,      setLugarCargue]        = useState("");
   const [lugarDescargue,   setLugarDescargue]     = useState("");
   const [observaciones,    setObservaciones]      = useState("");
+  const [anticipoMonto,    setAnticipoMonto]      = useState("");
   const [placa,            setPlaca]              = useState(location.state?.placa || "");
   const [tipoCarga,        setTipoCarga]          = useState("");
   const [producto,         setProducto]           = useState("");
@@ -30,7 +32,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [kmVacio,          setKmVacio]            = useState("");
   const [tonelaje,         setTonelaje]           = useState("");
   const [fleteTon,         setFleteTon]           = useState("");
-  const [modoComb,         setModoComb]           = useState("VII");
+  const [modoComb,         setModoComb]           = useState("auto");
   const [rendCargado,      setRendCargado]        = useState("");
   const [rendVacio,        setRendVacio]          = useState("");
   const [galManual,        setGalManual]          = useState("");
@@ -52,7 +54,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [descRetefuente,   setDescRetefuente]     = useState(false);
   const [pctRetefuente,    setPctRetefuente]      = useState(1);
   const [descReteica,      setDescReteica]        = useState(false);
-  const [pctReteica,       setPctReteica]         = useState(0.8);
+  const [pctReteica,       setPctReteica]         = useState(1);
   const [descFopat,        setDescFopat]          = useState(false);
   const [pctFopat,         setPctFopat]           = useState(0.1);
   const [descOtro,         setDescOtro]           = useState(false);
@@ -189,18 +191,24 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const guardarViaje = async () => {
     if (!ruta.trim())  { mostrarToast("Ingresa la ruta del viaje","error"); return; }
     if (!valorViaje)   { mostrarToast("Ingresa tonelaje y flete","error"); return; }
+    if (viajes.length >= 5000) { mostrarToast("Límite de viajes alcanzado (5000)","error"); return; }
     setGuardando(true);
     await onGuardar({
-      fecha, fechaDescarga, mani, placa, tipoCarga, prod: producto,
-      ruta: ruta.trim(), emp: empresa, condNom: conductor, contactoEmpresa, celularEmpresa,
-      remesa: remesa.trim(), pesoBascula: Number(pesoBascula)||0,
-      lugarCargue: lugarCargue.trim(), lugarDescargue: lugarDescargue.trim(),
-      observaciones: observaciones.trim(),
+      fecha, fechaDescarga, mani: sanitizar(mani), placa, tipoCarga, prod: sanitizar(producto),
+      ruta: sanitizar(ruta), emp: sanitizar(empresa), condNom: sanitizar(conductor),
+      contactoEmpresa: sanitizar(contactoEmpresa), celularEmpresa: sanitizar(celularEmpresa),
+      remesa: sanitizar(remesa), pesoBascula: validarNumero(pesoBascula, 0, 999),
+      lugarCargue: sanitizar(lugarCargue), lugarDescargue: sanitizar(lugarDescargue),
+      observaciones: sanitizar(observaciones).slice(0, 500),
+      anticipoMonto: validarNumero(anticipoMonto, 0, 999999999),
       kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmT: kmTotal,
       ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
       tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(tonelajeRetorno), fleteRetorno: n(fleteRetorno),
-      rutaRet: rutaRet.trim(), tipoCargaRet, productoRet, empresaRet, contactoRet, maniRet, remesaRet: remesaRet.trim(),
-      pesoBasRet: Number(pesoBasRet)||0, lugarCargueRet: lugarCargueRet.trim(), lugarDescargueRet: lugarDescargueRet.trim(),
+      rutaRet: sanitizar(rutaRet), tipoCargaRet, productoRet: sanitizar(productoRet),
+      empresaRet: sanitizar(empresaRet), contactoRet: sanitizar(contactoRet),
+      maniRet: sanitizar(maniRet), remesaRet: sanitizar(remesaRet),
+      pesoBasRet: validarNumero(pesoBasRet, 0, 999),
+      lugarCargueRet: sanitizar(lugarCargueRet), lugarDescargueRet: sanitizar(lugarDescargueRet),
       fechaCargueRet, fechaDescargueRet,
       gTot: galTotal, galCargado: galCarg, galVacio: galVac,
       adlt: adblLt, cAcpm: costoAcpm, cAdbl: costoAdbl, cComb: costoComb,
@@ -244,7 +252,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     setContactoRet(""); setManiRet(""); setRemesaRet(""); setPesoBasRet("");
     setLugarCargueRet(""); setLugarDescargueRet(""); setFechaCargueRet(""); setFechaDescargueRet("");
     setExtras([]); setPorcCond(""); setCarpado(""); setGastosViaje("");
-    setPeajesRuta([]); setRutaCargada(null);
+    setAnticipoMonto(""); setPeajesRuta([]); setRutaCargada(null);
 
     setGuardando(false);
     navigate(-1);
@@ -276,6 +284,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   if (rutaGuardada.carpado)         setCarpado(rutaGuardada.carpado);
   if (rutaGuardada.gastosViaje)     setGastosViaje(rutaGuardada.gastosViaje);
   if (rutaGuardada.extrasList)      setExtras(rutaGuardada.extrasList);
+  if (rutaGuardada.anticipoMonto)   setAnticipoMonto(rutaGuardada.anticipoMonto);
   // Descuentos de ley
   if (rutaGuardada.descRetefuente !== undefined) setDescRetefuente(rutaGuardada.descRetefuente);
   if (rutaGuardada.pctRetefuente)   setPctRetefuente(rutaGuardada.pctRetefuente);
@@ -295,8 +304,8 @@ const guardarRutaFrecuente = async () => {
   setGuardandoRuta(true);
 
   const datos = {
-    nombre:      nombreRuta.trim() || ruta.trim(),
-    ruta:        ruta.trim(),
+    nombre:      sanitizar(nombreRuta.trim() || ruta.trim()),
+    ruta:        sanitizar(ruta),
     kmCargado:   n(kmCargado),
     kmVacio:     n(kmVacio),
     rendCargado: n(rendCargado),
@@ -309,13 +318,13 @@ const guardarRutaFrecuente = async () => {
     })),
     categoria,
     // Datos adicionales
-    producto:       producto,
-    empresa:        empresa,
-    contactoEmpresa: contactoEmpresa,
-    celularEmpresa:  celularEmpresa,
-    conductor:       conductor,
-    lugarCargue:     lugarCargue.trim(),
-    lugarDescargue:  lugarDescargue.trim(),
+    producto:       sanitizar(producto),
+    empresa:        sanitizar(empresa),
+    contactoEmpresa: sanitizar(contactoEmpresa),
+    celularEmpresa:  sanitizar(celularEmpresa),
+    conductor:       sanitizar(conductor),
+    lugarCargue:     sanitizar(lugarCargue),
+    lugarDescargue:  sanitizar(lugarDescargue),
     modoConductor:   modoConductor,
     porcCond:        n(porcCond),
     carpado:         n(carpado),
@@ -328,6 +337,7 @@ const guardarRutaFrecuente = async () => {
     pctReteica:      pctReteica,
     descFopat:       descFopat,
     pctFopat:        pctFopat,
+    anticipoMonto:   n(anticipoMonto),
   };
 
   try {
@@ -454,7 +464,7 @@ const guardarRutaFrecuente = async () => {
             <label style={styles.label}>Placa vehículo</label>
             <select value={placa} onChange={e=>setPlaca(e.target.value)}
               style={{...styles.input, color: placa ? t.colors.textPrimary : t.colors.textTertiary}}>
-              <option value="">Escoge tu vehículo</option>
+              <option value="">Sin asignar</option>
               {vehiculos.map(v=>(
                 <option key={v.firestoreId} value={v.placa}>{v.placa} — {v.tipoVehiculo}</option>
               ))}
@@ -463,7 +473,7 @@ const guardarRutaFrecuente = async () => {
           <div style={styles.campo}>
   <label style={styles.label}>Tipo de carga</label>
   <select value={tipoCarga} onChange={e=>setTipoCarga(e.target.value)} style={styles.input}>
-    <option value=""> Seleccionar... </option>
+    <option value="">— Seleccionar —</option>
     <option>Granel sólido</option>
     <option>Granel líquido</option>
     <option>Carga general</option>
@@ -497,7 +507,7 @@ const guardarRutaFrecuente = async () => {
       }}
       style={{...styles.input, marginBottom: "6px", color: t.colors.textPrimary}}
     >
-      <option value="__nuevo__">Nuevo producto</option>
+      <option value="__nuevo__">+ Escribir nuevo producto</option>
       {productosFrecuentes.map((p, i) => (
         <option key={i} value={p}>{p}</option>
       ))}
@@ -529,7 +539,7 @@ const guardarRutaFrecuente = async () => {
 }}
       style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
     >
-      <option value="__nueva__">Nueva empresa</option>
+      <option value="__nueva__">+ Escribir nueva empresa</option>
       {empresasFrecuentes.map((emp, i) => (
         <option key={i} value={emp}>{emp}</option>
       ))}
@@ -546,7 +556,18 @@ const guardarRutaFrecuente = async () => {
 )}
 
 </div>
-    
+
+
+          <div style={styles.campo}>
+  <label style={styles.label}>Contacto empresa</label>
+  <input type="text" placeholder="Nombre del contacto" value={contactoEmpresa}
+    onChange={e => setContactoEmpresa(e.target.value)} style={styles.input} />
+</div>
+
+          <div style={styles.campo}>
+          <label style={styles.label}>Celular contacto</label>
+          <input type="tel" placeholder="+57 300 000 0000" value={celularEmpresa} onChange={e=>setCelularEmpresa(e.target.value)} style={styles.input} />
+          </div>
         </div>
         <div style={styles.campo}>
   <label style={styles.label}>Conductor</label>
@@ -603,6 +624,12 @@ const guardarRutaFrecuente = async () => {
     onChange={e=>setObservaciones(e.target.value)} style={styles.input}/>
 </div>
 
+<div style={styles.campo}>
+  <label style={styles.label}>Anticipo al conductor ($)</label>
+  <input type="number" placeholder="3000000" value={anticipoMonto}
+    onChange={e=>setAnticipoMonto(e.target.value)} style={styles.input}/>
+</div>
+
         <div style={styles.fila2}>
           <div style={styles.campo}>
             <label style={styles.label}>Km cargado</label>
@@ -621,8 +648,8 @@ const guardarRutaFrecuente = async () => {
     onChange={e => setModoFlete(e.target.value)}
     style={styles.input}
   >
-    <option value="porTon">Variable ($/Ton)</option>
-    <option value="porViaje">Fijo ($/Viaje)</option>
+    <option value="porTon">Por tonelada ($/ton)</option>
+    <option value="porViaje">Por viaje (valor fijo)</option>
   </select>
 </div>
 
@@ -672,7 +699,7 @@ const guardarRutaFrecuente = async () => {
                 <div>
                   <p style={{fontSize:t.fonts.sizeXs,color:"#92400E",fontWeight:t.fonts.weightBold,margin:0}}>¿Seguro que es $/ton?</p>
                   <p style={{fontSize:t.fonts.sizeXs,color:"#92400E",margin:"2px 0 0"}}>
-                    El flete por tonelada normalmente es entre $40.000 y $300.000/ton. Si el valor es el total del viaje, cambia a modo "Fijo ($/Viaje)".
+                    El flete por tonelada normalmente es entre $40.000 y $200.000/ton. Si el valor es el total del viaje, cambia a modo "Por viaje (valor fijo)".
                   </p>
                 </div>
               </div>
@@ -737,18 +764,13 @@ const guardarRutaFrecuente = async () => {
           <div style={styles.campo}>
             <label style={styles.label}>Tipo de carga</label>
             <select value={tipoCargaRet} onChange={e=>setTipoCargaRet(e.target.value)} style={styles.input}>
-              <option value=""> Seleccionar... </option>
-               <option>Granel sólido</option>
-               <option>Granel líquido</option>
-               <option>Carga general</option>
-               <option>Contenedor cargado</option>
-               <option>Contenedor vacío</option>
-               <option>Carga refrigerada</option>
-               <option>Sin carga</option>
-               <option>Carga peligrosa</option>
-               <option>Carga sobredimensionada</option>
-               <option>Ganado</option>
-               <option>Vehículos</option>
+              <option value="">Seleccionar...</option>
+              <option value="GENERAL">General</option>
+              <option value="GRANEL">Granel</option>
+              <option value="LIQUIDOS">Líquidos</option>
+              <option value="CONTENEDOR">Contenedor</option>
+              <option value="REFRIGERADA">Refrigerada</option>
+              <option value="PELIGROSA">Peligrosa</option>
             </select>
           </div>
           <div style={styles.campo}>
@@ -797,8 +819,8 @@ const guardarRutaFrecuente = async () => {
           onChange={e=>setModoFleteRetorno(e.target.value)}
           style={styles.input}
         >
-          <option value="porTon">Variable ($/Ton)</option>
-          <option value="porViaje">Fijo ($/Viaje)</option>
+          <option value="porTon">Por tonelada ($/ton)</option>
+          <option value="porViaje">Por viaje (valor fijo)</option>
           </select>
         </div>
           <div style={styles.fila2}>
@@ -1060,7 +1082,7 @@ const guardarRutaFrecuente = async () => {
       val:valRetefuente,
     },
     {
-      id:"reteica", label:"Reteica", sub:"Varía por municipio.",
+      id:"reteica", label:"Reteica", sub:"Varía por municipio",
       activo:descReteica, setActivo:setDescReteica,
       pct:pctReteica,     setPct:setPctReteica,
       val:valReteica,

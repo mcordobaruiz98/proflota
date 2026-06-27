@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send } from "lucide-react";
 import { theme as t } from "../styles/theme";
+import { sanitizar } from "../utils/validar";
 
 function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEditarVehiculo, mostrarToast }) {
   const navigate = useNavigate();
@@ -584,8 +585,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                           tipo: bitTipo,
                           fecha: new Date().toISOString().slice(0,10),
                           hora: new Date().toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"}),
-                          ubicacion: bitUbicacion.trim(),
-                          nota: bitNota.trim(),
+                          ubicacion: sanitizar(bitUbicacion).slice(0, 200),
+                          nota: sanitizar(bitNota).slice(0, 500),
                         };
                         const nuevos = [...(viaje.bitacora||[]), evento];
                         try {

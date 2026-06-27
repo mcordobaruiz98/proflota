@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, User, Trash2, Edit2, Save, AlertCircle } from "lucide-react";
 import { theme as t } from "../styles/theme";
+import { sanitizar } from "../utils/validar";
 
 function Conductores({ conductores = [], onAgregar, onEditar, onEliminar, mostrarToast }) {
   const navigate = useNavigate();
@@ -36,12 +37,17 @@ function Conductores({ conductores = [], onAgregar, onEditar, onEliminar, mostra
 
   const guardar = async () => {
     if (!nombre.trim()) { mostrarToast("Ingresa el nombre", "error"); return; }
+    if (!editId && conductores.length >= 50) { mostrarToast("Máximo 50 conductores por cuenta", "error"); return; }
     setGuardando(true);
     const datos = {
-      nombre: nombre.trim(), cedula: cedula.trim(),
-      telefono: telefono.trim(), licencia: licencia.trim(),
-      licVence, catLic: catLic.trim(),
-      arl: arl.trim(), eps: eps.trim(),
+      nombre: sanitizar(nombre).slice(0, 100),
+      cedula: sanitizar(cedula).slice(0, 20),
+      telefono: (telefono || "").replace(/[^0-9+\s-]/g, "").slice(0, 20),
+      licencia: sanitizar(licencia).slice(0, 30),
+      licVence,
+      catLic: sanitizar(catLic).slice(0, 5),
+      arl: sanitizar(arl).slice(0, 50),
+      eps: sanitizar(eps).slice(0, 50),
     };
     try {
       if (editId) {
@@ -82,7 +88,7 @@ function Conductores({ conductores = [], onAgregar, onEditar, onEliminar, mostra
             <p style={styles.cardTitulo}>{editId ? "Editar conductor" : "Nuevo conductor"}</p>
             <div style={styles.campo}>
               <label style={styles.label}>Nombre completo</label>
-              <input type="text" placeholder="Nombre del conductor" value={nombre}
+              <input type="text" placeholder="Juan Pérez González" value={nombre}
                 onChange={e => setNombre(e.target.value)} style={styles.input} />
             </div>
             <div style={styles.fila2}>
@@ -106,7 +112,7 @@ function Conductores({ conductores = [], onAgregar, onEditar, onEliminar, mostra
               <div style={styles.campo}>
                 <label style={styles.label}>Categoría</label>
                 <select value={catLic} onChange={e => setCatLic(e.target.value)} style={styles.input}>
-                  <option value="">Seleccionar...</option>
+                  <option value="">Seleccionar</option>
                   <option value="C1">C1</option>
                   <option value="C2">C2</option>
                   <option value="C3">C3</option>

@@ -34,6 +34,7 @@ function AgregarVehiculo({ vehiculos, onGuardar }) {
   };
 
   const guardarVehiculo = async () => {
+    if (vehiculos && vehiculos.length >= 50) { setErrores({general:"Máximo 50 vehículos por cuenta"}); return; }
     const e = validar();
     if (Object.keys(e).length > 0) { setErrores(e); return; }
     setGuardando(true);
