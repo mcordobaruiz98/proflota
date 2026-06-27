@@ -74,7 +74,7 @@ const seccionesHV = [
   },
 ];
 
-function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], gastosVehiculo = [], gastosFijos = [], conductores = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, onAgregarGasto, onEditarGato, onEliminarGasto, onAgregarGastoFijo, onEliminarGastoFijo, mostrarToast }) {
+function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMant = [], gastosVehiculo = [], gastosFijos = [], conductores = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, onAgregarGasto, onEditarGasto, onEliminarGasto, onAgregarGastoFijo, onEliminarGastoFijo, mostrarToast }) {
   const navigate  = useNavigate();
   const { id }    = useParams();
   const location  = useLocation();
@@ -109,7 +109,7 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [gastoFecha,    setGastoFecha]    = useState(new Date().toISOString().slice(0,10));
   const [gastoTaller,   setGastoTaller]   = useState("");
   const [gastoNit,      setGastoNit]      = useState("");
-  const [gastoEditId,   setGastoEditId]   = useState("null");
+  const [gastoEditId,   setGastoEditId]   = useState(null);
   const [guardandoGasto,setGuardandoGasto]= useState(false);
   const [verFormGasto,  setVerFormGasto]  = useState(false);
 
@@ -256,9 +256,25 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     onEditarVehiculo(vehiculo.firestoreId, { hvData: nuevo }).catch(()=>{});
   };
 
+  const TIPOS_PERMITIDOS = ["image/jpeg","image/png","application/pdf"];
+  const MAX_ARCHIVO = 5 * 1024 * 1024; // 5 MB
+
+  const validarArchivoLocal = (archivo) => {
+    if (!archivo) return false;
+    if (!TIPOS_PERMITIDOS.includes(archivo.type)) {
+      mostrarToast("Solo se permiten JPG, PNG o PDF","error");
+      return false;
+    }
+    if (archivo.size > MAX_ARCHIVO) {
+      mostrarToast("El archivo no puede superar 5 MB","error");
+      return false;
+    }
+    return true;
+  };
+
   const manejarArchivo = (e, docId) => {
     const archivo = e.target.files[0];
-    if (!archivo) return;
+    if (!validarArchivoLocal(archivo)) return;
     const ruta = `vehiculos/${id}/${docId}_${Date.now()}`;
     subirArchivo(archivo, ruta, docId, (url) => {
       actualizarHV(docId, {estado:"cargado", url, ruta, nombre:archivo.name});
@@ -317,7 +333,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
 
   const cambiarFotoVehiculo = async (e) => {
     const archivo = e.target.files[0];
-    if (!archivo) return;
+    if (!validarArchivoLocal(archivo)) return;
     const ruta = `vehiculos/${Date.now()}_${archivo.name}`;
     subirArchivo(archivo, ruta, "fotoVehiculo", async (url) => {
       try {
@@ -714,6 +730,27 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               </div>
             )}
 
+            {/* Viajes del mes */}
+            {viajesMes.length>0&&(
+              <div style={styles.card}>
+                <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
+                {[...viajesMes].reverse().map((viaje,i,arr)=>(
+                  <div key={viaje.firestoreId}
+                    style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`,cursor:"pointer"}}
+                    onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
+                  >
+                    <div>
+                      <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,margin:0,color:t.colors.textPrimary}}>{viaje.ruta||"Sin ruta"}</p>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{viaje.fecha||""}</p>
+                    </div>
+                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,margin:0,color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
+                      {fmt(viaje.neta||0)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* ── GASTOS Y FACTURAS DEL VEHÍCULO ── */}
             {(() => {
               const gastosMesVeh = gastosVehiculo.filter(g => {
@@ -777,7 +814,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                             {["Cuota del camión","Seguro","Parqueadero","GPS / Rastreo","SOAT","Tecnomecánica","Impuestos","Lavadas","Administración"].map(o=>(
                               <option key={o} value={o}>{o}</option>
                             ))}
-                            <option value="__otro__"> Otro gasto</option>
+                            <option value="__otro__">+ Otro gasto</option>
                           </select>
                         </div>
                         {gfNombre === "__otro__" && (
@@ -887,7 +924,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         {verFormGasto ? "Cancelar" : "+ Agregar"}
                       </button>
                     </div>
- 
+
                     {verFormGasto && (
                       <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"12px"}}>
                         <div style={styles.campo}>
@@ -927,7 +964,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                             <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{display:"none"}}
                               onChange={e=>{
                                 const archivo = e.target.files[0];
-                                if (!archivo) return;
+                                if (!validarArchivoLocal(archivo)) return;
                                 const ruta = `gastos/${id}/${Date.now()}_${archivo.name}`;
                                 subirArchivo(archivo, ruta, "gastoFactura", (url) => {
                                   setGastoDesc(prev => prev); // keep form open
@@ -984,13 +1021,13 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         </button>
                       </div>
                     )}
- 
+
                     {gastosMesVeh.length === 0 && !verFormGasto && (
                       <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textTertiary,textAlign:"center",padding:"12px 0",margin:0}}>
                         Sin gastos adicionales este mes
                       </p>
                     )}
- 
+
                     {gastosMesVeh.map((g, i, arr) => (
                       <div key={g.firestoreId} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                         <div style={{flex:1,minWidth:0}}>
@@ -1040,9 +1077,9 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 </>
               );
             })()}
- 
+
           </div>
-        )} 
+        )}
 
         {/* ── HISTORIAL ── */}
         {tabActivo==="historial" && (
