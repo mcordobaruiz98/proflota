@@ -46,21 +46,22 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
 
   const compartirWhatsApp = () => {
     if (!viaje) return;
+    const s = sanitizar;
     const lineas = [
       `🚛 *Resumen de viaje — NAVIRA*`,
       ``,
-      `📍 *Ruta:* ${viaje.ruta || "—"}`,
+      `📍 *Ruta:* ${s(viaje.ruta) || "—"}`,
       `📅 *Fecha cargue:* ${viaje.fecha || "—"}`,
       viaje.fechaDescarga ? `📅 *Fecha descargue:* ${viaje.fechaDescarga}` : null,
-      `🚗 *Placa:* ${viaje.placa || "—"}`,
-      viaje.emp ? `🏢 *Empresa:* ${viaje.emp}` : null,
-      viaje.condNom ? `👤 *Conductor:* ${viaje.condNom}` : null,
-      viaje.prod ? `📦 *Producto:* ${viaje.prod}` : null,
+      `🚗 *Placa:* ${s(viaje.placa) || "—"}`,
+      viaje.emp ? `🏢 *Empresa:* ${s(viaje.emp)}` : null,
+      viaje.condNom ? `👤 *Conductor:* ${s(viaje.condNom)}` : null,
+      viaje.prod ? `📦 *Producto:* ${s(viaje.prod)}` : null,
       viaje.ton ? `⚖️ *Toneladas:* ${viaje.ton}` : null,
       viaje.pesoBascula ? `⚖️ *Peso báscula:* ${viaje.pesoBascula} ton` : null,
-      viaje.remesa ? `📄 *Remesa:* ${viaje.remesa}` : null,
-      viaje.lugarCargue ? `📍 *Cargue:* ${viaje.lugarCargue}` : null,
-      viaje.lugarDescargue ? `📍 *Descargue:* ${viaje.lugarDescargue}` : null,
+      viaje.remesa ? `📄 *Remesa:* ${s(viaje.remesa)}` : null,
+      viaje.lugarCargue ? `📍 *Cargue:* ${s(viaje.lugarCargue)}` : null,
+      viaje.lugarDescargue ? `📍 *Descargue:* ${s(viaje.lugarDescargue)}` : null,
       ``,
       `💰 *Valor flete:* ${fmt(viaje.vViaje || 0)}`,
       `⛽ *Combustible:* ${fmt(viaje.cComb || 0)}`,
@@ -71,7 +72,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       `📊 *Total gastos:* ${fmt(viaje.total || 0)}`,
       `✅ *Ganancia neta:* ${fmt(viaje.neta || 0)}`,
       ``,
-      `_Generado por Navira — Inteligencia en Movimiento_`,
+      `_Generado por NAVIRA — naviraflota.app_`,
     ].filter(Boolean).join("\n");
 
     const url = `https://wa.me/?text=${encodeURIComponent(lineas)}`;
