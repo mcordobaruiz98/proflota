@@ -29,6 +29,8 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [conductor,        setConductor]          = useState("");
   const [kmCargado,        setKmCargado]          = useState("");
   const [kmVacio,          setKmVacio]            = useState("");
+  const [kmCargadoRet,     setKmCargadoRet]       = useState("");
+  const [kmVacioRet,       setKmVacioRet]         = useState("");
   const [tonelaje,         setTonelaje]           = useState("");
   const [fleteTon,         setFleteTon]           = useState("");
   const [modoComb,         setModoComb]           = useState("auto");
@@ -123,12 +125,14 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
 
   const valorViaje = valorViajeIda + valorViajeRetorno;
 
-  const kmTotal    = n(kmCargado) + n(kmVacio);
+  const kmCargTotal = n(kmCargado) + (tieneRetorno ? n(kmCargadoRet) : 0);
+  const kmVacTotal  = n(kmVacio) + (tieneRetorno ? n(kmVacioRet) : 0);
+  const kmTotal    = kmCargTotal + kmVacTotal;
 
   let galCarg = 0, galVac = 0, galTotal = 0;
   if (modoComb === "auto") {
-    galCarg  = n(rendCargado) > 0 ? n(kmCargado) / n(rendCargado) : 0;
-    galVac   = n(rendVacio)   > 0 ? n(kmVacio)   / n(rendVacio)   : 0;
+    galCarg  = n(rendCargado) > 0 ? kmCargTotal / n(rendCargado) : 0;
+    galVac   = n(rendVacio)   > 0 ? kmVacTotal   / n(rendVacio)   : 0;
     galTotal = galCarg + galVac;
   } else {
     galTotal = n(galManual);
@@ -202,7 +206,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       remesa: sanitizar(remesa), pesoBascula: validarNumero(pesoBascula, 0, 999),
       lugarCargue: sanitizar(lugarCargue), lugarDescargue: sanitizar(lugarDescargue),
       observaciones: sanitizar(observaciones).slice(0, 500),
-      kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmT: kmTotal,
+      kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmCargadoRet: n(kmCargadoRet), kmVacioRet: n(kmVacioRet), kmT: kmTotal,
       ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
       tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(tonelajeRetorno), fleteRetorno: n(fleteRetorno),
       rutaRet: sanitizar(rutaRet), tipoCargaRet, productoRet: sanitizar(productoRet),
@@ -247,7 +251,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     setFecha(new Date().toISOString().slice(0,10)); setFechaDescarga("");
     setMani(""); setRemesa(""); setPesoBascula(""); setLugarCargue(""); setLugarDescargue("");
     setObservaciones(""); setPlaca(""); setTipoCarga(""); setProducto(""); setRuta("");
-    setEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio("");
+    setEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio(""); setKmCargadoRet(""); setKmVacioRet("");
     setTonelaje(""); setFleteTon(""); setTieneRetorno(false); setFleteRetorno("");
     setTonelajeRetorno(""); setRutaRet(""); setEmpresaRet(""); setProductoRet("");
     setManiRet(""); setRemesaRet(""); setPesoBasRet("");
@@ -607,7 +611,7 @@ const guardarRutaFrecuente = async () => {
   <input type="text" placeholder="Novedades del viaje..." value={observaciones}
     onChange={e=>setObservaciones(e.target.value)} style={styles.input}/>
 </div>
-
+        {!tieneRetorno ? (
         <div style={styles.fila2}>
           <div style={styles.campo}>
             <label style={styles.label}>Km cargado</label>
@@ -618,6 +622,36 @@ const guardarRutaFrecuente = async () => {
             <input type="number" placeholder="100" value={kmVacio} onChange={e=>setKmVacio(e.target.value)} style={styles.input} />
           </div>
         </div>
+        ) : (
+        <div>
+          <div style={styles.fila2}>
+            <div style={styles.campo}>
+              <label style={styles.label}>Km cargado ida</label>
+              <input type="number" placeholder="450" value={kmCargado} onChange={e=>setKmCargado(e.target.value)} style={styles.input} />
+            </div>
+            <div style={styles.campo}>
+              <label style={styles.label}>Km vacío ida</label>
+              <input type="number" placeholder="120" value={kmVacio} onChange={e=>setKmVacio(e.target.value)} style={styles.input} />
+            </div>
+          </div>
+          <div style={styles.fila2}>
+            <div style={styles.campo}>
+              <label style={styles.label}>Km cargado retorno</label>
+              <input type="number" placeholder="380" value={kmCargadoRet} onChange={e=>setKmCargadoRet(e.target.value)} style={styles.input} />
+            </div>
+            <div style={styles.campo}>
+              <label style={styles.label}>Km vacío retorno</label>
+              <input type="number" placeholder="60" value={kmVacioRet} onChange={e=>setKmVacioRet(e.target.value)} style={styles.input} />
+            </div>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",marginBottom:"10px",fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}>
+            <span>Cargado: {kmCargTotal.toLocaleString("es-CO")} km</span>
+            <span>Vacío: {kmVacTotal.toLocaleString("es-CO")} km</span>
+            <span style={{fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Total: {kmTotal.toLocaleString("es-CO")} km</span>
+          </div>
+        </div>
+        )}
+        
         {/* MODO DE FLETE */}
 <div style={styles.campo}>
   <label style={styles.label}>Modo de pago del flete</label>
