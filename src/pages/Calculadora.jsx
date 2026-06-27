@@ -72,6 +72,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [modoFleteRetorno, setModoFleteRetorno]   = useState("porTon");
   const [rutaRet,          setRutaRet]            = useState("");
   const [tipoCargaRet,     setTipoCargaRet]       = useState("");
+  const [empresaRet,       setempresaRet]         = useState("");
   const [productoRet,      setProductoRet]        = useState("");
   const [maniRet,          setManiRet]            = useState("");
   const [remesaRet,        setRemesaRet]          = useState("");
@@ -201,10 +202,11 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       remesa: sanitizar(remesa), pesoBascula: validarNumero(pesoBascula, 0, 999),
       lugarCargue: sanitizar(lugarCargue), lugarDescargue: sanitizar(lugarDescargue),
       observaciones: sanitizar(observaciones).slice(0, 500),
-        kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmT: kmTotal,
+      kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmT: kmTotal,
       ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
       tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(tonelajeRetorno), fleteRetorno: n(fleteRetorno),
       rutaRet: sanitizar(rutaRet), tipoCargaRet, productoRet: sanitizar(productoRet),
+      empresaRet: sanitizar(empresaRet),
       maniRet: sanitizar(maniRet), remesaRet: sanitizar(remesaRet),
       pesoBasRet: validarNumero(pesoBasRet, 0, 999),
       lugarCargueRet: sanitizar(lugarCargueRet), lugarDescargueRet: sanitizar(lugarDescargueRet),
