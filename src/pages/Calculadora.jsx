@@ -66,8 +66,6 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [descOtro,         setDescOtro]           = useState(false);
   const [pctOtro,          setPctOtro]            = useState(0);
   const [nombreOtro,       setNombreOtro]         = useState("");
-  const [contactoEmpresa,  setContactoEmpresa]    = useState("");
-  const [celularEmpresa,   setCelularEmpresa]     = useState("");
   const [tieneRetorno,     setTieneRetorno]       = useState(false);
   const [fleteRetorno,     setFleteRetorno]       = useState("");
   const [tonelajeRetorno,  setTonelajeRetorno]    = useState("");
@@ -75,8 +73,6 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [rutaRet,          setRutaRet]            = useState("");
   const [tipoCargaRet,     setTipoCargaRet]       = useState("");
   const [productoRet,      setProductoRet]        = useState("");
-  const [empresaRet,       setEmpresaRet]         = useState("");
-  const [contactoRet,      setContactoRet]        = useState("");
   const [maniRet,          setManiRet]            = useState("");
   const [remesaRet,        setRemesaRet]          = useState("");
   const [pesoBasRet,       setPesoBasRet]         = useState("");
@@ -202,7 +198,6 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     await onGuardar({
       fecha, fechaDescarga, mani: sanitizar(mani), placa, tipoCarga, prod: sanitizar(producto),
       ruta: sanitizar(ruta), emp: sanitizar(empresa), condNom: sanitizar(conductor),
-      contactoEmpresa: sanitizar(contactoEmpresa), celularEmpresa: sanitizar(celularEmpresa),
       remesa: sanitizar(remesa), pesoBascula: validarNumero(pesoBascula, 0, 999),
       lugarCargue: sanitizar(lugarCargue), lugarDescargue: sanitizar(lugarDescargue),
       observaciones: sanitizar(observaciones).slice(0, 500),
@@ -210,7 +205,6 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
       tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(tonelajeRetorno), fleteRetorno: n(fleteRetorno),
       rutaRet: sanitizar(rutaRet), tipoCargaRet, productoRet: sanitizar(productoRet),
-      empresaRet: sanitizar(empresaRet), contactoRet: sanitizar(contactoRet),
       maniRet: sanitizar(maniRet), remesaRet: sanitizar(remesaRet),
       pesoBasRet: validarNumero(pesoBasRet, 0, 999),
       lugarCargueRet: sanitizar(lugarCargueRet), lugarDescargueRet: sanitizar(lugarDescargueRet),
@@ -254,7 +248,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     setEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio("");
     setTonelaje(""); setFleteTon(""); setTieneRetorno(false); setFleteRetorno("");
     setTonelajeRetorno(""); setRutaRet(""); setEmpresaRet(""); setProductoRet("");
-    setContactoRet(""); setManiRet(""); setRemesaRet(""); setPesoBasRet("");
+    setManiRet(""); setRemesaRet(""); setPesoBasRet("");
     setLugarCargueRet(""); setLugarDescargueRet(""); setFechaCargueRet(""); setFechaDescargueRet("");
     setExtras([]); setPorcCond(""); setCarpado(""); setGastosViaje("");
     setPeajesRuta([]); setRutaCargada(null);
@@ -279,8 +273,6 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   // Datos adicionales
   if (rutaGuardada.producto)        setProducto(rutaGuardada.producto);
   if (rutaGuardada.empresa)         setEmpresa(rutaGuardada.empresa);
-  if (rutaGuardada.contactoEmpresa) setContactoEmpresa(rutaGuardada.contactoEmpresa);
-  if (rutaGuardada.celularEmpresa)  setCelularEmpresa(rutaGuardada.celularEmpresa);
   if (rutaGuardada.conductor)       setConductor(rutaGuardada.conductor);
   if (rutaGuardada.lugarCargue)     setLugarCargue(rutaGuardada.lugarCargue);
   if (rutaGuardada.lugarDescargue)  setLugarDescargue(rutaGuardada.lugarDescargue);
@@ -324,8 +316,6 @@ const guardarRutaFrecuente = async () => {
     // Datos adicionales
     producto:       sanitizar(producto),
     empresa:        sanitizar(empresa),
-    contactoEmpresa: sanitizar(contactoEmpresa),
-    celularEmpresa:  sanitizar(celularEmpresa),
     conductor:       sanitizar(conductor),
     lugarCargue:     sanitizar(lugarCargue),
     lugarDescargue:  sanitizar(lugarDescargue),
@@ -560,17 +550,6 @@ const guardarRutaFrecuente = async () => {
 
 </div>
 
-
-          <div style={styles.campo}>
-  <label style={styles.label}>Contacto empresa</label>
-  <input type="text" placeholder="Nombre del contacto" value={contactoEmpresa}
-    onChange={e => setContactoEmpresa(e.target.value)} style={styles.input} />
-</div>
-
-          <div style={styles.campo}>
-          <label style={styles.label}>Celular contacto</label>
-          <input type="tel" placeholder="+57 300 000 0000" value={celularEmpresa} onChange={e=>setCelularEmpresa(e.target.value)} style={styles.input} />
-          </div>
         </div>
         <div style={styles.campo}>
   <label style={styles.label}>Conductor</label>
@@ -779,19 +758,6 @@ const guardarRutaFrecuente = async () => {
             <label style={styles.label}>Producto</label>
             <input type="text" placeholder="Carbón, arroz..." value={productoRet}
               onChange={e=>setProductoRet(e.target.value)} style={styles.input} />
-          </div>
-        </div>
-
-        <div style={styles.fila2}>
-          <div style={styles.campo}>
-            <label style={styles.label}>Empresa</label>
-            <input type="text" placeholder="Nombre empresa" value={empresaRet}
-              onChange={e=>setEmpresaRet(e.target.value)} style={styles.input} />
-          </div>
-          <div style={styles.campo}>
-            <label style={styles.label}>Contacto</label>
-            <input type="text" placeholder="Nombre contacto" value={contactoRet}
-              onChange={e=>setContactoRet(e.target.value)} style={styles.input} />
           </div>
         </div>
 
