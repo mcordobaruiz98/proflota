@@ -761,6 +761,14 @@ const guardarRutaFrecuente = async () => {
           </div>
         </div>
 
+        
+          <div style={styles.campo}>
+            <label style={styles.label}>Empresa</label>
+            <input type="text" placeholder="Nombre empresa" value={empresaRet}
+              onChange={e=>setEmpresaRet(e.target.value)} style={styles.input} />
+          </div>
+        
+
         <div style={styles.fila2}>
           <div style={styles.campo}>
             <label style={styles.label}>Manifiesto</label>
