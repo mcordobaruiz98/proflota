@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp, Scale, FileChartColumnIncreasing } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
@@ -311,11 +311,11 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           w.document.close();
           setTimeout(()=>w.print(), 500);
         }}>
-          <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
+          <FileChartColumnIncreasing size={16} color={t.colors.blue} strokeWidth={2} />
           Exportar
         </button>
         <button style={{...styles.btnHistorial, marginLeft:"6px"}} onClick={()=>navigate("/comparativo")}>
-          <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
+          <Scale size={16} color={t.colors.blue} strokeWidth={2} />
           Comparar
         </button>
       </div>
