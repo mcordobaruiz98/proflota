@@ -4,6 +4,8 @@ import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp } 
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
+const esc = (t) => (t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
 const MESES       = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const MESES_CORTO = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
@@ -224,14 +226,14 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             const subNeta = vjs.reduce((s,v)=>s+(v.neta||0),0);
             const subKm = vjs.reduce((s,v)=>s+(v.kmT||0),0);
             return `
-              <p style="font-size:14px;font-weight:700;margin:15px 0 8px;color:#1a1a1a">${placa}</p>
+              <p style="font-size:14px;font-weight:700;margin:15px 0 8px;color:#1a1a1a">${esc(placa)}</p>
               <table>
                 <tr><th>Fecha</th><th>Manifiesto</th><th>Ruta</th><th>Empresa</th><th>Flete</th><th>Gastos</th><th>Neta</th></tr>
                 ${vjs.map(v=>`<tr>
-                  <td>${v.fecha||"—"}</td>
-                  <td>${v.mani||"—"}</td>
-                  <td>${v.ruta||"—"}</td>
-                  <td>${v.emp||"—"}</td>
+                  <td>${esc(v.fecha)||"—"}</td>
+                  <td>${esc(v.mani)||"—"}</td>
+                  <td>${esc(v.ruta)||"—"}</td>
+                  <td>${esc(v.emp)||"—"}</td>
                   <td>${fmt(v.vViaje||0)}</td>
                   <td style="color:#dc2626">${fmt(v.total||0)}</td>
                   <td class="${(v.neta||0)>=0?"verde":"rojo"}">${fmt(v.neta||0)}</td>
@@ -250,7 +252,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           <table>
             <tr><th>Placa</th><th>Viajes</th><th>Km</th><th>Ingresos</th><th>Gastos</th><th>Utilidad</th></tr>
             ${gananciaPorVeh.map(v=>`<tr>
-              <td><strong>${v.placa}</strong></td>
+              <td><strong>${esc(v.placa)}</strong></td>
               <td>${v.viajes}</td>
               <td>${v.km.toLocaleString("es-CO")}</td>
               <td>${fmt(v.ingresos||0)}</td>
@@ -265,10 +267,10 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           <table>
             <tr><th>Fecha</th><th>Vehículo</th><th>Descripción</th><th>Taller</th><th>Monto</th></tr>
             ${gastosAdicMes.map(g=>`<tr>
-              <td>${g.fecha||"—"}</td>
-              <td>${g.placa||"—"}</td>
-              <td>${g.descripcion||"—"}</td>
-              <td>${g.taller||"—"}${g.nit?" · NIT: "+g.nit:""}</td>
+              <td>${esc(g.fecha)||"—"}</td>
+              <td>${esc(g.placa)||"—"}</td>
+              <td>${esc(g.descripcion)||"—"}</td>
+              <td>${esc(g.taller)||"—"}${g.nit?" · NIT: "+esc(g.nit):""}</td>
               <td style="color:#dc2626">${fmt(g.monto)}</td>
             </tr>`).join("")}
             <tr class="total"><td colspan="4">Total gastos adicionales</td><td style="color:#dc2626">${fmt(totalGastosAdic)}</td></tr>
@@ -292,7 +294,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           <table>
             <tr><th>Empresa</th><th>Viajes</th><th>Pendiente</th><th>Vencido</th></tr>
             ${Object.entries(carteraPorEmp).map(([emp,d])=>`<tr>
-              <td>${emp}</td>
+              <td>${esc(emp)}</td>
               <td>${d.viajes}</td>
               <td class="ambar">${fmt(d.monto)}</td>
               <td class="${d.vencido>0?"rojo":""}">${d.vencido>0?fmt(d.vencido):"—"}</td>
