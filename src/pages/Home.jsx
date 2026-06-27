@@ -173,39 +173,124 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
         </div>
       </div>
 
-      {/* ONBOARDING — primer uso */}
-      {vehiculos.length === 0 && viajes.length === 0 && (
+      {/* ONBOARDING — flujo guiado */}
+      {(vehiculos.length === 0 || gastosFijos.length === 0 || viajes.length === 0) && (
         <div style={{margin:"0 16px 10px"}}>
           <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"20px",boxShadow:t.shadows.card}}>
             <p style={{fontSize:"16px",fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:"0 0 4px",textAlign:"center"}}>
-              ¡Bienvenido a NAVIRA!
+              {vehiculos.length === 0 ? "¡Bienvenido a NAVIRA!" : viajes.length === 0 ? "¡Ya casi!" : "🎉 ¡Todo listo!"}
             </p>
-            <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"0 0 16px",textAlign:"center"}}>
-              Configura tu flota en 3 pasos y empieza a controlar tu operación.
+            <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"0 0 4px",textAlign:"center"}}>
+              {vehiculos.length === 0 ? "Configura tu flota en 5 minutos" : "Completa los pasos restantes"}
             </p>
 
-            {[
-              {num:"1",titulo:"Registra tu vehículo",sub:"Placa, tipo, marca y modelo",ruta:"/agregar-vehiculo",btn:"Agregar vehículo",color:t.colors.green},
-              {num:"2",titulo:"Configura gastos fijos",sub:"Cuota, seguro, GPS — tu punto de equilibrio",ruta:null,btn:null,color:t.colors.blue},
-              {num:"3",titulo:"Calcula tu primer viaje",sub:"Ruta, flete, peajes — sabe cuánto te queda",ruta:"/calculadora",btn:null,color:t.colors.amber},
-            ].map((paso,i,arr)=>(
-              <div key={paso.num} style={{display:"flex",gap:"12px",padding:"12px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
-                <div style={{width:"32px",height:"32px",borderRadius:"50%",background:paso.color+"22",border:`1.5px solid ${paso.color}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                  <span style={{fontSize:"14px",fontWeight:t.fonts.weightBlack,color:paso.color}}>{paso.num}</span>
+            {/* Barra de progreso */}
+            <div style={{display:"flex",gap:"4px",margin:"10px 0 16px"}}>
+              {[vehiculos.length > 0, gastosFijos.length > 0, viajes.length > 0].map((done,i)=>(
+                <div key={i} style={{flex:1,height:"4px",borderRadius:"2px",background:done?t.colors.green:t.colors.bgSection}} />
+              ))}
+            </div>
+
+            {/* PASO 1 */}
+            {(()=>{
+              const done = vehiculos.length > 0;
+              return (
+                <div style={{display:"flex",gap:"12px",padding:"12px 0",borderBottom:`1px solid ${t.colors.borderLight}`,opacity:done?0.6:1}}>
+                  <div style={{width:"32px",height:"32px",borderRadius:"50%",background:done?t.colors.green:t.colors.green+"22",border:`1.5px solid ${t.colors.green}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    {done
+                      ? <span style={{color:"#fff",fontSize:"14px",fontWeight:"900"}}>✓</span>
+                      : <span style={{fontSize:"14px",fontWeight:t.fonts.weightBlack,color:t.colors.green}}>1</span>
+                    }
+                  </div>
+                  <div style={{flex:1}}>
+                    <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:0,textDecoration:done?"line-through":"none"}}>
+                      Registra tu primer camión
+                    </p>
+                    <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
+                      {done ? `${vehiculos[0]?.placa} registrado` : "Solo necesitas la placa y el tipo — 30 segundos"}
+                    </p>
+                    {!done && (
+                      <button
+                        style={{marginTop:"8px",padding:"8px 16px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,cursor:"pointer"}}
+                        onClick={()=>navigate("/agregar-vehiculo")}
+                      >Agregar mi camión →</button>
+                    )}
+                  </div>
                 </div>
-                <div style={{flex:1}}>
-                  <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:0}}>{paso.titulo}</p>
-                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{paso.sub}</p>
+              );
+            })()}
+
+            {/* PASO 2 */}
+            {(()=>{
+              const prev = vehiculos.length > 0;
+              const done = gastosFijos.length > 0;
+              return (
+                <div style={{display:"flex",gap:"12px",padding:"12px 0",borderBottom:`1px solid ${t.colors.borderLight}`,opacity:done?0.6:!prev?0.4:1}}>
+                  <div style={{width:"32px",height:"32px",borderRadius:"50%",background:done?t.colors.blue:t.colors.blue+"22",border:`1.5px solid ${done?t.colors.blue:!prev?"#333":t.colors.blue}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    {done
+                      ? <span style={{color:"#fff",fontSize:"14px",fontWeight:"900"}}>✓</span>
+                      : <span style={{fontSize:"14px",fontWeight:t.fonts.weightBlack,color:!prev?"#555":t.colors.blue}}>2</span>
+                    }
+                  </div>
+                  <div style={{flex:1}}>
+                    <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:0,textDecoration:done?"line-through":"none"}}>
+                      ¿Cuánto le cuesta mantener el camión?
+                    </p>
+                    <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
+                      {done ? `${gastosFijos.length} gasto${gastosFijos.length!==1?"s":""} fijo${gastosFijos.length!==1?"s":""} configurado${gastosFijos.length!==1?"s":""}` : "Cuota, seguro, parqueadero, GPS — 1 minuto"}
+                    </p>
+                    {!done && prev && vehiculos[0] && (
+                      <button
+                        style={{marginTop:"8px",padding:"8px 16px",background:t.colors.blue,color:"#fff",border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,cursor:"pointer"}}
+                        onClick={()=>navigate(`/vehiculo/${vehiculos[0].firestoreId}`,{state:{tab:"cuentas"}})}
+                      >Configurar gastos fijos →</button>
+                    )}
+                  </div>
                 </div>
+              );
+            })()}
+
+            {/* PASO 3 */}
+            {(()=>{
+              const prev = vehiculos.length > 0 && gastosFijos.length > 0;
+              const done = viajes.length > 0;
+              return (
+                <div style={{display:"flex",gap:"12px",padding:"12px 0",opacity:done?0.6:!prev?0.4:1}}>
+                  <div style={{width:"32px",height:"32px",borderRadius:"50%",background:done?t.colors.amber:t.colors.amber+"22",border:`1.5px solid ${done?t.colors.amber:!prev?"#333":t.colors.amber}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    {done
+                      ? <span style={{color:"#fff",fontSize:"14px",fontWeight:"900"}}>✓</span>
+                      : <span style={{fontSize:"14px",fontWeight:t.fonts.weightBlack,color:!prev?"#555":t.colors.amber}}>3</span>
+                    }
+                  </div>
+                  <div style={{flex:1}}>
+                    <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:0,textDecoration:done?"line-through":"none"}}>
+                      Calcule su primer viaje
+                    </p>
+                    <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
+                      {done ? `${viajes.length} viaje${viajes.length!==1?"s":""} registrado${viajes.length!==1?"s":""}` : "Vea cuánto le queda después de combustible, peajes y conductor"}
+                    </p>
+                    {!done && prev && vehiculos[0] && (
+                      <button
+                        style={{marginTop:"8px",padding:"8px 16px",background:t.colors.amber,color:"#fff",border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,cursor:"pointer"}}
+                        onClick={()=>navigate("/calculadora",{state:{placa:vehiculos[0].placa}})}
+                      >Calcular mi primer viaje →</button>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Resultado después de completar todo */}
+            {vehiculos.length > 0 && gastosFijos.length > 0 && viajes.length > 0 && totalPE > 0 && (
+              <div style={{marginTop:"12px",padding:"14px",background:t.colors.greenSoft,border:`1.5px solid ${t.colors.greenBorder}`,borderRadius:t.radius.md,textAlign:"center"}}>
+                <p style={{fontSize:t.fonts.sizeXs,color:t.colors.green,fontWeight:t.fonts.weightBold,margin:"0 0 4px",textTransform:"uppercase"}}>Su punto de equilibrio mensual</p>
+                <p style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:t.colors.green,margin:"0 0 4px"}}>{fmt(totalPE)}</p>
+                <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:0}}>
+                  Con su primer viaje ya cubrió el {pctPE}%. ¡Siga así!
+                </p>
               </div>
-            ))}
+            )}
 
-            <button
-              style={{width:"100%",padding:"13px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",marginTop:"12px"}}
-              onClick={()=>navigate("/agregar-vehiculo")}
-            >
-              Empezar → Registrar mi primer vehículo
-            </button>
           </div>
         </div>
       )}
