@@ -253,7 +253,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     setObservaciones(""); setPlaca(""); setTipoCarga(""); setProducto(""); setRuta("");
     setEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio(""); setKmCargadoRet(""); setKmVacioRet("");
     setTonelaje(""); setFleteTon(""); setTieneRetorno(false); setFleteRetorno("");
-    setTonelajeRetorno(""); setRutaRet(""); setEmpresaRet(""); setProductoRet("");
+    setTonelajeRetorno(""); setRutaRet(""); setempresaRet(""); setProductoRet("");
     setManiRet(""); setRemesaRet(""); setPesoBasRet("");
     setLugarCargueRet(""); setLugarDescargueRet(""); setFechaCargueRet(""); setFechaDescargueRet("");
     setExtras([]); setPorcCond(""); setCarpado(""); setGastosViaje("");
@@ -651,7 +651,7 @@ const guardarRutaFrecuente = async () => {
           </div>
         </div>
         )}
-        
+
         {/* MODO DE FLETE */}
 <div style={styles.campo}>
   <label style={styles.label}>Modo de pago del flete</label>
@@ -801,8 +801,9 @@ const guardarRutaFrecuente = async () => {
           <div style={styles.campo}>
             <label style={styles.label}>Empresa</label>
             <input type="text" placeholder="Nombre empresa" value={empresaRet}
-              onChange={e=>setEmpresaRet(e.target.value)} style={styles.input} />
+              onChange={e=>setempresaRet(e.target.value)} style={styles.input} />
           </div>
+          
         
 
         <div style={styles.fila2}>
