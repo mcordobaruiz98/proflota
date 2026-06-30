@@ -173,6 +173,28 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
         </div>
       </div>
 
+      {/* RESUMEN DEL DÍA */}
+      {viajes.length > 0 && (()=>{
+        const hoyStr = new Date().toISOString().slice(0,10);
+        const viajesHoy = viajes.filter(v => v.fecha === hoyStr);
+        const gananciaHoy = viajesHoy.reduce((s,v) => s + (v.neta||0), 0);
+        const ingresosHoy = viajesHoy.reduce((s,v) => s + (v.vViaje||0), 0);
+        if (viajesHoy.length === 0) return null;
+        return (
+          <div style={{margin:"0 16px 10px",padding:"10px 16px",background:t.colors.bgCard,borderRadius:t.radius.md,display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:t.shadows.card}}>
+            <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+              <Truck size={14} color={t.colors.blue} strokeWidth={2}/>
+              <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>
+                Hoy: {viajesHoy.length} viaje{viajesHoy.length!==1?"s":""} · {fmt(ingresosHoy)} brutos
+              </span>
+            </div>
+            <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:gananciaHoy>=0?t.colors.green:t.colors.red}}>
+              {fmt(gananciaHoy)}
+            </span>
+          </div>
+        );
+      })()}
+
       {/* ONBOARDING — flujo guiado */}
       {(vehiculos.length === 0 || gastosFijos.length === 0 || viajes.length === 0) && (
         <div style={{margin:"0 16px 10px"}}>

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle, Clock, AlertCircle, Search } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, AlertCircle, Search, ChevronUp, ChevronDown } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
 function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
   const navigate = useNavigate();
   const [filtro, setFiltro] = useState("pendientes");
   const [busqueda, setBusqueda] = useState("");
+  const [periodo, setPeriodo] = useState("todo");
+  const [empAbiertas, setEmpAbiertas] = useState({});
 
   const fmt = (n) => "$" + Math.round(n || 0).toLocaleString("es-CO");
   const hoy = new Date();
@@ -21,11 +23,29 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
   };
 
   // Filtrar viajes
+  const mes = hoy.getMonth();
+  const anio = hoy.getFullYear();
+
+  const toggleEmp = (emp) => setEmpAbiertas(prev => ({...prev, [emp]: !prev[emp]}));
+
   const viajesFiltrados = viajes.filter(v => {
+    // Filtro de búsqueda
     const q = busqueda.toLowerCase();
-    const coincide = !q || (v.emp || "").toLowerCase().includes(q) || (v.ruta || "").toLowerCase().includes(q) || (v.placa || "").toLowerCase().includes(q);
+    const coincide = !q || (v.emp || "").toLowerCase().includes(q) || (v.ruta || "").toLowerCase().includes(q) || (v.placa || "").toLowerCase().includes(q) || (v.mani || "").toLowerCase().includes(q);
     if (!coincide) return false;
 
+    // Filtro de período
+    if (periodo !== "todo") {
+      const f = new Date(v.fecha);
+      if (periodo === "mes" && (f.getMonth() !== mes || f.getFullYear() !== anio)) return false;
+      if (periodo === "trimestre") {
+        const trimActual = Math.floor(mes / 3);
+        const trimViaje = Math.floor(f.getMonth() / 3);
+        if (trimViaje !== trimActual || f.getFullYear() !== anio) return false;
+      }
+    }
+
+    // Filtro de estado
     if (filtro === "pendientes") return v.estadoPago !== "pagado";
     if (filtro === "vencidos") {
       if (v.estadoPago === "pagado") return false;
@@ -113,6 +133,20 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
           />
         </div>
 
+        {/* PERÍODO */}
+        <div style={styles.chips}>
+          {[
+            { id: "todo", label: "Todo" },
+            { id: "mes", label: "Este mes" },
+            { id: "trimestre", label: "Trimestre" },
+          ].map(p => (
+            <button key={p.id}
+              style={{ ...styles.chip, ...(periodo === p.id ? styles.chipActivo : {}) }}
+              onClick={() => setPeriodo(p.id)}
+            >{p.label}</button>
+          ))}
+        </div>
+
         {/* FILTROS */}
         <div style={styles.chips}>
           {[
@@ -149,17 +183,23 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
         )}
 
         {/* VIAJES POR EMPRESA */}
-        {empresasOrdenadas.map(([empresa, data]) => (
+        {empresasOrdenadas.map(([empresa, data]) => {
+          const abierta = empAbiertas[empresa] !== false; // abierta por defecto
+          return (
           <div key={empresa} style={styles.card}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
+              onClick={() => toggleEmp(empresa)}>
               <div>
                 <p style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: 0 }}>{empresa}</p>
                 <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "2px 0 0" }}>{data.viajes.length} viaje{data.viajes.length !== 1 ? "s" : ""}</p>
               </div>
-              <p style={{ fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBlack, color: t.colors.textPrimary, margin: 0 }}>{fmt(data.total)}</p>
+              <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                <p style={{ fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBlack, color: t.colors.textPrimary, margin: 0 }}>{fmt(data.total)}</p>
+                {abierta ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
+              </div>
             </div>
 
-            {data.viajes.map((v, i, arr) => {
+            {abierta && data.viajes.map((v, i, arr) => {
               const { dias, vencido } = calcVencimiento(v);
               const pagado = v.estadoPago === "pagado";
               const placa = v.placa || "";
@@ -222,7 +262,8 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
               );
             })}
           </div>
-        ))}
+          );
+        })}
 
       </div>
     </div>
