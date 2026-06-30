@@ -369,7 +369,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
           <div style={styles.hero}>
             <p style={styles.heroRuta}>{viaje.ruta||"Sin ruta"}</p>
             <div style={styles.heroPills}>
-              {viaje.fecha&&<span style={styles.pill}>📅 {viaje.fecha}</span>}
+              {viaje.fecha&&<span style={styles.pill}> calendarDays {viaje.fecha}</span>}
               {viaje.placa&&<span style={styles.pill}>🚚 {viaje.placa}</span>}
               {viaje.condNom&&<span style={styles.pill}>👤 {viaje.condNom}</span>}
               {viaje.mani&&<span style={styles.pill}>📄 Man. {viaje.mani}</span>}
