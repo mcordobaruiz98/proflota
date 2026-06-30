@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp, Scale, FileChartColumnIncreasing } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
@@ -177,35 +177,31 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
 
           <!-- RESUMEN EJECUTIVO -->
           <h2>Resumen ejecutivo</h2>
-          <div class="resumen-grid" style="grid-template-columns:1fr 1fr">
+          <div class="resumen-grid">
             <div class="resumen-card">
               <div class="label">Ingresos brutos</div>
               <div class="valor azul">${fmt(ingresosMes)}</div>
-              <div style="font-size:11px;color:#888;margin-top:4px">${viajesMes.length} viaje${viajesMes.length!==1?"s":""}</div>
             </div>
-            <div class="resumen-card" style="border-color:${utilidadReal>=0?"#22c55e":"#ef4444"}">
+            <div class="resumen-card">
+              <div class="label">Total gastos</div>
+              <div class="valor rojo">${fmt(gastosMes + totalPE + totalGastosAdic)}</div>
+            </div>
+            <div class="resumen-card">
               <div class="label">${totalPE>0||totalGastosAdic>0?"Utilidad real":"Ganancia neta"}</div>
               <div class="valor ${utilidadReal>=0?"verde":"rojo"}">${fmt(utilidadReal)}</div>
-              <div style="font-size:11px;color:#888;margin-top:4px">Rentabilidad: ${rentabilidad}%</div>
             </div>
           </div>
-
           <table>
-            <tr style="background:#f0f9ff"><td style="font-weight:700">💰 Ingresos por viajes</td><td style="font-weight:700;color:#1565FF">${fmt(ingresosMes)}</td></tr>
-            <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos operativos:</td></tr>
-            <tr><td style="padding-left:20px">⛽ Combustible (ACPM + Adblue)</td><td style="color:#dc2626">-${fmt(acpmMes + adblMes)}</td></tr>
-            <tr><td style="padding-left:20px">🛣️ Peajes</td><td style="color:#dc2626">-${fmt(peajesMes)}</td></tr>
-            <tr><td style="padding-left:20px">👤 Conductor</td><td style="color:#dc2626">-${fmt(conductorMes)}</td></tr>
-            ${otrosMes>0?`<tr><td style="padding-left:20px">📋 Otros gastos de viaje</td><td style="color:#dc2626">-${fmt(otrosMes)}</td></tr>`:""}
-            ${descuentosMes>0?`<tr><td style="padding-left:20px">📑 Descuentos de ley</td><td style="color:#dc2626">-${fmt(descuentosMes)}</td></tr>`:""}
-            <tr style="background:#f0fdf4"><td style="font-weight:600">= Ganancia neta de viajes</td><td style="font-weight:700;color:${netaMes>=0?"#16a34a":"#dc2626"}">${fmt(netaMes)}</td></tr>
-            ${totalPE>0?`
-            <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos fijos mensuales:</td></tr>
-            <tr><td style="padding-left:20px">🏦 Gastos fijos (cuota, seguro, GPS...)</td><td style="color:#dc2626">-${fmt(totalPE)}</td></tr>`:""}
-            ${totalGastosAdic>0?`<tr><td style="padding-left:20px">🔧 Gastos adicionales (taller, repuestos...)</td><td style="color:#dc2626">-${fmt(totalGastosAdic)}</td></tr>`:""}
-            ${totalPE>0||totalGastosAdic>0?`<tr class="total" style="background:#f0fdf4"><td>= Utilidad real del período</td><td class="${utilidadReal>=0?"verde":"rojo"}">${fmt(utilidadReal)}</td></tr>`:""}
+            <tr><td>Ingresos brutos por viajes</td><td>${fmt(ingresosMes)}</td></tr>
+            <tr><td>Gastos operativos de viajes</td><td style="color:#dc2626">-${fmt(gastosMes)}</td></tr>
+            <tr><td>Ganancia neta viajes</td><td>${fmt(netaMes)}</td></tr>
+            ${totalPE>0?`<tr><td>Gastos fijos mensuales (Punto de equilibrio)</td><td style="color:#dc2626">-${fmt(totalPE)}</td></tr>`:""}
+            ${totalGastosAdic>0?`<tr><td>Gastos adicionales del mes</td><td style="color:#dc2626">-${fmt(totalGastosAdic)}</td></tr>`:""}
+            <tr class="total"><td>Utilidad real del período</td><td class="${utilidadReal>=0?"verde":"rojo"}">${fmt(utilidadReal)}</td></tr>
           </table>
           <table>
+            <tr><td>Rentabilidad</td><td>${rentabilidad}%</td></tr>
+            <tr><td>Viajes realizados</td><td>${viajesMes.length}</td></tr>
             <tr><td>Kilómetros recorridos</td><td>${kmMes.toLocaleString("es-CO")} km</td></tr>
             <tr><td>Vehículos activos</td><td>${vehiculos.length}</td></tr>
           </table>
@@ -315,11 +311,11 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           w.document.close();
           setTimeout(()=>w.print(), 500);
         }}>
-          <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
+          <FileChartColumnIncreasing size={16} color={t.colors.blue} strokeWidth={2} />
           Exportar
         </button>
         <button style={{...styles.btnHistorial, marginLeft:"6px"}} onClick={()=>navigate("/comparativo")}>
-          <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
+          <Scale size={16} color={t.colors.blue} strokeWidth={2} />
           Comparar
         </button>
       </div>
