@@ -110,7 +110,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
   { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Cartera",     Icono: AlertCircle, ruta: "/cartera",     color: "#0F2340", border: "#1E3A5F", iconColor: vencidos.length > 0 ? "#EF4444" : "#22C55E" },
   { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
-  { label: "Mant.",       Icono: Wrench,      ruta: "/vehiculos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
+  { label: "Mant.",       Icono: Wrench,      ruta: "/vehiculos",   state: {tab:"mant"}, color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
 ];
 
   if (cargando) return (
@@ -430,7 +430,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
         background: a.color,
         border: `1.5px solid ${a.border}`,
       }}
-      onClick={() => navigate(a.ruta)}
+      onClick={() => navigate(a.ruta, a.state ? {state: a.state} : undefined)}
     >
       <div style={{
         width: "40px",
