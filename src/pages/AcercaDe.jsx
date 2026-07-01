@@ -46,7 +46,7 @@ function AcercaDe() {
           {abierto.terminos && (
             <div style={styles.cuerpo}>
               {[
-                {texto:"Estos Términos y Condiciones regulan el uso de la aplicación NAVIRA (en adelante \"la Aplicación\"), desarrollada y operada por MARIO ALEJANDRO CORDOBA RUIZ, identificado con celula 1.017.255.866, con domicilio en Barranquilla, Colombia (en adelante \"NAVIRA\" o \"NOSOTROS\")"},
+                {texto:"Estos Términos y Condiciones regulan el uso de la aplicación NAVIRA (en adelante \"la Aplicación\"), desarrollada y operada por T&T MCR, identificado con celula 1.017.255.866, con domicilio en Barranquilla, Colombia (en adelante \"NAVIRA\" o \"NOSOTROS\")"},
                 {texto:"Al registrarse al usar la Aplicación, usted (en adelante \"el Usuario\"), acepta estos terminos en su totalidad. Si no está de acuerdo, no haga uso de la Aplicación"},
                 {titulo:"1. Descripción del servicio", texto:"NAVIRA es una aplicación web progresiva (PWA) diseñada para la gestión administrativa de flotas de transporte de carga por carretera en Colombia. Sus funciones incluyen entre otras: * Cálculo de costos y rentabilidades de viajes. * Registros y seguimientos de vehículos. * Control de mantenimiento preventivo. * Gestión de cartera y cuentas por cobrar. * Generación de informes financieros."},
                 {texto:"La Aplicación es una herramienta de apoyo administrativo. NAVIRA no presta servicios de trasnporte, intermediación de carga, ni asesoria financiera, contable o legal."},
@@ -79,7 +79,7 @@ function AcercaDe() {
                 {titulo:"8. Tarifas y pagos", texto:"8.1. Durante la fase Beta, el uso de NAVIRA es completamente gratuito."},
                 {texto:"8.2. Una vez finalizada la fase Beta, NAVIRA podrá implementar planes de suscripción de pago, los cuales serán comunicados al Usuario con al menos 30 días de anticipación."},
                 {texto:"8.3. El Usuario podrá continuar con un plan gratuito limitado o suscribirse a un plan de pago."},
-                {titulo:"9. Propiedad intelectual", texto:"9.1. NAVIRA, su logotipo, diseño, código fuente, algoritmos y contenido son propiedad exclusiva de Mario Alejandro Cordoba Ruiz."},
+                {titulo:"9. Propiedad intelectual", texto:"9.1. NAVIRA, su logotipo, diseño, código fuente, algoritmos y contenido son propiedad exclusiva de T&T MCR."},
                 {texto:"9.2. El uso de la Aplicación no otorga al Usuario ningún derecho de propiedad intelectual sobre la misma."},
                 {texto:"9.3. Queda prohibida la reproducción, distribución o modificación total o parcial de la Aplicación sin autorización expresa."},
                 {titulo:"10. Versión BETA", texto:"10.1. La Aplicación es una herramienta de apoyo administrativo. Los cálculos, estimaciones y datos proporcionados son orientativos y no constituyen asesoría financiera, contable ni legal."},
@@ -116,8 +116,8 @@ function AcercaDe() {
           {abierto.privacidad && (
             <div style={styles.cuerpo}>
               {[
-                {texto:"En cumplimiento de la Ley 1581 de 2012 (Ley de Protección de Datos Personales), el Decreto 1377 de 2013 y demás normativa vigente en Colombia, Mario Alejandro Cordoba Ruiz, identificado con NIT/Cédula 1.017.255.866, con domicilio en Barranquilla, Atlántico, Colombia, en calidad de Responsable del Tratamiento de datos personales, presenta la siguiente Política de Privacidad para la aplicación NAVIRA."},
-                {titulo:"1. Responsables del tratamiento", texto:"Responsable: Mario Alejandro Cordoba Ruiz. NIT/Cédula: 1.017.255.866, Barranquilla/ Atlantico, Colombia. Correo electronico: naviralatam@gmail.com. Teléfono/WhatsApp:+57 301 658 7224"},
+                {texto:"En cumplimiento de la Ley 1581 de 2012 (Ley de Protección de Datos Personales), el Decreto 1377 de 2013 y demás normativa vigente en Colombia, T&T MCR, identificado con NIT/Cédula 1.017.255.866, con domicilio en Barranquilla, Atlántico, Colombia, en calidad de Responsable del Tratamiento de datos personales, presenta la siguiente Política de Privacidad para la aplicación NAVIRA."},
+                {titulo:"1. Responsables del tratamiento", texto:"Responsable: T&T MCR. NIT/Cédula: 1.017.255.866, Barranquilla/ Atlantico, Colombia. Correo electronico: naviralatam@gmail.com. Teléfono/WhatsApp:+57 301 658 7224"},
                 {titulo:"2. Datos personales que recopilamos", texto:"NAVIRA recopila los siguientes datos personales según las funcionalidades que el Usuario utilice:"},
                 {texto:"2.1. Datos de registro: Nombre completo, correo electronico, contraseña (almacenada de forma cifrada por Firebase Authentication), foto de perfil (si inicia sesión con Google)."},
                 {texto:"2.2. Datos de vehiculos: Placa del vehiculo y remolque (opcional), marca, modelo, tipo de vehículo, propietario y/o tenedor, fotografia del vehículo, kilometraje (odómetro), fechas de vencimiento de documentos (SOAT, RTM, pólizas)."},
@@ -175,7 +175,7 @@ function AcercaDe() {
                 {texto:"* Autoriza de manera libre, expresa, previa e informada el tratamiento de sus datos personales conforme a las finalidades aquí descritas."},
                 {texto:"* Conoce sus derechos como titular de datos personales según la Ley 1581 de 2012."},
                 {titulo:"Contacto y canal de atención.", texto:"Para cualquier consulta, solicitud o reclamo relacionado con el tratamiento de datos personales:"},
-                {texto:"Responsable: Mario Alejandro Cordoba Ruiz. Correo electrónico: naviralatam@gmail.com"},
+                {texto:"Responsable: T&T MCR. Correo electrónico: naviralatam@gmail.com"},
                 {texto:"Autoridad de control: Superintendencia de Industria y Comercio (SIC) www.sic.gov.co Línea gratuita: 01 8000 910 165"},
 
               ].map((item,i)=>(
