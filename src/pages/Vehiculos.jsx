@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Truck, Plus, Search, Trash2 } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
 function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const tabDestino = location.state?.tab || null;
   const [busqueda, setBusqueda] = useState("");
 
   const vehiculosFiltrados = vehiculos.filter((v) =>
@@ -106,7 +108,7 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}
               {/* Contenido */}
               <div
   style={styles.tarjetaContenido}
-  onClick={() => navigate(`/vehiculo/${vehiculo.firestoreId}`)}
+  onClick={() => navigate(`/vehiculo/${vehiculo.firestoreId}`, tabDestino ? {state:{tab:tabDestino}} : undefined)}
 >
   {vehiculo.fotoUrl ? (
     <img src={vehiculo.fotoUrl} alt={vehiculo.placa}
