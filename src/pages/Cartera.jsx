@@ -19,7 +19,7 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
     const vence = new Date(fecha);
     vence.setDate(vence.getDate() + plazo);
     const dias = Math.ceil((vence - hoy) / (1000 * 60 * 60 * 24));
-    return { vence, dias, vencido: dias < 0 };
+    return { vence, dias, vencido: dias <= 0 };
   };
 
   // Filtrar viajes
