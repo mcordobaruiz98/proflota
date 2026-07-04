@@ -11,7 +11,7 @@ function Placa({ valor, size = "md" }) {
   }[size];
   return (
     <span style={{
-      display: "inline-block", background: "#FFC107", color: "#0A0A0A",
+      display: "inline-block", background: "#FFFFFF", color: "#0A0A0A",
       fontWeight: 800, fontFamily: "'Arial Narrow', Arial, sans-serif",
       letterSpacing: "1px", border: `${dims.borderWidth} solid #0A0A0A`,
       borderRadius: dims.borderRadius, padding: dims.padding,
