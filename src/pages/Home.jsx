@@ -110,7 +110,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
   { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
   { label: "Cartera",     Icono: AlertCircle, ruta: "/cartera",     color: "#0F2340", border: "#1E3A5F", iconColor: vencidos.length > 0 ? "#EF4444" : "#22C55E" },
   { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
-  { label: "Mant.",       Icono: Wrench,      ruta: "/vehiculos",   state: {tab:"mant"}, color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
+  { label: "Mant.",       Icono: Wrench,      ruta: "/vehiculos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
 ];
 
   if (cargando) return (
@@ -151,7 +151,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             {fmt(gananciaMes)}
           </p>
           <p style={styles.gananciaSub}>
-            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""}
+            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""} · {fmt(ingresosMes)} brutos
           </p>
           {totalPE > 0 && (
             <div style={{marginTop:"8px"}}>
@@ -172,6 +172,33 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
           </div>
         </div>
       </div>
+
+      {/* SEMÁFORO DE FLOTA */}
+      {vehiculos.length > 1 && (
+        <div style={{margin:"0 16px 10px",padding:"10px 14px",background:t.colors.bgCard,borderRadius:t.radius.md,boxShadow:t.shadows.card}}>
+          <div style={{display:"flex",gap:"12px",overflowX:"auto",paddingBottom:"2px"}}>
+            {vehiculos.map(v => {
+              const est = v.estado || "disponible";
+              const colores = {
+                disponible:      { c: t.colors.green,  label: "Disponible" },
+                en_viaje:        { c: t.colors.blue,   label: "En viaje" },
+                en_taller:       { c: t.colors.amber,  label: "En taller" },
+                esperando_carga: { c: "#8B9CB3",       label: "Esperando" },
+              };
+              const e = colores[est] || colores.disponible;
+              return (
+                <div key={v.firestoreId}
+                  onClick={()=>navigate(`/vehiculo/${v.firestoreId}`)}
+                  style={{display:"flex",alignItems:"center",gap:"6px",cursor:"pointer",flexShrink:0}}
+                >
+                  <span style={{width:"10px",height:"10px",borderRadius:"50%",background:e.c,boxShadow:`0 0 6px ${e.c}66`,flexShrink:0}} />
+                  <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.textSecondary}}>{v.placa}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* RESUMEN DEL DÍA */}
       {viajes.length > 0 && (()=>{
@@ -430,7 +457,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
         background: a.color,
         border: `1.5px solid ${a.border}`,
       }}
-      onClick={() => navigate(a.ruta, a.state ? {state: a.state} : undefined)}
+      onClick={() => navigate(a.ruta)}
     >
       <div style={{
         width: "40px",

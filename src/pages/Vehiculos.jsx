@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import Placa from "../components/Placa";
 import { Truck, Plus, Search, Trash2 } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
@@ -119,7 +120,7 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}
     </div>
   )}
   <div style={styles.tarjetaInfo}>
-    <p style={styles.tarjetaPlaca}>{vehiculo.placa}</p>
+    <div style={{marginBottom:"2px"}}><Placa valor={vehiculo.placa} size="md" /></div>
     <p style={styles.tarjetaTipo}>
       {vehiculo.tipoVehiculo}
       {vehiculo.tipoRemolque ? ` · ${vehiculo.tipoRemolque}` : ""}
