@@ -236,7 +236,11 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
         total: totalDesc,
       }
     });
-    mostrarToast("Viaje guardado correctamente","exito");
+    if (viajes.length === 0) {
+      mostrarToast("🎉 ¡Primer viaje registrado! Guárdelo como ruta frecuente y el próximo lo calcula en 10 segundos","exito");
+      } else {
+          mostrarToast("Viaje guardado correctamente","exito");
+      }
 
     // Actualizar odómetro del vehículo automáticamente
     if (placa && kmTotal > 0) {
@@ -440,6 +444,16 @@ const guardarRutaFrecuente = async () => {
     )}
   </div>
 )}
+
+      {/* GUÍA PRIMERA VEZ */}
+      {viajes.length === 0 && (
+        <div style={{margin:"10px 16px 0",padding:"10px 14px",background:"#1565FF15",border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.md,display:"flex",gap:"8px",alignItems:"flex-start"}}>
+          <span style={{fontSize:"16px"}}>💡</span>
+          <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:0,lineHeight:1.5}}>
+            <strong style={{color:t.colors.textPrimary}}>Su primer cálculo:</strong> solo necesita ruta, kilómetros, toneladas y flete. Las demás secciones (combustible, peajes, costos) las abre tocándolas. Todo lo demás es opcional.
+          </p>
+        </div>
+      )}
 
       {/* ── DATOS DEL VIAJE ── */}
       <div style={styles.seccionHeader} onClick={()=>setSecDatos(!secDatos)}>

@@ -233,6 +233,22 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     setMesActual(m); setAnioActual(a);
   };
 
+  // Tab Historial
+  const viajesBuscados = viajesVehiculo.filter(v => {
+    const q = busquedaH.toLowerCase();
+    if (!q) return true;
+    return (v.ruta||"").toLowerCase().includes(q)||(v.mani||"").toLowerCase().includes(q);
+  }).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+
+  const viajesAgrupadosPorMes = viajesBuscados.reduce((grupos,viaje)=>{
+    const f  = new Date(viaje.fecha);
+    const et = `${MESES[f.getMonth()]} ${f.getFullYear()}`;
+    const ex = grupos.find(g=>g.etiqueta===et);
+    if (ex) ex.viajes.push(viaje);
+    else grupos.push({etiqueta:et, viajes:[viaje]});
+    return grupos;
+  },[]);
+
   // Hoja de vida
   const actualizarHV = (clave, valor) => {
     const nuevo = {...hvData, [clave]:valor};
@@ -339,6 +355,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
   {id:"info",      label:"Info",    Icono:Info},
   {id:"viajes",    label:"Viajes",  Icono:Route},
   {id:"cuentas",   label:"Cuentas", Icono:TrendingUp},
+  {id:"historial", label:"Historial",Icono:Clock},
   {id:"mant",      label:"Mant.",   Icono:Wrench},
   {id:"hvida",     label:"H.Vida",  Icono:FileText},
 ];
@@ -713,6 +730,27 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               </div>
             )}
 
+            {/* Viajes del mes */}
+            {viajesMes.length>0&&(
+              <div style={styles.card}>
+                <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
+                {[...viajesMes].reverse().map((viaje,i,arr)=>(
+                  <div key={viaje.firestoreId}
+                    style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`,cursor:"pointer"}}
+                    onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
+                  >
+                    <div>
+                      <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,margin:0,color:t.colors.textPrimary}}>{viaje.ruta||"Sin ruta"}</p>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{viaje.fecha||""}</p>
+                    </div>
+                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,margin:0,color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
+                      {fmt(viaje.neta||0)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* ── GASTOS Y FACTURAS DEL VEHÍCULO ── */}
             {(() => {
               const gastosMesVeh = gastosVehiculo.filter(g => {
@@ -872,6 +910,16 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Punto de equilibrio</span>
                         <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:t.colors.amber}}>{fmt(puntoEquilibrio)}/mes</span>
                       </div>
+                    )}
+
+                    {/* Puente onboarding: gastos listos → primer viaje */}
+                    {gfVehiculo.length > 0 && viajes.length === 0 && (
+                      <button
+                        style={{width:"100%",marginTop:"12px",padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer"}}
+                        onClick={()=>navigate("/calculadora",{state:{placa:vehiculo.placa}})}
+                      >
+                        ✓ ¡Gastos listos! Calcular mi primer viaje →
+                      </button>
                     )}
                   </div>
 
@@ -1043,7 +1091,58 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
           </div>
         )}
 
-        
+        {/* ── HISTORIAL ── */}
+        {tabActivo==="historial" && (
+          <div>
+            <div style={styles.buscadorWrap}>
+              <input type="text" placeholder="Buscar por ruta o manifiesto..."
+                value={busquedaH} onChange={e=>setBusquedaH(e.target.value)} style={styles.buscadorInput} />
+            </div>
+
+            {viajesVehiculo.length===0&&(
+              <div style={styles.vacio}>
+                <Clock size={40} color={t.colors.textTertiary} strokeWidth={1.5} />
+                <p style={styles.vacioTexto}>Sin historial todavía</p>
+                <p style={styles.vacioSub}>Los viajes guardados aparecerán aquí.</p>
+              </div>
+            )}
+
+            {viajesVehiculo.length>0&&viajesBuscados.length===0&&(
+              <div style={styles.vacio}>
+                <p style={styles.vacioTexto}>Sin resultados</p>
+                <p style={styles.vacioSub}>No hay viajes con "{busquedaH}"</p>
+              </div>
+            )}
+
+            {viajesAgrupadosPorMes.map(grupo=>(
+              <div key={grupo.etiqueta} style={{marginBottom:"6px"}}>
+                <p style={styles.grupoMes}>{grupo.etiqueta}</p>
+                {grupo.viajes.map(viaje=>{
+                  const ok=(viaje.mrg||0)>=25;
+                  return (
+                    <div key={viaje.firestoreId} style={styles.tarjetaViaje} onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}>
+                      <div style={{...styles.tarjetaFranja,background:ok?t.colors.green:t.colors.amber}} />
+                      <div style={styles.tarjetaViajeContenido}>
+                        <div style={{flex:1,minWidth:0}}>
+                          <p style={styles.tarjetaRuta}>{viaje.ruta||"Sin ruta"}</p>
+                          <p style={styles.tarjetaMeta}>
+                            {viaje.fecha||""}
+                            {viaje.ton?` · ${fnD(viaje.ton,1)} ton`:""}
+                            {viaje.mani?` · Man. ${viaje.mani}`:""}
+                          </p>
+                        </div>
+                        <p style={{...styles.tarjetaNeta,color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
+                          {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* ── MANTENIMIENTO ── */}
 {tabActivo==="mant" && (
   <div>
