@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp, Scale, FileChartColumnIncreasing } from "lucide-react";
+import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp, FileChartColumnIncreasing, Scale } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
@@ -60,6 +60,28 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
   const totalGastosAdic = gastosAdicMes.reduce((s, g) => s + (g.monto || 0), 0);
 
   const utilidadReal = netaMes - totalPE - totalGastosAdic;
+
+  // ── Comparación con el mes anterior (para export) ──
+  let mesAnt = mes - 1, anioAnt = anio;
+  if (mesAnt < 0) { mesAnt = 11; anioAnt--; }
+  const viajesMesAnt  = viajes.filter(v => { const f=new Date(v.fecha); return f.getMonth()===mesAnt && f.getFullYear()===anioAnt; });
+  const ingresosAnt   = viajesMesAnt.reduce((s,v) => s+(v.vViaje||0), 0);
+  const netaAnt       = viajesMesAnt.reduce((s,v) => s+(v.neta||0),   0);
+  const gastosAdicAnt = gastosVehiculo.filter(g => { const f=new Date(g.fecha); return f.getMonth()===mesAnt && f.getFullYear()===anioAnt; }).reduce((s,g)=>s+(g.monto||0),0);
+  const utilidadAnt   = netaAnt - totalPE - gastosAdicAnt;
+
+  // Genera "↑ 12% vs May" en HTML para el export
+  const varPct = (actual, anterior) => {
+    if (!anterior || anterior === 0) return "";
+    const pct = ((actual - anterior) / Math.abs(anterior)) * 100;
+    const sube = pct >= 0;
+    return `<span style="font-size:10px;font-weight:700;color:${sube?"#16a34a":"#dc2626"}">${sube?"↑":"↓"} ${Math.abs(pct).toFixed(0)}% vs ${MESES_CORTO[mesAnt]}</span>`;
+  };
+
+  // ── KPIs operativos (para export) ──
+  const galMes   = viajesMes.reduce((s,v) => s+(v.gTot||0), 0);
+  const costoKm  = kmMes > 0 ? gastosMes / kmMes : 0;
+  const rendProm = galMes > 0 ? kmMes / galMes : 0;
 
   const gananciaPorVeh = vehiculos.map(veh => {
     const vt = viajesMes.filter(v => v.placa===veh.placa);
@@ -177,34 +199,69 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
 
           <!-- RESUMEN EJECUTIVO -->
           <h2>Resumen ejecutivo</h2>
-          <div class="resumen-grid">
+          <div class="resumen-grid" style="grid-template-columns:1fr 1fr">
             <div class="resumen-card">
               <div class="label">Ingresos brutos</div>
               <div class="valor azul">${fmt(ingresosMes)}</div>
+              <div style="font-size:11px;color:#888;margin-top:4px">${viajesMes.length} viaje${viajesMes.length!==1?"s":""} ${varPct(ingresosMes, ingresosAnt)}</div>
             </div>
-            <div class="resumen-card">
-              <div class="label">Total gastos</div>
-              <div class="valor rojo">${fmt(gastosMes + totalPE + totalGastosAdic)}</div>
-            </div>
-            <div class="resumen-card">
+            <div class="resumen-card" style="border-color:${utilidadReal>=0?"#22c55e":"#ef4444"}">
               <div class="label">${totalPE>0||totalGastosAdic>0?"Utilidad real":"Ganancia neta"}</div>
               <div class="valor ${utilidadReal>=0?"verde":"rojo"}">${fmt(utilidadReal)}</div>
+              <div style="font-size:11px;color:#888;margin-top:4px">Rentabilidad: ${rentabilidad}% ${varPct(utilidadReal, utilidadAnt)}</div>
             </div>
           </div>
+
+          <!-- KPIs OPERATIVOS -->
+          <div class="resumen-grid" style="grid-template-columns:1fr 1fr 1fr;margin-top:-8px">
+            <div class="resumen-card" style="padding:10px">
+              <div class="label">Costo por km</div>
+              <div style="font-size:15px;font-weight:800">${fmt(costoKm)}</div>
+            </div>
+            <div class="resumen-card" style="padding:10px">
+              <div class="label">Margen neto</div>
+              <div style="font-size:15px;font-weight:800;color:${Number(rentabilidad)>=40?"#16a34a":Number(rentabilidad)>=20?"#d97706":"#dc2626"}">${rentabilidad}%</div>
+            </div>
+            <div class="resumen-card" style="padding:10px">
+              <div class="label">Rendimiento prom.</div>
+              <div style="font-size:15px;font-weight:800">${rendProm>0?rendProm.toFixed(1)+" km/gal":"—"}</div>
+            </div>
+          </div>
+
           <table>
-            <tr><td>Ingresos brutos por viajes</td><td>${fmt(ingresosMes)}</td></tr>
-            <tr><td>Gastos operativos de viajes</td><td style="color:#dc2626">-${fmt(gastosMes)}</td></tr>
-            <tr><td>Ganancia neta viajes</td><td>${fmt(netaMes)}</td></tr>
-            ${totalPE>0?`<tr><td>Gastos fijos mensuales (Punto de equilibrio)</td><td style="color:#dc2626">-${fmt(totalPE)}</td></tr>`:""}
-            ${totalGastosAdic>0?`<tr><td>Gastos adicionales del mes</td><td style="color:#dc2626">-${fmt(totalGastosAdic)}</td></tr>`:""}
-            <tr class="total"><td>Utilidad real del período</td><td class="${utilidadReal>=0?"verde":"rojo"}">${fmt(utilidadReal)}</td></tr>
+            <tr style="background:#f0f9ff"><td style="font-weight:700">💰 Ingresos por viajes</td><td style="font-weight:700;color:#1565FF">${fmt(ingresosMes)}</td></tr>
+            <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos operativos:</td></tr>
+            <tr><td style="padding-left:20px">⛽ Combustible (ACPM + Adblue)</td><td style="color:#dc2626">-${fmt(acpmMes + adblMes)}</td></tr>
+            <tr><td style="padding-left:20px">🛣️ Peajes</td><td style="color:#dc2626">-${fmt(peajesMes)}</td></tr>
+            <tr><td style="padding-left:20px">👤 Conductor</td><td style="color:#dc2626">-${fmt(conductorMes)}</td></tr>
+            ${otrosMes>0?`<tr><td style="padding-left:20px">📋 Otros gastos de viaje</td><td style="color:#dc2626">-${fmt(otrosMes)}</td></tr>`:""}
+            ${descuentosMes>0?`<tr><td style="padding-left:20px">📑 Descuentos de ley</td><td style="color:#dc2626">-${fmt(descuentosMes)}</td></tr>`:""}
+            <tr style="background:#f0fdf4"><td style="font-weight:600">= Ganancia neta de viajes</td><td style="font-weight:700;color:${netaMes>=0?"#16a34a":"#dc2626"}">${fmt(netaMes)}</td></tr>
+            ${totalPE>0?`
+            <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos fijos mensuales:</td></tr>
+            <tr><td style="padding-left:20px">🏦 Gastos fijos (cuota, seguro, GPS...)</td><td style="color:#dc2626">-${fmt(totalPE)}</td></tr>`:""}
+            ${totalGastosAdic>0?`<tr><td style="padding-left:20px">🔧 Gastos adicionales (taller, repuestos...)</td><td style="color:#dc2626">-${fmt(totalGastosAdic)}</td></tr>`:""}
+            ${totalPE>0||totalGastosAdic>0?`<tr class="total" style="background:#f0fdf4"><td>= Utilidad real del período</td><td class="${utilidadReal>=0?"verde":"rojo"}">${fmt(utilidadReal)}</td></tr>`:""}
           </table>
           <table>
-            <tr><td>Rentabilidad</td><td>${rentabilidad}%</td></tr>
-            <tr><td>Viajes realizados</td><td>${viajesMes.length}</td></tr>
             <tr><td>Kilómetros recorridos</td><td>${kmMes.toLocaleString("es-CO")} km</td></tr>
             <tr><td>Vehículos activos</td><td>${vehiculos.length}</td></tr>
           </table>
+
+          <!-- EVOLUCIÓN 6 MESES -->
+          <h2>Evolución — Últimos 6 meses</h2>
+          <div style="display:flex;align-items:flex-end;gap:10px;height:110px;padding:10px 4px 0">
+            ${ultimos6.map(m=>{
+              const alt = Math.round((Math.abs(m.neta)/maxGrafica)*80);
+              const col = m.neta < 0 ? "#dc2626" : m.activo ? "#1565FF" : "#22c55e";
+              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+                <div style="font-size:9px;color:#666;font-weight:700;margin-bottom:3px">${m.neta!==0?"$"+(Math.abs(m.neta)/1000000).toFixed(1)+"M":""}</div>
+                <div style="width:100%;max-width:44px;height:${Math.max(alt,2)}px;background:${col};border-radius:3px 3px 0 0"></div>
+                <div style="font-size:10px;color:#888;margin-top:4px;font-weight:${m.activo?"800":"400"}">${m.mes}</div>
+              </div>`;
+            }).join("")}
+          </div>
+          <p style="font-size:10px;color:#999;margin:4px 0 0;text-align:center">Ganancia neta de viajes por mes · Mes actual en azul</p>
 
           <!-- DISTRIBUCIÓN DE GASTOS -->
           <h2>Distribución de gastos operativos</h2>
@@ -301,10 +358,21 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             </tr>`).join("")}
           </table>`:"<p style='color:#888;font-size:12px'>No hay viajes pendientes de cobro.</p>"}
 
+          <!-- FIRMAS -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:50px;page-break-inside:avoid">
+            <div style="text-align:center">
+              <div style="border-top:1px solid #333;padding-top:6px;font-size:11px;color:#666">Elaborado por</div>
+            </div>
+            <div style="text-align:center">
+              <div style="border-top:1px solid #333;padding-top:6px;font-size:11px;color:#666">Revisado por</div>
+            </div>
+          </div>
+
           <!-- FOOTER -->
           <div class="footer">
-            <strong>NAVIRA</strong> — Inteligencia y precisión en movimiento<br>
-            Informe generado automáticamente · ${MESES[mes]} ${anio} · Todos los valores en COP
+            <strong>NAVIRA</strong> — Inteligencia y precisión en movimiento · naviraflota.app<br>
+            Informe generado el ${new Date().toLocaleDateString("es-CO",{day:"numeric",month:"long",year:"numeric"})} a las ${new Date().toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"})} · Período: ${MESES[mes]} ${anio} · Todos los valores en COP<br>
+            Documento de uso interno — La información contenida es confidencial
           </div>
 
           </body></html>`);
@@ -515,31 +583,6 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             <button style={styles.btnCalcular} onClick={()=>navigate("/calculadora")}>
               Calcular flete
             </button>
-          </div>
-        )}
-
-        {/* VIAJES DEL MES */}
-        {viajesMes.length > 0 && (
-          <div style={styles.card}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setVerViajesMes(!verViajesMes)}>
-              <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
-              {verViajesMes ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
-            </div>
-            {verViajesMes && [...viajesMes].reverse().map((viaje,i,arr) => (
-              <div
-                key={viaje.firestoreId}
-                style={{...styles.viajeFilaMes, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`, cursor:"pointer"}}
-                onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
-              >
-                <div style={{flex:1}}>
-                  <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{viaje.ruta||"Sin ruta"}</p>
-                  <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0"}}>{viaje.fecha||""}{viaje.placa?` · ${viaje.placa}`:""}</p>
-                </div>
-                <p style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, margin:0, color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
-                  {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
-                </p>
-              </div>
-            ))}
           </div>
         )}
 
