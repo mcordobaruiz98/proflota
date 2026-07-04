@@ -33,3 +33,4 @@ function Placa({ valor, size = "md" }) {
 }
 
 export default Placa;
+
