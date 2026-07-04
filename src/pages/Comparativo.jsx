@@ -30,6 +30,19 @@ function Comparativo({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehi
     });
   };
 
+  const diasPeriodo = (() => {
+    if (periodo === "mes") return hoy.getDate();
+    if (periodo === "trimestre") {
+      const inicioTrim = new Date(anio, Math.floor(mes/3)*3, 1);
+      return Math.max(1, Math.ceil((hoy - inicioTrim) / 86400000));
+    }
+    // todo: desde el primer viaje registrado
+    const fechas = viajes.map(v => new Date(v.fecha)).filter(f => !isNaN(f));
+    if (fechas.length === 0) return 1;
+    const primera = new Date(Math.min(...fechas));
+    return Math.max(1, Math.ceil((hoy - primera) / 86400000));
+  })();
+
   const datos = vehiculos.map(v => {
     const vjs = filtrarViajes(v.placa);
     const ingresos = vjs.reduce((s, vj) => s + (vj.vViaje || 0), 0);
@@ -37,8 +50,12 @@ function Comparativo({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehi
     const utilidad = vjs.reduce((s, vj) => s + (vj.neta || 0), 0);
     const km = vjs.reduce((s, vj) => s + (vj.kmT || 0), 0);
     const galones = vjs.reduce((s, vj) => s + (vj.gTot || 0), 0);
+    const costoAcpm = vjs.reduce((s, vj) => s + (vj.cAcpm || 0), 0);
     const rendimiento = galones > 0 ? km / galones : 0;
     const costoKm = km > 0 ? gastos / km : 0;
+    const utilKm = km > 0 ? utilidad / km : 0;
+    const diasProductivos = new Set(vjs.map(vj => vj.fecha)).size;
+    const utilizacion = diasPeriodo > 0 ? (diasProductivos / diasPeriodo) * 100 : 0;
     const numViajes = vjs.length;
 
     return {
@@ -51,18 +68,80 @@ function Comparativo({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehi
       utilidad,
       km,
       galones,
+      costoAcpm,
       rendimiento,
       costoKm,
+      utilKm,
+      diasProductivos,
+      utilizacion,
       numViajes,
     };
   });
 
   const METRICAS = [
     { id: "utilidad",    label: "Rentabilidad",  Icono: DollarSign, color: t.colors.green,  unidad: "", format: (v) => fmt(v), campo: "utilidad",    orden: "desc" },
+    { id: "utilKm",      label: "Utilidad/km",   Icono: TrendingUp, color: "#8B5CF6",       unidad: "/km", format: (v) => "$" + Math.round(v).toLocaleString("es-CO"), campo: "utilKm", orden: "desc" },
     { id: "viajes",      label: "Productividad", Icono: Route,      color: t.colors.blue,   unidad: " viajes", format: (v) => v, campo: "numViajes",  orden: "desc" },
+    { id: "utilizacion", label: "Utilización",   Icono: Truck,      color: "#06B6D4",       unidad: "%", format: (v) => v.toFixed(0), campo: "utilizacion", orden: "desc" },
     { id: "rendimiento", label: "Rendimiento",   Icono: Fuel,       color: t.colors.amber,  unidad: " km/gl", format: (v) => v.toFixed(1), campo: "rendimiento", orden: "desc" },
     { id: "costoKm",     label: "Costo/km",      Icono: TrendingUp, color: t.colors.red,    unidad: "/km", format: (v) => "$" + Math.round(v).toLocaleString("es-CO"), campo: "costoKm", orden: "asc" },
   ];
+
+  // ── INSIGHTS AUTOMÁTICOS — convierte la comparación en pesos ──
+  const insights = (() => {
+    const activos = datos.filter(d => d.numViajes > 0 && d.km > 0);
+    if (activos.length < 2) return [];
+    const lista = [];
+
+    // 1. Ahorro potencial de combustible: si el peor rindiera como el mejor
+    const conRend = activos.filter(d => d.rendimiento > 0 && d.galones > 0);
+    if (conRend.length >= 2) {
+      const mejorR = conRend.reduce((a,b) => a.rendimiento > b.rendimiento ? a : b);
+      const peorR  = conRend.reduce((a,b) => a.rendimiento < b.rendimiento ? a : b);
+      if (mejorR.placa !== peorR.placa && peorR.rendimiento < mejorR.rendimiento * 0.9) {
+        const precioProm = peorR.costoAcpm / peorR.galones;
+        const galonesIdeales = peorR.km / mejorR.rendimiento;
+        const ahorro = (peorR.galones - galonesIdeales) * precioProm;
+        if (ahorro > 50000) {
+          lista.push({
+            icono: "⛽",
+            texto: `Si ${peorR.placa} rindiera como ${mejorR.placa} (${mejorR.rendimiento.toFixed(1)} km/gal), ahorraría ~${fmt(ahorro)} en combustible este período. Revise presión de llantas, estilo de conducción o posible fuga.`,
+          });
+        }
+      }
+    }
+
+    // 2. Utilidad/km vs promedio de flota
+    const promUtilKm = activos.reduce((s,d) => s + d.utilKm, 0) / activos.length;
+    const rezagado = activos.reduce((a,b) => a.utilKm < b.utilKm ? a : b);
+    if (promUtilKm > 0 && rezagado.utilKm < promUtilKm * 0.75) {
+      const pctMenos = ((1 - rezagado.utilKm / promUtilKm) * 100).toFixed(0);
+      lista.push({
+        icono: "📉",
+        texto: `${rezagado.placa} genera ${pctMenos}% menos utilidad por km que el promedio de su flota (${"$" + Math.round(rezagado.utilKm).toLocaleString("es-CO")}/km vs ${"$" + Math.round(promUtilKm).toLocaleString("es-CO")}/km). Revise sus fletes o sus rutas.`,
+      });
+    }
+
+    // 3. Camión subutilizado
+    const quieto = datos.filter(d => d.numViajes >= 0).reduce((a,b) => a.utilizacion < b.utilizacion ? a : b);
+    if (quieto.utilizacion < 30 && diasPeriodo >= 7) {
+      lista.push({
+        icono: "🅿️",
+        texto: `${quieto.placa} solo tuvo ${quieto.diasProductivos} día${quieto.diasProductivos!==1?"s":""} productivo${quieto.diasProductivos!==1?"s":""} de ${diasPeriodo} (${quieto.utilizacion.toFixed(0)}%). Un camión quieto sigue pagando cuota, seguro y parqueadero.`,
+      });
+    }
+
+    // 4. El campeón de la flota
+    const campeon = activos.reduce((a,b) => a.utilKm > b.utilKm ? a : b);
+    if (campeon.utilKm > 0) {
+      lista.push({
+        icono: "🏆",
+        texto: `${campeon.placa} es su campeón: ${"$" + Math.round(campeon.utilKm).toLocaleString("es-CO")} de utilidad por km rodado. Sus rutas y fletes son el modelo a replicar.`,
+      });
+    }
+
+    return lista.slice(0, 3);
+  })();
 
   const metActual = METRICAS.find(m => m.id === metrica);
 
@@ -129,6 +208,21 @@ function Comparativo({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehi
             </button>
           ))}
         </div>
+
+        {/* ANÁLISIS DE FLOTA — insights automáticos */}
+        {insights.length > 0 && (
+          <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"14px 16px",marginBottom:"14px",boxShadow:t.shadows.card,border:`1.5px solid ${t.colors.blueBorder}`}}>
+            <p style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,textTransform:"uppercase",letterSpacing:"0.08em",margin:"0 0 10px"}}>
+              💡 Análisis de su flota
+            </p>
+            {insights.map((ins, i) => (
+              <div key={i} style={{display:"flex",gap:"10px",padding:"8px 0",borderBottom:i===insights.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                <span style={{fontSize:"16px",flexShrink:0}}>{ins.icono}</span>
+                <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:0,lineHeight:1.55}}>{ins.texto}</p>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* RANKING */}
         {ordenados.length === 0 && (
