@@ -105,4 +105,3 @@ const styles = {
 };
 
 export default PantallaCarga;
-
