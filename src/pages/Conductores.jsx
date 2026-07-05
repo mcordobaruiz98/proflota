@@ -4,7 +4,7 @@ import { ArrowLeft, User, Trash2, Edit2, Save, AlertCircle } from "lucide-react"
 import { theme as t } from "../styles/theme";
 import { sanitizar } from "../utils/validar";
 
-function Conductores({ conductores = [], onAgregar, onEditar, onEliminar, mostrarToast }) {
+function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEliminar, mostrarToast }) {
   const navigate = useNavigate();
   const [verForm, setVerForm] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -19,6 +19,56 @@ function Conductores({ conductores = [], onAgregar, onEditar, onEliminar, mostra
   const [guardando, setGuardando] = useState(false);
 
   const hoy = new Date();
+
+  // ── LIQUIDACIÓN SEMANAL ──
+  // Por defecto: lunes de esta semana → hoy (el sábado en la tarde cubre lun-sáb)
+  const lunesSemana = (() => {
+    const d = new Date();
+    const dia = d.getDay(); // 0=dom, 1=lun...
+    d.setDate(d.getDate() - (dia === 0 ? 6 : dia - 1));
+    return d.toISOString().slice(0, 10);
+  })();
+  const [verLiquidacion, setVerLiquidacion] = useState(false);
+  const [liqConductor,   setLiqConductor]   = useState("");
+  const [liqDesde,       setLiqDesde]       = useState(lunesSemana);
+  const [liqHasta,       setLiqHasta]       = useState(new Date().toISOString().slice(0, 10));
+
+  const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
+
+  const viajesLiq = (liqConductor && liqDesde && liqHasta && liqDesde <= liqHasta)
+    ? viajes.filter(v => v.condNom === liqConductor && v.fecha >= liqDesde && v.fecha <= liqHasta)
+        .sort((a, b) => a.fecha.localeCompare(b.fecha))
+    : [];
+  const liqPagoViajes = viajesLiq.reduce((s, v) => s + (v.conductor || 0), 0);
+  const liqAnticipos  = viajesLiq.reduce((s, v) => s + (v.anticipoMonto || 0), 0);
+  const liqGastosRep  = viajesLiq.reduce((s, v) => s + (v.anticipoGastos || []).reduce((x, g) => x + (g.monto || 0), 0), 0);
+  const liqNeto       = liqPagoViajes - liqAnticipos + liqGastosRep;
+
+  const fFecha = (iso) => {
+    const [y, m, d] = iso.split("-");
+    return `${d}/${m}`;
+  };
+
+  const compartirLiquidacion = () => {
+    const lineas = [
+      `💵 *LIQUIDACIÓN — NAVIRA*`,
+      ``,
+      `👤 *Conductor:* ${liqConductor}`,
+      `📅 *Período:* ${fFecha(liqDesde)} al ${fFecha(liqHasta)}`,
+      ``,
+      `*Viajes del período:*`,
+      ...viajesLiq.map(v => `• ${fFecha(v.fecha)} ${v.ruta || "—"} (${v.placa || "—"}): ${fmt(v.conductor || 0)}`),
+      ``,
+      `Total viajes: ${fmt(liqPagoViajes)}`,
+      liqAnticipos > 0 ? `(−) Anticipos entregados: ${fmt(liqAnticipos)}` : null,
+      liqGastosRep > 0 ? `(+) Gastos reportados: ${fmt(liqGastosRep)}` : null,
+      `━━━━━━━━━━━━`,
+      `✅ *A PAGAR: ${fmt(liqNeto)}*`,
+      ``,
+      `_Generado por NAVIRA — naviraflota.app_`,
+    ].filter(l => l !== null).join("\n");
+    window.open(`https://wa.me/?text=${encodeURIComponent(lineas)}`, "_blank");
+  };
 
   const limpiar = () => {
     setNombre(""); setCedula(""); setTelefono("");
@@ -76,6 +126,90 @@ function Conductores({ conductores = [], onAgregar, onEditar, onEliminar, mostra
       </div>
 
       <div style={styles.contenido}>
+
+        {/* ── LIQUIDACIÓN SEMANAL ── */}
+        {conductores.length > 0 && !verForm && (
+          <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"12px 16px",marginBottom:"12px",boxShadow:t.shadows.card,border:`1.5px solid ${t.colors.greenBorder}`}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setVerLiquidacion(!verLiquidacion)}>
+              <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.green}}>💵 Liquidación del conductor</span>
+              <span style={{color:t.colors.textTertiary}}>{verLiquidacion ? "▲" : "▼"}</span>
+            </div>
+
+            {verLiquidacion && (
+              <div style={{marginTop:"12px"}}>
+                <select
+                  value={liqConductor}
+                  onChange={e=>setLiqConductor(e.target.value)}
+                  style={{width:"100%",boxSizing:"border-box",padding:"11px 12px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:liqConductor?t.colors.textPrimary:t.colors.textTertiary,fontSize:t.fonts.sizeSm,outline:"none",marginBottom:"10px"}}
+                >
+                  <option value="">Seleccionar conductor...</option>
+                  {[...new Set([...conductores.map(c=>c.nombre), ...viajes.map(v=>v.condNom).filter(Boolean)])].map((nom,i)=>(
+                    <option key={i} value={nom}>{nom}</option>
+                  ))}
+                </select>
+
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}}>
+                  <div>
+                    <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
+                    <input type="date" value={liqDesde} onChange={e=>setLiqDesde(e.target.value)}
+                      style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
+                  </div>
+                  <div>
+                    <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
+                    <input type="date" value={liqHasta} onChange={e=>setLiqHasta(e.target.value)}
+                      style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
+                  </div>
+                </div>
+
+                {liqConductor && viajesLiq.length > 0 && (
+                  <div>
+                    {viajesLiq.map((v,i)=>(
+                      <div key={v.firestoreId||i} style={{display:"flex",justifyContent:"space-between",padding:"6px 4px",borderBottom:`1px solid ${t.colors.borderLight}`,fontSize:t.fonts.sizeXs}}>
+                        <span style={{color:t.colors.textSecondary}}>{fFecha(v.fecha)} · {v.ruta||"—"} · {v.placa||""}</span>
+                        <span style={{fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary}}>{fmt(v.conductor||0)}</span>
+                      </div>
+                    ))}
+
+                    <div style={{padding:"10px 4px 0",fontSize:t.fonts.sizeSm}}>
+                      <div style={{display:"flex",justifyContent:"space-between",padding:"3px 0"}}>
+                        <span style={{color:t.colors.textSecondary}}>Total viajes ({viajesLiq.length})</span>
+                        <span style={{fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>{fmt(liqPagoViajes)}</span>
+                      </div>
+                      {liqAnticipos > 0 && (
+                        <div style={{display:"flex",justifyContent:"space-between",padding:"3px 0"}}>
+                          <span style={{color:t.colors.textSecondary}}>(−) Anticipos entregados</span>
+                          <span style={{fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(liqAnticipos)}</span>
+                        </div>
+                      )}
+                      {liqGastosRep > 0 && (
+                        <div style={{display:"flex",justifyContent:"space-between",padding:"3px 0"}}>
+                          <span style={{color:t.colors.textSecondary}}>(+) Gastos reportados</span>
+                          <span style={{fontWeight:t.fonts.weightSemibold,color:t.colors.green}}>+{fmt(liqGastosRep)}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:"8px",padding:"12px 14px",background:liqNeto>=0?t.colors.greenSoft:t.colors.redSoft,border:`1.5px solid ${liqNeto>=0?t.colors.greenBorder:t.colors.redBorder}`,borderRadius:t.radius.md}}>
+                      <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.textSecondary,textTransform:"uppercase"}}>A pagar</span>
+                      <span style={{fontSize:"20px",fontWeight:t.fonts.weightBlack,color:liqNeto>=0?t.colors.green:t.colors.red}}>{fmt(liqNeto)}</span>
+                    </div>
+
+                    <button
+                      style={{width:"100%",marginTop:"10px",padding:"12px",background:"#25D366",color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer"}}
+                      onClick={compartirLiquidacion}
+                    >
+                      📲 Enviar liquidación por WhatsApp
+                    </button>
+                  </div>
+                )}
+
+                {liqConductor && viajesLiq.length === 0 && (
+                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,textAlign:"center",margin:"6px 0"}}>Sin viajes de {liqConductor} en este período</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {!verForm && (
           <button style={styles.btnAgregar} onClick={() => setVerForm(true)}>
