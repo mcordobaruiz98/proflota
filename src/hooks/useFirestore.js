@@ -75,13 +75,14 @@ export function useFirestore(uid) {
     return () => unsub();
   }, [rutaMant]);
 
-  useEffect(() => {
+useEffect(() => {
+  if (!uid) return;
   const q = query(collection(db, "peajes"));
   const unsub = onSnapshot(q, (snap) => {
     setPeajes(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
   });
   return () => unsub();
-}, []);
+}, [uid]);
 
 useEffect(() => {
   if (!rutaConfigMant) return;
