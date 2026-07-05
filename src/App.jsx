@@ -229,6 +229,7 @@ function AppContenido() {
         <RutaProtegida>
           <Conductores
             conductores={conductores}
+            viajes={viajes}
             onAgregar={agregarConductor}
             onEditar={editarConductor}
             onEliminar={eliminarConductor}
