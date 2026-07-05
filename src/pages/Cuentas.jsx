@@ -406,7 +406,11 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           <Scale size={16} color={t.colors.blue} strokeWidth={2} />
           Comparar
         </button>
-      </div>
+        <button style={{...styles.btnHistorial, marginLeft:"6px"}} 
+          onClick={()=>navigate("/conductores",{state:{liquidar:true}})}>
+        Liquidar
+        </button>
+        </div>
 
       {/* NAV MES */}
       <div style={styles.navMes}>
