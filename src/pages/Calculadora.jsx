@@ -242,12 +242,18 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
           mostrarToast("Viaje guardado correctamente","exito");
       }
 
-    // Actualizar odómetro del vehículo automáticamente
-    if (placa && kmTotal > 0) {
+    // Actualizar odómetro y estado del vehículo automáticamente
+    if (placa) {
       const veh = vehiculos.find(v => v.placa === placa);
       if (veh) {
-        const kmActual = veh.kmOdometro || 0;
-        onEditarVehiculo(veh.firestoreId, { kmOdometro: kmActual + kmTotal }).catch(()=>{});
+        const cambios = {};
+        if (kmTotal > 0) cambios.kmOdometro = (veh.kmOdometro || 0) + kmTotal;
+        // Estado automático: viaje en curso → "En viaje" (respeta el taller)
+        const hoyStr = new Date().toISOString().slice(0,10);
+        const finViaje = fechaDescargueRet || fechaDescarga || "";
+        const enCurso = fecha <= hoyStr && (!finViaje || finViaje >= hoyStr);
+        if (enCurso && veh.estado !== "en_taller") cambios.estado = "en_viaje";
+        if (Object.keys(cambios).length > 0) onEditarVehiculo(veh.firestoreId, cambios).catch(()=>{});
       }
     }
 

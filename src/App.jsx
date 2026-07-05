@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Layout           from "./components/Layout";
@@ -50,6 +51,22 @@ function AppContenido() {
   agregarGastoFijo, eliminarGastoFijo,
   agregarConductor, editarConductor, eliminarConductor,
 } = useFirestore(usuario?.uid);
+
+// Estado automático: liberar vehículos cuyo viaje ya terminó
+  useEffect(() => {
+    if (!vehiculos.length || !viajes.length) return;
+    const hoyStr = new Date().toISOString().slice(0, 10);
+    vehiculos.forEach(veh => {
+      if (veh.estado !== "en_viaje") return;
+      const viajesVeh = viajes.filter(v => v.placa === veh.placa);
+      if (viajesVeh.length === 0) return;
+      const ultimo = viajesVeh.reduce((a, b) => (a.fecha > b.fecha ? a : b));
+      const fin = ultimo.fechaDescargueRet || ultimo.fechaDescarga || ultimo.fecha;
+      if (fin && fin < hoyStr) {
+        editarVehiculo(veh.firestoreId, { estado: "disponible" }).catch(() => {});
+      }
+    });
+  }, [viajes, vehiculos]);
 
   return (
     <>
