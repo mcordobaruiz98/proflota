@@ -15,6 +15,9 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
   const [mes,  setMes]  = useState(hoy.getMonth());
   const [anio, setAnio] = useState(hoy.getFullYear());
   const [verViajesMes, setVerViajesMes] = useState(false);
+  const [verRango,   setVerRango]   = useState(false);
+  const [rangoDesde, setRangoDesde] = useState("");
+  const [rangoHasta, setRangoHasta] = useState("");
 
   const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
   const fmtCorto = (n) => {
@@ -113,6 +116,23 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
     </div>
   </div>
 );
+
+  // Consulta por rango de fechas personalizado
+  const viajesRango = (rangoDesde && rangoHasta && rangoDesde <= rangoHasta)
+    ? viajes.filter(v => v.fecha >= rangoDesde && v.fecha <= rangoHasta)
+    : [];
+  const rangoIngresos = viajesRango.reduce((s,v)=>s+(v.vViaje||0),0);
+  const rangoGastos   = viajesRango.reduce((s,v)=>s+(v.total||0),0);
+  const rangoNeta     = viajesRango.reduce((s,v)=>s+(v.neta||0),0);
+  const rangoKm       = viajesRango.reduce((s,v)=>s+(v.kmT||0),0);
+  const rangoPorVeh   = Object.entries(
+    viajesRango.reduce((acc,v)=>{
+      const p = v.placa || "Sin placa";
+      if (!acc[p]) acc[p] = { viajes:0, neta:0 };
+      acc[p].viajes++; acc[p].neta += (v.neta||0);
+      return acc;
+    }, {})
+  ).sort((a,b)=>b[1].neta - a[1].neta);
 
   return (
     <div style={styles.pantalla}>
@@ -394,6 +414,57 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
         <p style={styles.labelMes}>{MESES[mes]} {anio}</p>
         <button style={styles.btnMes} onClick={()=>cambiarMes(1)}>›</button>
       </div>
+
+      {/* CONSULTA POR RANGO DE FECHAS */}
+        <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"12px 16px",marginBottom:"10px",boxShadow:t.shadows.card}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setVerRango(!verRango)}>
+            <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary}}>📅 Consultar por fechas</span>
+            <span style={{color:t.colors.textTertiary}}>{verRango ? "▲" : "▼"}</span>
+          </div>
+
+          {verRango && (
+            <div style={{marginTop:"12px"}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}}>
+                <div>
+                  <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
+                  <input type="date" value={rangoDesde} onChange={e=>setRangoDesde(e.target.value)}
+                    style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
+                </div>
+                <div>
+                  <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
+                  <input type="date" value={rangoHasta} onChange={e=>setRangoHasta(e.target.value)}
+                    style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
+                </div>
+              </div>
+
+              {rangoDesde && rangoHasta && rangoDesde > rangoHasta && (
+                <p style={{fontSize:t.fonts.sizeXs,color:t.colors.red,margin:"0 0 8px"}}>La fecha inicial debe ser anterior a la final</p>
+              )}
+
+              {viajesRango.length > 0 && (
+                <div>
+                  <div style={{display:"flex",justifyContent:"space-between",padding:"10px 12px",background:rangoNeta>=0?t.colors.greenSoft:t.colors.redSoft,border:`1.5px solid ${rangoNeta>=0?t.colors.greenBorder:t.colors.redBorder}`,borderRadius:t.radius.md,marginBottom:"8px"}}>
+                    <div>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:0}}>{viajesRango.length} viaje{viajesRango.length!==1?"s":""} · {rangoKm.toLocaleString("es-CO")} km</p>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>Ingresos {fmt(rangoIngresos)} · Gastos {fmt(rangoGastos)}</p>
+                    </div>
+                    <p style={{fontSize:"18px",fontWeight:t.fonts.weightBlack,color:rangoNeta>=0?t.colors.green:t.colors.red,margin:0,alignSelf:"center"}}>{fmt(rangoNeta)}</p>
+                  </div>
+                  {rangoPorVeh.map(([placa,d])=>(
+                    <div key={placa} style={{display:"flex",justifyContent:"space-between",padding:"7px 4px",borderBottom:`1px solid ${t.colors.borderLight}`,fontSize:t.fonts.sizeSm}}>
+                      <span style={{color:t.colors.textSecondary}}>{placa} · {d.viajes} viaje{d.viajes!==1?"s":""}</span>
+                      <span style={{fontWeight:t.fonts.weightBold,color:d.neta>=0?t.colors.green:t.colors.red}}>{fmt(d.neta)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {rangoDesde && rangoHasta && rangoDesde <= rangoHasta && viajesRango.length === 0 && (
+                <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,textAlign:"center",margin:"6px 0"}}>Sin viajes en este rango</p>
+              )}
+            </div>
+          )}
+        </div>
 
       <div style={styles.contenido}>
 

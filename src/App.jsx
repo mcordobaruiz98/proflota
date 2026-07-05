@@ -59,7 +59,7 @@ function AppContenido() {
     vehiculos.forEach(veh => {
       if (veh.estado !== "en_viaje") return;
       const viajesVeh = viajes.filter(v => v.placa === veh.placa);
-      if (viajesVeh.length === 0) return;
+      if (viajesVeh.length === 0) { editarVehiculo(veh.firestoreId, { estado: "disponible" }).catch(()=>{}); return; }
       const ultimo = viajesVeh.reduce((a, b) => (a.fecha > b.fecha ? a : b));
       const fin = ultimo.fechaDescargueRet || ultimo.fechaDescarga || ultimo.fecha;
       if (fin && fin < hoyStr) {
