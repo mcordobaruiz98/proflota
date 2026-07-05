@@ -234,23 +234,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     if (m<0){m=11;a--;}
     setMesActual(m); setAnioActual(a);
   };
-
-  // Tab Historial
-  const viajesBuscados = viajesVehiculo.filter(v => {
-    const q = busquedaH.toLowerCase();
-    if (!q) return true;
-    return (v.ruta||"").toLowerCase().includes(q)||(v.mani||"").toLowerCase().includes(q);
-  }).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
-
-  const viajesAgrupadosPorMes = viajesBuscados.reduce((grupos,viaje)=>{
-    const f  = new Date(viaje.fecha);
-    const et = `${MESES[f.getMonth()]} ${f.getFullYear()}`;
-    const ex = grupos.find(g=>g.etiqueta===et);
-    if (ex) ex.viajes.push(viaje);
-    else grupos.push({etiqueta:et, viajes:[viaje]});
-    return grupos;
-  },[]);
-
+ 
   // Hoja de vida
   const actualizarHV = (clave, valor) => {
     const nuevo = {...hvData, [clave]:valor};
@@ -732,27 +716,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               </div>
             )}
 
-            {/* Viajes del mes */}
-            {viajesMes.length>0&&(
-              <div style={styles.card}>
-                <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
-                {[...viajesMes].reverse().map((viaje,i,arr)=>(
-                  <div key={viaje.firestoreId}
-                    style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`,cursor:"pointer"}}
-                    onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
-                  >
-                    <div>
-                      <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,margin:0,color:t.colors.textPrimary}}>{viaje.ruta||"Sin ruta"}</p>
-                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{viaje.fecha||""}</p>
-                    </div>
-                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,margin:0,color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
-                      {fmt(viaje.neta||0)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-
+          
             {/* ── GASTOS Y FACTURAS DEL VEHÍCULO ── */}
             {(() => {
               const gastosMesVeh = gastosVehiculo.filter(g => {
@@ -813,7 +777,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                           <label style={styles.label}>Nombre del gasto</label>
                           <select value={gfNombre} onChange={e=>setGfNombre(e.target.value)} style={styles.input}>
                             <option value="">Seleccionar o escribir...</option>
-                            {["Cuota del camión","Seguro","Parqueadero","GPS / Rastreo","SOAT","Tecnomecánica","Impuestos","Lavadas","Administración"].map(o=>(
+                            {["Cuota del Vehículo","Seguro","Parqueadero","GPS / Rastreo","SOAT","Tecnomecánica","Impuestos","Lavadas","Administración","Seguridad Conductor"].map(o=>(
                               <option key={o} value={o}>{o}</option>
                             ))}
                             <option value="__otro__">+ Otro gasto</option>
