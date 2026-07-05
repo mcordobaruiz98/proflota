@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Lock, Save, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, User, Lock, Save, Users, Settings, HelpCircle, Info, LogOut, ChevronUp, ChevronRight } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { theme as t } from "../styles/theme";
 
@@ -18,7 +18,11 @@ function Perfil({ mostrarToast }) {
   const [verNueva,       setVerNueva]       = useState(false);
   const [guardandoCont,  setGuardandoCont]  = useState(false);
 
+  const [editNombre,     setEditNombre]     = useState(false);
+  const [editContrasena, setEditContrasena] = useState(false);
   const [confirmarCerrar, setConfirmarCerrar] = useState(false);
+
+  const esGoogle = usuario?.providerData?.[0]?.providerId?.includes("google");
 
   const guardarNombre = async () => {
     if (!nombre.trim()) { mostrarToast("Ingresa tu nombre","error"); return; }
@@ -26,6 +30,7 @@ function Perfil({ mostrarToast }) {
     try {
       await cambiarNombre(nombre.trim());
       mostrarToast("Nombre actualizado","exito");
+      setEditNombre(false);
     } catch(err) {
       mostrarToast("Error al actualizar nombre","error");
     } finally {
@@ -34,14 +39,15 @@ function Perfil({ mostrarToast }) {
   };
 
   const guardarContrasena = async () => {
-    if (!contActual)                        { mostrarToast("Ingresa tu contraseña actual","error"); return; }
-    if (contNueva.length < 6)               { mostrarToast("La nueva contraseña debe tener mínimo 6 caracteres","error"); return; }
-    if (contNueva !== contConfirm)          { mostrarToast("Las contraseñas no coinciden","error"); return; }
+    if (!contActual)               { mostrarToast("Ingresa tu contraseña actual","error"); return; }
+    if (contNueva.length < 6)      { mostrarToast("La nueva contraseña debe tener mínimo 6 caracteres","error"); return; }
+    if (contNueva !== contConfirm) { mostrarToast("Las contraseñas no coinciden","error"); return; }
     setGuardandoCont(true);
     try {
       await cambiarContrasena(contActual, contNueva);
       mostrarToast("Contraseña actualizada","exito");
       setContActual(""); setContNueva(""); setContConfirm("");
+      setEditContrasena(false);
     } catch(err) {
       if (err.code === "auth/wrong-password") {
         mostrarToast("Contraseña actual incorrecta","error");
@@ -65,177 +71,212 @@ function Perfil({ mostrarToast }) {
 
       <div style={styles.contenido}>
 
-        {/* AVATAR */}
-        <div style={{textAlign:"center", marginBottom:"20px"}}>
-          <div style={{width:"72px", height:"72px", borderRadius:"50%", background:t.colors.blueSoft, border:`2px solid ${t.colors.blueBorder}`, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 10px"}}>
-            <span style={{fontSize:"28px", fontWeight:t.fonts.weightBlack, color:t.colors.blue}}>
+        {/* IDENTIDAD */}
+        <div style={{textAlign:"center", padding:"14px 0 22px"}}>
+          <div style={{width:"78px", height:"78px", borderRadius:"50%", background:`linear-gradient(135deg, ${t.colors.blue}33, ${t.colors.green}33)`, border:`2px solid ${t.colors.blueBorder}`, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 12px"}}>
+            <span style={{fontSize:"30px", fontWeight:t.fonts.weightBlack, background:`linear-gradient(135deg, ${t.colors.blue}, ${t.colors.green})`, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent"}}>
               {(usuario?.displayName||usuario?.email||"U")[0].toUpperCase()}
             </span>
           </div>
-          <p style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0}}>
+          <p style={{fontSize:"17px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0}}>
             {usuario?.displayName || "Sin nombre"}
           </p>
-          <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"4px 0 0"}}>
-            {usuario?.email}
+          <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"4px 0 0"}}>
+            {usuario?.email}{esGoogle ? " · Google" : ""}
           </p>
         </div>
 
-        {/* CAMBIAR NOMBRE */}
+        {/* MI FLOTA */}
+        <p style={styles.seccionTitulo}>Mi flota</p>
         <div style={styles.card}>
-          <div style={styles.cardHeader}>
-            <User size={16} color={t.colors.blue} strokeWidth={2}/>
-            <p style={styles.cardTitulo}>Nombre</p>
+          <div style={styles.filaMenu} onClick={()=>navigate("/conductores")}>
+            <div style={styles.filaIzq}>
+              <div style={{...styles.iconoBox, background:t.colors.blueSoft}}>
+                <Users size={16} color={t.colors.blue} strokeWidth={2}/>
+              </div>
+              <div>
+                <p style={styles.filaLabel}>Conductores</p>
+                <p style={styles.filaSub}>Directorio, licencias y alertas</p>
+              </div>
+            </div>
+            <ChevronRight size={17} color={t.colors.textTertiary}/>
           </div>
-          <div style={styles.campo}>
-            <label style={styles.label}>Nombre completo</label>
-            <input
-              type="text"
-              placeholder="Tu nombre"
-              value={nombre}
-              onChange={e=>setNombre(e.target.value)}
-              style={styles.input}
-            />
-          </div>
-          <button
-            style={{width:"100%", padding:"12px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px", opacity:guardandoNom?0.75:1}}
-            onClick={guardarNombre}
-            disabled={guardandoNom}
-          >
-            <Save size={16} color="#fff" strokeWidth={2}/>
-            {guardandoNom?"Guardando...":"Guardar nombre"}
-          </button>
         </div>
 
-        {/* CAMBIAR CONTRASEÑA */}
-        {!usuario?.providerData?.[0]?.providerId?.includes("google") && (
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <Lock size={16} color={t.colors.blue} strokeWidth={2}/>
-              <p style={styles.cardTitulo}>Contraseña</p>
-            </div>
-            <div style={styles.campo}>
-              <label style={styles.label}>Contraseña actual</label>
-              <div style={{position:"relative"}}>
-                <input
-                  type={verActual?"text":"password"}
-                  placeholder="Tu contraseña actual"
-                  value={contActual}
-                  onChange={e=>setContActual(e.target.value)}
-                  style={{...styles.input, paddingRight:"40px"}}
-                />
-                <button
-                  style={{position:"absolute", right:"10px", top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", padding:0}}
-                  onClick={()=>setVerActual(!verActual)}
-                >
-                  {verActual ? <EyeOff size={16} color={t.colors.textTertiary}/> : <Eye size={16} color={t.colors.textTertiary}/>}
-                </button>
+        {/* MI CUENTA */}
+        <p style={styles.seccionTitulo}>Mi cuenta</p>
+        <div style={styles.card}>
+
+          {/* Editar nombre — colapsable */}
+          <div style={{...styles.filaMenu, borderBottom: (!esGoogle || editNombre) ? `1px solid ${t.colors.borderLight}` : "none"}} onClick={()=>setEditNombre(!editNombre)}>
+            <div style={styles.filaIzq}>
+              <div style={{...styles.iconoBox, background:t.colors.blueSoft}}>
+                <User size={16} color={t.colors.blue} strokeWidth={2}/>
               </div>
+              <p style={styles.filaLabel}>Editar nombre</p>
             </div>
-            <div style={styles.campo}>
-              <label style={styles.label}>Nueva contraseña</label>
-              <div style={{position:"relative"}}>
-                <input
-                  type={verNueva?"text":"password"}
-                  placeholder="Mínimo 6 caracteres"
-                  value={contNueva}
-                  onChange={e=>setContNueva(e.target.value)}
-                  style={{...styles.input, paddingRight:"40px"}}
-                />
-                <button
-                  style={{position:"absolute", right:"10px", top:"50%", transform:"translateY(-50%)", background:"none", border:"none", cursor:"pointer", padding:0}}
-                  onClick={()=>setVerNueva(!verNueva)}
-                >
-                  {verNueva ? <EyeOff size={16} color={t.colors.textTertiary}/> : <Eye size={16} color={t.colors.textTertiary}/>}
-                </button>
-              </div>
-            </div>
-            <div style={styles.campo}>
-              <label style={styles.label}>Confirmar nueva contraseña</label>
+            {editNombre ? <ChevronUp size={17} color={t.colors.textTertiary}/> : <ChevronRight size={17} color={t.colors.textTertiary}/>}
+          </div>
+          {editNombre && (
+            <div style={{padding:"12px 4px 14px", borderBottom: !esGoogle ? `1px solid ${t.colors.borderLight}` : "none"}}>
               <input
-                type="password"
-                placeholder="Repite la nueva contraseña"
-                value={contConfirm}
-                onChange={e=>setContConfirm(e.target.value)}
+                type="text"
+                placeholder="Tu nombre"
+                value={nombre}
+                onChange={e=>setNombre(e.target.value)}
                 style={styles.input}
               />
+              <button
+                style={{...styles.btnAccion, opacity:guardandoNom?0.75:1}}
+                onClick={guardarNombre}
+                disabled={guardandoNom}
+              >
+                <Save size={15} color="#fff" strokeWidth={2}/>
+                {guardandoNom?"Guardando...":"Guardar"}
+              </button>
             </div>
-            <button
-              style={{width:"100%", padding:"12px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px", opacity:guardandoCont?0.75:1}}
-              onClick={guardarContrasena}
-              disabled={guardandoCont}
-            >
-              <Save size={16} color="#fff" strokeWidth={2}/>
-              {guardandoCont?"Guardando...":"Cambiar contraseña"}
-            </button>
-          </div>
-        )}
+          )}
 
-        {/* CERRAR SESIÓN */}
-        <div style={styles.card}>
-          {!confirmarCerrar ? (
-            <button
-              style={{width:"100%", padding:"12px", background:t.colors.redSoft, color:t.colors.red, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer"}}
-              onClick={()=>setConfirmarCerrar(true)}
-            >
-              Cerrar sesión
-            </button>
-          ) : (
-            <div>
-              <p style={{fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, margin:"0 0 10px", textAlign:"center"}}>¿Seguro que quieres cerrar sesión?</p>
-              <div style={{display:"flex", gap:"8px"}}>
-                <button
-                  style={{flex:1, padding:"12px", background:t.colors.red, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer"}}
-                  onClick={cerrarSesion}
-                >
-                  Cerrar sesión
-                </button>
-                <button
-                  style={{flex:1, padding:"12px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, cursor:"pointer", color:t.colors.textSecondary}}
-                  onClick={()=>setConfirmarCerrar(false)}
-                >
-                  Cancelar
-                </button>
+          {/* Cambiar contraseña — colapsable, solo cuentas de correo */}
+          {!esGoogle && (
+            <>
+              <div style={styles.filaMenu} onClick={()=>setEditContrasena(!editContrasena)}>
+                <div style={styles.filaIzq}>
+                  <div style={{...styles.iconoBox, background:t.colors.blueSoft}}>
+                    <Lock size={16} color={t.colors.blue} strokeWidth={2}/>
+                  </div>
+                  <p style={styles.filaLabel}>Cambiar contraseña</p>
+                </div>
+                {editContrasena ? <ChevronUp size={17} color={t.colors.textTertiary}/> : <ChevronRight size={17} color={t.colors.textTertiary}/>}
               </div>
-            </div>
+              {editContrasena && (
+                <div style={{padding:"12px 4px 14px"}}>
+                  <div style={{position:"relative"}}>
+                    <input
+                      type={verActual?"text":"password"}
+                      placeholder="Contraseña actual"
+                      value={contActual}
+                      onChange={e=>setContActual(e.target.value)}
+                      style={styles.input}
+                    />
+                    <button style={styles.btnOjo} onClick={()=>setVerActual(!verActual)}>
+                      {verActual ? "●" : "○"}
+                    </button>
+                  </div>
+                  <div style={{position:"relative"}}>
+                    <input
+                      type={verNueva?"text":"password"}
+                      placeholder="Nueva contraseña (mín. 6)"
+                      value={contNueva}
+                      onChange={e=>setContNueva(e.target.value)}
+                      style={styles.input}
+                    />
+                    <button style={styles.btnOjo} onClick={()=>setVerNueva(!verNueva)}>
+                      {verNueva ? "●" : "○"}
+                    </button>
+                  </div>
+                  <input
+                    type="password"
+                    placeholder="Confirmar nueva contraseña"
+                    value={contConfirm}
+                    onChange={e=>setContConfirm(e.target.value)}
+                    style={styles.input}
+                  />
+                  <button
+                    style={{...styles.btnAccion, opacity:guardandoCont?0.75:1}}
+                    onClick={guardarContrasena}
+                    disabled={guardandoCont}
+                  >
+                    <Save size={15} color="#fff" strokeWidth={2}/>
+                    {guardandoCont?"Guardando...":"Cambiar contraseña"}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
 
-      </div>
+        {/* MÁS */}
+        <p style={styles.seccionTitulo}>Más</p>
+        <div style={styles.card}>
+          {[
+            {label:"Configuración",   sub:"Preferencias y datos",  ruta:"/configuracion", Icono:Settings},
+            {label:"Ayuda y soporte", sub:"Contáctanos",           ruta:"/ayuda",         Icono:HelpCircle},
+            {label:"Acerca de",       sub:"Términos y privacidad", ruta:"/acerca",        Icono:Info},
+          ].map((item,i,arr)=>(
+            <div
+              key={item.ruta}
+              style={{...styles.filaMenu, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}
+              onClick={()=>navigate(item.ruta)}
+            >
+              <div style={styles.filaIzq}>
+                <div style={styles.iconoBox}>
+                  <item.Icono size={16} color={t.colors.textSecondary} strokeWidth={2}/>
+                </div>
+                <div>
+                  <p style={styles.filaLabel}>{item.label}</p>
+                  <p style={styles.filaSub}>{item.sub}</p>
+                </div>
+              </div>
+              <ChevronRight size={17} color={t.colors.textTertiary}/>
+            </div>
+          ))}
+        </div>
 
-      {/* OTRAS OPCIONES */}
-<div style={styles.card}>
-  {[
-    {label:"Conductores",        ruta:"/conductores"},
-    {label:"Configuración",     ruta:"/configuracion"},
-    {label:"Ayuda y soporte",   ruta:"/ayuda"},
-    {label:"Acerca de",         ruta:"/acerca"},
-  ].map((item,i,arr)=>(
-    <div
-      key={item.ruta}
-      style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`,cursor:"pointer"}}
-      onClick={()=>navigate(item.ruta)}
-    >
-      <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textPrimary}}>{item.label}</span>
-      <span style={{color:t.colors.textTertiary,fontSize:"18px"}}>›</span>
-    </div>
-  ))}
-</div>
+        {/* CERRAR SESIÓN — al final */}
+        {!confirmarCerrar ? (
+          <button
+            style={styles.btnCerrarSesion}
+            onClick={()=>setConfirmarCerrar(true)}
+          >
+            <LogOut size={16} color={t.colors.red} strokeWidth={2}/>
+            Cerrar sesión
+          </button>
+        ) : (
+          <div style={{...styles.cardConfirm}}>
+            <p style={{fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, margin:"0 0 10px", textAlign:"center"}}>¿Seguro que quieres cerrar sesión?</p>
+            <div style={{display:"flex", gap:"8px"}}>
+              <button
+                style={{flex:1, padding:"12px", background:t.colors.red, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer"}}
+                onClick={cerrarSesion}
+              >
+                Cerrar sesión
+              </button>
+              <button
+                style={{flex:1, padding:"12px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, cursor:"pointer", color:t.colors.textSecondary}}
+                onClick={()=>setConfirmarCerrar(false)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
+
+        <p style={{textAlign:"center", fontSize:"11px", color:t.colors.textTertiary, marginTop:"18px"}}>NAVIRA v1.0</p>
+
+      </div>
     </div>
   );
 }
 
 const styles = {
-  pantalla:   { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
-  header:     { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
-  titulo:     { fontSize:"18px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
-  contenido:  { padding:"12px 16px 16px" },
-  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
-  cardHeader: { display:"flex", alignItems:"center", gap:"8px", marginBottom:"14px" },
-  cardTitulo: { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:0 },
-  campo:      { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
-  label:      { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
-  input:      { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
+  pantalla:       { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
+  header:         { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
+  btnVolver:      { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  titulo:         { fontSize:"18px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
+  contenido:      { padding:"4px 16px 16px" },
+  seccionTitulo:  { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"14px 4px 8px" },
+  card:           { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"4px 14px", marginBottom:"4px", boxShadow:t.shadows.card },
+  cardConfirm:    { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginTop:"14px", boxShadow:t.shadows.card },
+  filaMenu:       { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 0", cursor:"pointer" },
+  filaIzq:        { display:"flex", alignItems:"center", gap:"12px" },
+  iconoBox:       { width:"34px", height:"34px", borderRadius:"9px", background:t.colors.bgSection, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 },
+  filaLabel:      { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0 },
+  filaSub:        { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0" },
+  input:          { width:"100%", boxSizing:"border-box", padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", marginBottom:"8px" },
+  btnOjo:         { position:"absolute", right:"10px", top:"10px", background:"none", border:"none", cursor:"pointer", color:t.colors.textTertiary, fontSize:"14px", padding:"2px" },
+  btnAccion:      { width:"100%", padding:"11px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px" },
+  btnCerrarSesion:{ width:"100%", padding:"13px", background:"none", color:t.colors.red, border:`1.5px solid ${t.colors.redBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", marginTop:"14px" },
 };
 
 export default Perfil;
