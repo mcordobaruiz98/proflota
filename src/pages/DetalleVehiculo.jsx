@@ -341,8 +341,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
   {id:"info",      label:"Info",    Icono:Info},
   {id:"viajes",    label:"Viajes",  Icono:Route},
   {id:"cuentas",   label:"Cuentas", Icono:TrendingUp},
-  {id:"historial", label:"Historial",Icono:Clock},
-  {id:"mant",      label:"Mant.",   Icono:Wrench},
+   {id:"mant",      label:"Mant.",   Icono:Wrench},
   {id:"hvida",     label:"H.Vida",  Icono:FileText},
 ];
 
