@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { subirPeajes } from "../scripts/subirPeajes";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 function Configuracion({mostrarToast}) {
   const navigate = useNavigate();
@@ -66,6 +68,29 @@ function Configuracion({mostrarToast}) {
       accion:  toggleSonido,
     },
   ];
+
+  const [diaLiq, setDiaLiq] = useState("");
+
+  useEffect(() => {
+    if (!usuario?.uid) return;
+    getDoc(doc(db, "usuarios", usuario.uid)).then(snap => {
+      if (snap.exists() && snap.data().diaLiquidacion !== undefined) {
+        setDiaLiq(String(snap.data().diaLiquidacion));
+      }
+    }).catch(()=>{});
+  }, [usuario?.uid]);
+
+  const guardarDiaLiq = async (valor) => {
+    setDiaLiq(valor);
+    try {
+      await setDoc(doc(db, "usuarios", usuario.uid), {
+        diaLiquidacion: valor === "" ? null : Number(valor),
+      }, { merge: true });
+      mostrarToast("Día de liquidación guardado", "exito");
+    } catch(err) {
+      mostrarToast("Error al guardar", "error");
+    }
+  };
 
   return (
     <div style={styles.pantalla}>
@@ -157,6 +182,29 @@ function Configuracion({mostrarToast}) {
             </div>
           </div>
         </button>
+      </div>
+
+      {/* DÍA DE LIQUIDACIÓN */}
+      <div style={styles.seccionTitulo}>Liquidación de conductores</div>
+      <div style={styles.seccion}>
+        <div style={{padding:"12px 16px"}}>
+          <p style={{fontSize:"13px",color:"#fff",fontWeight:600,margin:"0 0 4px"}}>Día de pago semanal</p>
+          <p style={{fontSize:"12px",color:"#8B9CB3",margin:"0 0 10px"}}>Ese día aparecerá un recordatorio de liquidación en el inicio</p>
+          <select
+            value={diaLiq}
+            onChange={e=>guardarDiaLiq(e.target.value)}
+            style={{width:"100%",boxSizing:"border-box",padding:"11px 12px",borderRadius:"8px",border:"1.5px solid #1E3A5F",background:"#0A1A2F",color:"#fff",fontSize:"14px",outline:"none"}}
+          >
+            <option value="">Sin recordatorio</option>
+            <option value="1">Lunes</option>
+            <option value="2">Martes</option>
+            <option value="3">Miércoles</option>
+            <option value="4">Jueves</option>
+            <option value="5">Viernes</option>
+            <option value="6">Sábado</option>
+            <option value="0">Domingo</option>
+          </select>
+        </div>
       </div>
 
       {/* ZONA DE PELIGRO — Derecho de supresión (Ley 1581/2012) */}

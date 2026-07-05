@@ -1,12 +1,23 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth }     from "../hooks/useAuth";
 import { theme as t }  from "../styles/theme";
 import {Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake, AlertCircle, Wrench} from "lucide-react";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
+import {doc, getDoc} from "firebase/firestore";
+import { db } from "../firebase";
 
 function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [], conductores = [], gastosFijos = [], cargando}) {
   const navigate = useNavigate();
   const { usuario } = useAuth();
+  const [diaLiquidacion, setDiaLiquidacion] = useState(null);
+
+  useEffect(() => {
+    if (!usuario?.uid) return;
+    getDoc(doc(db, "usuarios", usuario.uid)).then(snap => {
+      if (snap.exists()) setDiaLiquidacion(snap.data().diaLiquidacion ?? null);
+    }).catch(()=>{});
+  }, [usuario?.uid]);
 
   const nombreSaludo = usuario?.displayName
     ? usuario.displayName.split(" ").slice(0, 2).join(" ")
@@ -199,6 +210,24 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
           </div>
         </div>
       )}
+
+        {/* DÍA DE LIQUIDACIÓN */}
+      {diaLiquidacion !== null && new Date().getDay() === diaLiquidacion && viajes.length > 0 && (
+        <div
+          style={{margin:"0 16px 10px",padding:"12px 16px",background:t.colors.greenSoft,border:`1.5px solid ${t.colors.greenBorder}`,borderRadius:t.radius.md,display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}}
+          onClick={()=>navigate("/conductores",{state:{liquidar:true}})}
+        >
+          <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+            <span style={{fontSize:"18px"}}>💵</span>
+            <div>
+              <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.green,margin:0}}>Hoy es día de liquidación</p>
+              <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>Calcule y envíe el pago de sus conductores</p>
+            </div>
+          </div>
+          <span style={{color:t.colors.green,fontSize:"18px",fontWeight:"bold"}}>›</span>
+        </div>
+      )}
+      
 
       {/* RESUMEN DEL DÍA */}
       {viajes.length > 0 && (()=>{
