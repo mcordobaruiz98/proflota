@@ -184,9 +184,7 @@ function AppContenido() {
         <RutaProtegida><AyudaSoporte /></RutaProtegida>
       } />  
 
-      <Route path="/acerca" element={
-        <RutaProtegida><AcercaDe /></RutaProtegida>
-      } />
+      <Route path="/acerca" element={<AcercaDe />} />
 
       <Route path="/cartera" element={
         <RutaProtegida>
