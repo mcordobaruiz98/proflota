@@ -5,7 +5,29 @@ import { subirPeajes } from "../scripts/subirPeajes";
 
 function Configuracion({mostrarToast}) {
   const navigate = useNavigate();
-  const { usuario } = useAuth();
+  const { usuario, eliminarCuenta } = useAuth();
+  const [confirmaEliminar, setConfirmaEliminar] = useState(false);
+  const [textoConfirm, setTextoConfirm] = useState("");
+  const [eliminando, setEliminando] = useState(false);
+
+  const manejarEliminarCuenta = async () => {
+    if (textoConfirm !== "ELIMINAR") {
+      mostrarToast("Escribe ELIMINAR para confirmar", "error");
+      return;
+    }
+    setEliminando(true);
+    try {
+      await eliminarCuenta();
+      // Al eliminar la cuenta, onAuthStateChanged redirige solo al login
+    } catch (err) {
+      if (err.code === "auth/requires-recent-login") {
+        mostrarToast("Por seguridad, cierra sesión, vuelve a entrar y repite la eliminación", "error");
+      } else {
+        mostrarToast("Error al eliminar la cuenta. Contáctanos por soporte", "error");
+      }
+      setEliminando(false);
+    }
+  };
 
   const [notificaciones, setNotificaciones] = useState(() =>
     localStorage.getItem("cfg_notif") !== "false"
@@ -135,6 +157,56 @@ function Configuracion({mostrarToast}) {
             </div>
           </div>
         </button>
+      </div>
+
+      {/* ZONA DE PELIGRO — Derecho de supresión (Ley 1581/2012) */}
+      <div style={{...styles.seccionTitulo, color:"#ef4444"}}>Zona de peligro</div>
+      <div style={{...styles.seccion, border:"1.5px solid #ef444433"}}>
+        {!confirmaEliminar ? (
+          <button
+            style={{ ...styles.filaBtn, borderBottom: "none" }}
+            onClick={() => setConfirmaEliminar(true)}
+          >
+            <div style={styles.filaIzq}>
+              <span style={styles.filaIcono}>⚠️</span>
+              <div>
+                <p style={{ ...styles.filaLabel, color: "#ef4444" }}>Eliminar mi cuenta</p>
+                <p style={styles.filaSub}>Borra permanentemente todos tus datos: vehículos, viajes, conductores y archivos</p>
+              </div>
+            </div>
+          </button>
+        ) : (
+          <div style={{padding:"14px 16px"}}>
+            <p style={{fontSize:"13px", color:"#ef4444", fontWeight:700, margin:"0 0 6px"}}>
+              Esta acción es permanente e irreversible
+            </p>
+            <p style={{fontSize:"12px", color:"#8B9CB3", margin:"0 0 12px", lineHeight:1.5}}>
+              Se eliminarán todos tus vehículos, viajes, conductores, gastos, rutas frecuentes, archivos adjuntos y tu cuenta de acceso. Escribe <strong style={{color:"#ef4444"}}>ELIMINAR</strong> para confirmar.
+            </p>
+            <input
+              type="text"
+              placeholder="Escribe ELIMINAR"
+              value={textoConfirm}
+              onChange={e=>setTextoConfirm(e.target.value.toUpperCase())}
+              style={{width:"100%",boxSizing:"border-box",padding:"11px 12px",borderRadius:"8px",border:"1.5px solid #ef444455",background:"transparent",color:"#fff",fontSize:"14px",fontWeight:700,letterSpacing:"2px",textAlign:"center",outline:"none",marginBottom:"10px"}}
+            />
+            <div style={{display:"flex",gap:"8px"}}>
+              <button
+                style={{flex:1,padding:"11px",background: textoConfirm==="ELIMINAR" ? "#ef4444" : "#ef444455",color:"#fff",border:"none",borderRadius:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer",opacity:eliminando?0.6:1}}
+                onClick={manejarEliminarCuenta}
+                disabled={eliminando}
+              >
+                {eliminando ? "Eliminando..." : "Eliminar definitivamente"}
+              </button>
+              <button
+                style={{padding:"11px 16px",background:"none",border:"1px solid #1E3A5F",borderRadius:"8px",fontSize:"13px",color:"#8B9CB3",cursor:"pointer"}}
+                onClick={()=>{setConfirmaEliminar(false); setTextoConfirm("");}}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ function Login() {
   const [contrasena, setContrasena] = useState("");
   const [verPass,    setVerPass]    = useState(false);
   const [codigoBeta, setCodigoBeta] = useState("");
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [error,      setError]      = useState("");
   const [cargando,   setCargando]   = useState(false);
 
@@ -42,11 +43,13 @@ function Login() {
   const handleGoogle = async () => {
     setCargando(true); setError("");
     try {
-      await loginGoogle(codigoBeta);
+      await loginGoogle(codigoBeta, aceptaTerminos);
       navigate("/");
     } catch (e) {
       if (e.code === "auth/codigo-invalido") {
         setError("Código de acceso beta inválido. Ingresa el código para continuar.");
+      } else if (e.code === "auth/terminos-no-aceptados") {
+        setError("Para crear tu cuenta debes aceptar los Términos y la Política de Privacidad.");
       } else {
         setError("Error al iniciar sesión con Google");
       }
@@ -62,7 +65,6 @@ function Login() {
       <div style={styles.hero}>
         <div style={styles.logoWrap}>
           <img src="/logo-naviraT.png" alt="Navira" style={{ height: "120px", objectFit: "contain" }} />
-          
         </div>
       </div>
 
@@ -136,8 +138,21 @@ function Login() {
             placeholder="Código de acceso beta"
             value={codigoBeta}
             onChange={e=>setCodigoBeta(e.target.value.trim().toUpperCase())}
-            style={{...styles.input,textAlign:"center",marginBottom:"12px",letterSpacing:"2px",fontWeight:"bold"}}
+            style={{...styles.input,textAlign:"center",marginBottom:"10px",letterSpacing:"2px",fontWeight:"bold"}}
           />
+          <div style={{display:"flex",gap:"10px",alignItems:"flex-start",marginBottom:"12px",cursor:"pointer"}} onClick={()=>setAceptaTerminos(!aceptaTerminos)}>
+            <div style={{
+              width:"18px",height:"18px",borderRadius:"4px",flexShrink:0,marginTop:"1px",
+              border:`2px solid ${aceptaTerminos ? "#22C55E" : "#1E3A5F"}`,
+              background: aceptaTerminos ? "#22C55E" : "transparent",
+              display:"flex",alignItems:"center",justifyContent:"center",
+            }}>
+              {aceptaTerminos && <span style={{color:"#fff",fontSize:"11px",fontWeight:900,lineHeight:1}}>✓</span>}
+            </div>
+            <p style={{fontSize:"11px",color:"#8B9CB3",margin:0,lineHeight:1.5}}>
+              Acepto los <span style={{color:"#1565FF",textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Términos</span> y autorizo el tratamiento de mis datos según la <span style={{color:"#1565FF",textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Política de Privacidad</span>.
+            </p>
+          </div>
         </div>
 
         <button

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, Wrench, Camera, Edit2, Save, X, CircleDot, Droplets, Filter, Disc, ClipboardList, Fuel } from "lucide-react";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
+import { useAuth } from "../hooks/useAuth";
 import { theme as t } from "../styles/theme";
 
 
@@ -99,6 +100,7 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({propietario:true,tenedor:false,vehiculo:false,conductor:false});
 
   const { subirArchivo, eliminarArchivo, progreso: progresoArchivo, subiendo } = useSubirArchivo();
+  const { usuario } = useAuth();
 
   const [editando,      setEditando]      = useState(false);
   const [editData,      setEditData]      = useState({});
@@ -275,7 +277,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
   const manejarArchivo = (e, docId) => {
     const archivo = e.target.files[0];
     if (!validarArchivoLocal(archivo)) return;
-    const ruta = `vehiculos/${id}/${docId}_${Date.now()}`;
+    const ruta = `usuarios/${usuario?.uid}/vehiculos/${id}/${docId}_${Date.now()}`;
     subirArchivo(archivo, ruta, docId, (url) => {
       actualizarHV(docId, {estado:"cargado", url, ruta, nombre:archivo.name});
     });
@@ -334,7 +336,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
   const cambiarFotoVehiculo = async (e) => {
     const archivo = e.target.files[0];
     if (!validarArchivoLocal(archivo)) return;
-    const ruta = `vehiculos/${Date.now()}_${archivo.name}`;
+    const ruta = `usuarios/${usuario?.uid}/vehiculos/${Date.now()}_${archivo.name}`;
     subirArchivo(archivo, ruta, "fotoVehiculo", async (url) => {
       try {
         await onEditarVehiculo(vehiculo.firestoreId, { fotoUrl: url });
@@ -975,7 +977,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                               onChange={e=>{
                                 const archivo = e.target.files[0];
                                 if (!validarArchivoLocal(archivo)) return;
-                                const ruta = `gastos/${id}/${Date.now()}_${archivo.name}`;
+                                const ruta = `usuarios/${usuario?.uid}/gastos/${id}/${Date.now()}_${archivo.name}`;
                                 subirArchivo(archivo, ruta, "gastoFactura", (url) => {
                                   setGastoDesc(prev => prev); // keep form open
                                   // Store URL temporarily on the form
