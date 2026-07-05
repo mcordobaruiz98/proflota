@@ -51,10 +51,10 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
 
   const compartirLiquidacion = () => {
     const lineas = [
-      `💵 *LIQUIDACIÓN — NAVIRA*`,
+      `*LIQUIDACIÓN — NAVIRA*`,
       ``,
-      `👤 *Conductor:* ${liqConductor}`,
-      `📅 *Período:* ${fFecha(liqDesde)} al ${fFecha(liqHasta)}`,
+      `*Conductor:* ${liqConductor}`,
+      `*Período:* ${fFecha(liqDesde)} al ${fFecha(liqHasta)}`,
       ``,
       `*Viajes del período:*`,
       ...viajesLiq.map(v => `• ${fFecha(v.fecha)} ${v.ruta || "—"} (${v.placa || "—"}): ${fmt(v.conductor || 0)}`),
@@ -131,7 +131,7 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
         {conductores.length > 0 && !verForm && (
           <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"12px 16px",marginBottom:"12px",boxShadow:t.shadows.card,border:`1.5px solid ${t.colors.greenBorder}`}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setVerLiquidacion(!verLiquidacion)}>
-              <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.green}}>💵 Liquidación del conductor</span>
+              <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.green}}>Liquidación del conductor</span>
               <span style={{color:t.colors.textTertiary}}>{verLiquidacion ? "▲" : "▼"}</span>
             </div>
 
