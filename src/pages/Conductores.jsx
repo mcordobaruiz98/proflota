@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, User, Trash2, Edit2, Save, AlertCircle } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { sanitizar } from "../utils/validar";
 
 function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEliminar, mostrarToast }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [verForm, setVerForm] = useState(false);
   const [editId, setEditId] = useState(null);
   const [nombre, setNombre] = useState("");
@@ -28,7 +29,7 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
     d.setDate(d.getDate() - (dia === 0 ? 6 : dia - 1));
     return d.toISOString().slice(0, 10);
   })();
-  const [verLiquidacion, setVerLiquidacion] = useState(false);
+  const [verLiquidacion, setVerLiquidacion] = useState(location.state?.liquidar || false);
   const [liqConductor,   setLiqConductor]   = useState("");
   const [liqDesde,       setLiqDesde]       = useState(lunesSemana);
   const [liqHasta,       setLiqHasta]       = useState(new Date().toISOString().slice(0, 10));
