@@ -234,7 +234,23 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     if (m<0){m=11;a--;}
     setMesActual(m); setAnioActual(a);
   };
- 
+
+  // Tab Historial
+  const viajesBuscados = viajesVehiculo.filter(v => {
+    const q = busquedaH.toLowerCase();
+    if (!q) return true;
+    return (v.ruta||"").toLowerCase().includes(q)||(v.mani||"").toLowerCase().includes(q);
+  }).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+
+  const viajesAgrupadosPorMes = viajesBuscados.reduce((grupos,viaje)=>{
+    const f  = new Date(viaje.fecha);
+    const et = `${MESES[f.getMonth()]} ${f.getFullYear()}`;
+    const ex = grupos.find(g=>g.etiqueta===et);
+    if (ex) ex.viajes.push(viaje);
+    else grupos.push({etiqueta:et, viajes:[viaje]});
+    return grupos;
+  },[]);
+
   // Hoja de vida
   const actualizarHV = (clave, valor) => {
     const nuevo = {...hvData, [clave]:valor};
@@ -286,6 +302,9 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
       tenedor:       vehiculo.tenedor        || "",
       fotoUrl:       vehiculo.fotoUrl        || "",
       adblueRatio:   vehiculo.adblueRatio    || 0,
+      usaAdblue:     vehiculo.usaAdblue !== false,
+      rendCargadoDef: vehiculo.rendCargadoDef || "",
+      rendVacioDef:   vehiculo.rendVacioDef   || "",
     });
     setEditando(true);
   };
@@ -307,6 +326,9 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
         propietario: editData.propietario.trim(),
         tenedor: editData.tenedor.trim(),
         adblueRatio: editData.adblueRatio || 0,
+        usaAdblue: editData.usaAdblue !== false,
+        rendCargadoDef: Number(editData.rendCargadoDef) || 0,
+        rendVacioDef: Number(editData.rendVacioDef) || 0,
       });
       mostrarToast("Vehículo actualizado","exito");
       setEditando(false);
@@ -341,7 +363,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
   {id:"info",      label:"Info",    Icono:Info},
   {id:"viajes",    label:"Viajes",  Icono:Route},
   {id:"cuentas",   label:"Cuentas", Icono:TrendingUp},
-   {id:"mant",      label:"Mant.",   Icono:Wrench},
+  {id:"historial", label:"Historial",Icono:Clock},
+  {id:"mant",      label:"Mant.",   Icono:Wrench},
   {id:"hvida",     label:"H.Vida",  Icono:FileText},
 ];
 
@@ -491,7 +514,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   {label:"Modelo",           valor:vehiculo.modelo},
                   {label:"Propietario",      valor:vehiculo.propietario},
                   {label:"Tenedor",          valor:vehiculo.tenedor},
-                  {label:"Consumo Adblue",   valor:vehiculo.adblueRatio ? `${(vehiculo.adblueRatio*100).toFixed(1)}%` : "18.9% (default)"},
+                  {label:"Consumo Adblue",   valor: vehiculo.usaAdblue === false ? "No usa" : (vehiculo.adblueRatio ? `${(vehiculo.adblueRatio*100).toFixed(1)}%` : "18.9% (default)")},
+                  {label:"Rendimiento",      valor: (vehiculo.rendCargadoDef || vehiculo.rendVacioDef) ? `${vehiculo.rendCargadoDef||"—"} carg / ${vehiculo.rendVacioDef||"—"} vacío km/gal` : "Sin configurar"},
                 ].map((item,i,arr)=>(
                   <div key={item.label} style={{...styles.fila, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                     <span style={styles.filaLabel}>{item.label}</span>
@@ -560,13 +584,42 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   <input type="text" value={editData.tenedor}
                     onChange={e=>setEditData({...editData,tenedor:e.target.value})} style={styles.input} />
                 </div>
-                <div style={styles.campo}>
-                  <label style={styles.label}>Consumo Adblue (%)</label>
-                  <input type="number" placeholder="18.9" step="0.1"
-                    value={editData.adblueRatio ? (editData.adblueRatio * 100).toFixed(1) : ""}
-                    onChange={e=>setEditData({...editData, adblueRatio: Number(e.target.value)/100 || 0})}
-                    style={styles.input} />
+                {/* ADBLUE — toggle + porcentaje */}
+                <div style={{display:"flex", alignItems:"center", gap:"10px", margin:"4px 0 10px", cursor:"pointer"}} onClick={()=>setEditData({...editData, usaAdblue: !editData.usaAdblue})}>
+                  <div style={{width:"38px",height:"21px",borderRadius:"11px",background:editData.usaAdblue?t.colors.blue:"#1E3A5F",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                    <div style={{width:"17px",height:"17px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:editData.usaAdblue?"19px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
+                  </div>
+                  <label style={{fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, cursor:"pointer"}}>¿Este vehículo usa Adblue?</label>
                 </div>
+                {editData.usaAdblue && (
+                  <div style={styles.campo}>
+                    <label style={styles.label}>Consumo Adblue (%)</label>
+                    <input type="number" placeholder="18.9" step="0.1"
+                      value={editData.adblueRatio ? (editData.adblueRatio * 100).toFixed(1) : ""}
+                      onChange={e=>setEditData({...editData, adblueRatio: Number(e.target.value)/100 || 0})}
+                      style={styles.input} />
+                    <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"3px 0 0"}}>Se calcula sobre el total de galones de ACPM consumidos en el viaje. Si no lo configura, se usa el 18.9% estándar.</p>
+                  </div>
+                )}
+
+                {/* RENDIMIENTO POR DEFECTO */}
+                <div style={styles.fila2}>
+                  <div style={styles.campo}>
+                    <label style={styles.label}>Rend. cargado (km/gal)</label>
+                    <input type="number" placeholder="7" step="0.1"
+                      value={editData.rendCargadoDef}
+                      onChange={e=>setEditData({...editData, rendCargadoDef: e.target.value})}
+                      style={styles.input} />
+                  </div>
+                  <div style={styles.campo}>
+                    <label style={styles.label}>Rend. vacío (km/gal)</label>
+                    <input type="number" placeholder="11" step="0.1"
+                      value={editData.rendVacioDef}
+                      onChange={e=>setEditData({...editData, rendVacioDef: e.target.value})}
+                      style={styles.input} />
+                  </div>
+                </div>
+                <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"-4px 0 10px"}}>Se pre-llenan en la calculadora al seleccionar este vehículo.</p>
               </div>
             )}
           </div>
@@ -715,7 +768,27 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               </div>
             )}
 
-          
+            {/* Viajes del mes */}
+            {viajesMes.length>0&&(
+              <div style={styles.card}>
+                <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
+                {[...viajesMes].reverse().map((viaje,i,arr)=>(
+                  <div key={viaje.firestoreId}
+                    style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`,cursor:"pointer"}}
+                    onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
+                  >
+                    <div>
+                      <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,margin:0,color:t.colors.textPrimary}}>{viaje.ruta||"Sin ruta"}</p>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{viaje.fecha||""}</p>
+                    </div>
+                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,margin:0,color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
+                      {fmt(viaje.neta||0)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* ── GASTOS Y FACTURAS DEL VEHÍCULO ── */}
             {(() => {
               const gastosMesVeh = gastosVehiculo.filter(g => {
@@ -776,7 +849,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                           <label style={styles.label}>Nombre del gasto</label>
                           <select value={gfNombre} onChange={e=>setGfNombre(e.target.value)} style={styles.input}>
                             <option value="">Seleccionar o escribir...</option>
-                            {["Cuota del Vehículo","Seguro","Parqueadero","GPS / Rastreo","SOAT","Tecnomecánica","Impuestos","Lavadas","Administración","Seguridad Conductor"].map(o=>(
+                            {["Cuota del camión","Seguro","Parqueadero","GPS / Rastreo","SOAT","Tecnomecánica","Impuestos","Lavadas","Administración"].map(o=>(
                               <option key={o} value={o}>{o}</option>
                             ))}
                             <option value="__otro__">+ Otro gasto</option>
@@ -1056,6 +1129,57 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
           </div>
         )}
 
+        {/* ── HISTORIAL ── */}
+        {tabActivo==="historial" && (
+          <div>
+            <div style={styles.buscadorWrap}>
+              <input type="text" placeholder="Buscar por ruta o manifiesto..."
+                value={busquedaH} onChange={e=>setBusquedaH(e.target.value)} style={styles.buscadorInput} />
+            </div>
+
+            {viajesVehiculo.length===0&&(
+              <div style={styles.vacio}>
+                <Clock size={40} color={t.colors.textTertiary} strokeWidth={1.5} />
+                <p style={styles.vacioTexto}>Sin historial todavía</p>
+                <p style={styles.vacioSub}>Los viajes guardados aparecerán aquí.</p>
+              </div>
+            )}
+
+            {viajesVehiculo.length>0&&viajesBuscados.length===0&&(
+              <div style={styles.vacio}>
+                <p style={styles.vacioTexto}>Sin resultados</p>
+                <p style={styles.vacioSub}>No hay viajes con "{busquedaH}"</p>
+              </div>
+            )}
+
+            {viajesAgrupadosPorMes.map(grupo=>(
+              <div key={grupo.etiqueta} style={{marginBottom:"6px"}}>
+                <p style={styles.grupoMes}>{grupo.etiqueta}</p>
+                {grupo.viajes.map(viaje=>{
+                  const ok=(viaje.mrg||0)>=25;
+                  return (
+                    <div key={viaje.firestoreId} style={styles.tarjetaViaje} onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}>
+                      <div style={{...styles.tarjetaFranja,background:ok?t.colors.green:t.colors.amber}} />
+                      <div style={styles.tarjetaViajeContenido}>
+                        <div style={{flex:1,minWidth:0}}>
+                          <p style={styles.tarjetaRuta}>{viaje.ruta||"Sin ruta"}</p>
+                          <p style={styles.tarjetaMeta}>
+                            {viaje.fecha||""}
+                            {viaje.ton?` · ${fnD(viaje.ton,1)} ton`:""}
+                            {viaje.mani?` · Man. ${viaje.mani}`:""}
+                          </p>
+                        </div>
+                        <p style={{...styles.tarjetaNeta,color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
+                          {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* ── MANTENIMIENTO ── */}
 {tabActivo==="mant" && (

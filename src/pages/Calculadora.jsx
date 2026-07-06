@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronUp } from "lucide-react";
 import { theme as t } from "../styles/theme";
@@ -139,7 +139,8 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   }
 
   const vehiculoSel = vehiculos.find(v => v.placa === placa);
-  const adblueRatio = vehiculoSel?.adblueRatio || DEFAULT_ADBLUE;
+  const usaAdblue   = vehiculoSel?.usaAdblue !== false;
+  const adblueRatio = usaAdblue ? (vehiculoSel?.adblueRatio || DEFAULT_ADBLUE) : 0;
   const adblLt    = galTotal * adblueRatio;
   const costoAcpm = galTotal * n(precioAcpm);
   const costoAdbl = adblLt   * n(precioAdblue);
@@ -360,6 +361,14 @@ const guardarRutaFrecuente = async () => {
     setGuardandoRuta(false);
   }
 };
+
+// Pre-llenar rendimiento configurado en el vehículo al seleccionar placa
+  useEffect(() => {
+    const veh = vehiculos.find(v => v.placa === placa);
+    if (!veh) return;
+    if (veh.rendCargadoDef > 0 && !rendCargado) setRendCargado(String(veh.rendCargadoDef));
+    if (veh.rendVacioDef > 0 && !rendVacio) setRendVacio(String(veh.rendVacioDef));
+  }, [placa]);
 
   return (
     <div style={styles.pantalla}>
