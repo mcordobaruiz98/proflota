@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send } from "lucide-react";
+import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send, Repeat } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { sanitizar } from "../utils/validar";
 
@@ -72,6 +72,14 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       viaje.remesa ? `📄 *Remesa:* ${viaje.remesa}` : null,
       viaje.lugarCargue ? `📍 *Cargue:* ${viaje.lugarCargue}` : null,
       viaje.lugarDescargue ? `📍 *Descargue:* ${viaje.lugarDescargue}` : null,
+      viaje.tieneRetorno ? `` : null,
+      viaje.tieneRetorno ? `🔄 *VIAJE DE RETORNO*` : null,
+      viaje.tieneRetorno && viaje.rutaRet ? `📍 *Ruta:* ${viaje.rutaRet}` : null,
+      viaje.tieneRetorno && viaje.fechaCargueRet ? `📅 *Cargue:* ${viaje.fechaCargueRet}` : null,
+      viaje.tieneRetorno && viaje.empresaRet ? `🏢 *Empresa:* ${viaje.empresaRet}` : null,
+      viaje.tieneRetorno && viaje.productoRet ? `📦 *Producto:* ${viaje.productoRet}` : null,
+      viaje.tieneRetorno && viaje.maniRet ? `📄 *Manifiesto:* ${viaje.maniRet}` : null,
+      viaje.tieneRetorno ? `💰 *Flete retorno:* ${fmt(viaje.valorViajeRetorno || 0)}` : null,
       ``,
       `💰 *Valor flete:* ${fmt(viaje.vViaje || 0)}`,
       `⛽ *Combustible:* ${fmt(viaje.cComb || 0)}`,
@@ -584,6 +592,31 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 {viaje.contactoEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Contacto empresa</span><span style={styles.filaValor}>{viaje.contactoEmpresa}</span></div>}
                 {viaje.celularEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Celular contacto</span><a href={`tel:${viaje.celularEmpresa}`} style={{...styles.filaValor,color:t.colors.blue,textDecoration:"none"}}>{viaje.celularEmpresa}</a></div>}
                 {viaje.observaciones&&<div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Observaciones</span><span style={{...styles.filaValor,color:t.colors.textSecondary,fontStyle:"italic"}}>{viaje.observaciones}</span></div>}
+              </div>
+            )}
+
+            {/* VIAJE DE RETORNO */}
+            {viaje.tieneRetorno && (
+              <div style={{...styles.card, border:`1.5px solid ${t.colors.blueBorder}`, background:t.colors.blueSoft}}>
+                <div style={{...styles.cardHeader, justifyContent:"space-between"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                    <Repeat size={16} color={t.colors.blue} strokeWidth={2} />
+                    <p style={{...styles.cardTitulo, color:t.colors.blue}}>Viaje de retorno</p>
+                  </div>
+                  <span style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBlack, color:t.colors.blue}}>{fmt(viaje.valorViajeRetorno || 0)}</span>
+                </div>
+                {viaje.rutaRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Ruta</span><span style={styles.filaValor}>{viaje.rutaRet}</span></div>}
+                {(viaje.fechaCargueRet || viaje.fechaDescargueRet) && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Cargue / Descargue</span><span style={styles.filaValor}>{viaje.fechaCargueRet || "—"} · {viaje.fechaDescargueRet || "—"}</span></div>}
+                {viaje.empresaRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Empresa</span><span style={styles.filaValor}>{viaje.empresaRet}</span></div>}
+                {viaje.contactoRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Contacto</span><span style={styles.filaValor}>{viaje.contactoRet}</span></div>}
+                {(viaje.productoRet || viaje.tipoCargaRet) && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Producto</span><span style={styles.filaValor}>{viaje.productoRet || "—"}{viaje.tipoCargaRet ? ` · ${viaje.tipoCargaRet}` : ""}</span></div>}
+                {viaje.maniRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Manifiesto</span><span style={styles.filaValor}>{viaje.maniRet}</span></div>}
+                {viaje.remesaRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>N° Remesa</span><span style={styles.filaValor}>{viaje.remesaRet}</span></div>}
+                {viaje.pesoBasRet > 0 && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Peso báscula</span><span style={styles.filaValor}>{viaje.pesoBasRet} ton</span></div>}
+                {viaje.lugarCargueRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Lugar de cargue</span><span style={styles.filaValor}>{viaje.lugarCargueRet}</span></div>}
+                {viaje.lugarDescargueRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Lugar de descargue</span><span style={styles.filaValor}>{viaje.lugarDescargueRet}</span></div>}
+                {(viaje.tonelajeRetorno > 0 && viaje.fleteRetorno > 0) && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Flete</span><span style={styles.filaValor}>{viaje.tonelajeRetorno} ton × {fmt(viaje.fleteRetorno)}/ton</span></div>}
+                {((viaje.kmCargadoRet || 0) > 0 || (viaje.kmVacioRet || 0) > 0) && <div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Recorrido</span><span style={styles.filaValor}>{viaje.kmCargadoRet || 0} km cargado · {viaje.kmVacioRet || 0} km vacío</span></div>}
               </div>
             )}
 
