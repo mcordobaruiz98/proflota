@@ -275,9 +275,11 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   };
 
   const cargarRuta = (rutaGuardada) => {
+  setTipoCarga(rutaGuardada.tipoCarga || "");
   setRuta(rutaGuardada.ruta);
   setKmCargado(rutaGuardada.kmCargado || "");
   setKmVacio(rutaGuardada.kmVacio || "");
+  setFleteTon(rutaGuardada.fleteTon || "");
   setRendCargado(rutaGuardada.rendCargado || "");
   setRendVacio(rutaGuardada.rendVacio || "");
   setGalManual(rutaGuardada.galManual || "");
@@ -318,10 +320,12 @@ const guardarRutaFrecuente = async () => {
   setGuardandoRuta(true);
 
   const datos = {
+    tipoCarga:   sanitizar(tipoCarga),
     nombre:      sanitizar(nombreRuta.trim() || ruta.trim()),
     ruta:        sanitizar(ruta),
     kmCargado:   n(kmCargado),
     kmVacio:     n(kmVacio),
+    fleteTon:    n(fleteTon),
     rendCargado: n(rendCargado),
     rendVacio:   n(rendVacio),
     galManual:   n(galManual),
