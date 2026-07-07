@@ -280,6 +280,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   setKmVacio(rutaGuardada.kmVacio || "");
   setRendCargado(rutaGuardada.rendCargado || "");
   setRendVacio(rutaGuardada.rendVacio || "");
+  setGalManual(rutaGuardada.galManual || "");
   if (rutaGuardada.precioAcpm)   setPrecioAcpm(rutaGuardada.precioAcpm);
   if (rutaGuardada.precioAdblue) setPrecioAdblue(rutaGuardada.precioAdblue);
   setCategoria(rutaGuardada.categoria || "VII");
@@ -323,6 +324,7 @@ const guardarRutaFrecuente = async () => {
     kmVacio:     n(kmVacio),
     rendCargado: n(rendCargado),
     rendVacio:   n(rendVacio),
+    galManual:   n(galManual),
     precioAcpm:  n(precioAcpm),
     precioAdblue: n(precioAdblue),
     peajesRuta:  peajesRuta.map(p => ({
