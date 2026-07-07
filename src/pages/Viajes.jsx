@@ -1,208 +1,265 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Search, ChevronDown, ChevronUp, MapPin, Plus } from "lucide-react";
 import { theme as t } from "../styles/theme";
-import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
+import { SkeletonCard } from "../components/Skeleton";
 
-const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+// VIAJES — Memoria de costos por ruta
+// Catálogo de consulta rápida: agrupa los viajes por ruta y muestra la
+// estructura de costos del más reciente, para cotizar y negociar fletes.
+// El historial contable con fechas vive en Vehículos → Viajes.
 
-function Viajes({ viajes = [], cargando}) {
-  const navigate  = useNavigate();
+function Viajes({ viajes = [], cargando }) {
+  const navigate = useNavigate();
   const [busqueda, setBusqueda] = useState("");
-  const [filtro,   setFiltro]   = useState("todos");
+  const [rutasAbiertas, setRutasAbiertas] = useState({});
 
-  const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
-  const fn  = (n,d) => (Math.round(n*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
+  const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
+  const fFecha = (iso) => {
+    if (!iso) return "—";
+    const [y, m, d] = iso.split("-");
+    return `${d}/${m}/${y}`;
+  };
 
-  const hoy = new Date();
+  const toggleRuta = (r) => setRutasAbiertas(prev => ({ ...prev, [r]: !prev[r] }));
 
-  const viajesFiltrados = [...viajes].filter(v => {
-    const q = busqueda.toLowerCase();
-    const coincide = !q ||
-      (v.ruta||"").toLowerCase().includes(q) ||
-      (v.placa||"").toLowerCase().includes(q) ||
-      (v.mani||"").toLowerCase().includes(q);
-    if (!coincide) return false;
-    const f = new Date(v.fecha);
-    if (filtro==="mes")    return f.getMonth()===hoy.getMonth() && f.getFullYear()===hoy.getFullYear();
-    if (filtro==="semana") {
-  const inicioSemana = new Date(hoy);
-  const dia = hoy.getDay();
-  const diff = dia === 0 ? 6 : dia - 1;
-  inicioSemana.setDate(hoy.getDate() - diff);
-  inicioSemana.setHours(0,0,0,0);
-  return f >= inicioSemana;
-}
-    return true;
-  });
+  // Agrupar viajes por ruta
+  const q = busqueda.toLowerCase();
+  const grupos = Object.entries(
+    viajes
+      .filter(v => !q
+        || (v.ruta || "").toLowerCase().includes(q)
+        || (v.emp || "").toLowerCase().includes(q)
+        || (v.prod || "").toLowerCase().includes(q))
+      .reduce((acc, v) => {
+        const r = v.ruta || "Sin ruta";
+        if (!acc[r]) acc[r] = [];
+        acc[r].push(v);
+        return acc;
+      }, {})
+  )
+    // Ordenar rutas por fecha del viaje más reciente
+    .map(([ruta, vjs]) => {
+      const ordenados = [...vjs].sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+      return { ruta, viajes: ordenados, ultimo: ordenados[0] };
+    })
+    .sort((a, b) => (b.ultimo.fecha || "").localeCompare(a.ultimo.fecha || ""));
 
-  const agrupados = viajesFiltrados.reduce((grupos, viaje) => {
-    const f = new Date(viaje.fecha);
-    const et = `${MESES[f.getMonth()]} ${f.getFullYear()}`;
-    const ex = grupos.find(g=>g.etiqueta===et);
-    if (ex) ex.viajes.push(viaje);
-    else grupos.push({etiqueta:et, viajes:[viaje]});
-    return grupos;
-  }, []);
-
-if (cargando) return (
-  <div style={styles.pantalla}>
-    <div style={{padding:"16px"}}>
-      <SkeletonCard filas={4}/>
-      <SkeletonCard filas={4}/>
-    </div>
-  </div>
-);
+  if (cargando) {
+    return (
+      <div style={styles.pantalla}>
+        <div style={styles.header}>
+          <button style={styles.btnVolver} onClick={() => navigate(-1)}>
+            <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
+            <span>Volver</span>
+          </button>
+          <div>
+            <h1 style={styles.titulo}>Viajes</h1>
+            <p style={styles.headerSub}>Costos por ruta</p>
+          </div>
+        </div>
+        <div style={{ padding: "16px" }}>
+          <SkeletonCard /><SkeletonCard /><SkeletonCard />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.pantalla}>
 
       {/* HEADER */}
       <div style={styles.header}>
-        <div>
-          <p style={styles.headerSub}>Historial completo</p>
+        <button style={styles.btnVolver} onClick={() => navigate(-1)}>
+          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
+          <span>Volver</span>
+        </button>
+        <div style={{ flex: 1 }}>
           <h1 style={styles.titulo}>Viajes</h1>
+          <p style={styles.headerSub}>Memoria de costos por ruta</p>
         </div>
-        <button style={styles.btnNuevo} onClick={()=>navigate("/calculadora")}>
+        <button style={styles.btnNuevo} onClick={() => navigate("/calculadora")}>
           <Plus size={16} color="#fff" strokeWidth={2.5} />
-          Nuevo
         </button>
       </div>
 
-      {/* BUSCADOR */}
-      <div style={styles.buscadorWrap}>
-        <Search size={16} color={t.colors.textTertiary} style={{flexShrink:0}} />
-        <input
-          type="text"
-          placeholder="Buscar por placa, ruta o manifiesto..."
-          value={busqueda}
-          onChange={e=>setBusqueda(e.target.value)}
-          style={styles.buscadorInput}
-        />
-      </div>
+      <div style={styles.contenido}>
 
-      {/* CHIPS */}
-      <div style={styles.chips}>
-        {[{id:"todos",label:"Todos"},{id:"mes",label:"Este mes"},{id:"semana",label:"Esta semana"}].map(f=>(
-          <button
-            key={f.id}
-            style={{...styles.chip, ...(filtro===f.id?styles.chipActivo:{})}}
-            onClick={()=>setFiltro(f.id)}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
+        {/* BUSCADOR */}
+        {viajes.length > 0 && (
+          <div style={styles.buscadorBox}>
+            <Search size={16} color={t.colors.textTertiary} />
+            <input
+              type="text"
+              placeholder="Buscar ruta, empresa o producto..."
+              value={busqueda}
+              onChange={e => setBusqueda(e.target.value)}
+              style={styles.buscadorInput}
+            />
+          </div>
+        )}
 
-      {/* ESTADO VACÍO */}
-      {viajes.length === 0 && (
-        <div style={styles.vacio}>
-          <p style={{fontSize:"36px", marginBottom:"10px"}}>🗺️</p>
-          <p style={styles.vacioTexto}>Sin viajes registrados</p>
-          <p style={styles.vacioSub}>Usa la calculadora para registrar tu primer viaje.</p>
-          <button style={styles.btnCalcular} onClick={()=>navigate("/calculadora")}>
-            Calcular flete
-          </button>
-        </div>
-      )}
+        {/* VACÍO */}
+        {viajes.length === 0 && (
+          <div style={{ textAlign: "center", padding: "50px 20px" }}>
+            <p style={{ fontSize: "36px", margin: "0 0 8px" }}>🚛</p>
+            <p style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: "0 0 4px" }}>Aún no hay viajes</p>
+            <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "0 0 16px" }}>Cuando calcule viajes, aquí quedará la memoria de costos de cada ruta</p>
+            <button style={styles.btnCalcular} onClick={() => navigate("/calculadora")}>
+              Calcular mi primer viaje
+            </button>
+          </div>
+        )}
 
-      {viajes.length > 0 && viajesFiltrados.length === 0 && (
-        <div style={styles.vacio}>
-          <p style={{fontSize:"36px", marginBottom:"10px"}}>🔍</p>
-          <p style={styles.vacioTexto}>Sin resultados</p>
-          <p style={styles.vacioSub}>No hay viajes que coincidan con "{busqueda}"</p>
-        </div>
-      )}
-
-      {/* LISTA AGRUPADA */}
-      <div style={styles.lista}>
-        {agrupados.map(grupo => {
-          const netaGrupo = grupo.viajes.reduce((s,v)=>s+(v.neta||0),0);
+        {/* RUTAS */}
+        {grupos.map(g => {
+          const abierta = rutasAbiertas[g.ruta] || false;
+          const u = g.ultimo; // viaje más reciente de la ruta = referencia de costos
+          const otrosGastos = (u.carp || 0) + (u.gv2 || 0) + (u.extras || 0);
+          const kmRuta = u.kmT || 0;
           return (
-            <div key={grupo.etiqueta}>
-              <div style={styles.grupoHeader}>
-                <p style={styles.grupoMes}>{grupo.etiqueta}</p>
-                <p style={{...styles.grupoNeta, color:netaGrupo>=0?t.colors.green:t.colors.red}}>
-                  {netaGrupo>=0?"+":""}{fmt(netaGrupo)}
-                </p>
-              </div>
-              {grupo.viajes.map(viaje => {
-                const ok = (viaje.mrg||0) >= 25;
-                return (
-                  <div
-                    key={viaje.firestoreId}
-                    style={styles.tarjeta}
-                    onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
-                  >
-                    {/* Indicador lateral */}
-                    <div style={{...styles.indicador, background:ok?t.colors.green:t.colors.amber}} />
+            <div key={g.ruta} style={styles.card}>
 
-                    <div style={styles.tarjetaContenido}>
-                      <div style={styles.tarjetaInfo}>
-                        <p style={styles.tarjetaRuta}>{viaje.ruta||"Sin ruta"}</p>
-                        <p style={styles.tarjetaMeta}>
-                          {viaje.fecha||""}
-                          {viaje.placa?` · ${viaje.placa}`:""}
-                          {viaje.ton?` · ${fn(viaje.ton,1)} ton`:""}
-                        </p>
-                        <div style={styles.pills}>
-                          {viaje.mani && <span style={styles.pill}>Man. {viaje.mani}</span>}
-                          {viaje.mrg!==undefined && (
-                            <span style={{...styles.pill, background:ok?t.colors.greenSoft:t.colors.amberSoft, color:ok?t.colors.green:t.colors.amber}}>
-                              {viaje.mrg.toFixed(1)}%
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div style={styles.tarjetaDer}>
-                        <p style={{...styles.tarjetaNeta, color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
-                          {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
-                        </p>
-                        <p style={styles.tarjetaFlete}>{fmt(viaje.vViaje||0)}</p>
-                      </div>
-                    </div>
+              {/* Cabecera de ruta */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }} onClick={() => toggleRuta(g.ruta)}>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", flex: 1, minWidth: 0 }}>
+                  <MapPin size={16} color={t.colors.blue} strokeWidth={2} style={{ flexShrink: 0 }} />
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{g.ruta}</p>
+                    <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "2px 0 0" }}>
+                      {g.viajes.length} viaje{g.viajes.length !== 1 ? "s" : ""} · último {fFecha(u.fecha)}{kmRuta > 0 ? ` · ${kmRuta.toLocaleString("es-CO")} km` : ""}
+                    </p>
                   </div>
-                );
-              })}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                  <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBlack, color: (u.neta || 0) >= 0 ? t.colors.green : t.colors.red }}>{fmt(u.neta || 0)}</span>
+                  {abierta ? <ChevronUp size={16} color={t.colors.textTertiary} /> : <ChevronDown size={16} color={t.colors.textTertiary} />}
+                </div>
+              </div>
+
+              {/* Estructura de costos del último viaje */}
+              {abierta && (
+                <div style={{ marginTop: "10px", paddingTop: "10px", borderTop: `1px solid ${t.colors.borderLight}` }}>
+
+                  <p style={styles.refTitulo}>Referencia de costos (último viaje)</p>
+
+                  <div style={styles.refFila}>
+                    <span style={styles.refL}>Flete cobrado</span>
+                    <span style={{ ...styles.refV, color: t.colors.blue }}>
+                      {fmt(u.vViaje || 0)}{u.ton > 0 && u.fleteTon > 0 ? ` (${u.ton} ton × ${fmt(u.fleteTon)})` : ""}
+                    </span>
+                  </div>
+
+                  {(u.cComb || 0) > 0 && (
+                    <div style={styles.refFila}>
+                      <span style={styles.refL}>Combustible{u.gTot > 0 ? ` (${Math.round(u.gTot)} gal)` : ""}</span>
+                      <span style={styles.refV}>{fmt(u.cComb)}</span>
+                    </div>
+                  )}
+
+                  {(u.peajes || 0) > 0 && (
+                    <div style={styles.refFila}>
+                      <span style={styles.refL}>Peajes{(u.peajesDetalle || []).length > 0 ? ` (${u.peajesDetalle.length})` : ""}</span>
+                      <span style={styles.refV}>{fmt(u.peajes)}</span>
+                    </div>
+                  )}
+
+                  {/* Detalle de peajes — lo que se consulta al negociar */}
+                  {(u.peajesDetalle || []).length > 0 && (
+                    <div style={{ margin: "2px 0 6px", padding: "8px 10px", background: t.colors.bgSection, borderRadius: t.radius.sm }}>
+                      {u.peajesDetalle.map((p, i) => (
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: t.fonts.sizeXs, padding: "2px 0" }}>
+                          <span style={{ color: t.colors.textTertiary }}>{p.n}{p.iv ? " (ida y vuelta)" : ""}</span>
+                          <span style={{ color: t.colors.textSecondary, fontWeight: t.fonts.weightSemibold }}>{fmt(p.total || p.tarifa || 0)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {(u.conductor || 0) > 0 && (
+                    <div style={styles.refFila}>
+                      <span style={styles.refL}>Conductor{u.pcond > 0 && u.pcond <= 100 ? ` (${u.pcond}%)` : ""}</span>
+                      <span style={styles.refV}>{fmt(u.conductor)}</span>
+                    </div>
+                  )}
+
+                  {otrosGastos > 0 && (
+                    <div style={styles.refFila}>
+                      <span style={styles.refL}>Carpado + gastos + otros</span>
+                      <span style={styles.refV}>{fmt(otrosGastos)}</span>
+                    </div>
+                  )}
+
+                  {(u.descuentos?.total || 0) > 0 && (
+                    <div style={styles.refFila}>
+                      <span style={styles.refL}>Descuentos de ley</span>
+                      <span style={styles.refV}>{fmt(u.descuentos.total)}</span>
+                    </div>
+                  )}
+
+                  <div style={{ ...styles.refFila, borderBottom: "none", paddingTop: "8px" }}>
+                    <span style={{ ...styles.refL, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary }}>Costo total del viaje</span>
+                    <span style={{ ...styles.refV, color: t.colors.red, fontWeight: t.fonts.weightBold }}>{fmt(u.total || 0)}</span>
+                  </div>
+                  {kmRuta > 0 && (u.total || 0) > 0 && (
+                    <div style={{ ...styles.refFila, borderBottom: "none", paddingTop: 0 }}>
+                      <span style={styles.refL}>Costo por km</span>
+                      <span style={styles.refV}>{fmt((u.total || 0) / kmRuta)}/km</span>
+                    </div>
+                  )}
+
+                  {/* Historial de la ruta */}
+                  <p style={{ ...styles.refTitulo, marginTop: "12px" }}>Veces realizada</p>
+                  {g.viajes.slice(0, 5).map(v => (
+                    <div
+                      key={v.firestoreId}
+                      style={{ display: "flex", justifyContent: "space-between", padding: "7px 4px", borderBottom: `1px solid ${t.colors.borderLight}`, cursor: "pointer", fontSize: t.fonts.sizeXs }}
+                      onClick={() => navigate(`/viaje/${v.firestoreId}`)}
+                    >
+                      <span style={{ color: t.colors.textSecondary }}>{fFecha(v.fecha)} · {v.placa || "—"}{v.emp ? ` · ${v.emp}` : ""}</span>
+                      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span style={{ fontWeight: t.fonts.weightBold, color: (v.neta || 0) >= 0 ? t.colors.green : t.colors.red }}>{fmt(v.neta || 0)}</span>
+                        <span style={{ color: t.colors.textTertiary }}>›</span>
+                      </span>
+                    </div>
+                  ))}
+                  {g.viajes.length > 5 && (
+                    <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, textAlign: "center", margin: "6px 0 0" }}>
+                      +{g.viajes.length - 5} más en Vehículos → Viajes
+                    </p>
+                  )}
+
+                </div>
+              )}
             </div>
           );
         })}
-      </div>
 
+        {grupos.length === 0 && viajes.length > 0 && (
+          <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, textAlign: "center", margin: "20px 0" }}>Sin resultados para "{busqueda}"</p>
+        )}
+
+      </div>
     </div>
   );
 }
 
 const styles = {
-  pantalla:       { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"20px" },
-  header:         { display:"flex", justifyContent:"space-between", alignItems:"flex-end", padding:"20px 20px 16px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  headerSub:      { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 2px", fontWeight:t.fonts.weightMedium, textTransform:"uppercase", letterSpacing:"0.06em" },
-  titulo:         { fontSize:"22px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:0, letterSpacing:"-0.3px" },
-  btnNuevo:       { display:"flex", alignItems:"center", gap:"6px", padding:"10px 16px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer" },
-  buscadorWrap:   { display:"flex", alignItems:"center", gap:"10px", margin:"12px 16px 0", background:t.colors.bgCard, border:`1.5px solid ${t.colors.border}`, borderRadius:t.radius.md, padding:"11px 14px", boxShadow:t.shadows.card },
-  buscadorInput:  { flex:1, border:"none", outline:"none", fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, background:"transparent" },
-  chips:          { display:"flex", gap:"8px", padding:"10px 16px 4px" },
-  chip:           { padding:"6px 14px", borderRadius:t.radius.full, border:`1.5px solid ${t.colors.border}`, background:t.colors.bgCard, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, cursor:"pointer" },
-  chipActivo:     { background:t.colors.blue, color:"#fff", border:`1.5px solid ${t.colors.blue}` },
-  vacio:          { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"50px 20px", textAlign:"center", margin:"12px 16px", boxShadow:t.shadows.card },
-  vacioTexto:     { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 6px" },
-  vacioSub:       { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, margin:"0 0 20px" },
-  btnCalcular:    { padding:"12px 28px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer" },
-  lista:          { padding:"4px 16px 16px" },
-  grupoHeader:    { display:"flex", justifyContent:"space-between", alignItems:"center", margin:"14px 0 8px" },
-  grupoMes:       { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.07em", margin:0 },
-  grupoNeta:      { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, margin:0 },
-  tarjeta:        { background:t.colors.bgCard, borderRadius:t.radius.lg, marginBottom:"8px", display:"flex", overflow:"hidden", boxShadow:t.shadows.card, cursor:"pointer" },
-  indicador:      { width:"4px", flexShrink:0 },
-  tarjetaContenido:{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 14px", flex:1 },
-  tarjetaInfo:    { flex:1, minWidth:0 },
-  tarjetaRuta:    { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" },
-  tarjetaMeta:    { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"3px 0 5px" },
-  pills:          { display:"flex", gap:"4px", flexWrap:"wrap" },
-  pill:           { fontSize:"10px", background:t.colors.bgSection, color:t.colors.textSecondary, padding:"2px 7px", borderRadius:t.radius.full },
-  tarjetaDer:     { textAlign:"right", marginLeft:"10px", flexShrink:0 },
-  tarjetaNeta:    { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, margin:0 },
-  tarjetaFlete:   { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0" },
+  pantalla:      { maxWidth: "430px", margin: "0 auto", minHeight: "100vh", background: t.colors.bgPrimary, paddingBottom: "30px" },
+  header:        { display: "flex", alignItems: "center", gap: "12px", padding: "16px 20px 12px", background: t.colors.bgCard, borderBottom: `1px solid ${t.colors.borderLight}` },
+  btnVolver:     { display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", color: t.colors.blue, cursor: "pointer", padding: 0, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightSemibold },
+  titulo:        { fontSize: "18px", fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: 0 },
+  headerSub:     { fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "2px 0 0" },
+  btnNuevo:      { width: "36px", height: "36px", borderRadius: "10px", background: t.colors.green, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  contenido:     { padding: "14px 16px" },
+  buscadorBox:   { display: "flex", alignItems: "center", gap: "8px", background: t.colors.bgCard, borderRadius: t.radius.md, padding: "10px 14px", marginBottom: "12px", boxShadow: t.shadows.card },
+  buscadorInput: { flex: 1, border: "none", outline: "none", background: "transparent", fontSize: t.fonts.sizeSm, color: t.colors.textPrimary },
+  btnCalcular:   { padding: "12px 24px", background: t.colors.green, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, cursor: "pointer" },
+  card:          { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "14px 16px", marginBottom: "10px", boxShadow: t.shadows.card },
+  refTitulo:     { fontSize: "10px", fontWeight: t.fonts.weightBold, color: t.colors.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" },
+  refFila:       { display: "flex", justifyContent: "space-between", fontSize: t.fonts.sizeSm, padding: "5px 0", borderBottom: `1px solid ${t.colors.borderLight}` },
+  refL:          { color: t.colors.textSecondary, fontSize: t.fonts.sizeXs },
+  refV:          { fontWeight: t.fonts.weightSemibold, color: t.colors.textPrimary, fontSize: t.fonts.sizeXs },
 };
 
 export default Viajes;
