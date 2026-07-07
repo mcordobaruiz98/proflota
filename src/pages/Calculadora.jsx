@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronUp } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { sanitizar, validarNumero } from "../utils/validar";
+import { useSubirArchivo } from "../hooks/useSubirArchivo";
+import { useAuth } from "../hooks/useAuth";
 
 const DEFAULT_ADBLUE = 0.18925;
 
@@ -12,6 +14,11 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   : [];
   const navigate = useNavigate();
   const location = useLocation();
+  const { subirArchivo, subiendo, progreso } = useSubirArchivo();
+  const { usuario } = useAuth();
+
+  const [maniFotoUrl,     setManiFotoUrl]        = useState(null);
+  const [maniFotoRuta,    setManiFotoRuta]       = useState(null);
 
   const [fecha,            setFecha]              = useState(new Date().toISOString().slice(0,10));
   const [fechaDescarga,    setFechaDescarga]      = useState("");
@@ -204,6 +211,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     await onGuardar({
       fecha, fechaDescarga, mani: sanitizar(mani), placa, tipoCarga, prod: sanitizar(producto),
       ruta: sanitizar(ruta), emp: sanitizar(empresa), condNom: sanitizar(conductor),
+      manifiestoFotoUrl: maniFotoUrl, manifiestoFotoRuta: maniFotoRuta,
       remesa: sanitizar(remesa), pesoBascula: validarNumero(pesoBascula, 0, 999),
       lugarCargue: sanitizar(lugarCargue), lugarDescargue: sanitizar(lugarDescargue),
       observaciones: sanitizar(observaciones).slice(0, 500),
@@ -269,6 +277,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     setLugarCargueRet(""); setLugarDescargueRet(""); setFechaCargueRet(""); setFechaDescargueRet("");
     setExtras([]); setPorcCond(""); setCarpado(""); setGastosViaje("");
     setPeajesRuta([]); setRutaCargada(null);
+    setManiFotoUrl(null); setManiFotoRuta(null);
 
     setGuardando(false);
     navigate(-1);
@@ -615,6 +624,27 @@ const guardarRutaFrecuente = async () => {
     onChange={e=>setMani(e.target.value)} style={styles.input}/>
 </div>
 
+  <div style={{marginBottom:"12px"}}>
+          <input type="file" accept="image/*" capture="environment" id="fotoManifiesto" style={{display:"none"}}
+            onChange={e=>{
+              const archivo = e.target.files[0];
+              if (!archivo) return;
+              if (!["image/jpeg","image/png"].includes(archivo.type)) { mostrarToast("Solo JPG o PNG","error"); return; }
+              if (archivo.size > 5*1024*1024) { mostrarToast("Máximo 5 MB","error"); return; }
+              const ruta = `usuarios/${usuario?.uid}/manifiestos/${Date.now()}_${archivo.name}`;
+              subirArchivo(archivo, ruta, "manifiesto", (url) => {
+                setManiFotoUrl(url); setManiFotoRuta(ruta);
+                mostrarToast("Manifiesto adjuntado","exito");
+              });
+            }} />
+          <button type="button"
+            style={{width:"100%",padding:"11px",background:maniFotoUrl?t.colors.greenSoft:"transparent",border:`1.5px dashed ${maniFotoUrl?t.colors.greenBorder:t.colors.border}`,borderRadius:t.radius.md,fontSize:t.fonts.sizeXs,color:maniFotoUrl?t.colors.green:t.colors.textSecondary,cursor:"pointer",fontWeight:t.fonts.weightSemibold}}
+            onClick={()=>document.getElementById("fotoManifiesto").click()}
+          >
+            {subiendo ? `Subiendo... ${progreso}%` : maniFotoUrl ? "✓ Manifiesto adjuntado — toque para cambiar" : "📷 Tomar foto del manifiesto"}
+          </button>
+        </div>  
+
 <div style={styles.fila2}>
   <div style={styles.campo}>
     <label style={styles.label}>N° Remesa</label>
@@ -847,6 +877,28 @@ const guardarRutaFrecuente = async () => {
             <input type="text" placeholder="MAN-001" value={maniRet}
               onChange={e=>setManiRet(e.target.value)} style={styles.input} />
           </div>
+
+          <div style={{marginBottom:"12px"}}>
+          <input type="file" accept="image/*" capture="environment" id="fotoManifiesto" style={{display:"none"}}
+            onChange={e=>{
+              const archivo = e.target.files[0];
+              if (!archivo) return;
+              if (!["image/jpeg","image/png"].includes(archivo.type)) { mostrarToast("Solo JPG o PNG","error"); return; }
+              if (archivo.size > 5*1024*1024) { mostrarToast("Máximo 5 MB","error"); return; }
+              const ruta = `usuarios/${usuario?.uid}/manifiestos/${Date.now()}_${archivo.name}`;
+              subirArchivo(archivo, ruta, "manifiesto", (url) => {
+                setManiFotoUrl(url); setManiFotoRuta(ruta);
+                mostrarToast("Manifiesto adjuntado","exito");
+              });
+            }} />
+          <button type="button"
+            style={{width:"100%",padding:"11px",background:maniFotoUrl?t.colors.greenSoft:"transparent",border:`1.5px dashed ${maniFotoUrl?t.colors.greenBorder:t.colors.border}`,borderRadius:t.radius.md,fontSize:t.fonts.sizeXs,color:maniFotoUrl?t.colors.green:t.colors.textSecondary,cursor:"pointer",fontWeight:t.fonts.weightSemibold}}
+            onClick={()=>document.getElementById("fotoManifiesto").click()}
+          >
+            {subiendo ? `Subiendo... ${progreso}%` : maniFotoUrl ? "✓ Manifiesto adjuntado — toque para cambiar" : "📷 Tomar foto del manifiesto"}
+          </button>
+        </div>
+
           <div style={styles.campo}>
             <label style={styles.label}>N° Remesa</label>
             <input type="text" placeholder="REM-001" value={remesaRet}
