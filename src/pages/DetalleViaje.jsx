@@ -18,10 +18,21 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
   const [antMonto,        setAntMonto]        = useState("");
   const [retornoE,        setRetornoE]        = useState(false);
   const [fleteRetE,       setFleteRetE]       = useState("");
-  const [verBitacora,     setVerBitacora]     = useState(false);
-  const [bitTipo,         setBitTipo]         = useState("");
-  const [bitNota,         setBitNota]         = useState("");
-  const [bitUbicacion,    setBitUbicacion]    = useState("");
+  const [modoRetE,        setModoRetE]        = useState("porViaje");
+  const [tonRetE,         setTonRetE]         = useState("");
+  const [rutaRetE,        setRutaRetE]        = useState("");
+  const [fCargueRetE,     setFCargueRetE]     = useState("");
+  const [fDescargueRetE,  setFDescargueRetE]  = useState("");
+  const [empRetE,         setEmpRetE]         = useState("");
+  const [prodRetE,        setProdRetE]        = useState("");
+  const [tipoCargaRetE,   setTipoCargaRetE]   = useState("");
+  const [maniRetE,        setManiRetE]        = useState("");
+  const [remesaRetE,      setRemesaRetE]      = useState("");
+  const [pesoBasRetE,     setPesoBasRetE]     = useState("");
+  const [lugarCRetE,      setLugarCRetE]      = useState("");
+  const [lugarDRetE,      setLugarDRetE]      = useState("");
+  const [kmCRetE,         setKmCRetE]         = useState("");
+  const [kmVRetE,         setKmVRetE]         = useState("");
 
   const [fecha,     setFecha]     = useState("");
   const [ruta,      setRuta]      = useState("");
@@ -46,22 +57,21 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
 
   const compartirWhatsApp = () => {
     if (!viaje) return;
-    const s = sanitizar;
     const lineas = [
       `🚛 *Resumen de viaje — NAVIRA*`,
       ``,
-      `📍 *Ruta:* ${s(viaje.ruta) || "—"}`,
+      `📍 *Ruta:* ${viaje.ruta || "—"}`,
       `📅 *Fecha cargue:* ${viaje.fecha || "—"}`,
       viaje.fechaDescarga ? `📅 *Fecha descargue:* ${viaje.fechaDescarga}` : null,
-      `🚗 *Placa:* ${s(viaje.placa) || "—"}`,
-      viaje.emp ? `🏢 *Empresa:* ${s(viaje.emp)}` : null,
-      viaje.condNom ? `👤 *Conductor:* ${s(viaje.condNom)}` : null,
-      viaje.prod ? `📦 *Producto:* ${s(viaje.prod)}` : null,
+      `🚗 *Placa:* ${viaje.placa || "—"}`,
+      viaje.emp ? `🏢 *Empresa:* ${viaje.emp}` : null,
+      viaje.condNom ? `👤 *Conductor:* ${viaje.condNom}` : null,
+      viaje.prod ? `📦 *Producto:* ${viaje.prod}` : null,
       viaje.ton ? `⚖️ *Toneladas:* ${viaje.ton}` : null,
       viaje.pesoBascula ? `⚖️ *Peso báscula:* ${viaje.pesoBascula} ton` : null,
-      viaje.remesa ? `📄 *Remesa:* ${s(viaje.remesa)}` : null,
-      viaje.lugarCargue ? `📍 *Cargue:* ${s(viaje.lugarCargue)}` : null,
-      viaje.lugarDescargue ? `📍 *Descargue:* ${s(viaje.lugarDescargue)}` : null,
+      viaje.remesa ? `📄 *Remesa:* ${viaje.remesa}` : null,
+      viaje.lugarCargue ? `📍 *Cargue:* ${viaje.lugarCargue}` : null,
+      viaje.lugarDescargue ? `📍 *Descargue:* ${viaje.lugarDescargue}` : null,
       ``,
       `💰 *Valor flete:* ${fmt(viaje.vViaje || 0)}`,
       `⛽ *Combustible:* ${fmt(viaje.cComb || 0)}`,
@@ -72,7 +82,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       `📊 *Total gastos:* ${fmt(viaje.total || 0)}`,
       `✅ *Ganancia neta:* ${fmt(viaje.neta || 0)}`,
       ``,
-      `_Generado por NAVIRA — naviraflota.app_`,
+      `_Generado por Navira — Inteligencia en Movimiento_`,
     ].filter(Boolean).join("\n");
 
     const url = `https://wa.me/?text=${encodeURIComponent(lineas)}`;
@@ -98,7 +108,25 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
     setLugarDE(viaje.lugarDescargue || "");
     setObsE(viaje.observaciones || "");
     setRetornoE(viaje.tieneRetorno || false);
-    setFleteRetE(viaje.valorViajeRetorno || "");
+    // Detectar si el retorno era por tonelada o valor fijo
+    const esPorTon = viaje.tonelajeRetorno > 0 && viaje.fleteRetorno > 0
+      && Math.abs(viaje.tonelajeRetorno * viaje.fleteRetorno - (viaje.valorViajeRetorno || 0)) < 5;
+    setModoRetE(esPorTon ? "porTon" : "porViaje");
+    setTonRetE(viaje.tonelajeRetorno || "");
+    setFleteRetE(esPorTon ? (viaje.fleteRetorno || "") : (viaje.valorViajeRetorno || ""));
+    setRutaRetE(viaje.rutaRet || "");
+    setFCargueRetE(viaje.fechaCargueRet || "");
+    setFDescargueRetE(viaje.fechaDescargueRet || "");
+    setEmpRetE(viaje.empresaRet || "");
+    setProdRetE(viaje.productoRet || "");
+    setTipoCargaRetE(viaje.tipoCargaRet || "");
+    setManiRetE(viaje.maniRet || "");
+    setRemesaRetE(viaje.remesaRet || "");
+    setPesoBasRetE(viaje.pesoBasRet || "");
+    setLugarCRetE(viaje.lugarCargueRet || "");
+    setLugarDRetE(viaje.lugarDescargueRet || "");
+    setKmCRetE(viaje.kmCargadoRet || "");
+    setKmVRetE(viaje.kmVacioRet || "");
     setEditando(true);
   };
 
@@ -109,30 +137,116 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       const nuevoVViaje = viaje.modoFlete === "porViaje"
           ? parseFloat(fleteTon)||viaje.vViaje
           : (parseFloat(ton)||viaje.ton) * (parseFloat(fleteTon)||viaje.fleteTon);
-      const nuevoRetorno = retornoE ? (parseFloat(fleteRetE) || 0) : 0;
+      const nuevoRetorno = retornoE
+        ? (modoRetE === "porTon"
+            ? (parseFloat(tonRetE)||0) * (parseFloat(fleteRetE)||0)
+            : (parseFloat(fleteRetE)||0))
+        : 0;
       const totalIngresos = nuevoVViaje + nuevoRetorno;
-      const totalGastos = viaje.total || 0;
+
+      // ── KM totales (ida + retorno) ──
+      const nKmC  = parseFloat(kmCargado)||viaje.kmCargado||0;
+      const nKmV  = parseFloat(kmVacio)  ||viaje.kmVacio  ||0;
+      const nKmCR = retornoE ? (parseFloat(kmCRetE)||0) : 0;
+      const nKmVR = retornoE ? (parseFloat(kmVRetE)||0) : 0;
+      const nuevoKmT = nKmC + nKmV + nKmCR + nKmVR;
+
+      // ── Recalcular combustible con los rendimientos derivados del viaje original ──
+      const rendC   = (viaje.galCargado>0 && viaje.kmCargado>0) ? viaje.kmCargado/viaje.galCargado : 0;
+      const rendV   = (viaje.galVacio>0   && viaje.kmVacio>0)   ? viaje.kmVacio/viaje.galVacio     : 0;
+      const precioA = (viaje.gTot>0)  ? (viaje.cAcpm||0)/viaje.gTot : 0;
+      const ratioAd = (viaje.gTot>0)  ? (viaje.adlt||0)/viaje.gTot  : 0;
+      const precioAd= (viaje.adlt>0)  ? (viaje.cAdbl||0)/viaje.adlt : 0;
+
+      let nGalC = viaje.galCargado||0, nGalV = viaje.galVacio||0;
+      let nGTot = viaje.gTot||0, nAdlt = viaje.adlt||0;
+      let nCAcpm = viaje.cAcpm||0, nCAdbl = viaje.cAdbl||0, nCComb = viaje.cComb||0;
+      if (rendC > 0 && precioA > 0) {
+        nGalC  = (nKmC + nKmCR) / rendC;
+        nGalV  = rendV > 0 ? (nKmV + nKmVR) / rendV : nGalV;
+        nGTot  = nGalC + nGalV;
+        nAdlt  = nGTot * ratioAd;
+        nCAcpm = nGTot * precioA;
+        nCAdbl = nAdlt * precioAd;
+        nCComb = nCAcpm + nCAdbl;
+      }
+
+      // ── Conductor: si era por porcentaje, recalcular sobre el nuevo ingreso ──
+      const eraPorcentaje = viaje.pcond > 0 && viaje.pcond <= 100
+        && Math.abs((viaje.conductor||0) - (viaje.pcond/100)*(viaje.vViaje||0)) < 5;
+      const nConductor = eraPorcentaje ? (viaje.pcond/100)*totalIngresos : (viaje.conductor||0);
+
+      // ── Descuentos de ley: escalar proporcional al nuevo ingreso ──
+      const d = viaje.descuentos || {};
+      const factor = (viaje.vViaje>0) ? totalIngresos/viaje.vViaje : 1;
+      const nDesc = (d.total>0) ? {
+        retefuente: (d.retefuente||0)*factor,
+        reteica:    (d.reteica||0)*factor,
+        fopat:      (d.fopat||0)*factor,
+        otro:       (d.otro||0)*factor,
+        nombreOtro: d.nombreOtro||"",
+        total:      (d.total||0)*factor,
+      } : d;
+
+      // ── Total de gastos: reemplazar los componentes recalculados ──
+      const totalGastos = (viaje.total||0)
+        - (viaje.cComb||0)      + nCComb
+        - (viaje.conductor||0)  + nConductor
+        - (d.total||0)          + (nDesc.total||0);
+
+      const nuevaNeta = totalIngresos - totalGastos;
+      const nuevoMargen = totalIngresos > 0 ? (nuevaNeta/totalIngresos)*100 : 0;
 
       await onEditar(viaje.firestoreId, {
-        fecha, ruta: ruta.trim(), mani,
-        placa, emp, carga: tipoCarga,
-        prod, condNom,
+        fecha, ruta: sanitizar(ruta), mani: sanitizar(mani),
+        placa, emp: sanitizar(emp), carga: tipoCarga,
+        prod: sanitizar(prod), condNom: sanitizar(condNom),
         ton:       parseFloat(ton)     || viaje.ton,
         fleteTon:  parseFloat(fleteTon)|| viaje.fleteTon,
-        kmCargado: parseFloat(kmCargado)||viaje.kmCargado,
-        kmVacio:   parseFloat(kmVacio)  ||viaje.kmVacio,
-        kmT: (parseFloat(kmCargado)||viaje.kmCargado||0) + (parseFloat(kmVacio)||viaje.kmVacio||0),
-        remesa: remesaE.trim(),
+        kmCargado: nKmC, kmVacio: nKmV,
+        kmCargadoRet: nKmCR, kmVacioRet: nKmVR,
+        kmT: nuevoKmT,
+        remesa: sanitizar(remesaE),
         pesoBascula: parseFloat(pesoBasE) || 0,
-        lugarCargue: lugarCE.trim(),
-        lugarDescargue: lugarDE.trim(),
-        observaciones: obsE.trim(),
+        lugarCargue: sanitizar(lugarCE),
+        lugarDescargue: sanitizar(lugarDE),
+        observaciones: sanitizar(obsE).slice(0, 500),
         vViaje: totalIngresos,
         tieneRetorno: retornoE,
         valorViajeRetorno: nuevoRetorno,
         valorViajeIda: nuevoVViaje,
-        neta: totalIngresos - totalGastos,
+        tonelajeRetorno: retornoE ? (parseFloat(tonRetE)||0) : 0,
+        fleteRetorno: retornoE ? (parseFloat(fleteRetE)||0) : 0,
+        rutaRet: retornoE ? sanitizar(rutaRetE) : "",
+        fechaCargueRet: retornoE ? fCargueRetE : "",
+        fechaDescargueRet: retornoE ? fDescargueRetE : "",
+        empresaRet: retornoE ? sanitizar(empRetE) : "",
+        productoRet: retornoE ? sanitizar(prodRetE) : "",
+        tipoCargaRet: retornoE ? tipoCargaRetE : "",
+        maniRet: retornoE ? sanitizar(maniRetE) : "",
+        remesaRet: retornoE ? sanitizar(remesaRetE) : "",
+        pesoBasRet: retornoE ? (parseFloat(pesoBasRetE)||0) : 0,
+        lugarCargueRet: retornoE ? sanitizar(lugarCRetE) : "",
+        lugarDescargueRet: retornoE ? sanitizar(lugarDRetE) : "",
+        galCargado: nGalC, galVacio: nGalV, gTot: nGTot,
+        adlt: nAdlt, cAcpm: nCAcpm, cAdbl: nCAdbl, cComb: nCComb,
+        conductor: nConductor,
+        descuentos: nDesc,
+        total: totalGastos,
+        neta: nuevaNeta,
+        mrg: nuevoMargen, margen: nuevoMargen,
+        cxk: nuevoKmT > 0 ? totalGastos/nuevoKmT : 0,
       });
+
+      // Ajustar el odómetro del vehículo con la diferencia de km
+      const deltaKm = nuevoKmT - (viaje.kmT||0);
+      if (deltaKm !== 0 && viaje.placa) {
+        const veh = vehiculos.find(v => v.placa === viaje.placa);
+        if (veh) {
+          onEditarVehiculo(veh.firestoreId, { kmOdometro: Math.max(0, (veh.kmOdometro||0) + deltaKm) }).catch(()=>{});
+        }
+      }
+
       mostrarToast("Viaje actualizado", "exito");
       setEditando(false);
     } catch(err) {
@@ -384,6 +498,11 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
               <div style={styles.kpiCard}>
                 <p style={styles.kpiLabel}>Valor viaje</p>
                 <p style={{...styles.kpiVal, color:t.colors.blue}}>{fmt(viaje.vViaje)}</p>
+                {viaje.tieneRetorno && (viaje.valorViajeRetorno||0) > 0 && (
+                  <p style={{fontSize:"10px", color:t.colors.textTertiary, margin:"4px 0 0"}}>
+                    Ida {fmt(viaje.valorViajeIda ?? ((viaje.vViaje||0)-(viaje.valorViajeRetorno||0)))} + Ret. {fmt(viaje.valorViajeRetorno)}
+                  </p>
+                )}
               </div>
               <div style={{...styles.kpiCard, background:positivo?t.colors.greenSoft:t.colors.redSoft, border:`1.5px solid ${positivo?t.colors.greenBorder:t.colors.redBorder}`}}>
                 <p style={styles.kpiLabel}>Ganancia neta</p>
@@ -468,29 +587,6 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
               </div>
             )}
 
-            {/* DATOS DEL RETORNO */}
-            {viaje.tieneRetorno && (
-              <div style={{...styles.card, border:`1.5px solid ${t.colors.blueBorder}`}}>
-                <div style={styles.cardHeader}>
-                  <ArrowLeft size={16} color={t.colors.blue} strokeWidth={2} style={{transform:"rotate(180deg)"}} />
-                  <p style={styles.cardTitulo}>Viaje de retorno</p>
-                </div>
-                {viaje.rutaRet&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Ruta retorno</span><span style={styles.filaValor}>{viaje.rutaRet}</span></div>}
-                {viaje.valorViajeRetorno>0&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Flete retorno</span><span style={{...styles.filaValor,color:t.colors.blue,fontWeight:t.fonts.weightBold}}>{fmt(viaje.valorViajeRetorno)}</span></div>}
-                {viaje.fechaCargueRet&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Fecha cargue</span><span style={styles.filaValor}>{viaje.fechaCargueRet}</span></div>}
-                {viaje.fechaDescargueRet&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Fecha descargue</span><span style={styles.filaValor}>{viaje.fechaDescargueRet}</span></div>}
-                {viaje.tipoCargaRet&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Tipo de carga</span><span style={styles.filaValor}>{viaje.tipoCargaRet}</span></div>}
-                {viaje.productoRet&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Producto</span><span style={styles.filaValor}>{viaje.productoRet}</span></div>}
-                {viaje.empresaRet&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Empresa</span><span style={styles.filaValor}>{viaje.empresaRet}</span></div>}
-                {viaje.contactoRet&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Contacto</span><span style={styles.filaValor}>{viaje.contactoRet}</span></div>}
-                {viaje.maniRet&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Manifiesto</span><span style={styles.filaValor}>{viaje.maniRet}</span></div>}
-                {viaje.remesaRet&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>N° Remesa</span><span style={styles.filaValor}>{viaje.remesaRet}</span></div>}
-                {viaje.pesoBasRet>0&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Peso báscula</span><span style={styles.filaValor}>{viaje.pesoBasRet} ton</span></div>}
-                {viaje.lugarCargueRet&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Lugar de cargue</span><span style={styles.filaValor}>{viaje.lugarCargueRet}</span></div>}
-                {viaje.lugarDescargueRet&&<div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Lugar de descargue</span><span style={styles.filaValor}>{viaje.lugarDescargueRet}</span></div>}
-              </div>
-            )}
-
             {/* PEAJES */}
             {viaje.peajesDetalle&&viaje.peajesDetalle.length>0&&(
               <div style={styles.card}>
@@ -526,121 +622,6 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 ))}
               </div>
             )}
-
-            {/* BITÁCORA DEL VIAJE */}
-            <div style={styles.card}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
-                <div style={styles.cardHeader}>
-                  <Clock size={16} color={t.colors.blue} strokeWidth={2} />
-                  <p style={styles.cardTitulo}>Bitácora del viaje</p>
-                </div>
-                <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}>
-                  {(viaje.bitacora||[]).length} evento{(viaje.bitacora||[]).length!==1?"s":""}
-                </span>
-              </div>
-
-              {/* Botones de evento rápido */}
-              {!verBitacora && (
-                <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginBottom:"10px"}}>
-                  {[
-                    {id:"cargue",    label:"Cargue",    emoji:"📦"},
-                    {id:"descargue", label:"Descargue", emoji:"📤"},
-                    {id:"reten",     label:"Retén",     emoji:"🛑"},
-                    {id:"espera",    label:"Espera",    emoji:"⏳"},
-                    {id:"descanso",  label:"Descanso",  emoji:"😴"},
-                    {id:"comida",    label:"Comida",    emoji:"🍽️"},
-                    {id:"tanqueo",   label:"Tanqueo",   emoji:"⛽"},
-                    {id:"incidente", label:"Incidente", emoji:"⚠️"},
-                    {id:"otro",      label:"Otro",      emoji:"📝"},
-                  ].map(ev=>(
-                    <button key={ev.id}
-                      style={{padding:"6px 10px",borderRadius:t.radius.full,border:`1.5px solid ${t.colors.border}`,background:"none",fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,cursor:"pointer",display:"flex",alignItems:"center",gap:"4px"}}
-                      onClick={()=>{setBitTipo(ev.id);setVerBitacora(true);}}
-                    >
-                      {ev.emoji} {ev.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Formulario inline */}
-              {verBitacora && (
-                <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"10px"}}>
-                  <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:"0 0 10px"}}>
-                    {bitTipo==="cargue"?"📦 Cargue":bitTipo==="descargue"?"📤 Descargue":bitTipo==="reten"?"🛑 Retén":bitTipo==="espera"?"⏳ Espera":bitTipo==="descanso"?"😴 Descanso":bitTipo==="comida"?"🍽️ Comida":bitTipo==="tanqueo"?"⛽ Tanqueo":bitTipo==="incidente"?"⚠️ Incidente":"📝 Otro"}
-                  </p>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"8px"}}>
-                    <input type="text" placeholder="Ubicación" value={bitUbicacion}
-                      onChange={e=>setBitUbicacion(e.target.value)}
-                      style={{padding:"8px 10px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}} />
-                    <input type="text" placeholder="Nota (opcional)" value={bitNota}
-                      onChange={e=>setBitNota(e.target.value)}
-                      style={{padding:"8px 10px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}} />
-                  </div>
-                  <div style={{display:"flex",gap:"6px"}}>
-                    <button
-                      style={{flex:1,padding:"8px",background:t.colors.green,border:"none",borderRadius:t.radius.sm,color:"#fff",fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,cursor:"pointer"}}
-                      onClick={async()=>{
-                        const evento = {
-                          id: Date.now(),
-                          tipo: bitTipo,
-                          fecha: new Date().toISOString().slice(0,10),
-                          hora: new Date().toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"}),
-                          ubicacion: sanitizar(bitUbicacion).slice(0, 200),
-                          nota: sanitizar(bitNota).slice(0, 500),
-                        };
-                        const nuevos = [...(viaje.bitacora||[]), evento];
-                        try {
-                          await onEditar(viaje.firestoreId, { bitacora: nuevos });
-                          setBitTipo(""); setBitNota(""); setBitUbicacion(""); setVerBitacora(false);
-                          mostrarToast("Evento registrado","exito");
-                        } catch(err) { mostrarToast("Error","error"); }
-                      }}
-                    >Registrar</button>
-                    <button
-                      style={{padding:"8px 12px",background:"none",border:`1px solid ${t.colors.border}`,borderRadius:t.radius.sm,color:t.colors.textSecondary,fontSize:t.fonts.sizeXs,cursor:"pointer"}}
-                      onClick={()=>{setVerBitacora(false);setBitTipo("");setBitNota("");setBitUbicacion("");}}
-                    >✕</button>
-                  </div>
-                </div>
-              )}
-
-              {/* Lista de eventos */}
-              {(viaje.bitacora||[]).length > 0 && (
-                <div>
-                  {[...(viaje.bitacora||[])].sort((a,b)=>b.id-a.id).map((ev,i,arr)=>{
-                    const emojis = {cargue:"📦",descargue:"📤",reten:"🛑",espera:"⏳",descanso:"😴",comida:"🍽️",tanqueo:"⛽",incidente:"⚠️",otro:"📝"};
-                    return (
-                      <div key={ev.id} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"8px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
-                        <div style={{display:"flex",gap:"8px",flex:1}}>
-                          <span style={{fontSize:"16px"}}>{emojis[ev.tipo]||"📝"}</span>
-                          <div>
-                            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>
-                              {ev.tipo.charAt(0).toUpperCase()+ev.tipo.slice(1)}
-                            </p>
-                            <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
-                              {ev.fecha} · {ev.hora}{ev.ubicacion?` · ${ev.ubicacion}`:""}
-                            </p>
-                            {ev.nota&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0",fontStyle:"italic"}}>{ev.nota}</p>}
-                          </div>
-                        </div>
-                        <button
-                          style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
-                          onClick={async()=>{
-                            const nuevos = (viaje.bitacora||[]).filter(e=>e.id!==ev.id);
-                            try {
-                              await onEditar(viaje.firestoreId, { bitacora: nuevos });
-                            } catch(err){}
-                          }}
-                        >
-                          <Trash2 size={12} color={t.colors.textTertiary} />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
 
             {/* ANTICIPOS AL CONDUCTOR */}
             <div style={styles.card}>
