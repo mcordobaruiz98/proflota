@@ -84,6 +84,12 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [filtro,    setFiltro]    = useState("todos");
   const [busquedaH, setBusquedaH] = useState("");
   const hoy = new Date();
+
+  // Parseo de fechas YYYY-MM-DD como fecha LOCAL (evita el corrimiento UTC de -1 día)
+  const fechaLocal = (iso) => {
+    const [y, m, d] = (iso || "").split("-").map(Number);
+    return new Date(y || 1970, (m || 1) - 1, d || 1);
+  };
   const [mesActual,  setMesActual]  = useState(hoy.getMonth());
   const [anioActual, setAnioActual] = useState(hoy.getFullYear());
 
@@ -111,6 +117,19 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const [gastoFecha,    setGastoFecha]    = useState(new Date().toISOString().slice(0,10));
   const [gastoTaller,   setGastoTaller]   = useState("");
   const [gastoNit,      setGastoNit]      = useState("");
+
+  // Talleres frecuentes: nombre → NIT, derivados del historial de gastos de toda la flota
+  const talleresFrecuentes = [...gastosVehiculo.reduce((map, g) => {
+    const nom = (g.taller || "").trim();
+    if (nom && !map.has(nom.toLowerCase())) map.set(nom.toLowerCase(), { nombre: nom, nit: g.nit || "" });
+    return map;
+  }, new Map()).values()];
+
+  const seleccionarTaller = (valor) => {
+    setGastoTaller(valor);
+    const match = talleresFrecuentes.find(t => t.nombre.toLowerCase() === valor.trim().toLowerCase());
+    if (match && match.nit) setGastoNit(match.nit);
+  };
   const [gastoEditId,   setGastoEditId]   = useState(null);
   const [guardandoGasto,setGuardandoGasto]= useState(false);
   const [verFormGasto,  setVerFormGasto]  = useState(false);
@@ -202,14 +221,14 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
   // Tab Viajes
   const hoyFiltro = new Date();
   const viajesFiltrados = viajesVehiculo.filter(v => {
-    const f = new Date(v.fecha);
+    const f = fechaLocal(v.fecha);
     if (filtro==="mes")    return f.getMonth()===hoyFiltro.getMonth()&&f.getFullYear()===hoyFiltro.getFullYear();
     if (filtro==="semana") { const h=new Date(); h.setDate(hoyFiltro.getDate()-7); return f>=h; }
     return true;
   });
 
   // Tab Cuentas
-  const viajesMes    = viajesVehiculo.filter(v => { const f=new Date(v.fecha); return f.getMonth()===mesActual&&f.getFullYear()===anioActual; });
+  const viajesMes    = viajesVehiculo.filter(v => { const f=fechaLocal(v.fecha); return f.getMonth()===mesActual&&f.getFullYear()===anioActual; });
   const ingresosMes  = viajesMes.reduce((s,v)=>s+(v.vViaje||0),0);
   const gastosMes    = viajesMes.reduce((s,v)=>s+(v.total||0),0);
   const netaMes      = viajesMes.reduce((s,v)=>s+(v.neta||0),0);
@@ -234,6 +253,22 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     if (m<0){m=11;a--;}
     setMesActual(m); setAnioActual(a);
   };
+
+  // Tab Historial
+  const viajesBuscados = viajesVehiculo.filter(v => {
+    const q = busquedaH.toLowerCase();
+    if (!q) return true;
+    return (v.ruta||"").toLowerCase().includes(q)||(v.mani||"").toLowerCase().includes(q);
+  }).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+
+  const viajesAgrupadosPorMes = viajesBuscados.reduce((grupos,viaje)=>{
+    const f  = fechaLocal(viaje.fecha);
+    const et = `${MESES[f.getMonth()]} ${f.getFullYear()}`;
+    const ex = grupos.find(g=>g.etiqueta===et);
+    if (ex) ex.viajes.push(viaje);
+    else grupos.push({etiqueta:et, viajes:[viaje]});
+    return grupos;
+  },[]);
 
   // Hoja de vida
   const actualizarHV = (clave, valor) => {
@@ -347,7 +382,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
   {id:"info",      label:"Info",    Icono:Info},
   {id:"viajes",    label:"Viajes",  Icono:Route},
   {id:"cuentas",   label:"Cuentas", Icono:TrendingUp},
-   {id:"mant",      label:"Mant.",   Icono:Wrench},
+  {id:"historial", label:"Historial",Icono:Clock},
+  {id:"mant",      label:"Mant.",   Icono:Wrench},
   {id:"hvida",     label:"H.Vida",  Icono:FileText},
 ];
 
@@ -751,11 +787,32 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               </div>
             )}
 
-                       {/* ── GASTOS Y FACTURAS DEL VEHÍCULO ── */}
+            {/* Viajes del mes */}
+            {viajesMes.length>0&&(
+              <div style={styles.card}>
+                <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
+                {[...viajesMes].reverse().map((viaje,i,arr)=>(
+                  <div key={viaje.firestoreId}
+                    style={{...styles.fila,borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`,cursor:"pointer"}}
+                    onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
+                  >
+                    <div>
+                      <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,margin:0,color:t.colors.textPrimary}}>{viaje.ruta||"Sin ruta"}</p>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{viaje.fecha||""}</p>
+                    </div>
+                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,margin:0,color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
+                      {fmt(viaje.neta||0)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* ── GASTOS Y FACTURAS DEL VEHÍCULO ── */}
             {(() => {
               const gastosMesVeh = gastosVehiculo.filter(g => {
                 if (g.vehiculoId !== id) return false;
-                const f = new Date(g.fecha);
+                const f = fechaLocal(g.fecha);
                 return f.getMonth() === mesActual && f.getFullYear() === anioActual;
               });
               const totalGastosAdicionales = gastosMesVeh.reduce((s, g) => s + (g.monto || 0), 0);
@@ -957,8 +1014,11 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
                           <div style={styles.campo}>
                             <label style={styles.label}>Taller / Proveedor</label>
-                            <input type="text" placeholder="Nombre del taller"
-                              value={gastoTaller} onChange={e=>setGastoTaller(e.target.value)} style={styles.input} />
+                            <input type="text" placeholder="Nombre del taller" list="talleres-frecuentes"
+                              value={gastoTaller} onChange={e=>seleccionarTaller(e.target.value)} style={styles.input} />
+                            <datalist id="talleres-frecuentes">
+                              {talleresFrecuentes.map(t => <option key={t.nombre} value={t.nombre} />)}
+                            </datalist>
                           </div>
                           <div style={styles.campo}>
                             <label style={styles.label}>NIT</label>
@@ -1091,7 +1151,59 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
           </div>
         )}
 
-               {/* ── MANTENIMIENTO ── */}
+        {/* ── HISTORIAL ── */}
+        {tabActivo==="historial" && (
+          <div>
+            <div style={styles.buscadorWrap}>
+              <input type="text" placeholder="Buscar por ruta o manifiesto..."
+                value={busquedaH} onChange={e=>setBusquedaH(e.target.value)} style={styles.buscadorInput} />
+            </div>
+
+            {viajesVehiculo.length===0&&(
+              <div style={styles.vacio}>
+                <Clock size={40} color={t.colors.textTertiary} strokeWidth={1.5} />
+                <p style={styles.vacioTexto}>Sin historial todavía</p>
+                <p style={styles.vacioSub}>Los viajes guardados aparecerán aquí.</p>
+              </div>
+            )}
+
+            {viajesVehiculo.length>0&&viajesBuscados.length===0&&(
+              <div style={styles.vacio}>
+                <p style={styles.vacioTexto}>Sin resultados</p>
+                <p style={styles.vacioSub}>No hay viajes con "{busquedaH}"</p>
+              </div>
+            )}
+
+            {viajesAgrupadosPorMes.map(grupo=>(
+              <div key={grupo.etiqueta} style={{marginBottom:"6px"}}>
+                <p style={styles.grupoMes}>{grupo.etiqueta}</p>
+                {grupo.viajes.map(viaje=>{
+                  const ok=(viaje.mrg||0)>=25;
+                  return (
+                    <div key={viaje.firestoreId} style={styles.tarjetaViaje} onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}>
+                      <div style={{...styles.tarjetaFranja,background:ok?t.colors.green:t.colors.amber}} />
+                      <div style={styles.tarjetaViajeContenido}>
+                        <div style={{flex:1,minWidth:0}}>
+                          <p style={styles.tarjetaRuta}>{viaje.ruta||"Sin ruta"}</p>
+                          <p style={styles.tarjetaMeta}>
+                            {viaje.fecha||""}
+                            {viaje.ton?` · ${fnD(viaje.ton,1)} ton`:""}
+                            {viaje.mani?` · Man. ${viaje.mani}`:""}
+                          </p>
+                        </div>
+                        <p style={{...styles.tarjetaNeta,color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
+                          {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── MANTENIMIENTO ── */}
 {tabActivo==="mant" && (
   <div>
 
