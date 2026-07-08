@@ -199,7 +199,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const guardarViaje = async () => {
     if (!ruta.trim())  { mostrarToast("Ingresa la ruta del viaje","error"); return; }
     if (!valorViaje)   { mostrarToast("Ingresa tonelaje y flete","error"); return; }
-    if (viajes.length >= 5000) { mostrarToast("Límite de viajes alcanzado (5000)","error"); return; }
+    if (viajes.length >= 5000) { mostrarToast("Límite de viajes alcanzado","error"); return; }
     setGuardando(true);
     await onGuardar({
       fecha, fechaDescarga, mani: sanitizar(mani), placa, tipoCarga, prod: sanitizar(producto),
@@ -269,8 +269,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     setLugarCargueRet(""); setLugarDescargueRet(""); setFechaCargueRet(""); setFechaDescargueRet("");
     setExtras([]); setPorcCond(""); setCarpado(""); setGastosViaje("");
     setPeajesRuta([]); setRutaCargada(null);
-    setManiFotoUrl(null); setManiFotoRuta(null);
-
+   
     setGuardando(false);
     navigate(-1);
   };
