@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp, FileChartColumnIncreasing, Scale } from "lucide-react";
+import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
@@ -15,9 +15,6 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
   const [mes,  setMes]  = useState(hoy.getMonth());
   const [anio, setAnio] = useState(hoy.getFullYear());
   const [verViajesMes, setVerViajesMes] = useState(false);
-  const [verRango,   setVerRango]   = useState(false);
-  const [rangoDesde, setRangoDesde] = useState("");
-  const [rangoHasta, setRangoHasta] = useState("");
 
   const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
   const fmtCorto = (n) => {
@@ -116,23 +113,6 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
     </div>
   </div>
 );
-
-  // Consulta por rango de fechas personalizado
-  const viajesRango = (rangoDesde && rangoHasta && rangoDesde <= rangoHasta)
-    ? viajes.filter(v => v.fecha >= rangoDesde && v.fecha <= rangoHasta)
-    : [];
-  const rangoIngresos = viajesRango.reduce((s,v)=>s+(v.vViaje||0),0);
-  const rangoGastos   = viajesRango.reduce((s,v)=>s+(v.total||0),0);
-  const rangoNeta     = viajesRango.reduce((s,v)=>s+(v.neta||0),0);
-  const rangoKm       = viajesRango.reduce((s,v)=>s+(v.kmT||0),0);
-  const rangoPorVeh   = Object.entries(
-    viajesRango.reduce((acc,v)=>{
-      const p = v.placa || "Sin placa";
-      if (!acc[p]) acc[p] = { viajes:0, neta:0 };
-      acc[p].viajes++; acc[p].neta += (v.neta||0);
-      return acc;
-    }, {})
-  ).sort((a,b)=>b[1].neta - a[1].neta);
 
   return (
     <div style={styles.pantalla}>
@@ -249,18 +229,18 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           </div>
 
           <table>
-            <tr style="background:#f0f9ff"><td style="font-weight:700">Ingresos por viajes</td><td style="font-weight:700;color:#1565FF">${fmt(ingresosMes)}</td></tr>
+            <tr style="background:#f0f9ff"><td style="font-weight:700">💰 Ingresos por viajes</td><td style="font-weight:700;color:#1565FF">${fmt(ingresosMes)}</td></tr>
             <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos operativos:</td></tr>
-            <tr><td style="padding-left:20px">Combustible (ACPM + Adblue)</td><td style="color:#dc2626">-${fmt(acpmMes + adblMes)}</td></tr>
-            <tr><td style="padding-left:20px">Peajes</td><td style="color:#dc2626">-${fmt(peajesMes)}</td></tr>
-            <tr><td style="padding-left:20px">Conductor</td><td style="color:#dc2626">-${fmt(conductorMes)}</td></tr>
-            ${otrosMes>0?`<tr><td style="padding-left:20px">Otros gastos de viaje</td><td style="color:#dc2626">-${fmt(otrosMes)}</td></tr>`:""}
-            ${descuentosMes>0?`<tr><td style="padding-left:20px">Descuentos de ley</td><td style="color:#dc2626">-${fmt(descuentosMes)}</td></tr>`:""}
+            <tr><td style="padding-left:20px">⛽ Combustible (ACPM + Adblue)</td><td style="color:#dc2626">-${fmt(acpmMes + adblMes)}</td></tr>
+            <tr><td style="padding-left:20px">🛣️ Peajes</td><td style="color:#dc2626">-${fmt(peajesMes)}</td></tr>
+            <tr><td style="padding-left:20px">👤 Conductor</td><td style="color:#dc2626">-${fmt(conductorMes)}</td></tr>
+            ${otrosMes>0?`<tr><td style="padding-left:20px">📋 Otros gastos de viaje</td><td style="color:#dc2626">-${fmt(otrosMes)}</td></tr>`:""}
+            ${descuentosMes>0?`<tr><td style="padding-left:20px">📑 Descuentos de ley</td><td style="color:#dc2626">-${fmt(descuentosMes)}</td></tr>`:""}
             <tr style="background:#f0fdf4"><td style="font-weight:600">= Ganancia neta de viajes</td><td style="font-weight:700;color:${netaMes>=0?"#16a34a":"#dc2626"}">${fmt(netaMes)}</td></tr>
             ${totalPE>0?`
             <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos fijos mensuales:</td></tr>
-            <tr><td style="padding-left:20px">Gastos fijos (cuota, seguro, GPS...)</td><td style="color:#dc2626">-${fmt(totalPE)}</td></tr>`:""}
-            ${totalGastosAdic>0?`<tr><td style="padding-left:20px">Gastos adicionales (taller, repuestos...)</td><td style="color:#dc2626">-${fmt(totalGastosAdic)}</td></tr>`:""}
+            <tr><td style="padding-left:20px">🏦 Gastos fijos (cuota, seguro, GPS...)</td><td style="color:#dc2626">-${fmt(totalPE)}</td></tr>`:""}
+            ${totalGastosAdic>0?`<tr><td style="padding-left:20px">🔧 Gastos adicionales (taller, repuestos...)</td><td style="color:#dc2626">-${fmt(totalGastosAdic)}</td></tr>`:""}
             ${totalPE>0||totalGastosAdic>0?`<tr class="total" style="background:#f0fdf4"><td>= Utilidad real del período</td><td class="${utilidadReal>=0?"verde":"rojo"}">${fmt(utilidadReal)}</td></tr>`:""}
           </table>
           <table>
@@ -305,18 +285,32 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             return `
               <p style="font-size:14px;font-weight:700;margin:15px 0 8px;color:#1a1a1a">${esc(placa)}</p>
               <table>
-                <tr><th>Fecha</th><th>Manifiesto</th><th>Ruta</th><th>Empresa</th><th>Flete</th><th>Gastos</th><th>Neta</th></tr>
-                ${vjs.map(v=>`<tr>
+                <tr><th>Fecha</th><th>Manifiesto</th><th>Ruta</th><th>Empresa</th><th>Producto</th><th>Flete</th><th>Gastos</th><th>Neta</th></tr>
+                ${vjs.map(v=>{
+                  const filaIda = `<tr>
                   <td>${esc(v.fecha)||"—"}</td>
                   <td>${esc(v.mani)||"—"}</td>
                   <td>${esc(v.ruta)||"—"}</td>
                   <td>${esc(v.emp)||"—"}</td>
-                  <td>${fmt(v.vViaje||0)}</td>
+                  <td>${esc(v.prod)||"—"}</td>
+                  <td>${fmt(v.tieneRetorno ? (v.valorViajeIda||(v.vViaje||0)-(v.valorViajeRetorno||0)) : (v.vViaje||0))}</td>
                   <td style="color:#dc2626">${fmt(v.total||0)}</td>
                   <td class="${(v.neta||0)>=0?"verde":"rojo"}">${fmt(v.neta||0)}</td>
-                </tr>`).join("")}
+                </tr>`;
+                  if (!v.tieneRetorno || !(v.valorViajeRetorno > 0)) return filaIda;
+                  const filaRet = `<tr style="background:#f0f9ff">
+                  <td>${esc(v.fechaCargueRet)||esc(v.fecha)||"—"}</td>
+                  <td>${esc(v.maniRet)||"—"}</td>
+                  <td>↩ ${esc(v.rutaRet)||"retorno"}</td>
+                  <td>${esc(v.empresaRet)||esc(v.emp)||"—"}</td>
+                  <td>${esc(v.productoRet)||"—"}</td>
+                  <td>${fmt(v.valorViajeRetorno||0)}</td>
+                  <td colspan="2" style="font-size:10px;color:#888">incluido arriba</td>
+                </tr>`;
+                  return filaIda + filaRet;
+                }).join("")}
                 <tr class="subtotal">
-                  <td colspan="4"><strong>${vjs.length} viaje${vjs.length!==1?"s":""} · ${subKm.toLocaleString("es-CO")} km</strong></td>
+                  <td colspan="5"><strong>${vjs.length} viaje${vjs.length!==1?"s":""} · ${subKm.toLocaleString("es-CO")} km</strong></td>
                   <td>${fmt(subIngresos)}</td>
                   <td style="color:#dc2626">${fmt(subGastos)}</td>
                   <td class="${subNeta>=0?"verde":"rojo"}">${fmt(subNeta)}</td>
@@ -399,14 +393,14 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           w.document.close();
           setTimeout(()=>w.print(), 500);
         }}>
-          <FileChartColumnIncreasing size={16} color={t.colors.blue} strokeWidth={2} />
+          <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
           Exportar
         </button>
         <button style={{...styles.btnHistorial, marginLeft:"6px"}} onClick={()=>navigate("/comparativo")}>
-          <Scale size={16} color={t.colors.blue} strokeWidth={2} />
+          <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
           Comparar
         </button>
-                </div>
+      </div>
 
       {/* NAV MES */}
       <div style={styles.navMes}>
@@ -414,57 +408,6 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
         <p style={styles.labelMes}>{MESES[mes]} {anio}</p>
         <button style={styles.btnMes} onClick={()=>cambiarMes(1)}>›</button>
       </div>
-
-      {/* CONSULTA POR RANGO DE FECHAS */}
-        <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"12px 16px",marginBottom:"10px",boxShadow:t.shadows.card}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setVerRango(!verRango)}>
-            <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary}}>📅 Consultar por fechas</span>
-            <span style={{color:t.colors.textTertiary}}>{verRango ? "▲" : "▼"}</span>
-          </div>
-
-          {verRango && (
-            <div style={{marginTop:"12px"}}>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}}>
-                <div>
-                  <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
-                  <input type="date" value={rangoDesde} onChange={e=>setRangoDesde(e.target.value)}
-                    style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
-                </div>
-                <div>
-                  <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
-                  <input type="date" value={rangoHasta} onChange={e=>setRangoHasta(e.target.value)}
-                    style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
-                </div>
-              </div>
-
-              {rangoDesde && rangoHasta && rangoDesde > rangoHasta && (
-                <p style={{fontSize:t.fonts.sizeXs,color:t.colors.red,margin:"0 0 8px"}}>La fecha inicial debe ser anterior a la final</p>
-              )}
-
-              {viajesRango.length > 0 && (
-                <div>
-                  <div style={{display:"flex",justifyContent:"space-between",padding:"10px 12px",background:rangoNeta>=0?t.colors.greenSoft:t.colors.redSoft,border:`1.5px solid ${rangoNeta>=0?t.colors.greenBorder:t.colors.redBorder}`,borderRadius:t.radius.md,marginBottom:"8px"}}>
-                    <div>
-                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:0}}>{viajesRango.length} viaje{viajesRango.length!==1?"s":""} · {rangoKm.toLocaleString("es-CO")} km</p>
-                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>Ingresos {fmt(rangoIngresos)} · Gastos {fmt(rangoGastos)}</p>
-                    </div>
-                    <p style={{fontSize:"18px",fontWeight:t.fonts.weightBlack,color:rangoNeta>=0?t.colors.green:t.colors.red,margin:0,alignSelf:"center"}}>{fmt(rangoNeta)}</p>
-                  </div>
-                  {rangoPorVeh.map(([placa,d])=>(
-                    <div key={placa} style={{display:"flex",justifyContent:"space-between",padding:"7px 4px",borderBottom:`1px solid ${t.colors.borderLight}`,fontSize:t.fonts.sizeSm}}>
-                      <span style={{color:t.colors.textSecondary}}>{placa} · {d.viajes} viaje{d.viajes!==1?"s":""}</span>
-                      <span style={{fontWeight:t.fonts.weightBold,color:d.neta>=0?t.colors.green:t.colors.red}}>{fmt(d.neta)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {rangoDesde && rangoHasta && rangoDesde <= rangoHasta && viajesRango.length === 0 && (
-                <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,textAlign:"center",margin:"6px 0"}}>Sin viajes en este rango</p>
-              )}
-            </div>
-          )}
-        </div>
 
       <div style={styles.contenido}>
 
@@ -654,6 +597,31 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             <button style={styles.btnCalcular} onClick={()=>navigate("/calculadora")}>
               Calcular flete
             </button>
+          </div>
+        )}
+
+        {/* VIAJES DEL MES */}
+        {viajesMes.length > 0 && (
+          <div style={styles.card}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setVerViajesMes(!verViajesMes)}>
+              <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
+              {verViajesMes ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
+            </div>
+            {verViajesMes && [...viajesMes].reverse().map((viaje,i,arr) => (
+              <div
+                key={viaje.firestoreId}
+                style={{...styles.viajeFilaMes, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`, cursor:"pointer"}}
+                onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
+              >
+                <div style={{flex:1}}>
+                  <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{viaje.ruta||"Sin ruta"}</p>
+                  <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0"}}>{viaje.fecha||""}{viaje.placa?` · ${viaje.placa}`:""}</p>
+                </div>
+                <p style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, margin:0, color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
+                  {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
+                </p>
+              </div>
+            ))}
           </div>
         )}
 
