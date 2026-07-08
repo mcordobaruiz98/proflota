@@ -632,7 +632,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
           <div>
             <button
               style={{width:"100%",padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",marginBottom:"10px"}}
-              onClick={()=>navigate("/calculadora",{state:{placa:vehiculo.placa}})}
+              onClick={()=>navigate("/calculadora",{state:{placa:vehiculo.placa, vehiculoId:id, volverTab:"viajes"}})}
             >
               + Agregar viaje
             </button>

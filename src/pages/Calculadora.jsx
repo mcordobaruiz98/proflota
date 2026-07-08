@@ -243,6 +243,13 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
           mostrarToast("Viaje guardado correctamente","exito");
       }
 
+      // Volver a donde el usuario estaba — SIEMPRE, fuera del if/else del toast
+      if (location.state?.vehiculoId) {
+        navigate(`/vehiculo/${location.state.vehiculoId}`, { state: { tab: location.state.volverTab || "viajes" }, replace: true });
+      } else {
+        navigate(-1);
+      }
+
     // Actualizar odómetro y estado del vehículo automáticamente
     if (placa) {
       const veh = vehiculos.find(v => v.placa === placa);
