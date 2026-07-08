@@ -662,16 +662,13 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                     <a href={viaje.manifiestoFotoUrl} target="_blank" rel="noreferrer"
                       style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold,textDecoration:"none"}}>Ver</a>
                   )}
-                  <input type="file" accept="image/*" capture="environment" id="fotoManiIda" style={{display:"none"}}
-                    onChange={e=>subirManifiesto(e,"ida",viaje)} />
-                  <button
+                  <label htmlFor={`fotoManiIda_${viaje.firestoreId}`}
                     style={{width:"30px",height:"30px",borderRadius:"8px",background:viaje.manifiestoFotoUrl?t.colors.greenSoft:t.colors.bgSection,border:`1px solid ${viaje.manifiestoFotoUrl?t.colors.greenBorder:t.colors.border}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}
-                    onClick={()=>document.getElementById("fotoManiIda").click()}
-                    title={viaje.manifiestoFotoUrl?"Cambiar foto":"Tomar foto"}
-                    disabled={subiendo}
                   >
                     <Camera size={14} color={viaje.manifiestoFotoUrl?t.colors.green:t.colors.textSecondary} strokeWidth={2}/>
-                  </button>
+                  </label>
+                  <input type="file" accept="image/*" capture="environment" id={`fotoManiIda_${viaje.firestoreId}`} style={{display:"none"}}
+                    onChange={e=>subirManifiesto(e,"ida",viaje)} />
                 </div>
               </div>
 
@@ -686,16 +683,13 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                       <a href={viaje.manifiestoRetFotoUrl} target="_blank" rel="noreferrer"
                         style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold,textDecoration:"none"}}>Ver</a>
                     )}
-                    <input type="file" accept="image/*" capture="environment" id="fotoManiRet" style={{display:"none"}}
-                      onChange={e=>subirManifiesto(e,"ret",viaje)} />
-                    <button
+                    <label htmlFor={`fotoManiRet_${viaje.firestoreId}`}
                       style={{width:"30px",height:"30px",borderRadius:"8px",background:viaje.manifiestoRetFotoUrl?t.colors.greenSoft:t.colors.bgSection,border:`1px solid ${viaje.manifiestoRetFotoUrl?t.colors.greenBorder:t.colors.border}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}
-                      onClick={()=>document.getElementById("fotoManiRet").click()}
-                      title={viaje.manifiestoRetFotoUrl?"Cambiar foto":"Tomar foto"}
-                      disabled={subiendo}
                     >
                       <Camera size={14} color={viaje.manifiestoRetFotoUrl?t.colors.green:t.colors.textSecondary} strokeWidth={2}/>
-                    </button>
+                    </label>
+                    <input type="file" accept="image/*" capture="environment" id={`fotoManiRet_${viaje.firestoreId}`} style={{display:"none"}}
+                      onChange={e=>subirManifiesto(e,"ret",viaje)} />
                   </div>
                 </div>
               )}
