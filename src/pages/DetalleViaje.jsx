@@ -1,10 +1,35 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send, Repeat } from "lucide-react";
+import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send, Repeat, Camera, Paperclip } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { sanitizar } from "../utils/validar";
+import { useSubirArchivo } from "../hooks/useSubirArchivo";
+import { useAuth } from "../hooks/useAuth";
 
 function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEditarVehiculo, mostrarToast }) {
+  const { subirArchivo, subiendo } = useSubirArchivo();
+  const { usuario } = useAuth();
+
+  // Subir foto de manifiesto (ida o retorno) y amarrarla al viaje
+  const subirManifiesto = (e, tipo, viaje) => {
+    const archivo = e.target.files[0];
+    if (!archivo) return;
+    if (!["image/jpeg","image/png"].includes(archivo.type)) { mostrarToast("Solo JPG o PNG","error"); return; }
+    if (archivo.size > 5*1024*1024) { mostrarToast("Máximo 5 MB","error"); return; }
+    const ruta = `usuarios/${usuario?.uid}/manifiestos/${viaje.firestoreId}_${tipo}_${Date.now()}`;
+    subirArchivo(archivo, ruta, `mani_${tipo}`, async (url) => {
+      const campos = tipo === "ida"
+        ? { manifiestoFotoUrl: url, manifiestoFotoRuta: ruta }
+        : { manifiestoRetFotoUrl: url, manifiestoRetFotoRuta: ruta };
+      try {
+        await onEditar(viaje.firestoreId, campos);
+        mostrarToast("Manifiesto adjuntado","exito");
+      } catch(err) {
+        mostrarToast("Error al guardar","error");
+      }
+    });
+  };
+
   const navigate = useNavigate();
   const { id }   = useParams();
 
@@ -592,7 +617,6 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 {viaje.contactoEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Contacto empresa</span><span style={styles.filaValor}>{viaje.contactoEmpresa}</span></div>}
                 {viaje.celularEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Celular contacto</span><a href={`tel:${viaje.celularEmpresa}`} style={{...styles.filaValor,color:t.colors.blue,textDecoration:"none"}}>{viaje.celularEmpresa}</a></div>}
                 {viaje.observaciones&&<div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Observaciones</span><span style={{...styles.filaValor,color:t.colors.textSecondary,fontStyle:"italic"}}>{viaje.observaciones}</span></div>}
-                {viaje.manifiestoFotoUrl && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Manifiesto (foto)</span><a href={viaje.manifiestoFotoUrl} target="_blank" rel="noreferrer" style={{...styles.filaValor,color:t.colors.blue,textDecoration:"underline"}}>Ver documento</a></div>}
               </div>
             )}
 
@@ -620,6 +644,62 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 {((viaje.kmCargadoRet || 0) > 0 || (viaje.kmVacioRet || 0) > 0) && <div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Recorrido</span><span style={styles.filaValor}>{viaje.kmCargadoRet || 0} km cargado · {viaje.kmVacioRet || 0} km vacío</span></div>}
               </div>
             )}
+
+            {/* DOCUMENTOS DEL VIAJE */}
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <Paperclip size={16} color={t.colors.textSecondary} strokeWidth={2} />
+                <p style={styles.cardTitulo}>Documentos</p>
+              </div>
+
+              {/* Manifiesto ida */}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:viaje.tieneRetorno?`1px solid ${t.colors.borderLight}`:"none"}}>
+                <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>
+                  Manifiesto{viaje.mani ? ` ${viaje.mani}` : ""}
+                </span>
+                <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                  {viaje.manifiestoFotoUrl && (
+                    <a href={viaje.manifiestoFotoUrl} target="_blank" rel="noreferrer"
+                      style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold,textDecoration:"none"}}>Ver</a>
+                  )}
+                  <input type="file" accept="image/*" capture="environment" id="fotoManiIda" style={{display:"none"}}
+                    onChange={e=>subirManifiesto(e,"ida",viaje)} />
+                  <button
+                    style={{width:"30px",height:"30px",borderRadius:"8px",background:viaje.manifiestoFotoUrl?t.colors.greenSoft:t.colors.bgSection,border:`1px solid ${viaje.manifiestoFotoUrl?t.colors.greenBorder:t.colors.border}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}
+                    onClick={()=>document.getElementById("fotoManiIda").click()}
+                    title={viaje.manifiestoFotoUrl?"Cambiar foto":"Tomar foto"}
+                    disabled={subiendo}
+                  >
+                    <Camera size={14} color={viaje.manifiestoFotoUrl?t.colors.green:t.colors.textSecondary} strokeWidth={2}/>
+                  </button>
+                </div>
+              </div>
+
+              {/* Manifiesto retorno */}
+              {viaje.tieneRetorno && (
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0"}}>
+                  <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>
+                    Manifiesto retorno{viaje.maniRet ? ` ${viaje.maniRet}` : ""}
+                  </span>
+                  <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                    {viaje.manifiestoRetFotoUrl && (
+                      <a href={viaje.manifiestoRetFotoUrl} target="_blank" rel="noreferrer"
+                        style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold,textDecoration:"none"}}>Ver</a>
+                    )}
+                    <input type="file" accept="image/*" capture="environment" id="fotoManiRet" style={{display:"none"}}
+                      onChange={e=>subirManifiesto(e,"ret",viaje)} />
+                    <button
+                      style={{width:"30px",height:"30px",borderRadius:"8px",background:viaje.manifiestoRetFotoUrl?t.colors.greenSoft:t.colors.bgSection,border:`1px solid ${viaje.manifiestoRetFotoUrl?t.colors.greenBorder:t.colors.border}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}
+                      onClick={()=>document.getElementById("fotoManiRet").click()}
+                      title={viaje.manifiestoRetFotoUrl?"Cambiar foto":"Tomar foto"}
+                      disabled={subiendo}
+                    >
+                      <Camera size={14} color={viaje.manifiestoRetFotoUrl?t.colors.green:t.colors.textSecondary} strokeWidth={2}/>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* PEAJES */}
             {viaje.peajesDetalle&&viaje.peajesDetalle.length>0&&(
