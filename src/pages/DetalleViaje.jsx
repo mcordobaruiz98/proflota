@@ -7,7 +7,7 @@ import { useSubirArchivo } from "../hooks/useSubirArchivo";
 import { useAuth } from "../hooks/useAuth";
 
 function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEditarVehiculo, mostrarToast }) {
-  const { subirArchivo, subiendo } = useSubirArchivo();
+  const { subirArchivo, eliminarArchivo, subiendo } = useSubirArchivo();
   const { usuario } = useAuth();
 
   // Subir foto de manifiesto (ida o retorno) y amarrarla al viaje
@@ -25,9 +25,27 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
         await onEditar(viaje.firestoreId, campos);
         mostrarToast("Manifiesto adjuntado","exito");
       } catch(err) {
-        mostrarToast("Error al guardar","error");
+        console.error("Error guardando ref manifiesto:", err);
+        mostrarToast("Error al guardar referencia","error");
       }
     });
+  };
+
+  // Eliminar foto de manifiesto
+  const eliminarManifiesto = async (tipo, viaje) => {
+    const rutaStorage = tipo === "ida" ? viaje.manifiestoFotoRuta : viaje.manifiestoRetFotoRuta;
+    const campos = tipo === "ida"
+      ? { manifiestoFotoUrl: null, manifiestoFotoRuta: null }
+      : { manifiestoRetFotoUrl: null, manifiestoRetFotoRuta: null };
+    try {
+      if (rutaStorage) await eliminarArchivo(rutaStorage, ()=>{});
+    } catch(err) { /* archivo puede no existir, continuar */ }
+    try {
+      await onEditar(viaje.firestoreId, campos);
+      mostrarToast("Manifiesto eliminado","exito");
+    } catch(err) {
+      mostrarToast("Error al eliminar","error");
+    }
   };
 
   const navigate = useNavigate();
@@ -657,10 +675,18 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>
                   Manifiesto{viaje.mani ? ` ${viaje.mani}` : ""}
                 </span>
-                <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
                   {viaje.manifiestoFotoUrl && (
                     <a href={viaje.manifiestoFotoUrl} target="_blank" rel="noreferrer"
                       style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold,textDecoration:"none"}}>Ver</a>
+                  )}
+                  {viaje.manifiestoFotoUrl && (
+                    <button
+                      style={{width:"28px",height:"28px",borderRadius:"7px",background:t.colors.redSoft,border:`1px solid ${t.colors.redBorder}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}
+                      onClick={()=>eliminarManifiesto("ida",viaje)}
+                    >
+                      <X size={12} color={t.colors.red} strokeWidth={2.5}/>
+                    </button>
                   )}
                   <label htmlFor={`fotoManiIda_${viaje.firestoreId}`}
                     style={{width:"30px",height:"30px",borderRadius:"8px",background:viaje.manifiestoFotoUrl?t.colors.greenSoft:t.colors.bgSection,border:`1px solid ${viaje.manifiestoFotoUrl?t.colors.greenBorder:t.colors.border}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}
@@ -668,7 +694,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                     <Camera size={14} color={viaje.manifiestoFotoUrl?t.colors.green:t.colors.textSecondary} strokeWidth={2}/>
                   </label>
                   <input type="file" accept="image/*" capture="environment" id={`fotoManiIda_${viaje.firestoreId}`} style={{display:"none"}}
-                    onChange={e=>subirManifiesto(e,"ida",viaje)} />
+                    onChange={e=>{subirManifiesto(e,"ida",viaje); e.target.value="";}} />
                 </div>
               </div>
 
@@ -678,10 +704,18 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                   <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>
                     Manifiesto retorno{viaje.maniRet ? ` ${viaje.maniRet}` : ""}
                   </span>
-                  <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
                     {viaje.manifiestoRetFotoUrl && (
                       <a href={viaje.manifiestoRetFotoUrl} target="_blank" rel="noreferrer"
                         style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold,textDecoration:"none"}}>Ver</a>
+                    )}
+                    {viaje.manifiestoRetFotoUrl && (
+                      <button
+                        style={{width:"28px",height:"28px",borderRadius:"7px",background:t.colors.redSoft,border:`1px solid ${t.colors.redBorder}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}
+                        onClick={()=>eliminarManifiesto("ret",viaje)}
+                      >
+                        <X size={12} color={t.colors.red} strokeWidth={2.5}/>
+                      </button>
                     )}
                     <label htmlFor={`fotoManiRet_${viaje.firestoreId}`}
                       style={{width:"30px",height:"30px",borderRadius:"8px",background:viaje.manifiestoRetFotoUrl?t.colors.greenSoft:t.colors.bgSection,border:`1px solid ${viaje.manifiestoRetFotoUrl?t.colors.greenBorder:t.colors.border}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}
@@ -689,7 +723,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                       <Camera size={14} color={viaje.manifiestoRetFotoUrl?t.colors.green:t.colors.textSecondary} strokeWidth={2}/>
                     </label>
                     <input type="file" accept="image/*" capture="environment" id={`fotoManiRet_${viaje.firestoreId}`} style={{display:"none"}}
-                      onChange={e=>subirManifiesto(e,"ret",viaje)} />
+                      onChange={e=>{subirManifiesto(e,"ret",viaje); e.target.value="";}} />
                   </div>
                 </div>
               )}
