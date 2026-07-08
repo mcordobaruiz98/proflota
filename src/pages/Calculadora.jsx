@@ -744,32 +744,55 @@ const guardarRutaFrecuente = async () => {
   )}
     </div>
 
-        {/* VALOR VIAJE */}
+    {/* VALOR VIAJE */}
         {valorViaje > 0 && (
           <div>
-            {modoFlete === "porTon" && n(fleteTon) > 300000 && (
-              <div style={{padding:"8px 12px",background:"#FEF3C7",border:"1.5px solid #F59E0B33",borderRadius:t.radius.sm,marginBottom:"6px",display:"flex",alignItems:"center",gap:"8px"}}>
-                <span style={{fontSize:"16px"}}>⚠️</span>
-                <div>
-                  <p style={{fontSize:t.fonts.sizeXs,color:"#92400E",fontWeight:t.fonts.weightBold,margin:0}}>¿Seguro que es $/ton?</p>
-                  <p style={{fontSize:t.fonts.sizeXs,color:"#92400E",margin:"2px 0 0"}}>
-                    El flete por tonelada normalmente es entre $40.000 y $200.000/ton. Si el valor es el total del viaje, cambia a modo "Por viaje (valor fijo)".
-                  </p>
+            {/* ... aquí queda tu alerta de "¿Seguro que es $/ton?" si la tienes ... */}
+            {(() => {
+              const valorIda = modoFlete === "porTon" ? n(tonelaje) * n(fleteTon) : n(fleteTon);
+              const valorRet = valorViaje - valorIda;
+              if (!tieneRetorno || valorRet <= 0) {
+                // Sin retorno: como siempre
+                return (
+                  <div style={styles.valorViajeBox}>
+                    <span style={styles.valorViajeLabel}>
+                      {modoFlete === "porTon"
+                        ? fnD(n(tonelaje),2) + " ton x $" + Math.round(n(fleteTon)).toLocaleString("es-CO") + "/ton"
+                        : "Valor fijo por viaje"}
+                    </span>
+                    <span style={styles.valorViajeNum}>{fmt(valorViaje)}</span>
+                  </div>
+                );
+              }
+              // Con retorno: desglose ida + retorno = total
+              return (
+                <div style={styles.valorViajeBox}>
+                  <div style={{width:"100%"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",padding:"2px 0"}}>
+                      <span style={styles.valorViajeLabel}>
+                        Ida — {modoFlete === "porTon"
+                          ? fnD(n(tonelaje),2) + " ton x $" + Math.round(n(fleteTon)).toLocaleString("es-CO") + "/ton"
+                          : "valor fijo"}
+                      </span>
+                      <span style={{...styles.valorViajeLabel, fontWeight:700, color:t.colors.textPrimary}}>{fmt(valorIda)}</span>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",padding:"2px 0"}}>
+                      <span style={styles.valorViajeLabel}>Retorno</span>
+                      <span style={{...styles.valorViajeLabel, fontWeight:700, color:t.colors.textPrimary}}>{fmt(valorRet)}</span>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",padding:"4px 0 0",marginTop:"2px",borderTop:`1px solid ${t.colors.borderLight}`}}>
+                      <span style={{...styles.valorViajeLabel, fontWeight:700}}>Total viaje</span>
+                      <span style={styles.valorViajeNum}>{fmt(valorViaje)}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-            <div style={styles.valorViajeBox}>
-              <span style={styles.valorViajeLabel}>
-                {modoFlete === "porTon"
-                  ? fnD(n(tonelaje),2) + " ton x $" + Math.round(n(fleteTon)).toLocaleString("es-CO") + "/ton"
-                  : "Valor fijo por viaje"}
-              </span>
-              <span style={styles.valorViajeNum}>{fmt(valorViaje)}</span>
-            </div>
+              );
+            })()}
           </div>
         )}
       </div>
-        
+
+  
         {/* RETORNO */}
       <div style={{marginTop:"10px"}}>
       <div style={{display:"flex", alignItems:"center", gap:"10px", cursor:"pointer"}} onClick={()=>setTieneRetorno(!tieneRetorno)}>
