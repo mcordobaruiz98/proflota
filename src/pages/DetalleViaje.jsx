@@ -658,9 +658,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 {viaje.pesoBasRet > 0 && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Peso báscula</span><span style={styles.filaValor}>{viaje.pesoBasRet} ton</span></div>}
                 {viaje.lugarCargueRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Lugar de cargue</span><span style={styles.filaValor}>{viaje.lugarCargueRet}</span></div>}
                 {viaje.lugarDescargueRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Lugar de descargue</span><span style={styles.filaValor}>{viaje.lugarDescargueRet}</span></div>}
-                {(viaje.tonelajeRetorno > 0 && viaje.fleteRetorno > 0) && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Flete</span><span style={styles.filaValor}>{viaje.tonelajeRetorno} ton × {fmt(viaje.fleteRetorno)}/ton</span></div>}
-                {((viaje.kmCargadoRet || 0) > 0 || (viaje.kmVacioRet || 0) > 0) && <div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Recorrido</span><span style={styles.filaValor}>{viaje.kmCargadoRet || 0} km cargado · {viaje.kmVacioRet || 0} km vacío</span></div>}
-              </div>
+                {(viaje.tonelajeRetorno > 0 && viaje.fleteRetorno > 0) && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Flete</span><span style={styles.filaValor}>{viaje.tonelajeRetorno}{fmt(viaje.fleteRetorno)}/ton</span></div>}
+                </div>
             )}
 
             {/* DOCUMENTOS DEL VIAJE */}

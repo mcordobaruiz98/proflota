@@ -769,11 +769,7 @@ const guardarRutaFrecuente = async () => {
                 <div style={styles.valorViajeBox}>
                   <div style={{width:"100%"}}>
                     <div style={{display:"flex",justifyContent:"space-between",padding:"2px 0"}}>
-                      <span style={styles.valorViajeLabel}>
-                        Ida — {modoFlete === "porTon"
-                          ? fnD(n(tonelaje),2) + " ton x $" + Math.round(n(fleteTon)).toLocaleString("es-CO") + "/ton"
-                          : "valor fijo"}
-                      </span>
+                      <span style={styles.valorViajeLabel}>Ida </span>
                       <span style={{...styles.valorViajeLabel, fontWeight:700, color:t.colors.textPrimary}}>{fmt(valorIda)}</span>
                     </div>
                     <div style={{display:"flex",justifyContent:"space-between",padding:"2px 0"}}>
