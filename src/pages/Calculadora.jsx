@@ -208,7 +208,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       lugarCargue: sanitizar(lugarCargue), lugarDescargue: sanitizar(lugarDescargue),
       observaciones: sanitizar(observaciones).slice(0, 500),
       kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmCargadoRet: n(kmCargadoRet), kmVacioRet: n(kmVacioRet), kmT: kmTotal,
-      ton: n(tonelaje), fleteTon: n(fleteTon), vViaje: valorViaje,
+      ton: n(tonelaje), modoFlete, fleteTon: n(fleteTon), vViaje: valorViaje,
       tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(tonelajeRetorno), fleteRetorno: n(fleteRetorno),
       rutaRet: sanitizar(rutaRet), tipoCargaRet, productoRet: sanitizar(productoRet),
       empresaRet: sanitizar(empresaRet),
@@ -216,7 +216,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       pesoBasRet: validarNumero(pesoBasRet, 0, 999),
       lugarCargueRet: sanitizar(lugarCargueRet), lugarDescargueRet: sanitizar(lugarDescargueRet),
       fechaCargueRet, fechaDescargueRet,
-      gTot: galTotal, galCargado: galCarg, galVacio: galVac,
+      modoComb, gTot: galTotal, galCargado: galCarg, galVacio: galVac,
       adlt: adblLt, cAcpm: costoAcpm, cAdbl: costoAdbl, cComb: costoComb,
       peajes: totPeajes,
       peajesDetalle: peajesRuta.map(p => ({
@@ -268,8 +268,8 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     // Limpiar formulario
     setFecha(new Date().toISOString().slice(0,10)); setFechaDescarga("");
     setMani(""); setRemesa(""); setPesoBascula(""); setLugarCargue(""); setLugarDescargue("");
-    setObservaciones(""); setPlaca(""); setTipoCarga(""); setProducto(""); setRuta("");
-    setEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio(""); setKmCargadoRet(""); setKmVacioRet("");
+    setObservaciones(""); setPlaca(""); setTipoCarga(""); setProducto(""); setRuta(""); setModoFlete("");
+    setEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio(""); setKmCargadoRet(""); setKmVacioRet(""); setModoComb("");
     setTonelaje(""); setFleteTon(""); setTieneRetorno(false); setFleteRetorno("");
     setTonelajeRetorno(""); setRutaRet(""); setempresaRet(""); setProductoRet("");
     setManiRet(""); setRemesaRet(""); setPesoBasRet("");
@@ -286,10 +286,12 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   setRuta(rutaGuardada.ruta);
   setKmCargado(rutaGuardada.kmCargado || "");
   setKmVacio(rutaGuardada.kmVacio || "");
+  setModoFlete(rutaGuardada.modoFlete || "");
   setFleteTon(rutaGuardada.fleteTon || "");
   setRendCargado(rutaGuardada.rendCargado || "");
   setRendVacio(rutaGuardada.rendVacio || "");
   setGalManual(rutaGuardada.galManual || "");
+  setModoComb(rutaGuardada.modoComb || "");
   if (rutaGuardada.precioAcpm)   setPrecioAcpm(rutaGuardada.precioAcpm);
   if (rutaGuardada.precioAdblue) setPrecioAdblue(rutaGuardada.precioAdblue);
   setCategoria(rutaGuardada.categoria || "VII");
@@ -332,10 +334,12 @@ const guardarRutaFrecuente = async () => {
     ruta:        sanitizar(ruta),
     kmCargado:   n(kmCargado),
     kmVacio:     n(kmVacio),
+    modoFlete:   modoFlete,
     fleteTon:    n(fleteTon),
     rendCargado: n(rendCargado),
     rendVacio:   n(rendVacio),
     galManual:   n(galManual),
+    modoComb:    modoComb,
     precioAcpm:  n(precioAcpm),
     precioAdblue: n(precioAdblue),
     peajesRuta:  peajesRuta.map(p => ({
