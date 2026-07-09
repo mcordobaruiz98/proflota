@@ -124,14 +124,14 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       viaje.tieneRetorno && viaje.maniRet ? `📄 *Manifiesto:* ${viaje.maniRet}` : null,
       viaje.tieneRetorno ? `💰 *Flete retorno:* ${fmt(viaje.valorViajeRetorno || 0)}` : null,
       ``,
-      `💰 *Valor flete:* ${fmt(viaje.vViaje || 0)}`,
-      `⛽ *Combustible:* ${fmt(viaje.cComb || 0)}`,
-      `🛣️ *Peajes:* ${fmt(viaje.peajes || 0)}`,
-      `👤 *Conductor:* ${fmt(viaje.conductor || 0)}`,
+      `*Valor flete:* ${fmt(viaje.vViaje || 0)}`,
+      `*Combustible:* ${fmt(viaje.cComb || 0)}`,
+      `*Peajes:* ${fmt(viaje.peajes || 0)}`,
+      `*Conductor:* ${fmt(viaje.conductor || 0)}`,
       (viaje.carp || viaje.gv2 || viaje.extras) ? `📋 *Otros gastos:* ${fmt((viaje.carp||0)+(viaje.gv2||0)+(viaje.extras||0))}` : null,
       ``,
-      `📊 *Total gastos:* ${fmt(viaje.total || 0)}`,
-      `✅ *Ganancia neta:* ${fmt(viaje.neta || 0)}`,
+      `*Total gastos:* ${fmt(viaje.total || 0)}`,
+      `*Ganancia neta:* ${fmt(viaje.neta || 0)}`,
       ``,
       `_Generado por Navira — Inteligencia en Movimiento_`,
     ].filter(Boolean).join("\n");
@@ -640,7 +640,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
 
             {/* VIAJE DE RETORNO */}
             {viaje.tieneRetorno && (
-              <div style={{...styles.card, border:`1.5px solid ${t.colors.blueBorder}`, background:t.colors.blueSoft}}>
+              <div style={{...styles.card, border:`1.5px solid ${t.colors.blueBorder}`}}>
                 <div style={{...styles.cardHeader, justifyContent:"space-between"}}>
                   <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
                     <Repeat size={16} color={t.colors.blue} strokeWidth={2} />

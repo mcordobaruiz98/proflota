@@ -600,32 +600,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           </div>
         )}
 
-        {/* VIAJES DEL MES */}
-        {viajesMes.length > 0 && (
-          <div style={styles.card}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setVerViajesMes(!verViajesMes)}>
-              <p style={styles.cardTitulo}>{viajesMes.length} viaje{viajesMes.length!==1?"s":""} este mes</p>
-              {verViajesMes ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
-            </div>
-            {verViajesMes && [...viajesMes].reverse().map((viaje,i,arr) => (
-              <div
-                key={viaje.firestoreId}
-                style={{...styles.viajeFilaMes, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`, cursor:"pointer"}}
-                onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
-              >
-                <div style={{flex:1}}>
-                  <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{viaje.ruta||"Sin ruta"}</p>
-                  <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0"}}>{viaje.fecha||""}{viaje.placa?` · ${viaje.placa}`:""}</p>
-                </div>
-                <p style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, margin:0, color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
-                  {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-
-      </div>
+        </div>
     </div>
   );
 }
