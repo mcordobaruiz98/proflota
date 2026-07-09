@@ -46,55 +46,53 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     if (ultimoViaje && ultimoViaje.adlt > 0) return Math.round((ultimoViaje.cAdbl || 0) / ultimoViaje.adlt) || "";
     return "";
   });
-  const [categoria,           setCategoria]          = useState("VII");
-  const [busquedaP,           setBusquedaP]          = useState("");
-  const [selP,                setSelP]               = useState("");
-  const [peajesRuta,          setPeajesRuta]         = useState([]);
-  const [porcCond,            setPorcCond]           = useState("");
-  const [carpado,             setCarpado]            = useState("");
-  const [gastosViaje,         setGastosViaje]        = useState("");
-  const [extras,              setExtras]             = useState([]);
-  const [nuevoNom,            setNuevoNom]           = useState("");
-  const [nuevoVal,            setNuevoVal]           = useState("");
-  const [guardando,           setGuardando]          = useState(false);
-  const [modoFlete,           setModoFlete]          = useState("porTon");
-  const [modoConductor,       setModoConductor]      = useState("porcentaje");
-  const [descRetefuente,      setDescRetefuente]     = useState(false);
-  const [pctRetefuente,       setPctRetefuente]      = useState(1);
-  const [descReteica,         setDescReteica]        = useState(false);
-  const [pctReteica,          setPctReteica]         = useState(1);
-  const [descFopat,           setDescFopat]          = useState(false);
-  const [pctFopat,            setPctFopat]           = useState(0.1);
-  const [descOtro,            setDescOtro]           = useState(false);
-  const [pctOtro,             setPctOtro]            = useState(0);
-  const [nombreOtro,          setNombreOtro]         = useState("");
-  const [tieneRetorno,        setTieneRetorno]       = useState(false);
-  const [fleteRetorno,        setFleteRetorno]       = useState("");
-  const [tonelajeRetorno,     setTonelajeRetorno]    = useState("");
-  const [modoFleteRetorno,    setModoFleteRetorno]   = useState("porTon");
-  const [rutaRet,             setRutaRet]            = useState("");
-  const [tipoCargaRet,        setTipoCargaRet]       = useState("");
-  const [empresaRet,          setempresaRet]         = useState("");
-  const [productoRet,         setProductoRet]        = useState("");
-  const [maniRet,             setManiRet]            = useState("");
-  const [remesaRet,           setRemesaRet]          = useState("");
-  const [pesoBasRet,          setPesoBasRet]         = useState("");
-  const [lugarCargueRet,      setLugarCargueRet]     = useState("");
-  const [lugarDescargueRet,   setLugarDescargueRet]  = useState("");
-  const [fechaCargueRet,      setFechaCargueRet]     = useState("");
-  const [fechaDescargueRet,   setFechaDescargueRet]  = useState("");
-  const [mostrarRutas,        setMostrarRutas]       = useState(false);
-  const [guardandoRuta,       setGuardandoRuta]      = useState(false);
-  const [nombreRuta,          setNombreRuta]         = useState("");
-  const [mostrarGuardar,      setMostrarGuardar]     = useState(false);
-  const [rutaCargada,         setRutaCargada]        = useState(null);
-  const [secDatos,            setSecDatos]           = useState(true);
-  const [secComb,             setSecComb]            = useState(false);
-  const [secPeajes,           setSecPeajes]          = useState(false);
-  const [secCostos,           setSecCostos]          = useState(false);
-  const [secDesc,             setSecDesc]            = useState(false);
-  const [sugerenciaPeajes,    setSugerenciaPeajes] = useState(null);
-  const [sugerenciaAplicada,  setSugerenciaAplicada] = useState(false);
+  const [categoria,        setCategoria]          = useState("VII");
+  const [busquedaP,        setBusquedaP]          = useState("");
+  const [selP,             setSelP]               = useState("");
+  const [peajesRuta,       setPeajesRuta]         = useState([]);
+  const [porcCond,         setPorcCond]           = useState("");
+  const [carpado,          setCarpado]            = useState("");
+  const [gastosViaje,      setGastosViaje]        = useState("");
+  const [extras,           setExtras]             = useState([]);
+  const [nuevoNom,         setNuevoNom]           = useState("");
+  const [nuevoVal,         setNuevoVal]           = useState("");
+  const [guardando,        setGuardando]          = useState(false);
+  const [modoFlete,        setModoFlete]          = useState("porTon");
+  const [modoConductor,    setModoConductor]      = useState("porcentaje");
+  const [descRetefuente,   setDescRetefuente]     = useState(false);
+  const [pctRetefuente,    setPctRetefuente]      = useState(1);
+  const [descReteica,      setDescReteica]        = useState(false);
+  const [pctReteica,       setPctReteica]         = useState(1);
+  const [descFopat,        setDescFopat]          = useState(false);
+  const [pctFopat,         setPctFopat]           = useState(0.1);
+  const [descOtro,         setDescOtro]           = useState(false);
+  const [pctOtro,          setPctOtro]            = useState(0);
+  const [nombreOtro,       setNombreOtro]         = useState("");
+  const [tieneRetorno,     setTieneRetorno]       = useState(false);
+  const [fleteRetorno,     setFleteRetorno]       = useState("");
+  const [tonelajeRetorno,  setTonelajeRetorno]    = useState("");
+  const [modoFleteRetorno, setModoFleteRetorno]   = useState("porTon");
+  const [rutaRet,          setRutaRet]            = useState("");
+  const [tipoCargaRet,     setTipoCargaRet]       = useState("");
+  const [empresaRet,       setempresaRet]         = useState("");
+  const [productoRet,      setProductoRet]        = useState("");
+  const [maniRet,          setManiRet]            = useState("");
+  const [remesaRet,        setRemesaRet]          = useState("");
+  const [pesoBasRet,       setPesoBasRet]         = useState("");
+  const [lugarCargueRet,   setLugarCargueRet]     = useState("");
+  const [lugarDescargueRet,setLugarDescargueRet]  = useState("");
+  const [fechaCargueRet,   setFechaCargueRet]     = useState("");
+  const [fechaDescargueRet,setFechaDescargueRet]  = useState("");
+  const [mostrarRutas,     setMostrarRutas]       = useState(false);
+  const [guardandoRuta,    setGuardandoRuta]      = useState(false);
+  const [nombreRuta,       setNombreRuta]         = useState("");
+  const [mostrarGuardar,   setMostrarGuardar]     = useState(false);
+  const [rutaCargada,      setRutaCargada]        = useState(null);
+  const [secDatos,         setSecDatos]           = useState(true);
+  const [secComb,          setSecComb]            = useState(false);
+  const [secPeajes,        setSecPeajes]          = useState(false);
+  const [secCostos,        setSecCostos]          = useState(false);
+  const [secDesc,          setSecDesc]            = useState(false);
 
 
   const n   = (v) => parseFloat(v) || 0;
@@ -384,43 +382,6 @@ const guardarRutaFrecuente = async () => {
     if (veh.rendCargadoDef > 0 && !rendCargado) setRendCargado(String(veh.rendCargadoDef));
     if (veh.rendVacioDef > 0 && !rendVacio) setRendVacio(String(veh.rendVacioDef));
   }, [placa]);
-
-  // Peajes sugeridos: si la ruta ya se hizo antes, ofrecer los peajes del último viaje
-  useEffect(() => {
-    if (!ruta.trim() || peajesRuta.length > 0 || sugerenciaAplicada) {
-      if (!ruta.trim()) { setSugerenciaPeajes(null); setSugerenciaAplicada(false); }
-      return;
-    }
-    const rutaNorm = ruta.trim().toLowerCase();
-    const viajeAnterior = viajes.find(v =>
-      (v.ruta || "").trim().toLowerCase() === rutaNorm && (v.peajesDetalle || []).length > 0
-    );
-    if (viajeAnterior) {
-      const totalPeajesAnt = viajeAnterior.peajesDetalle.reduce((s, p) => s + (p.total || p.tarifa || 0), 0);
-      setSugerenciaPeajes({
-        detalle: viajeAnterior.peajesDetalle,
-        total: totalPeajesAnt,
-        cantidad: viajeAnterior.peajesDetalle.length,
-      });
-    } else {
-      setSugerenciaPeajes(null);
-    }
-  }, [ruta]);
-
-  const aplicarPeajesSugeridos = () => {
-    if (!sugerenciaPeajes) return;
-    const peajesRecuperados = sugerenciaPeajes.detalle.map(p => ({
-      c: p.n.replace(/\s/g, "_"),
-      n: p.n,
-      d: p.d || "",
-      iv: p.iv || false,
-      t: { [categoria]: p.tarifa || p.total || 0 },
-    }));
-    setPeajesRuta(peajesRecuperados);
-    setSugerenciaPeajes(null);
-    setSugerenciaAplicada(true);
-    mostrarToast(`${peajesRecuperados.length} peajes cargados de su último viaje`, "exito");
-  };
 
   return (
     <div style={styles.pantalla}>
@@ -785,29 +746,24 @@ const guardarRutaFrecuente = async () => {
 
     {/* VALOR VIAJE */}
         {valorViaje > 0 && (
-          <div style={{display:"flex",flexDirection:"column",gap:"6px",marginTop:"4px"}}>
-            {modoFlete === "porTon" && n(fleteTon) > 200000 && (
-              <div style={{padding:"8px 12px",background:"#FEF3C7",border:"1.5px solid #F59E0B33",borderRadius:t.radius.sm,marginBottom:"6px",display:"flex",alignItems:"center",gap:"8px"}}>
-                <span style={{fontSize:"16px"}}>⚠️</span>
-                <div>
-                  <p style={{fontSize:t.fonts.sizeXs,color:"#92400E",fontWeight:t.fonts.weightBold,margin:0}}>¿Seguro que es $/ton?</p>
-                  <p style={{fontSize:t.fonts.sizeXs,color:"#92400E",margin:"2px 0 0"}}>
-                    El flete por tonelada normalmente es entre $40.000 y $200.000/ton. Si el valor es el total del viaje, cambie a modo "Fijo ($/Viaje)".
-                  </p>
-                </div>
-              </div>
-            )}
+          <div>
+            {/* ... aquí queda tu alerta de "¿Seguro que es $/ton?" si la tienes ... */}
             {(() => {
-              // Sin retorno: solo ida = total
-              if (!tieneRetorno) {
+              const valorIda = modoFlete === "porTon" ? n(tonelaje) * n(fleteTon) : n(fleteTon);
+              const valorRet = valorViaje - valorIda;
+              if (!tieneRetorno || valorRet <= 0) {
+                // Sin retorno: como siempre
                 return (
                   <div style={styles.valorViajeBox}>
+                    <span style={styles.valorViajeLabel}>
+                      {modoFlete === "porTon"
+                        ? fnD(n(tonelaje),2) + " ton x $" + Math.round(n(fleteTon)).toLocaleString("es-CO") + "/ton"
+                        : "Valor fijo por viaje"}
+                    </span>
                     <span style={styles.valorViajeNum}>{fmt(valorViaje)}</span>
                   </div>
                 );
               }
-
-              
               // Con retorno: desglose ida + retorno = total
               return (
                 <div style={styles.valorViajeBox}>
@@ -1073,32 +1029,6 @@ const guardarRutaFrecuente = async () => {
             <Plus size={16} color="#fff" strokeWidth={2.5} />
           </button>
         </div>
-
-        {/* SUGERENCIA DE PEAJES */}
-        {sugerenciaPeajes && peajesRuta.length === 0 && (
-          <div style={{padding:"10px 12px",background:t.colors.greenSoft,border:`1.5px solid ${t.colors.greenBorder}`,borderRadius:t.radius.md,marginBottom:"10px"}}>
-            <p style={{fontSize:t.fonts.sizeXs,color:t.colors.green,fontWeight:t.fonts.weightBold,margin:"0 0 4px"}}>
-              Esta ruta ya la ha hecho antes
-            </p>
-            <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"0 0 8px"}}>
-              Usó {sugerenciaPeajes.cantidad} peajes por {fmt(sugerenciaPeajes.total)} — ¿Agregarlos?
-            </p>
-            <div style={{display:"flex",gap:"8px"}}>
-              <button
-                style={{flex:1,padding:"9px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,cursor:"pointer"}}
-                onClick={aplicarPeajesSugeridos}
-              >
-                ✓ Sí, cargar peajes
-              </button>
-              <button
-                style={{padding:"9px 14px",background:"none",border:`1px solid ${t.colors.border}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,cursor:"pointer"}}
-                onClick={()=>{setSugerenciaPeajes(null); setSugerenciaAplicada(true);}}
-              >
-                No
-              </button>
-            </div>
-          </div>
-        )}
 
         {peajesRuta.length > 0 && (
           <div style={styles.peajesTags}>
