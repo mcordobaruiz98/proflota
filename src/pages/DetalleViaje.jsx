@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send, Repeat, Camera, Paperclip, Calendar, Truck, FileText, Building2  } from "lucide-react";
+import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send, Repeat, Camera, Paperclip, Calendar, Truck, FileText, Building2, User } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { sanitizar } from "../utils/validar";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
