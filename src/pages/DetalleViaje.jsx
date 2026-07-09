@@ -124,14 +124,14 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       viaje.tieneRetorno && viaje.maniRet ? `📄 *Manifiesto:* ${viaje.maniRet}` : null,
       viaje.tieneRetorno ? `💰 *Flete retorno:* ${fmt(viaje.valorViajeRetorno || 0)}` : null,
       ``,
-      `*Valor flete:* ${fmt(viaje.vViaje || 0)}`,
-      `*Combustible:* ${fmt(viaje.cComb || 0)}`,
-      `*Peajes:* ${fmt(viaje.peajes || 0)}`,
-      `*Conductor:* ${fmt(viaje.conductor || 0)}`,
+      `💰 *Valor flete:* ${fmt(viaje.vViaje || 0)}`,
+      `⛽ *Combustible:* ${fmt(viaje.cComb || 0)}`,
+      `🛣️ *Peajes:* ${fmt(viaje.peajes || 0)}`,
+      `👤 *Conductor:* ${fmt(viaje.conductor || 0)}`,
       (viaje.carp || viaje.gv2 || viaje.extras) ? `📋 *Otros gastos:* ${fmt((viaje.carp||0)+(viaje.gv2||0)+(viaje.extras||0))}` : null,
       ``,
-      `*Total gastos:* ${fmt(viaje.total || 0)}`,
-      `*Ganancia neta:* ${fmt(viaje.neta || 0)}`,
+      `📊 *Total gastos:* ${fmt(viaje.total || 0)}`,
+      `✅ *Ganancia neta:* ${fmt(viaje.neta || 0)}`,
       ``,
       `_Generado por Navira — Inteligencia en Movimiento_`,
     ].filter(Boolean).join("\n");
@@ -533,12 +533,21 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
           {/* HERO */}
           <div style={styles.hero}>
             <p style={styles.heroRuta}>{viaje.ruta||"Sin ruta"}</p>
+            {viaje.tieneRetorno && viaje.rutaRet && (
+              <p style={{fontSize:t.fonts.sizeSm,color:t.colors.blue,margin:"4px 0 0",fontWeight:t.fonts.weightSemibold}}>↩ {viaje.rutaRet}</p>
+            )}
             <div style={styles.heroPills}>
-              {viaje.fecha&&<span style={styles.pill}>📅 {viaje.fecha}</span>}
+              {viaje.fecha&&<span style={styles.pill}>📅 {viaje.fecha}{viaje.fechaDescarga ? ` → ${viaje.fechaDescarga}` : ""}</span>}
               {viaje.placa&&<span style={styles.pill}>🚚 {viaje.placa}</span>}
               {viaje.condNom&&<span style={styles.pill}>👤 {viaje.condNom}</span>}
-              {viaje.mani&&<span style={styles.pill}>📄 Man. {viaje.mani}</span>}
+              {viaje.mani&&<span style={styles.pill}>📄 {viaje.mani}</span>}
               {viaje.emp&&<span style={styles.pill}>🏢 {viaje.emp}</span>}
+              {viaje.tieneRetorno && viaje.empresaRet && viaje.empresaRet !== viaje.emp && (
+                <span style={{...styles.pill, background:`${t.colors.blue}22`, border:`1px solid ${t.colors.blueBorder}`}}>🏢 {viaje.empresaRet} <span style={{fontSize:"9px",opacity:0.7}}>(ret)</span></span>
+              )}
+              {viaje.tieneRetorno && viaje.maniRet && (
+                <span style={{...styles.pill, background:`${t.colors.blue}22`, border:`1px solid ${t.colors.blueBorder}`}}>📄 {viaje.maniRet} <span style={{fontSize:"9px",opacity:0.7}}>(ret)</span></span>
+              )}
             </div>
           </div>
 
@@ -648,18 +657,18 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                   </div>
                   <span style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBlack, color:t.colors.blue}}>{fmt(viaje.valorViajeRetorno || 0)}</span>
                 </div>
-                {viaje.rutaRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Ruta</span><span style={styles.filaValor}>{viaje.rutaRet}</span></div>}
-                {(viaje.fechaCargueRet || viaje.fechaDescargueRet) && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Cargue / Descargue</span><span style={styles.filaValor}>{viaje.fechaCargueRet || "—"} · {viaje.fechaDescargueRet || "—"}</span></div>}
-                {viaje.empresaRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Empresa</span><span style={styles.filaValor}>{viaje.empresaRet}</span></div>}
-                {viaje.contactoRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Contacto</span><span style={styles.filaValor}>{viaje.contactoRet}</span></div>}
-                {(viaje.productoRet || viaje.tipoCargaRet) && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Producto</span><span style={styles.filaValor}>{viaje.productoRet || "—"}{viaje.tipoCargaRet ? ` · ${viaje.tipoCargaRet}` : ""}</span></div>}
-                {viaje.maniRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Manifiesto</span><span style={styles.filaValor}>{viaje.maniRet}</span></div>}
-                {viaje.remesaRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>N° Remesa</span><span style={styles.filaValor}>{viaje.remesaRet}</span></div>}
-                {viaje.pesoBasRet > 0 && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Peso báscula</span><span style={styles.filaValor}>{viaje.pesoBasRet} ton</span></div>}
-                {viaje.lugarCargueRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Lugar de cargue</span><span style={styles.filaValor}>{viaje.lugarCargueRet}</span></div>}
-                {viaje.lugarDescargueRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Lugar de descargue</span><span style={styles.filaValor}>{viaje.lugarDescargueRet}</span></div>}
-                {(viaje.tonelajeRetorno > 0 && viaje.fleteRetorno > 0) && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.blueBorder}44`}}><span style={styles.filaLabel}>Flete</span><span style={styles.filaValor}>{viaje.tonelajeRetorno}{fmt(viaje.fleteRetorno)}/ton</span></div>}
-                </div>
+                {viaje.rutaRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Ruta</span><span style={styles.filaValor}>{viaje.rutaRet}</span></div>}
+                {(viaje.fechaCargueRet || viaje.fechaDescargueRet) && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Cargue / Descargue</span><span style={styles.filaValor}>{viaje.fechaCargueRet || "—"} · {viaje.fechaDescargueRet || "—"}</span></div>}
+                {viaje.empresaRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Empresa</span><span style={styles.filaValor}>{viaje.empresaRet}</span></div>}
+                {viaje.contactoRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Contacto</span><span style={styles.filaValor}>{viaje.contactoRet}</span></div>}
+                {(viaje.productoRet || viaje.tipoCargaRet) && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Producto</span><span style={styles.filaValor}>{viaje.productoRet || "—"}{viaje.tipoCargaRet ? ` · ${viaje.tipoCargaRet}` : ""}</span></div>}
+                {viaje.maniRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Manifiesto</span><span style={styles.filaValor}>{viaje.maniRet}</span></div>}
+                {viaje.remesaRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>N° Remesa</span><span style={styles.filaValor}>{viaje.remesaRet}</span></div>}
+                {viaje.pesoBasRet > 0 && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Peso báscula</span><span style={styles.filaValor}>{viaje.pesoBasRet} ton</span></div>}
+                {viaje.lugarCargueRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Lugar de cargue</span><span style={styles.filaValor}>{viaje.lugarCargueRet}</span></div>}
+                {viaje.lugarDescargueRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Lugar de descargue</span><span style={styles.filaValor}>{viaje.lugarDescargueRet}</span></div>}
+                {((viaje.kmCargadoRet || 0) > 0 || (viaje.kmVacioRet || 0) > 0) && <div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Recorrido</span><span style={styles.filaValor}>{viaje.kmCargadoRet || 0} km cargado · {viaje.kmVacioRet || 0} km vacío</span></div>}
+              </div>
             )}
 
             {/* DOCUMENTOS DEL VIAJE */}
