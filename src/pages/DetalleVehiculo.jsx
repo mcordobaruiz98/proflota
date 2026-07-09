@@ -82,6 +82,9 @@ function DetalleVehiculo({ vehiculos, viajes = [], mantenimientos = [], configMa
   const vehiculo  = vehiculos.find(v => String(v.firestoreId) === String(id));
   const [tabActivo, setTabActivo] = useState(location.state?.tab || "info");
   const [filtro,    setFiltro]    = useState("todos");
+  const [verRangoV,   setVerRangoV]   = useState(false);
+  const [rangoDesdeV, setRangoDesdeV] = useState("");
+  const [rangoHastaV, setRangoHastaV] = useState("");
   const [busquedaH, setBusquedaH] = useState("");
   const hoy = new Date();
 
@@ -224,6 +227,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     const f = fechaLocal(v.fecha);
     if (filtro==="mes")    return f.getMonth()===hoyFiltro.getMonth()&&f.getFullYear()===hoyFiltro.getFullYear();
     if (filtro==="semana") { const h=new Date(); h.setDate(hoyFiltro.getDate()-7); return f>=h; }
+    if (filtro==="rango" && rangoDesdeV && rangoHastaV) return v.fecha >= rangoDesdeV && v.fecha <= rangoHastaV;
     return true;
   });
 

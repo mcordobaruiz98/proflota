@@ -8,6 +8,9 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
   const [filtro, setFiltro] = useState("pendientes");
   const [busqueda, setBusqueda] = useState("");
   const [periodo, setPeriodo] = useState("todo");
+  const [verRango, setVerRango] = useState(false);
+  const [rangoDesde, setRangoDesde] = useState("");
+  const [rangoHasta, setRangoHasta] = useState("");
   const [empAbiertas, setEmpAbiertas] = useState({});
 
   const fmt = (n) => "$" + Math.round(n || 0).toLocaleString("es-CO");
@@ -42,6 +45,9 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
         const trimActual = Math.floor(mes / 3);
         const trimViaje = Math.floor(f.getMonth() / 3);
         if (trimViaje !== trimActual || f.getFullYear() !== anio) return false;
+      }
+      if (periodo === "rango" && rangoDesde && rangoHasta) {
+        if (v.fecha < rangoDesde || v.fecha > rangoHasta) return false;
       }
     }
 
@@ -139,13 +145,31 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
             { id: "todo", label: "Todo" },
             { id: "mes", label: "Este mes" },
             { id: "trimestre", label: "Trimestre" },
+            { id: "rango", label: "📅 Fechas" },
           ].map(p => (
             <button key={p.id}
-              style={{ ...styles.chip, ...(periodo === p.id ? styles.chipActivo : {}) }}
-              onClick={() => setPeriodo(p.id)}
+              style={{ ...styles.chip, ...(periodo === p.id || (p.id === "rango" && verRango) ? styles.chipActivo : {}) }}
+              onClick={() => { if (p.id === "rango") { setVerRango(!verRango); } else { setPeriodo(p.id); setVerRango(false); }}}
             >{p.label}</button>
           ))}
         </div>
+
+        {verRango && (
+          <div style={{background:t.colors.bgCard,borderRadius:t.radius.md,padding:"12px",marginBottom:"12px",border:`1px solid ${t.colors.border}`}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+              <div>
+                <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
+                <input type="date" value={rangoDesde} onChange={e=>{setRangoDesde(e.target.value);setPeriodo("rango");}}
+                  style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
+              </div>
+              <div>
+                <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
+                <input type="date" value={rangoHasta} onChange={e=>{setRangoHasta(e.target.value);setPeriodo("rango");}}
+                  style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* FILTROS */}
         <div style={styles.chips}>
