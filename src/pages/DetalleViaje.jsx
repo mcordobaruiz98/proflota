@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send, Repeat, Camera, Paperclip } from "lucide-react";
+import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send, Repeat, Camera, Paperclip, Calendar, Truck, user, FileText, Building2  } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { sanitizar } from "../utils/validar";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
@@ -537,16 +537,13 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
               <p style={{fontSize:t.fonts.sizeSm,color:t.colors.blue,margin:"4px 0 0",fontWeight:t.fonts.weightSemibold}}>↩ {viaje.rutaRet}</p>
             )}
             <div style={styles.heroPills}>
-              {viaje.fecha&&<span style={styles.pill}>📅 {viaje.fecha}{viaje.fechaDescarga ? ` → ${viaje.fechaDescarga}` : ""}</span>}
-              {viaje.placa&&<span style={styles.pill}>🚚 {viaje.placa}</span>}
-              {viaje.condNom&&<span style={styles.pill}>👤 {viaje.condNom}</span>}
-              {viaje.mani&&<span style={styles.pill}>📄 {viaje.mani}</span>}
-              {viaje.emp&&<span style={styles.pill}>🏢 {viaje.emp}</span>}
+              {viaje.fecha&&<span style={styles.pill}><Calendar size={12} strokeWidth={2} /> {viaje.fecha}{viaje.fechaDescarga ? ` → ${viaje.fechaDescarga}` : ""}</span>}
+              {viaje.placa&&<span style={styles.pill}><Truck size={12} strokeWidth={2} /> {viaje.placa}</span>}
+              {viaje.condNom&&<span style={styles.pill}><User size={12} strokeWidth={2} /> {viaje.condNom}</span>}
+              {viaje.mani&&<span style={styles.pill}><FileText size={12} strokeWidth={2} /> {viaje.mani}</span>}
+              {viaje.emp&&<span style={styles.pill}><Building2 size={12} strokeWidth={2} /> {viaje.emp}</span>}
               {viaje.tieneRetorno && viaje.empresaRet && viaje.empresaRet !== viaje.emp && (
-                <span style={{...styles.pill, background:`${t.colors.blue}22`, border:`1px solid ${t.colors.blueBorder}`}}>🏢 {viaje.empresaRet} <span style={{fontSize:"9px",opacity:0.7}}>(ret)</span></span>
-              )}
-              {viaje.tieneRetorno && viaje.maniRet && (
-                <span style={{...styles.pill, background:`${t.colors.blue}22`, border:`1px solid ${t.colors.blueBorder}`}}>📄 {viaje.maniRet} <span style={{fontSize:"9px",opacity:0.7}}>(ret)</span></span>
+              <span style={{...styles.pill, background:`${t.colors.blue}22`, border:`1px solid ${t.colors.blueBorder}`}}><Building2 size={12} strokeWidth={2} /> {viaje.empresaRet} <span style={{fontSize:"9px",opacity:0.7}}>(ret)</span></span>
               )}
             </div>
           </div>
