@@ -982,7 +982,7 @@ const styles = {
   hero:            { background:t.colors.bgCard, padding:"16px 20px", borderBottom:`1px solid ${t.colors.borderLight}` },
   heroRuta:        { fontSize:"20px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:"0 0 10px", letterSpacing:"-0.3px" },
   heroPills:       { display:"flex", flexWrap:"wrap", gap:"6px" },
-  pill:            { fontSize:"11px", background:t.colors.bgSection, color:t.colors.textSecondary, padding:"4px 10px", borderRadius:t.radius.full },
+  pill:            { fontSize:t.fonts.sizeXs, background:t.colors.bgSection, padding:"4px 10px", borderRadius:t.radius.full, display:"inline-flex", alignItems:"center", gap:"4px",  },
   contenido:       { padding:"12px 16px 30px" },
   dosColumnas:     { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" },
   kpiCard:         { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", boxShadow:t.shadows.card, border:`1.5px solid ${t.colors.border}` },
