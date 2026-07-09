@@ -785,17 +785,8 @@ const guardarRutaFrecuente = async () => {
 
     {/* VALOR VIAJE */}
         {valorViaje > 0 && (
-          <div>
-            {/* ... aquí queda tu alerta de "¿Seguro que es $/ton?" si la tienes ... */}
-            {(() => {
-              const valorIda = modoFlete === "porTon" ? n(tonelaje) * n(fleteTon) : n(fleteTon);
-              const valorRet = valorViaje - valorIda;
-              if (!tieneRetorno || valorRet <= 0) {
-                // Sin retorno: como siempre
-                return (
-                  <div style={styles.valorViajeBox}>
-                    <span style={styles.valorViajeLabel}>
-                      {modoFlete === "porTon" && n(fleteTon) > 200000 && (
+          <div style={{display:"flex",flexDirection:"column",gap:"6px",marginTop:"4px"}}>
+            {modoFlete === "porTon" && n(fleteTon) > 200000 && (
               <div style={{padding:"8px 12px",background:"#FEF3C7",border:"1.5px solid #F59E0B33",borderRadius:t.radius.sm,marginBottom:"6px",display:"flex",alignItems:"center",gap:"8px"}}>
                 <span style={{fontSize:"16px"}}>⚠️</span>
                 <div>
@@ -806,11 +797,17 @@ const guardarRutaFrecuente = async () => {
                 </div>
               </div>
             )}
-                    </span>
+            {(() => {
+              // Sin retorno: solo ida = total
+              if (!tieneRetorno) {
+                return (
+                  <div style={styles.valorViajeBox}>
                     <span style={styles.valorViajeNum}>{fmt(valorViaje)}</span>
                   </div>
                 );
               }
+
+              
               // Con retorno: desglose ida + retorno = total
               return (
                 <div style={styles.valorViajeBox}>
