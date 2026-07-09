@@ -1350,7 +1350,7 @@ const styles = {
   fila2:            { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },
   label:            { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
   input:            { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
-  valorViajeBox:    { display:"flex", justifyContent:"space-between", alignItems:"center", background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, padding:"12px 14px", marginTop:"4px" },
+  valorViajeBox:    { display:"flex", justifyContent:"space-between", alignItems:"center", background:t.colors.bgCard, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, padding:"12px 14px", marginTop:"4px" },
   valorViajeLabel:  { fontSize:t.fonts.sizeSm, color:t.colors.blue, fontWeight:t.fonts.weightMedium },
   valorViajeNum:    { fontSize:"20px", fontWeight:t.fonts.weightBlack, color:t.colors.blue },
   resumenBox:       { background:t.colors.bgSection, borderRadius:t.radius.sm, padding:"10px 12px", marginTop:"8px" },
