@@ -747,13 +747,13 @@ const guardarRutaFrecuente = async () => {
     {/* VALOR VIAJE */}
         {valorViaje > 0 && (
           <div>
-            {modoFlete === "porTon" && n(fleteTon) > 200000 && (
+            {modoFlete === "porTon" && n(fleteTon) > 300000 && (
               <div style={{padding:"8px 12px",background:"#FEF3C7",border:"1.5px solid #F59E0B33",borderRadius:t.radius.sm,marginBottom:"6px",display:"flex",alignItems:"center",gap:"8px"}}>
                 <span style={{fontSize:"16px"}}>⚠️</span>
                 <div>
                   <p style={{fontSize:t.fonts.sizeXs,color:"#92400E",fontWeight:t.fonts.weightBold,margin:0}}>¿Seguro que es $/ton?</p>
                   <p style={{fontSize:t.fonts.sizeXs,color:"#92400E",margin:"2px 0 0"}}>
-                    El flete por tonelada normalmente es entre $40.000 y $200.000/ton. Si el valor es el total del viaje, cambie a modo "Fijo ($/Viaje)".
+                    El flete por tonelada normalmente es entre $40.000 y $300.000/ton. Si el valor es el total del viaje, cambie a modo "Fijo ($/Viaje)".
                   </p>
                 </div>
               </div>
