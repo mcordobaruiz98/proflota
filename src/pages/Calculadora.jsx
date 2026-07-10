@@ -624,6 +624,11 @@ const guardarRutaFrecuente = async () => {
   <label style={styles.label}>Manifiesto</label>
   <input type="text" placeholder="123456789" value={mani}
     onChange={e=>setMani(e.target.value)} style={styles.input}/>
+  {mani.trim() && viajes.some(v => v.mani && v.mani.trim().toLowerCase() === mani.trim().toLowerCase()) && (
+    <p style={{fontSize:t.fonts.sizeXs,color:"#F59E0B",margin:"4px 0 0",display:"flex",alignItems:"center",gap:"4px"}}>
+      ⚠️ Este manifiesto ya existe en otro viaje. Verifique el número.
+    </p>
+  )}
 </div>
 
   <div style={styles.fila2}>
@@ -886,6 +891,11 @@ const guardarRutaFrecuente = async () => {
             <label style={styles.label}>Manifiesto</label>
             <input type="text" placeholder="MAN-001" value={maniRet}
               onChange={e=>setManiRet(e.target.value)} style={styles.input} />
+              {maniRet.trim() && viajes.some(v => (v.mani && v.mani.trim().toLowerCase() === maniRet.trim().toLowerCase()) || (v.maniRet && v.maniRet.trim().toLowerCase() === maniRet.trim().toLowerCase())) && (
+               <p style={{fontSize:t.fonts.sizeXs,color:"#F59E0B",margin:"4px 0 0",display:"flex",alignItems:"center",gap:"4px"}}>
+                ⚠️ Este manifiesto ya existe en otro viaje. Verifique el número.
+                </p>
+              )}
           </div>
 
         <div style={styles.campo}>
