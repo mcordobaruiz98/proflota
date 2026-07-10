@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp, Scale, FileDown } from "lucide-react";
+import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp, FileDown, Scale } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
@@ -12,10 +12,16 @@ const MESES_CORTO = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct"
 function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo = [], cargando }) {
   const navigate = useNavigate();
   const hoy = new Date();
+
+  // Parseo de fechas YYYY-MM-DD como fecha LOCAL (evita el corrimiento UTC de -1 día)
+  const fechaLocal = (iso) => {
+    const [y, m, d] = (iso || "").split("-").map(Number);
+    return new Date(y || 1970, (m || 1) - 1, d || 1);
+  };
   const [mes,  setMes]  = useState(hoy.getMonth());
   const [anio, setAnio] = useState(hoy.getFullYear());
   const [verViajesMes, setVerViajesMes] = useState(false);
-  const [verRango,  setVerRango] = useState(false);
+  const [verRango,   setVerRango]   = useState(false);
   const [rangoDesde, setRangoDesde] = useState("");
   const [rangoHasta, setRangoHasta] = useState("");
 
@@ -34,7 +40,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
     setMes(m); setAnio(a);
   };
 
-  const viajesMes    = viajes.filter(v => { const f=new Date(v.fecha); return f.getMonth()===mes && f.getFullYear()===anio; });
+  const viajesMes    = viajes.filter(v => { const f=fechaLocal(v.fecha); return f.getMonth()===mes && f.getFullYear()===anio; });
   const ingresosMes  = viajesMes.reduce((s,v) => s+(v.vViaje||0), 0);
   const gastosMes    = viajesMes.reduce((s,v) => s+(v.total||0),  0);
   const netaMes      = viajesMes.reduce((s,v) => s+(v.neta||0),   0);
@@ -57,7 +63,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
 
   // Gastos adicionales del mes
   const gastosAdicMes = gastosVehiculo.filter(g => {
-    const f = new Date(g.fecha);
+    const f = fechaLocal(g.fecha);
     return f.getMonth() === mes && f.getFullYear() === anio;
   });
   const totalGastosAdic = gastosAdicMes.reduce((s, g) => s + (g.monto || 0), 0);
@@ -67,10 +73,10 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
   // ── Comparación con el mes anterior (para export) ──
   let mesAnt = mes - 1, anioAnt = anio;
   if (mesAnt < 0) { mesAnt = 11; anioAnt--; }
-  const viajesMesAnt  = viajes.filter(v => { const f=new Date(v.fecha); return f.getMonth()===mesAnt && f.getFullYear()===anioAnt; });
+  const viajesMesAnt  = viajes.filter(v => { const f=fechaLocal(v.fecha); return f.getMonth()===mesAnt && f.getFullYear()===anioAnt; });
   const ingresosAnt   = viajesMesAnt.reduce((s,v) => s+(v.vViaje||0), 0);
   const netaAnt       = viajesMesAnt.reduce((s,v) => s+(v.neta||0),   0);
-  const gastosAdicAnt = gastosVehiculo.filter(g => { const f=new Date(g.fecha); return f.getMonth()===mesAnt && f.getFullYear()===anioAnt; }).reduce((s,g)=>s+(g.monto||0),0);
+  const gastosAdicAnt = gastosVehiculo.filter(g => { const f=fechaLocal(g.fecha); return f.getMonth()===mesAnt && f.getFullYear()===anioAnt; }).reduce((s,g)=>s+(g.monto||0),0);
   const utilidadAnt   = netaAnt - totalPE - gastosAdicAnt;
 
   // Genera "↑ 12% vs May" en HTML para el export
@@ -102,7 +108,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
   const ultimos6 = Array.from({length:6}, (_,i) => {
     let m = mes-(5-i), a = anio;
     if (m<0) { m+=12; a--; }
-    const vm = viajes.filter(v => { const f=new Date(v.fecha); return f.getMonth()===m && f.getFullYear()===a; });
+    const vm = viajes.filter(v => { const f=fechaLocal(v.fecha); return f.getMonth()===m && f.getFullYear()===a; });
     return { mes: MESES_CORTO[m], neta: vm.reduce((s,v)=>s+(v.neta||0),0), activo: m===mes&&a===anio };
   });
   const maxGrafica = Math.max(...ultimos6.map(m=>Math.abs(m.neta)), 1);
@@ -132,7 +138,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           const totalPendCobro = pendientesCobro.reduce((s,v) => s+(v.vViaje||0), 0);
           const vencidosCobro = pendientesCobro.filter(v => {
             const plazo = v.diasPago || 30;
-            const f = new Date(v.fecha);
+            const f = fechaLocal(v.fecha);
             f.setDate(f.getDate()+plazo);
             return new Date() > f;
           });
@@ -154,7 +160,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             carteraPorEmp[emp].viajes++;
             carteraPorEmp[emp].monto += v.vViaje||0;
             const plazo = v.diasPago||30;
-            const f = new Date(v.fecha);
+            const f = fechaLocal(v.fecha);
             f.setDate(f.getDate()+plazo);
             if (new Date()>f) carteraPorEmp[emp].vencido += v.vViaje||0;
           });
@@ -232,18 +238,18 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           </div>
 
           <table>
-            <tr style="background:#f0f9ff"><td style="font-weight:700">Ingresos por viajes</td><td style="font-weight:700;color:#1565FF">${fmt(ingresosMes)}</td></tr>
+            <tr style="background:#f0f9ff"><td style="font-weight:700">💰 Ingresos por viajes</td><td style="font-weight:700;color:#1565FF">${fmt(ingresosMes)}</td></tr>
             <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos operativos:</td></tr>
-            <tr><td style="padding-left:20px">Combustible (ACPM + Adblue)</td><td style="color:#dc2626">-${fmt(acpmMes + adblMes)}</td></tr>
-            <tr><td style="padding-left:20px">Peajes</td><td style="color:#dc2626">-${fmt(peajesMes)}</td></tr>
-            <tr><td style="padding-left:20px">Conductor</td><td style="color:#dc2626">-${fmt(conductorMes)}</td></tr>
-            ${otrosMes>0?`<tr><td style="padding-left:20px">Otros gastos de viaje</td><td style="color:#dc2626">-${fmt(otrosMes)}</td></tr>`:""}
-            ${descuentosMes>0?`<tr><td style="padding-left:20px">Descuentos de ley</td><td style="color:#dc2626">-${fmt(descuentosMes)}</td></tr>`:""}
+            <tr><td style="padding-left:20px">⛽ Combustible (ACPM + Adblue)</td><td style="color:#dc2626">-${fmt(acpmMes + adblMes)}</td></tr>
+            <tr><td style="padding-left:20px">🛣️ Peajes</td><td style="color:#dc2626">-${fmt(peajesMes)}</td></tr>
+            <tr><td style="padding-left:20px">👤 Conductor</td><td style="color:#dc2626">-${fmt(conductorMes)}</td></tr>
+            ${otrosMes>0?`<tr><td style="padding-left:20px">📋 Otros gastos de viaje</td><td style="color:#dc2626">-${fmt(otrosMes)}</td></tr>`:""}
+            ${descuentosMes>0?`<tr><td style="padding-left:20px">📑 Descuentos de ley</td><td style="color:#dc2626">-${fmt(descuentosMes)}</td></tr>`:""}
             <tr style="background:#f0fdf4"><td style="font-weight:600">= Ganancia neta de viajes</td><td style="font-weight:700;color:${netaMes>=0?"#16a34a":"#dc2626"}">${fmt(netaMes)}</td></tr>
             ${totalPE>0?`
             <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos fijos mensuales:</td></tr>
-            <tr><td style="padding-left:20px">Gastos fijos (cuota, seguro, GPS...)</td><td style="color:#dc2626">-${fmt(totalPE)}</td></tr>`:""}
-            ${totalGastosAdic>0?`<tr><td style="padding-left:20px">Gastos adicionales (taller, repuestos...)</td><td style="color:#dc2626">-${fmt(totalGastosAdic)}</td></tr>`:""}
+            <tr><td style="padding-left:20px">🏦 Gastos fijos (cuota, seguro, GPS...)</td><td style="color:#dc2626">-${fmt(totalPE)}</td></tr>`:""}
+            ${totalGastosAdic>0?`<tr><td style="padding-left:20px">🔧 Gastos adicionales (taller, repuestos...)</td><td style="color:#dc2626">-${fmt(totalGastosAdic)}</td></tr>`:""}
             ${totalPE>0||totalGastosAdic>0?`<tr class="total" style="background:#f0fdf4"><td>= Utilidad real del período</td><td class="${utilidadReal>=0?"verde":"rojo"}">${fmt(utilidadReal)}</td></tr>`:""}
           </table>
           <table>
@@ -412,7 +418,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
         <button style={styles.btnMes} onClick={()=>cambiarMes(1)}>›</button>
       </div>
 
-        {/* CONSULTA POR RANGO DE FECHAS */}
+      {/* CONSULTA POR RANGO DE FECHAS */}
       <div style={{padding:"0 16px 6px"}}>
         <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"12px 16px",boxShadow:t.shadows.card}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setVerRango(!verRango)}>
@@ -663,7 +669,8 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           </div>
         )}
 
-        </div>
+       
+      </div>
     </div>
   );
 }
