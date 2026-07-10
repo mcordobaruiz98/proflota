@@ -10,6 +10,11 @@ function Comparativo({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehi
 
   const fmt = (n) => "$" + Math.round(n || 0).toLocaleString("es-CO");
   const hoy = new Date();
+
+  const fechaLocal = (iso) => {
+    const [y, m, d] = (iso || "").split("-").map(Number);
+    return new Date(y || 1970, (m || 1) - 1, d || 1);
+  };
   const mes = hoy.getMonth();
   const anio = hoy.getFullYear();
 
@@ -17,11 +22,11 @@ function Comparativo({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehi
     return viajes.filter(v => {
       if (v.placa !== placa) return false;
       if (periodo === "mes") {
-        const f = new Date(v.fecha);
+        const f = fechaLocal(v.fecha);
         return f.getMonth() === mes && f.getFullYear() === anio;
       }
       if (periodo === "trimestre") {
-        const f = new Date(v.fecha);
+        const f = fechaLocal(v.fecha);
         const trimActual = Math.floor(mes / 3);
         const trimViaje = Math.floor(f.getMonth() / 3);
         return trimViaje === trimActual && f.getFullYear() === anio;
@@ -37,7 +42,7 @@ function Comparativo({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehi
       return Math.max(1, Math.ceil((hoy - inicioTrim) / 86400000));
     }
     // todo: desde el primer viaje registrado
-    const fechas = viajes.map(v => new Date(v.fecha)).filter(f => !isNaN(f));
+    const fechas = viajes.map(v => fechaLocal(v.fecha)).filter(f => !isNaN(f));
     if (fechas.length === 0) return 1;
     const primera = new Date(Math.min(...fechas));
     return Math.max(1, Math.ceil((hoy - primera) / 86400000));
