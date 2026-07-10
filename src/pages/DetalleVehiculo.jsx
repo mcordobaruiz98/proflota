@@ -996,7 +996,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                           <label style={styles.label}>Adjuntar factura (opcional)</label>
                           <label style={{display:"flex",alignItems:"center",gap:"8px",padding:"10px 12px",borderRadius:t.radius.sm,border:`1.5px dashed ${t.colors.border}`,cursor:"pointer",fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold}}>
                             <Upload size={14} color={t.colors.blue} />
-                            {subiendo ? `Subiendo... ${progresoArchivo}%` : "Seleccionar archivo"}
+                            {subiendo?.gastoFactura ? `Subiendo... ${progresoArchivo?.gastoFactura || 0}%` : "Seleccionar archivo"}
                             <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{display:"none"}}
                               onChange={e=>{
                                 const archivo = e.target.files[0];
