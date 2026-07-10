@@ -1,23 +1,12 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth }     from "../hooks/useAuth";
 import { theme as t }  from "../styles/theme";
 import {Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake, AlertCircle, Wrench} from "lucide-react";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
-import {doc, getDoc} from "firebase/firestore";
-import { db } from "../firebase";
 
 function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [], conductores = [], gastosFijos = [], cargando}) {
   const navigate = useNavigate();
   const { usuario } = useAuth();
-  const [diaLiquidacion, setDiaLiquidacion] = useState(null);
-
-  useEffect(() => {
-    if (!usuario?.uid) return;
-    getDoc(doc(db, "usuarios", usuario.uid)).then(snap => {
-      if (snap.exists()) setDiaLiquidacion(snap.data().diaLiquidacion ?? null);
-    }).catch(()=>{});
-  }, [usuario?.uid]);
 
   const nombreSaludo = usuario?.displayName
     ? usuario.displayName.split(" ").slice(0, 2).join(" ")
@@ -32,8 +21,13 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
   const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
 
   const hoy = new Date();
+
+  const fechaLocal = (iso) => {
+    const [y, m, d] = (iso || "").split("-").map(Number);
+    return new Date(y || 1970, (m || 1) - 1, d || 1);
+  };
   const viajesMes = viajes.filter((v) => {
-    const f = new Date(v.fecha);
+    const f = fechaLocal(v.fecha);
     return (
       f.getMonth()    === hoy.getMonth() &&
       f.getFullYear() === hoy.getFullYear()
@@ -55,7 +49,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
   const pendientes = viajes.filter(v => v.estadoPago !== "pagado");
   const vencidos = pendientes.filter(v => {
     const plazo = v.diasPago || 30;
-    const fecha = new Date(v.fecha);
+    const fecha = fechaLocal(v.fecha);
     const vence = new Date(fecha);
     vence.setDate(vence.getDate() + plazo);
     return new Date() > vence;
@@ -162,7 +156,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             {fmt(gananciaMes)}
           </p>
           <p style={styles.gananciaSub}>
-            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""} 
+            {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""} · {fmt(ingresosMes)} brutos
           </p>
           {totalPE > 0 && (
             <div style={{marginTop:"8px"}}>
@@ -211,27 +205,10 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
         </div>
       )}
 
-        {/* DÍA DE LIQUIDACIÓN */}
-      {diaLiquidacion !== null && new Date().getDay() === diaLiquidacion && viajes.length > 0 && (
-        <div
-          style={{margin:"0 16px 10px",padding:"12px 16px",background:t.colors.greenSoft,border:`1.5px solid ${t.colors.greenBorder}`,borderRadius:t.radius.md,display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}}
-          onClick={()=>navigate("/conductores",{state:{liquidar:true}})}
-        >
-          <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
-            <span style={{fontSize:"18px"}}>💵</span>
-            <div>
-              <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.green,margin:0}}>Hoy es día de liquidación</p>
-              <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>Calcule y envíe el pago de sus conductores</p>
-            </div>
-          </div>
-          <span style={{color:t.colors.green,fontSize:"18px",fontWeight:"bold"}}>›</span>
-        </div>
-      )}
-      
-
       {/* RESUMEN DEL DÍA */}
       {viajes.length > 0 && (()=>{
-        const hoyStr = new Date().toISOString().slice(0,10);
+        const ahora = new Date();
+        const hoyStr = `${ahora.getFullYear()}-${String(ahora.getMonth()+1).padStart(2,"0")}-${String(ahora.getDate()).padStart(2,"0")}`;
         const viajesHoy = viajes.filter(v => v.fecha === hoyStr);
         const gananciaHoy = viajesHoy.reduce((s,v) => s + (v.neta||0), 0);
         const ingresosHoy = viajesHoy.reduce((s,v) => s + (v.vViaje||0), 0);
