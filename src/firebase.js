@@ -1,7 +1,7 @@
 import { initializeApp }             from "firebase/app";
 import { getStorage }                from "firebase/storage";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore }              from "firebase/firestore";
+import { getFirestore, enableMultiTabIndexedDbPersistence } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey:            "AIzaSyBhiMiU9l3axu4jZe2Frik2eqIpL7CcNik",
@@ -18,3 +18,12 @@ export const storage        = getStorage(app);
 export const auth           = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 export const db             = getFirestore(app);
+
+// Habilitar persistencia offline en Firestore para IndexedDB
+enableMultiTabIndexedDbPersistence(db).catch((err) => {
+  if (err.code === 'failed-precondition') {
+    console.warn("La persistencia offline de Firestore falló por tener múltiples pestañas abiertas.");
+  } else if (err.code === 'unimplemented') {
+    console.warn("El navegador no soporta persistencia offline.");
+  }
+});
