@@ -42,6 +42,8 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
 
   const viajesMes    = viajes.filter(v => { const f=fechaLocal(v.fecha); return f.getMonth()===mes && f.getFullYear()===anio; });
   const ingresosMes  = viajesMes.reduce((s,v) => s+(v.vViaje||0), 0);
+  const anticiposMes = viajesMes.reduce((s,v) => s + (v.anticipoFleteMonto || 0) + (v.anticipoFleteMontoRet || 0), 0);
+  const saldosMes    = ingresosMes - anticiposMes;
   const gastosMes    = viajesMes.reduce((s,v) => s+(v.total||0),  0);
   const netaMes      = viajesMes.reduce((s,v) => s+(v.neta||0),   0);
   const rentabilidad = ingresosMes > 0 ? ((netaMes/ingresosMes)*100).toFixed(1) : "0.0";
@@ -135,14 +137,15 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
         <button style={styles.btnHistorial} onClick={()=>{
           // Datos para el informe
           const pendientesCobro = viajes.filter(v => v.estadoPago !== "pagado");
-          const totalPendCobro = pendientesCobro.reduce((s,v) => s+(v.vViaje||0), 0);
+          const obtenerSaldoPendiente = (v) => (v.vViaje || 0) - (v.anticipoFleteMonto || 0) - (v.anticipoFleteMontoRet || 0);
+          const totalPendCobro = pendientesCobro.reduce((s,v) => s + obtenerSaldoPendiente(v), 0);
           const vencidosCobro = pendientesCobro.filter(v => {
             const plazo = v.diasPago || 30;
             const f = fechaLocal(v.fecha);
             f.setDate(f.getDate()+plazo);
             return new Date() > f;
           });
-          const totalVencCobro = vencidosCobro.reduce((s,v)=>s+(v.vViaje||0),0);
+          const totalVencCobro = vencidosCobro.reduce((s,v)=> s + obtenerSaldoPendiente(v), 0);
 
           // Viajes por vehículo con detalle
           const viajesPorVeh = {};
@@ -158,12 +161,19 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             const emp = v.emp || "Sin empresa";
             if (!carteraPorEmp[emp]) carteraPorEmp[emp] = {viajes:0, monto:0, vencido:0};
             carteraPorEmp[emp].viajes++;
-            carteraPorEmp[emp].monto += v.vViaje||0;
+            const saldoV = obtenerSaldoPendiente(v);
+            carteraPorEmp[emp].monto += saldoV;
             const plazo = v.diasPago||30;
             const f = fechaLocal(v.fecha);
             f.setDate(f.getDate()+plazo);
-            if (new Date()>f) carteraPorEmp[emp].vencido += v.vViaje||0;
+            if (new Date()>f) carteraPorEmp[emp].vencido += saldoV;
           });
+
+          // Calcular anticipos acumulados en el mes
+          const anticiposIdaMes = viajesMes.reduce((s, v) => s + (v.anticipoFleteMonto || 0), 0);
+          const anticiposRetMes = viajesMes.reduce((s, v) => s + (v.anticipoFleteMontoRet || 0), 0);
+          const totalAnticiposMes = anticiposIdaMes + anticiposRetMes;
+          const saldosPendientesMes = ingresosMes - totalAnticiposMes;
 
           const w = window.open("","_blank","width=800,height=600");
           w.document.write(`<!DOCTYPE html><html><head><title>Informe ${MESES[mes]} ${anio} — NAVIRA</title>
@@ -208,11 +218,16 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
 
           <!-- RESUMEN EJECUTIVO -->
           <h2>Resumen ejecutivo</h2>
-          <div class="resumen-grid" style="grid-template-columns:1fr 1fr">
+          <div class="resumen-grid" style="grid-template-columns:1fr 1fr 1fr">
             <div class="resumen-card">
               <div class="label">Ingresos brutos</div>
               <div class="valor azul">${fmt(ingresosMes)}</div>
               <div style="font-size:11px;color:#888;margin-top:4px">${viajesMes.length} viaje${viajesMes.length!==1?"s":""} ${varPct(ingresosMes, ingresosAnt)}</div>
+            </div>
+            <div class="resumen-card">
+              <div class="label">Anticipos Recibidos</div>
+              <div class="valor azul" style="color:#2563eb">${fmt(totalAnticiposMes)}</div>
+              <div style="font-size:11px;color:#888;margin-top:4px">Pendiente: ${fmt(saldosPendientesMes)}</div>
             </div>
             <div class="resumen-card" style="border-color:${utilidadReal>=0?"#22c55e":"#ef4444"}">
               <div class="label">${totalPE>0||totalGastosAdic>0?"Utilidad real":"Ganancia neta"}</div>
@@ -239,6 +254,9 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
 
           <table>
             <tr style="background:#f0f9ff"><td style="font-weight:700">💰 Ingresos por viajes</td><td style="font-weight:700;color:#1565FF">${fmt(ingresosMes)}</td></tr>
+            ${totalAnticiposMes > 0 ? `
+            <tr><td style="padding-left:20px;color:#555">↳ Anticipos recibidos en ruta</td><td style="color:#555">${fmt(totalAnticiposMes)}</td></tr>
+            <tr><td style="padding-left:20px;color:#555">↳ Saldos por cobrar a empresas</td><td style="color:#555">${fmt(saldosPendientesMes)}</td></tr>` : ""}
             <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos operativos:</td></tr>
             <tr><td style="padding-left:20px">⛽ Combustible (ACPM + Adblue)</td><td style="color:#dc2626">-${fmt(acpmMes + adblMes)}</td></tr>
             <tr><td style="padding-left:20px">🛣️ Peajes</td><td style="color:#dc2626">-${fmt(peajesMes)}</td></tr>
@@ -302,7 +320,10 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
                   <td>${esc(v.ruta)||"—"}</td>
                   <td>${esc(v.emp)||"—"}</td>
                   <td>${esc(v.prod)||"—"}</td>
-                  <td>${fmt(v.tieneRetorno ? (v.valorViajeIda||(v.vViaje||0)-(v.valorViajeRetorno||0)) : (v.vViaje||0))}</td>
+                  <td>
+                    ${fmt(v.tieneRetorno ? (v.valorViajeIda||(v.vViaje||0)-(v.valorViajeRetorno||0)) : (v.vViaje||0))}
+                    ${(v.anticipoFleteMonto || 0) > 0 ? `<div style="font-size:9px;color:#888;margin-top:2px">Ant: ${fmt(v.anticipoFleteMonto)} (${v.anticipoFletePct || 0}%)</div>` : ""}
+                  </td>
                   <td style="color:#dc2626">${fmt(v.total||0)}</td>
                   <td class="${(v.neta||0)>=0?"verde":"rojo"}">${fmt(v.neta||0)}</td>
                 </tr>`;
@@ -313,7 +334,10 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
                   <td>↩ ${esc(v.rutaRet)||"retorno"}</td>
                   <td>${esc(v.empresaRet)||esc(v.emp)||"—"}</td>
                   <td>${esc(v.productoRet)||"—"}</td>
-                  <td>${fmt(v.valorViajeRetorno||0)}</td>
+                  <td>
+                    ${fmt(v.valorViajeRetorno||0)}
+                    ${(v.anticipoFleteMontoRet || 0) > 0 ? `<div style="font-size:9px;color:#888;margin-top:2px">Ant: ${fmt(v.anticipoFleteMontoRet)} (${v.anticipoFletePctRet || 0}%)</div>` : ""}
+                  </td>
                   <td colspan="2" style="font-size:10px;color:#888">incluido arriba</td>
                 </tr>`;
                   return filaIda + filaRet;
@@ -514,6 +538,26 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             <p style={{...styles.metricaVal, color: t.colors.red}}>{fmt(gastosMes)}</p>
           </div>
         </div>
+
+        {/* ANTICIPOS Y SALDOS DE LA FLOTA */}
+        {anticiposMes > 0 && (
+          <div style={{
+            ...styles.metricaCard,
+            marginBottom: "16px",
+            background: t.colors.bgSection,
+            border: `1.5px solid ${t.colors.border}22`
+          }}>
+            <p style={{ ...styles.metricaLabel, color: t.colors.blue, fontWeight: 700, margin: "0 0 10px 0" }}>Flujo de Caja (Fletes del Mes)</p>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "8px", borderBottom: `1px solid ${t.colors.borderLight}`, paddingBottom: "6px" }}>
+              <span style={{ fontSize: t.fonts.sizeSm, color: t.colors.textSecondary }}>Anticipos Recibidos en Ruta:</span>
+              <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary }}>{fmt(anticiposMes)}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", paddingTop: "6px" }}>
+              <span style={{ fontSize: t.fonts.sizeSm, color: t.colors.textSecondary }}>Pendiente por Cobrar (Saldos):</span>
+              <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.amber }}>{fmt(saldosMes)}</span>
+            </div>
+          </div>
+        )}
 
         <div style={styles.dosColumnas}>
   <div style={styles.metricaCard}>
