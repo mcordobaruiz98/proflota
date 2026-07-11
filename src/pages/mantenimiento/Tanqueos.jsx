@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Fuel, Trash2, TrendingDown, TrendingUp } from "lucide-react";
 import { theme as t } from "../../styles/theme";
 
-function Tanqueos({ vehiculos, onEditarVehiculo, mostrarToast }) {
+function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
   const navigate = useNavigate();
   const { id }   = useParams();
 
@@ -16,8 +16,13 @@ function Tanqueos({ vehiculos, onEditarVehiculo, mostrarToast }) {
   const [galones,     setGalones]     = useState("");
   const [precioGal,   setPrecioGal]   = useState("");
   const [kmOdom,      setKmOdom]      = useState(vehiculo?.kmOdometro || "");
+  const [viajeAsociado, setViajeAsociado] = useState("");
   const [nota,        setNota]        = useState("");
   const [guardando,   setGuardando]   = useState(false);
+
+  const viajesVehiculo = viajes
+    .filter(v => v.placa === vehiculo?.placa)
+    .sort((a,b) => b.fecha.localeCompare(a.fecha));
 
   const fmt  = (n) => "$" + Math.round(n||0).toLocaleString("es-CO");
   const fmtN = (n, d=1) => (Math.round((n||0)*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
@@ -63,6 +68,7 @@ function Tanqueos({ vehiculos, onEditarVehiculo, mostrarToast }) {
       precioGalon: Number(precioGal),
       total: Number(galones) * Number(precioGal),
       kmOdometro: Number(kmOdom),
+      viajeId: viajeAsociado || null,
       nota: nota.trim(),
     };
 
@@ -73,7 +79,7 @@ function Tanqueos({ vehiculos, onEditarVehiculo, mostrarToast }) {
         kmOdometro: Number(kmOdom),
       });
       mostrarToast("Tanqueo registrado","exito");
-      setEstacion(""); setGalones(""); setPrecioGal(""); setNota("");
+      setEstacion(""); setGalones(""); setPrecioGal(""); setNota(""); setViajeAsociado("");
       setKmOdom(Number(kmOdom));
       setMostrarForm(false);
     } catch(err) {
@@ -206,6 +212,22 @@ function Tanqueos({ vehiculos, onEditarVehiculo, mostrarToast }) {
             </div>
 
             <div style={styles.campo}>
+              <label style={styles.label}>Asociar a viaje (opcional)</label>
+              <select
+                value={viajeAsociado}
+                onChange={e => setViajeAsociado(e.target.value)}
+                style={styles.input}
+              >
+                <option value="">No asociar a ningún viaje</option>
+                {viajesVehiculo.slice(0, 10).map(v => (
+                  <option key={v.firestoreId} value={v.firestoreId}>
+                    {v.ruta} ({v.fecha})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={styles.campo}>
               <label style={styles.label}>Nota (opcional)</label>
               <input type="text" placeholder="Observaciones" value={nota}
                 onChange={e=>setNota(e.target.value)} style={styles.input} />
@@ -246,6 +268,14 @@ function Tanqueos({ vehiculos, onEditarVehiculo, mostrarToast }) {
                       {r.fecha} · {r.kmOdometro?.toLocaleString("es-CO")} km
                       {r.estacion?` · ${r.estacion}`:""}
                     </p>
+                    {(() => {
+                      const viajeAsoc = r.viajeId ? viajes.find(v => v.firestoreId === r.viajeId) : null;
+                      return viajeAsoc ? (
+                        <p style={{ fontSize: "10px", color: t.colors.blue, fontWeight: 700, margin: "2px 0 0" }}>
+                          📍 Viaje: {viajeAsoc.ruta} ({viajeAsoc.fecha})
+                        </p>
+                      ) : null;
+                    })()}
                     {r.nota&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{r.nota}</p>}
                   </div>
                 </div>

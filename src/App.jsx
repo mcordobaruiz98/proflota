@@ -283,7 +283,7 @@ function AppContenido() {
 
 <Route path="/vehiculo/:id/tanqueos" element={
   <RutaProtegida>
-    <Tanqueos vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar}/>
+    <Tanqueos vehiculos={vehiculos} viajes={viajes} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar}/>
   </RutaProtegida>
 } />
 

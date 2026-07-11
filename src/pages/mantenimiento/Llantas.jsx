@@ -177,6 +177,33 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
   const [valor,    setValor]    = useState("");
   const [estado, setEstado] = useState("ok");
   const [obs,    setObs]    = useState("");
+  const [rotarDestino, setRotarDestino] = useState("");
+
+  const ejecutarRotacion = (destinoPos) => {
+    const dest = Number(destinoPos);
+    if (!dest || dest === seleccionada) return;
+    const nuevas = { ...llantas };
+    const origenData = nuevas[seleccionada];
+    const destinoData = nuevas[dest];
+    
+    if (origenData) {
+      nuevas[dest] = { ...origenData };
+    } else {
+      delete nuevas[dest];
+    }
+    
+    if (destinoData) {
+      nuevas[seleccionada] = { ...destinoData };
+    } else {
+      delete nuevas[seleccionada];
+    }
+    
+    setLlantas(nuevas);
+    guardarLocal(nuevas);
+    setSeleccionada(null);
+    setRotarDestino("");
+    mostrarToast("Rotación de llanta realizada con éxito", "exito");
+  };
 
   const guardarLocal = (nuevas) => {
     onEditarVehiculo(vehiculo.firestoreId, { llantasData: nuevas }).catch(()=>{});
@@ -184,6 +211,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
 
   const abrirDetalle = (n) => {
     setSeleccionada(n);
+    setRotarDestino("");
     const d = llantas[n] || {};
     setMarca(d.marca||""); setRef(d.ref||"");
     setProf(d.prof||""); setKmMont(d.km||"");
@@ -350,6 +378,51 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
                 Cancelar
               </button>
             </div>
+
+            {/* Rotación de Llanta */}
+            {!!llantas[seleccionada] && (
+              <div style={{ marginTop: "16px", borderTop: `1px solid ${t.colors.border}22`, paddingTop: "14px" }}>
+                <label style={{ ...styles.label, marginBottom: "8px", display: "block", color: t.colors.blue, fontWeight: 700 }}>
+                  Rotar esta llanta a otra posición
+                </label>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                  <select
+                    value={rotarDestino}
+                    onChange={(e) => setRotarDestino(e.target.value)}
+                    style={{ ...styles.input, flex: 1, margin: 0 }}
+                  >
+                    <option value="">Selecciona posición destino...</option>
+                    {posiciones.map((pos, idx) => {
+                      const num = idx + 1;
+                      if (num === seleccionada) return null;
+                      const tieneLl = !!llantas[num];
+                      return (
+                        <option key={num} value={num}>
+                          Posición {num} — {pos} {tieneLl ? "(Tiene llanta - se intercambiarán)" : "(Vacía)"}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <button
+                    style={{
+                      padding: "12px 16px",
+                      background: t.colors.blue,
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: t.radius.md,
+                      fontSize: t.fonts.sizeSm,
+                      fontWeight: t.fonts.weightBold,
+                      cursor: "pointer",
+                      opacity: !rotarDestino ? 0.6 : 1
+                    }}
+                    onClick={() => ejecutarRotacion(rotarDestino)}
+                    disabled={!rotarDestino}
+                  >
+                    Rotar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
