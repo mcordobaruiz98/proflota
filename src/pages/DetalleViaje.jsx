@@ -96,6 +96,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
   const [obsE,      setObsE]      = useState("");
   const [pctAnticipoFleteE, setPctAnticipoFleteE] = useState("60");
   const [montoAnticipoFleteE, setMontoAnticipoFleteE] = useState("");
+  const [pctAnticipoFleteRetE, setPctAnticipoFleteRetE] = useState("60");
+  const [montoAnticipoFleteRetE, setMontoAnticipoFleteRetE] = useState("");
 
   const fmt = (n) => "$" + Math.round(n||0).toLocaleString("es-CO");
   const fnD = (n,d) => (Math.round((n||0)*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
@@ -108,10 +110,14 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
   const editValorViaje = editFleteIda + editFleteRet;
 
   const manejarMontoAnticipoEditChange = (valStr) => {
+    let valNum = parseFloat(valStr) || 0;
+    if (editFleteIda > 0 && valNum > editFleteIda) {
+      valNum = editFleteIda;
+      valStr = String(editFleteIda);
+    }
     setMontoAnticipoFleteE(valStr);
-    const valNum = parseFloat(valStr) || 0;
-    if (editValorViaje > 0) {
-      const pct = Math.round((valNum / editValorViaje) * 100);
+    if (editFleteIda > 0) {
+      const pct = Math.round((valNum / editFleteIda) * 100);
       setPctAnticipoFleteE(String(pct));
     } else {
       setPctAnticipoFleteE("");
@@ -121,17 +127,47 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
   const manejarPctAnticipoEditChange = (pctStr) => {
     setPctAnticipoFleteE(pctStr);
     const pctNum = parseFloat(pctStr) || 0;
-    const val = Math.round(editValorViaje * (pctNum / 100));
+    const val = Math.round(editFleteIda * (pctNum / 100));
     setMontoAnticipoFleteE(val ? String(val) : "");
   };
 
-  // Sincronizar monto si cambia el valor del viaje y se tiene porcentaje
+  const manejarMontoAnticipoRetEditChange = (valStr) => {
+    let valNum = parseFloat(valStr) || 0;
+    if (editFleteRet > 0 && valNum > editFleteRet) {
+      valNum = editFleteRet;
+      valStr = String(editFleteRet);
+    }
+    setMontoAnticipoFleteRetE(valStr);
+    if (editFleteRet > 0) {
+      const pct = Math.round((valNum / editFleteRet) * 100);
+      setPctAnticipoFleteRetE(String(pct));
+    } else {
+      setPctAnticipoFleteRetE("");
+    }
+  };
+
+  const manejarPctAnticipoRetEditChange = (pctStr) => {
+    setPctAnticipoFleteRetE(pctStr);
+    const pctNum = parseFloat(pctStr) || 0;
+    const val = Math.round(editFleteRet * (pctNum / 100));
+    setMontoAnticipoFleteRetE(val ? String(val) : "");
+  };
+
+  // Sincronizar monto si cambia el valor del flete de ida original
   useEffect(() => {
-    if (pctAnticipoFleteE !== "" && editValorViaje > 0) {
-      const val = Math.round(editValorViaje * (parseFloat(pctAnticipoFleteE) / 100));
+    if (pctAnticipoFleteE !== "" && editFleteIda > 0) {
+      const val = Math.round(editFleteIda * (parseFloat(pctAnticipoFleteE) / 100));
       setMontoAnticipoFleteE(val ? String(val) : "");
     }
-  }, [editValorViaje, pctAnticipoFleteE]);
+  }, [editFleteIda]);
+
+  // Sincronizar monto si cambia el valor del flete de retorno original
+  useEffect(() => {
+    if (pctAnticipoFleteRetE !== "" && editFleteRet > 0) {
+      const val = Math.round(editFleteRet * (parseFloat(pctAnticipoFleteRetE) / 100));
+      setMontoAnticipoFleteRetE(val ? String(val) : "");
+    }
+  }, [editFleteRet]);
 
   const compartirWhatsApp = () => {
     if (!viaje) return;
@@ -160,8 +196,9 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       viaje.tieneRetorno ? `💰 *Flete retorno:* ${fmt(viaje.valorViajeRetorno || 0)}` : null,
       ``,
       `💰 *Valor flete:* ${fmt(viaje.vViaje || 0)}`,
-      viaje.anticipoFleteMonto ? `💵 *Anticipo flete:* ${fmt(viaje.anticipoFleteMonto)} (${viaje.anticipoFletePct || 0}%)` : null,
-      viaje.anticipoFleteMonto ? `⏳ *Saldo por cobrar:* ${fmt((viaje.vViaje || 0) - viaje.anticipoFleteMonto)}` : null,
+      viaje.anticipoFleteMonto ? `💵 *Anticipo flete Ida:* ${fmt(viaje.anticipoFleteMonto)} (${viaje.anticipoFletePct || 0}%)` : null,
+      (viaje.tieneRetorno && viaje.anticipoFleteMontoRet) ? `💵 *Anticipo flete Retorno:* ${fmt(viaje.anticipoFleteMontoRet)} (${viaje.anticipoFletePctRet || 0}%)` : null,
+      (viaje.anticipoFleteMonto || viaje.anticipoFleteMontoRet) ? `⏳ *Saldo por cobrar:* ${fmt((viaje.vViaje || 0) - (viaje.anticipoFleteMonto || 0) - (viaje.anticipoFleteMontoRet || 0))}` : null,
       `⛽ *Combustible:* ${fmt(viaje.cComb || 0)}`,
       `🛣️ *Peajes:* ${fmt(viaje.peajes || 0)}`,
       `👤 *Conductor:* ${fmt(viaje.conductor || 0)}`,
@@ -197,6 +234,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
     setObsE(viaje.observaciones || "");
     setPctAnticipoFleteE(viaje.anticipoFletePct !== undefined ? String(viaje.anticipoFletePct) : "60");
     setMontoAnticipoFleteE(viaje.anticipoFleteMonto !== undefined ? String(viaje.anticipoFleteMonto) : "");
+    setPctAnticipoFleteRetE(viaje.anticipoFletePctRet !== undefined ? String(viaje.anticipoFletePctRet) : "60");
+    setMontoAnticipoFleteRetE(viaje.anticipoFleteMontoRet !== undefined ? String(viaje.anticipoFleteMontoRet) : "");
     setRetornoE(viaje.tieneRetorno || false);
     // Detectar si el retorno era por tonelada o valor fijo
     const esPorTon = viaje.tonelajeRetorno > 0 && viaje.fleteRetorno > 0
@@ -304,7 +343,9 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
         vViaje: totalIngresos,
         anticipoFletePct: parseFloat(pctAnticipoFleteE) || 0,
         anticipoFleteMonto: parseFloat(montoAnticipoFleteE) || 0,
-        saldoFlete: totalIngresos - (parseFloat(montoAnticipoFleteE) || 0),
+        anticipoFletePctRet: parseFloat(pctAnticipoFleteRetE) || 0,
+        anticipoFleteMontoRet: parseFloat(montoAnticipoFleteRetE) || 0,
+        saldoFlete: totalIngresos - (parseFloat(montoAnticipoFleteE) || 0) - (parseFloat(montoAnticipoFleteRetE) || 0),
         tieneRetorno: retornoE,
         valorViajeRetorno: nuevoRetorno,
         valorViajeIda: nuevoVViaje,
@@ -547,31 +588,75 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                   fontWeight: t.fonts.weightBold,
                   color: t.colors.blue,
                   margin: "0 0 10px 0"
-                }}>Anticipo y Saldo del Flete (Empresa)</p>
+                }}>Anticipos del Flete (Empresa)</p>
                 
-                <div style={styles.fila2}>
-                  <div style={styles.campo}>
-                    <label style={styles.label}>Anticipo (%)</label>
-                    <input
-                      type="number"
-                      placeholder="60"
-                      value={pctAnticipoFleteE}
-                      onChange={e => manejarPctAnticipoEditChange(e.target.value)}
-                      style={styles.input}
-                    />
+                {/* Ida */}
+                <div style={{ marginBottom: retornoE ? "12px" : "0" }}>
+                  {retornoE && <p style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700, margin: "0 0 6px" }}>1. TRAYECTO DE IDA</p>}
+                  <div style={styles.fila2}>
+                    <div style={styles.campo}>
+                      <label style={styles.label}>Anticipo Ida (%)</label>
+                      <input
+                        type="number"
+                        placeholder="60"
+                        value={pctAnticipoFleteE}
+                        onChange={e => manejarPctAnticipoEditChange(e.target.value)}
+                        style={styles.input}
+                      />
+                    </div>
+                    <div style={styles.campo}>
+                      <label style={styles.label}>Valor Anticipo Ida ($)</label>
+                      <input
+                        type="number"
+                        placeholder="Monto recibido"
+                        value={montoAnticipoFleteE}
+                        onChange={e => manejarMontoAnticipoEditChange(e.target.value)}
+                        style={styles.input}
+                      />
+                    </div>
                   </div>
-                  <div style={styles.campo}>
-                    <label style={styles.label}>Valor del Anticipo ($)</label>
-                    <input
-                      type="number"
-                      placeholder="Monto recibido"
-                      value={montoAnticipoFleteE}
-                      onChange={e => manejarMontoAnticipoEditChange(e.target.value)}
-                      style={styles.input}
-                    />
-                  </div>
+                  {retornoE && (
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
+                      <span style={{ fontSize: "11px", color: t.colors.textTertiary }}>Saldo por cobrar Ida:</span>
+                      <span style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700 }}>{fmt(editFleteIda - n(montoAnticipoFleteE))}</span>
+                    </div>
+                  )}
                 </div>
+
+                {/* Retorno */}
+                {retornoE && (
+                  <div style={{ borderTop: `1px solid ${t.colors.borderLight}`, paddingTop: "12px", marginBottom: "12px" }}>
+                    <p style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700, margin: "0 0 6px" }}>2. TRAYECTO DE RETORNO</p>
+                    <div style={styles.fila2}>
+                      <div style={styles.campo}>
+                        <label style={styles.label}>Anticipo Retorno (%)</label>
+                        <input
+                          type="number"
+                          placeholder="60"
+                          value={pctAnticipoFleteRetE}
+                          onChange={e => manejarPctAnticipoRetEditChange(e.target.value)}
+                          style={styles.input}
+                        />
+                      </div>
+                      <div style={styles.campo}>
+                        <label style={styles.label}>Valor Anticipo Retorno ($)</label>
+                        <input
+                          type="number"
+                          placeholder="Monto recibido"
+                          value={montoAnticipoFleteRetE}
+                          onChange={e => manejarMontoAnticipoRetEditChange(e.target.value)}
+                          style={styles.input}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
+                      <span style={{ fontSize: "11px", color: t.colors.textTertiary }}>Saldo por cobrar Retorno:</span>
+                      <span style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700 }}>{fmt(editFleteRet - n(montoAnticipoFleteRetE))}</span>
+                    </div>
+                  </div>
+                )}
                 
+                {/* Consolidado */}
                 <div style={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -579,12 +664,14 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                   marginTop: "8px",
                   borderTop: `1px solid ${t.colors.borderLight}`
                 }}>
-                  <span style={{ fontSize: t.fonts.sizeSm, color: t.colors.textSecondary }}>Saldo por cobrar (Flete):</span>
+                  <span style={{ fontSize: t.fonts.sizeSm, color: t.colors.textSecondary, fontWeight: retornoE ? 700 : 400 }}>
+                    {retornoE ? "Saldo Total por Cobrar (Flete):" : "Saldo por cobrar (Flete):"}
+                  </span>
                   <span style={{
                     fontSize: t.fonts.sizeSm,
                     fontWeight: t.fonts.weightBold,
                     color: t.colors.green
-                  }}>{fmt(editValorViaje - n(montoAnticipoFleteE))}</span>
+                  }}>{fmt(editValorViaje - n(montoAnticipoFleteE) - n(montoAnticipoFleteRetE))}</span>
                 </div>
               </div>
             )}
@@ -654,9 +741,13 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
               <div style={styles.kpiCard}>
                 <p style={styles.kpiLabel}>Valor flete</p>
                 <p style={{...styles.kpiVal, color:t.colors.blue}}>{fmt(viaje.vViaje)}</p>
-                {(viaje.anticipoFleteMonto || 0) > 0 ? (
+                {((viaje.anticipoFleteMonto || 0) > 0 || (viaje.anticipoFleteMontoRet || 0) > 0) ? (
                   <p style={{fontSize:"10px", color:t.colors.textTertiary, margin:"4px 0 0"}}>
-                    Ant: {fmt(viaje.anticipoFleteMonto)} ({viaje.anticipoFletePct || 0}%) · Saldo: {fmt((viaje.vViaje || 0) - (viaje.anticipoFleteMonto || 0))}
+                    Ida Ant: {fmt(viaje.anticipoFleteMonto || 0)} ({viaje.anticipoFletePct || 0}%)
+                    {viaje.tieneRetorno && (viaje.valorViajeRetorno || 0) > 0 && (
+                      <> <br/>Ret Ant: {fmt(viaje.anticipoFleteMontoRet || 0)} ({viaje.anticipoFletePctRet || 0}%)</>
+                    )}
+                    <br/>Saldo Total: {fmt((viaje.vViaje || 0) - (viaje.anticipoFleteMonto || 0) - (viaje.anticipoFleteMontoRet || 0))}
                   </p>
                 ) : (
                   viaje.tieneRetorno && (viaje.valorViajeRetorno||0) > 0 && (

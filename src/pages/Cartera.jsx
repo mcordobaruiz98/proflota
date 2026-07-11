@@ -16,7 +16,7 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
   const fmt = (n) => "$" + Math.round(n || 0).toLocaleString("es-CO");
   const hoy = new Date();
 
-  const obtenerSaldoPendiente = (v) => (v.vViaje || 0) - (v.anticipoFleteMonto || 0);
+  const obtenerSaldoPendiente = (v) => (v.vViaje || 0) - (v.anticipoFleteMonto || 0) - (v.anticipoFleteMontoRet || 0);
 
   const calcVencimiento = (viaje) => {
     const plazo = viaje.diasPago || 30;
@@ -258,7 +258,7 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
                       <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: pagado ? t.colors.green : t.colors.textPrimary }}>
                         {fmt(pagado ? (v.vViaje || 0) : obtenerSaldoPendiente(v))}
                       </span>
-                      {!pagado && (v.anticipoFleteMonto || 0) > 0 && (
+                      {!pagado && ((v.anticipoFleteMonto || 0) > 0 || (v.anticipoFleteMontoRet || 0) > 0) && (
                         <span style={{ fontSize: "10px", color: t.colors.textTertiary }}>
                           Saldo de {fmt(v.vViaje || 0)}
                         </span>

@@ -119,6 +119,8 @@ export const validarViaje = (datos) => {
       anticipoMonto: validarNumero(datos.anticipoMonto, 0, 999999999),
       anticipoFletePct: validarNumero(datos.anticipoFletePct, 0, 100),
       anticipoFleteMonto: validarNumero(datos.anticipoFleteMonto, 0, 999999999),
+      anticipoFletePctRet: validarNumero(datos.anticipoFletePctRet, 0, 100),
+      anticipoFleteMontoRet: validarNumero(datos.anticipoFleteMontoRet, 0, 999999999),
       saldoFlete: validarNumero(datos.saldoFlete, 0, 999999999),
     }
   };
