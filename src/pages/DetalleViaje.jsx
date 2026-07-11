@@ -94,9 +94,44 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
   const [lugarCE,   setLugarCE]   = useState("");
   const [lugarDE,   setLugarDE]   = useState("");
   const [obsE,      setObsE]      = useState("");
+  const [pctAnticipoFleteE, setPctAnticipoFleteE] = useState("60");
+  const [montoAnticipoFleteE, setMontoAnticipoFleteE] = useState("");
 
   const fmt = (n) => "$" + Math.round(n||0).toLocaleString("es-CO");
   const fnD = (n,d) => (Math.round((n||0)*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
+  const n = (v) => parseFloat(v) || 0;
+
+  const editFleteIda = viaje && (viaje.modoFlete === "porViaje"
+    ? n(fleteTon)
+    : n(ton) * n(fleteTon));
+  const editFleteRet = retornoE ? n(fleteRetE) : 0;
+  const editValorViaje = editFleteIda + editFleteRet;
+
+  const manejarMontoAnticipoEditChange = (valStr) => {
+    setMontoAnticipoFleteE(valStr);
+    const valNum = parseFloat(valStr) || 0;
+    if (editValorViaje > 0) {
+      const pct = Math.round((valNum / editValorViaje) * 100);
+      setPctAnticipoFleteE(String(pct));
+    } else {
+      setPctAnticipoFleteE("");
+    }
+  };
+
+  const manejarPctAnticipoEditChange = (pctStr) => {
+    setPctAnticipoFleteE(pctStr);
+    const pctNum = parseFloat(pctStr) || 0;
+    const val = Math.round(editValorViaje * (pctNum / 100));
+    setMontoAnticipoFleteE(val ? String(val) : "");
+  };
+
+  // Sincronizar monto si cambia el valor del viaje y se tiene porcentaje
+  useEffect(() => {
+    if (pctAnticipoFleteE !== "" && editValorViaje > 0) {
+      const val = Math.round(editValorViaje * (parseFloat(pctAnticipoFleteE) / 100));
+      setMontoAnticipoFleteE(val ? String(val) : "");
+    }
+  }, [editValorViaje, pctAnticipoFleteE]);
 
   const compartirWhatsApp = () => {
     if (!viaje) return;
@@ -125,6 +160,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       viaje.tieneRetorno ? `💰 *Flete retorno:* ${fmt(viaje.valorViajeRetorno || 0)}` : null,
       ``,
       `💰 *Valor flete:* ${fmt(viaje.vViaje || 0)}`,
+      viaje.anticipoFleteMonto ? `💵 *Anticipo flete:* ${fmt(viaje.anticipoFleteMonto)} (${viaje.anticipoFletePct || 0}%)` : null,
+      viaje.anticipoFleteMonto ? `⏳ *Saldo por cobrar:* ${fmt((viaje.vViaje || 0) - viaje.anticipoFleteMonto)}` : null,
       `⛽ *Combustible:* ${fmt(viaje.cComb || 0)}`,
       `🛣️ *Peajes:* ${fmt(viaje.peajes || 0)}`,
       `👤 *Conductor:* ${fmt(viaje.conductor || 0)}`,
@@ -158,6 +195,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
     setLugarCE(viaje.lugarCargue || "");
     setLugarDE(viaje.lugarDescargue || "");
     setObsE(viaje.observaciones || "");
+    setPctAnticipoFleteE(viaje.anticipoFletePct !== undefined ? String(viaje.anticipoFletePct) : "60");
+    setMontoAnticipoFleteE(viaje.anticipoFleteMonto !== undefined ? String(viaje.anticipoFleteMonto) : "");
     setRetornoE(viaje.tieneRetorno || false);
     // Detectar si el retorno era por tonelada o valor fijo
     const esPorTon = viaje.tonelajeRetorno > 0 && viaje.fleteRetorno > 0
@@ -263,6 +302,9 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
         lugarDescargue: sanitizar(lugarDE),
         observaciones: sanitizar(obsE).slice(0, 500),
         vViaje: totalIngresos,
+        anticipoFletePct: parseFloat(pctAnticipoFleteE) || 0,
+        anticipoFleteMonto: parseFloat(montoAnticipoFleteE) || 0,
+        saldoFlete: totalIngresos - (parseFloat(montoAnticipoFleteE) || 0),
         tieneRetorno: retornoE,
         valorViajeRetorno: nuevoRetorno,
         valorViajeIda: nuevoVViaje,
@@ -490,6 +532,63 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
               <input type="text" value={obsE} onChange={e=>setObsE(e.target.value)} style={styles.input}/>
             </div>
 
+            {/* Anticipo y Saldo del Flete (Empresa) */}
+            {editValorViaje > 0 && (
+              <div style={{
+                marginTop: "12px",
+                padding: "12px",
+                background: t.colors.bgSection,
+                borderRadius: t.radius.md,
+                border: `1.5px solid ${t.colors.border}33`,
+                marginBottom: "12px"
+              }}>
+                <p style={{
+                  fontSize: t.fonts.sizeSm,
+                  fontWeight: t.fonts.weightBold,
+                  color: t.colors.blue,
+                  margin: "0 0 10px 0"
+                }}>Anticipo y Saldo del Flete (Empresa)</p>
+                
+                <div style={styles.fila2}>
+                  <div style={styles.campo}>
+                    <label style={styles.label}>Anticipo (%)</label>
+                    <input
+                      type="number"
+                      placeholder="60"
+                      value={pctAnticipoFleteE}
+                      onChange={e => manejarPctAnticipoEditChange(e.target.value)}
+                      style={styles.input}
+                    />
+                  </div>
+                  <div style={styles.campo}>
+                    <label style={styles.label}>Valor del Anticipo ($)</label>
+                    <input
+                      type="number"
+                      placeholder="Monto recibido"
+                      value={montoAnticipoFleteE}
+                      onChange={e => manejarMontoAnticipoEditChange(e.target.value)}
+                      style={styles.input}
+                    />
+                  </div>
+                </div>
+                
+                <div style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "8px 0 0",
+                  marginTop: "8px",
+                  borderTop: `1px solid ${t.colors.borderLight}`
+                }}>
+                  <span style={{ fontSize: t.fonts.sizeSm, color: t.colors.textSecondary }}>Saldo por cobrar (Flete):</span>
+                  <span style={{
+                    fontSize: t.fonts.sizeSm,
+                    fontWeight: t.fonts.weightBold,
+                    color: t.colors.green
+                  }}>{fmt(editValorViaje - n(montoAnticipoFleteE))}</span>
+                </div>
+              </div>
+            )}
+
             {/* Flete de retorno */}
             <div style={{marginBottom:"12px"}}>
               <div style={{display:"flex",alignItems:"center",gap:"10px",cursor:"pointer",marginBottom:retornoE?"10px":"0"}} onClick={()=>setRetornoE(!retornoE)}>
@@ -553,12 +652,18 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
             {/* MÉTRICAS KPI */}
             <div style={styles.dosColumnas}>
               <div style={styles.kpiCard}>
-                <p style={styles.kpiLabel}>Valor viaje</p>
+                <p style={styles.kpiLabel}>Valor flete</p>
                 <p style={{...styles.kpiVal, color:t.colors.blue}}>{fmt(viaje.vViaje)}</p>
-                {viaje.tieneRetorno && (viaje.valorViajeRetorno||0) > 0 && (
+                {(viaje.anticipoFleteMonto || 0) > 0 ? (
                   <p style={{fontSize:"10px", color:t.colors.textTertiary, margin:"4px 0 0"}}>
-                    Ida {fmt(viaje.valorViajeIda ?? ((viaje.vViaje||0)-(viaje.valorViajeRetorno||0)))} + Ret. {fmt(viaje.valorViajeRetorno)}
+                    Ant: {fmt(viaje.anticipoFleteMonto)} ({viaje.anticipoFletePct || 0}%) · Saldo: {fmt((viaje.vViaje || 0) - (viaje.anticipoFleteMonto || 0))}
                   </p>
+                ) : (
+                  viaje.tieneRetorno && (viaje.valorViajeRetorno||0) > 0 && (
+                    <p style={{fontSize:"10px", color:t.colors.textTertiary, margin:"4px 0 0"}}>
+                      Ida {fmt(viaje.valorViajeIda ?? ((viaje.vViaje||0)-(viaje.valorViajeRetorno||0)))} + Ret. {fmt(viaje.valorViajeRetorno)}
+                    </p>
+                  )
                 )}
               </div>
               <div style={{...styles.kpiCard, background:positivo?t.colors.greenSoft:t.colors.redSoft, border:`1.5px solid ${positivo?t.colors.greenBorder:t.colors.redBorder}`}}>
@@ -1002,4 +1107,3 @@ const styles = {
 };
 
 export default DetalleViaje;
-

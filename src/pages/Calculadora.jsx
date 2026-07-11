@@ -69,6 +69,8 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [pctOtro,          setPctOtro]            = useState(0);
   const [nombreOtro,       setNombreOtro]         = useState("");
   const [tieneRetorno,     setTieneRetorno]       = useState(false);
+  const [pctAnticipoFlete,  setPctAnticipoFlete]   = useState("60");
+  const [montoAnticipoFlete,setMontoAnticipoFlete] = useState("");
   const [fleteRetorno,     setFleteRetorno]       = useState("");
   const [tonelajeRetorno,  setTonelajeRetorno]    = useState("");
   const [modoFleteRetorno, setModoFleteRetorno]   = useState("porTon");
@@ -172,6 +174,31 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const cxkm   = kmTotal > 0 ? totalGastos / kmTotal : 0;
   const margenColor = margen >= 40 ? t.colors.green : margen >= 20 ? t.colors.amber : t.colors.red;
 
+  // Lógica bidireccional para anticipo de flete
+  useEffect(() => {
+    if (pctAnticipoFlete !== "") {
+      const val = Math.round(valorViaje * (parseFloat(pctAnticipoFlete) / 100));
+      setMontoAnticipoFlete(val ? String(val) : "");
+    }
+  }, [valorViaje, pctAnticipoFlete]);
+
+  const manejarMontoAnticipoChange = (valStr) => {
+    setMontoAnticipoFlete(valStr);
+    const valNum = parseFloat(valStr) || 0;
+    if (valorViaje > 0) {
+      const pct = Math.round((valNum / valorViaje) * 100);
+      setPctAnticipoFlete(String(pct));
+    } else {
+      setPctAnticipoFlete("");
+    }
+  };
+
+  const manejarPctAnticipoChange = (pctStr) => {
+    setPctAnticipoFlete(pctStr);
+    const pctNum = parseFloat(pctStr) || 0;
+    const val = Math.round(valorViaje * (pctNum / 100));
+    setMontoAnticipoFlete(val ? String(val) : "");
+  };
 
   const peajesFiltrados = busquedaP
     ? PEAJES_CO.filter(p =>
@@ -209,6 +236,9 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       observaciones: sanitizar(observaciones).slice(0, 500),
       kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmCargadoRet: n(kmCargadoRet), kmVacioRet: n(kmVacioRet), kmT: kmTotal,
       ton: n(tonelaje), modoFlete, fleteTon: n(fleteTon), vViaje: valorViaje,
+      anticipoFletePct: n(pctAnticipoFlete),
+      anticipoFleteMonto: n(montoAnticipoFlete),
+      saldoFlete: valorViaje - n(montoAnticipoFlete),
       tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(tonelajeRetorno), fleteRetorno: n(fleteRetorno),
       rutaRet: sanitizar(rutaRet), tipoCargaRet, productoRet: sanitizar(productoRet),
       empresaRet: sanitizar(empresaRet),
@@ -276,6 +306,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     setLugarCargueRet(""); setLugarDescargueRet(""); setFechaCargueRet(""); setFechaDescargueRet("");
     setExtras([]); setPorcCond(""); setCarpado(""); setGastosViaje("");
     setPeajesRuta([]); setRutaCargada(null);
+    setPctAnticipoFlete("60"); setMontoAnticipoFlete("");
    
     setGuardando(false);
     navigate(-1);
@@ -317,6 +348,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   if (rutaGuardada.pctReteica)      setPctReteica(rutaGuardada.pctReteica);
   if (rutaGuardada.descFopat !== undefined) setDescFopat(rutaGuardada.descFopat);
   if (rutaGuardada.pctFopat)        setPctFopat(rutaGuardada.pctFopat);
+  if (rutaGuardada.pctAnticipoFlete !== undefined) setPctAnticipoFlete(String(rutaGuardada.pctAnticipoFlete));
   setMostrarRutas(false);
 
   setRutaCargada(rutaGuardada.nombre);
@@ -365,6 +397,7 @@ const guardarRutaFrecuente = async () => {
     pctReteica:      pctReteica,
     descFopat:       descFopat,
     pctFopat:        pctFopat,
+    pctAnticipoFlete: n(pctAnticipoFlete),
   };
 
   try {
@@ -803,6 +836,62 @@ const guardarRutaFrecuente = async () => {
                 </div>
               );
             })()}
+          </div>
+        )}
+
+        {/* ANTICIPO Y SALDO DEL FLETE (EMPRESA) */}
+        {valorViaje > 0 && (
+          <div style={{
+            marginTop: "12px",
+            padding: "12px",
+            background: t.colors.bgSection,
+            borderRadius: t.radius.md,
+            border: `1.5px solid ${t.colors.border}33`
+          }}>
+            <p style={{
+              fontSize: t.fonts.sizeSm,
+              fontWeight: t.fonts.weightBold,
+              color: t.colors.blue,
+              margin: "0 0 10px 0"
+            }}>Anticipo y Saldo del Flete (Empresa)</p>
+            
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label style={styles.label}>Anticipo (%)</label>
+                <input
+                  type="number"
+                  placeholder="60"
+                  value={pctAnticipoFlete}
+                  onChange={e => manejarPctAnticipoChange(e.target.value)}
+                  style={styles.input}
+                />
+              </div>
+              <div style={styles.campo}>
+                <label style={styles.label}>Valor del Anticipo ($)</label>
+                <input
+                  type="number"
+                  placeholder="Monto recibido"
+                  value={montoAnticipoFlete}
+                  onChange={e => manejarMontoAnticipoChange(e.target.value)}
+                  style={styles.input}
+                />
+              </div>
+            </div>
+            
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "8px 0 0",
+              marginTop: "8px",
+              borderTop: `1px solid ${t.colors.borderLight}`
+            }}>
+              <span style={{ fontSize: t.fonts.sizeSm, color: t.colors.textSecondary }}>Saldo por cobrar (Flete):</span>
+              <span style={{
+                fontSize: t.fonts.sizeSm,
+                fontWeight: t.fonts.weightBold,
+                color: t.colors.green
+              }}>{fmt(valorViaje - n(montoAnticipoFlete))}</span>
+            </div>
           </div>
         )}
       </div>

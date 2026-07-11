@@ -16,6 +16,8 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
   const fmt = (n) => "$" + Math.round(n || 0).toLocaleString("es-CO");
   const hoy = new Date();
 
+  const obtenerSaldoPendiente = (v) => (v.vViaje || 0) - (v.anticipoFleteMonto || 0);
+
   const calcVencimiento = (viaje) => {
     const plazo = viaje.diasPago || 30;
     const fecha = new Date(viaje.fecha);
@@ -67,15 +69,15 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
     const emp = v.emp || "Sin empresa";
     if (!porEmpresa[emp]) porEmpresa[emp] = { viajes: [], total: 0 };
     porEmpresa[emp].viajes.push(v);
-    porEmpresa[emp].total += v.vViaje || 0;
+    porEmpresa[emp].total += obtenerSaldoPendiente(v);
   });
   const empresasOrdenadas = Object.entries(porEmpresa).sort((a, b) => b[1].total - a[1].total);
 
   // Totales
   const pendientes = viajes.filter(v => v.estadoPago !== "pagado");
-  const totalPendiente = pendientes.reduce((s, v) => s + (v.vViaje || 0), 0);
+  const totalPendiente = pendientes.reduce((s, v) => s + obtenerSaldoPendiente(v), 0);
   const vencidos = pendientes.filter(v => calcVencimiento(v).vencido);
-  const totalVencido = vencidos.reduce((s, v) => s + (v.vViaje || 0), 0);
+  const totalVencido = vencidos.reduce((s, v) => s + obtenerSaldoPendiente(v), 0);
 
   const marcarPagado = async (viaje) => {
     try {
@@ -252,9 +254,16 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
                   </div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "10px" }}>
-                    <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: pagado ? t.colors.green : t.colors.textPrimary }}>
-                      {fmt(v.vViaje || 0)}
-                    </span>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
+                      <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: pagado ? t.colors.green : t.colors.textPrimary }}>
+                        {fmt(pagado ? (v.vViaje || 0) : obtenerSaldoPendiente(v))}
+                      </span>
+                      {!pagado && (v.anticipoFleteMonto || 0) > 0 && (
+                        <span style={{ fontSize: "10px", color: t.colors.textTertiary }}>
+                          Saldo de {fmt(v.vViaje || 0)}
+                        </span>
+                      )}
+                    </div>
 
                     {!pagado ? (
                       <button

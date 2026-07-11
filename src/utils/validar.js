@@ -117,6 +117,9 @@ export const validarViaje = (datos) => {
       fleteTon: validarNumero(datos.fleteTon, 0, 999999999),
       pesoBascula: validarNumero(datos.pesoBascula, 0, 999),
       anticipoMonto: validarNumero(datos.anticipoMonto, 0, 999999999),
+      anticipoFletePct: validarNumero(datos.anticipoFletePct, 0, 100),
+      anticipoFleteMonto: validarNumero(datos.anticipoFleteMonto, 0, 999999999),
+      saldoFlete: validarNumero(datos.saldoFlete, 0, 999999999),
     }
   };
 };
