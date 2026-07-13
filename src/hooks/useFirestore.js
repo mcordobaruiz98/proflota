@@ -17,7 +17,6 @@ export function useFirestore(uid) {
   const [configMant,     setConfigMant]     = useState([]);
   const [gastosVehiculo, setGastosVehiculo] = useState([]);
   const [gastosFijos,    setGastosFijos]    = useState([]);
-  const [conductores,   setConductores]   = useState([]);
 
   const rutaVehiculos = uid ? `usuarios/${uid}/vehiculos`     : null;
   const rutaViajes    = uid ? `usuarios/${uid}/viajes`        : null;
@@ -27,7 +26,22 @@ export function useFirestore(uid) {
   const rutaConfigMant = uid ? `usuarios/${uid}/config_mant` : null;
   const rutaGastos     = uid ? `usuarios/${uid}/gastos_vehiculo` : null;
   const rutaGastosFijos = uid ? `usuarios/${uid}/gastos_fijos` : null;
-  const rutaConductores = uid ? `usuarios/${uid}/conductores` : null;
+
+  // ── RESET al cambiar de usuario (previene data leakage entre cuentas) ──
+  // Va ANTES de los listeners para que el estado se limpie sincrónicamente
+  // antes de que los nuevos snapshots empiecen a llenar datos del nuevo usuario.
+  useEffect(() => {
+    setVehiculos([]);
+    setViajes([]);
+    setEmpresas([]);
+    setRutas([]);
+    setMantenimientos([]);
+    setConfigMant([]);
+    setGastosVehiculo([]);
+    setGastosFijos([]);
+    setPeajes([]);
+    setCargando(true);
+  }, [uid]);
 
   useEffect(() => {
     if (!rutaVehiculos) return;
@@ -75,14 +89,13 @@ export function useFirestore(uid) {
     return () => unsub();
   }, [rutaMant]);
 
-useEffect(() => {
-  if (!uid) return;
+  useEffect(() => {
   const q = query(collection(db, "peajes"));
   const unsub = onSnapshot(q, (snap) => {
     setPeajes(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
   });
   return () => unsub();
-}, [uid]);
+}, []);
 
 useEffect(() => {
   if (!rutaConfigMant) return;
@@ -182,10 +195,6 @@ const eliminarConfigMant = async (firestoreId) => {
     const datosLimpios = JSON.parse(JSON.stringify(datos));
     await addDoc(collection(db, rutaGastos), { ...datosLimpios, creadoEn: new Date().toISOString() });
   };
-  const editarGasto = async (firestoreId, datos) => {
-    const datosLimpios = JSON.parse(JSON.stringify(datos));
-    await updateDoc(doc(db, rutaGastos, firestoreId), datosLimpios);
-  };
   const eliminarGasto = async (firestoreId) => {
     await deleteDoc(doc(db, rutaGastos, firestoreId));
   };
@@ -198,37 +207,15 @@ const eliminarConfigMant = async (firestoreId) => {
     await deleteDoc(doc(db, rutaGastosFijos, firestoreId));
   };
 
-  // CONDUCTORES
-  useEffect(() => {
-    if (!rutaConductores) return;
-    const unsub = onSnapshot(collection(db, rutaConductores), (snap) => {
-      setConductores(snap.docs.map(d => ({ firestoreId: d.id, ...d.data() })));
-    });
-    return () => unsub();
-  }, [rutaConductores]);
-
-  const agregarConductor = async (datos) => {
-    const datosLimpios = JSON.parse(JSON.stringify(datos));
-    await addDoc(collection(db, rutaConductores), { ...datosLimpios, creadoEn: new Date().toISOString() });
-  };
-  const editarConductor = async (firestoreId, datos) => {
-    const datosLimpios = JSON.parse(JSON.stringify(datos));
-    await updateDoc(doc(db, rutaConductores, firestoreId), datosLimpios);
-  };
-  const eliminarConductor = async (firestoreId) => {
-    await deleteDoc(doc(db, rutaConductores, firestoreId));
-  };
-
   return {
-    vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, gastosVehiculo, gastosFijos, conductores, cargando,
+    vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, gastosVehiculo, gastosFijos, cargando,
     agregarVehiculo, eliminarVehiculo, editarVehiculo,
     agregarViaje,    eliminarViaje,    editarViaje,
     agregarEmpresa,  eliminarEmpresa,
     agregarRuta,     eliminarRuta,
     agregarMantenimiento, eliminarMantenimiento,
     agregarConfigMant, eliminarConfigMant,
-    agregarGasto, editarGasto, eliminarGasto,
+    agregarGasto, eliminarGasto,
     agregarGastoFijo, eliminarGastoFijo,
-    agregarConductor, editarConductor, eliminarConductor,
   };
 }
