@@ -69,3 +69,18 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+/* Spinner para botones de guardado */
+@keyframes navira-spin {
+  to { transform: rotate(360deg); }
+}
+.navira-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: navira-spin 0.6s linear infinite;
+  vertical-align: middle;
+}
