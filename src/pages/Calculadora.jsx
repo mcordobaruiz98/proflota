@@ -264,91 +264,105 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     if (!valorViaje)   { mostrarToast("Ingresa tonelaje y flete","error"); return; }
     if (viajes.length >= 5000) { mostrarToast("Límite de viajes alcanzado","error"); return; }
     setGuardando(true);
-    await onGuardar({
-      fecha, fechaDescarga, mani: sanitizar(mani), placa, tipoCarga, prod: sanitizar(producto),
-      ruta: sanitizar(ruta), emp: sanitizar(empresa), condNom: sanitizar(conductor),
-      remesa: sanitizar(remesa), pesoBascula: validarNumero(pesoBascula, 0, 999),
-      lugarCargue: sanitizar(lugarCargue), lugarDescargue: sanitizar(lugarDescargue),
-      observaciones: sanitizar(observaciones).slice(0, 500),
-      kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmCargadoRet: n(kmCargadoRet), kmVacioRet: n(kmVacioRet), kmT: kmTotal,
-      ton: n(tonelaje), modoFlete, fleteTon: n(fleteTon), vViaje: valorViaje,
-      anticipoFletePct: n(pctAnticipoFlete),
-      anticipoFleteMonto: n(montoAnticipoFlete),
-      anticipoFletePctRet: n(pctAnticipoFleteRet),
-      anticipoFleteMontoRet: n(montoAnticipoFleteRet),
-      saldoFlete: valorViaje - n(montoAnticipoFlete) - n(montoAnticipoFleteRet),
-      tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(tonelajeRetorno), fleteRetorno: n(fleteRetorno),
-      rutaRet: sanitizar(rutaRet), tipoCargaRet, productoRet: sanitizar(productoRet),
-      empresaRet: sanitizar(empresaRet),
-      maniRet: sanitizar(maniRet), remesaRet: sanitizar(remesaRet),
-      pesoBasRet: validarNumero(pesoBasRet, 0, 999),
-      lugarCargueRet: sanitizar(lugarCargueRet), lugarDescargueRet: sanitizar(lugarDescargueRet),
-      fechaCargueRet, fechaDescargueRet,
-      modoComb, gTot: galTotal, galCargado: galCarg, galVacio: galVac,
-      adlt: adblLt, cAcpm: costoAcpm, cAdbl: costoAdbl, cComb: costoComb,
-      peajes: totPeajes,
-      peajesDetalle: peajesRuta.map(p => ({
-        n: p.n, d: p.d, tarifa: obtenerTarifa(p, categoria), iv: p.iv,
-        total: (obtenerTarifa(p, categoria)) * (p.iv?2:1),
-      })),
-      pcond: n(porcCond), conductor: costoConduct,
-      carp: n(carpado), gv2: n(gastosViaje),
-      extras: totExtras, extrasList: extras,
-      total: totalGastos, neta: gananciaNeta,
-      mrg: margen, margen, cxk: cxkm,
-      descuentos: { 
-        retefuente: valRetefuente,
-        reteica: valReteica,
-        fopat: valFopat,
-        otro: valOtro,
-        nombreOtro: nombreOtro,
-        total: totalDesc,
-      }
-    });
-    if (viajes.length === 0) {
-      mostrarToast("🎉 ¡Primer viaje registrado! Guárdelo como ruta frecuente y el próximo lo calcula en 10 segundos","exito");
-      } else {
-          mostrarToast("Viaje guardado correctamente","exito");
+    try {
+      await onGuardar({
+        fecha, fechaDescarga, mani: sanitizar(mani), placa, tipoCarga, prod: sanitizar(producto),
+        ruta: sanitizar(ruta), emp: sanitizar(empresa), condNom: sanitizar(conductor),
+        remesa: sanitizar(remesa), pesoBascula: validarNumero(pesoBascula, 0, 999),
+        lugarCargue: sanitizar(lugarCargue), lugarDescargue: sanitizar(lugarDescargue),
+        observaciones: sanitizar(observaciones).slice(0, 500),
+        kmCargado: n(kmCargado), kmVacio: n(kmVacio), kmCargadoRet: n(kmCargadoRet), kmVacioRet: n(kmVacioRet), kmT: kmTotal,
+        ton: n(tonelaje), modoFlete, fleteTon: n(fleteTon), vViaje: valorViaje,
+        anticipoFletePct: n(pctAnticipoFlete),
+        anticipoFleteMonto: n(montoAnticipoFlete),
+        anticipoFletePctRet: n(pctAnticipoFleteRet),
+        anticipoFleteMontoRet: n(montoAnticipoFleteRet),
+        saldoFlete: valorViaje - n(montoAnticipoFlete) - n(montoAnticipoFleteRet),
+        tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(tonelajeRetorno), fleteRetorno: n(fleteRetorno),
+        rutaRet: sanitizar(rutaRet), tipoCargaRet, productoRet: sanitizar(productoRet),
+        empresaRet: sanitizar(empresaRet),
+        maniRet: sanitizar(maniRet), remesaRet: sanitizar(remesaRet),
+        pesoBasRet: validarNumero(pesoBasRet, 0, 999),
+        lugarCargueRet: sanitizar(lugarCargueRet), lugarDescargueRet: sanitizar(lugarDescargueRet),
+        fechaCargueRet, fechaDescargueRet,
+        modoComb, gTot: galTotal, galCargado: galCarg, galVacio: galVac,
+        adlt: adblLt, cAcpm: costoAcpm, cAdbl: costoAdbl, cComb: costoComb,
+        peajes: totPeajes,
+        peajesDetalle: peajesRuta.map(p => ({
+          n: p.n, d: p.d, tarifa: obtenerTarifa(p, categoria), iv: p.iv,
+          total: (obtenerTarifa(p, categoria)) * (p.iv?2:1),
+        })),
+        pcond: n(porcCond), conductor: costoConduct,
+        carp: n(carpado), gv2: n(gastosViaje),
+        extras: totExtras, extrasList: extras,
+        total: totalGastos, neta: gananciaNeta,
+        mrg: margen, margen, cxk: cxkm,
+        descuentos: { 
+          retefuente: valRetefuente,
+          reteica: valReteica,
+          fopat: valFopat,
+          otro: valOtro,
+          nombreOtro: nombreOtro,
+          total: totalDesc,
+        }
+      });
+
+      // Actualizar odómetro y estado — esperado y con aviso si falla
+      if (placa) {
+        const veh = vehiculos.find(v => v.placa === placa);
+        if (veh) {
+          const cambios = {};
+          if (kmTotal > 0) cambios.kmOdometro = (veh.kmOdometro || 0) + kmTotal;
+          const ahora = new Date();
+          const hoyStr = `${ahora.getFullYear()}-${String(ahora.getMonth()+1).padStart(2,"0")}-${String(ahora.getDate()).padStart(2,"0")}`;
+          const finViaje = fechaDescargueRet || fechaDescarga || "";
+          const enCurso = fecha <= hoyStr && (!finViaje || finViaje >= hoyStr);
+          if (enCurso && veh.estado !== "en_taller") cambios.estado = "en_viaje";
+          if (Object.keys(cambios).length > 0) {
+            try {
+              await onEditarVehiculo(veh.firestoreId, cambios);
+            } catch (e) {
+              console.error("Odómetro no actualizado:", e);
+              mostrarToast("Viaje guardado, pero el odómetro no se actualizó","error");
+            }
+          }
+        }
       }
 
-      // Volver a donde el usuario estaba — SIEMPRE, fuera del if/else del toast
+      // Toast de éxito
+      if (viajes.length === 0) {
+        mostrarToast("🎉 ¡Primer viaje registrado! Guárdelo como ruta frecuente y el próximo lo calcula en 10 segundos","exito");
+      } else {
+        mostrarToast("Viaje guardado correctamente","exito");
+      }
+
+      // Limpiar formulario (solo si guardó exitosamente)
+      setFecha(new Date().toISOString().slice(0,10)); setFechaDescarga("");
+      setMani(""); setRemesa(""); setPesoBascula(""); setLugarCargue(""); setLugarDescargue("");
+      setObservaciones(""); setPlaca(""); setTipoCarga(""); setProducto(""); setRuta(""); setModoFlete("");
+      setEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio(""); setKmCargadoRet(""); setKmVacioRet(""); setModoComb("");
+      setTonelaje(""); setFleteTon(""); setTieneRetorno(false); setFleteRetorno("");
+      setTonelajeRetorno(""); setRutaRet(""); setempresaRet(""); setProductoRet("");
+      setManiRet(""); setRemesaRet(""); setPesoBasRet("");
+      setLugarCargueRet(""); setLugarDescargueRet(""); setFechaCargueRet(""); setFechaDescargueRet("");
+      setExtras([]); setPorcCond(""); setCarpado(""); setGastosViaje("");
+      setPeajesRuta([]); setRutaCargada(null);
+      setPctAnticipoFlete("60"); setMontoAnticipoFlete("");
+      setPctAnticipoFleteRet("60"); setMontoAnticipoFleteRet("");
+
+      // Navegación de retorno
       if (location.state?.vehiculoId) {
         navigate(`/vehiculo/${location.state.vehiculoId}`, { state: { tab: location.state.volverTab || "viajes" }, replace: true });
       } else {
         navigate(-1);
       }
-
-    // Actualizar odómetro y estado del vehículo automáticamente
-    if (placa) {
-      const veh = vehiculos.find(v => v.placa === placa);
-      if (veh) {
-        const cambios = {};
-        if (kmTotal > 0) cambios.kmOdometro = (veh.kmOdometro || 0) + kmTotal;
-        // Estado automático: viaje en curso → "En viaje" (respeta el taller)
-        const hoyStr = new Date().toISOString().slice(0,10);
-        const finViaje = fechaDescargueRet || fechaDescarga || "";
-        const enCurso = fecha <= hoyStr && (!finViaje || finViaje >= hoyStr);
-        if (enCurso && veh.estado !== "en_taller") cambios.estado = "en_viaje";
-        if (Object.keys(cambios).length > 0) onEditarVehiculo(veh.firestoreId, cambios).catch(()=>{});
-      }
+    } catch (err) {
+      console.error("Error al guardar viaje:", err);
+      mostrarToast("No se pudo guardar el viaje. Verifique su conexión e intente de nuevo","error");
+      // NO limpia el formulario: el usuario conserva lo digitado para reintentar
+    } finally {
+      setGuardando(false);
     }
-
-    // Limpiar formulario
-    setFecha(new Date().toISOString().slice(0,10)); setFechaDescarga("");
-    setMani(""); setRemesa(""); setPesoBascula(""); setLugarCargue(""); setLugarDescargue("");
-    setObservaciones(""); setPlaca(""); setTipoCarga(""); setProducto(""); setRuta(""); setModoFlete("");
-    setEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio(""); setKmCargadoRet(""); setKmVacioRet(""); setModoComb("");
-    setTonelaje(""); setFleteTon(""); setTieneRetorno(false); setFleteRetorno("");
-    setTonelajeRetorno(""); setRutaRet(""); setempresaRet(""); setProductoRet("");
-    setManiRet(""); setRemesaRet(""); setPesoBasRet("");
-    setLugarCargueRet(""); setLugarDescargueRet(""); setFechaCargueRet(""); setFechaDescargueRet("");
-    setExtras([]); setPorcCond(""); setCarpado(""); setGastosViaje("");
-    setPeajesRuta([]); setRutaCargada(null);
-    setPctAnticipoFlete("60"); setMontoAnticipoFlete("");
-    setPctAnticipoFleteRet("60"); setMontoAnticipoFleteRet("");
-   
-    setGuardando(false);
-    navigate(-1);
   };
 
   const cargarRuta = (rutaGuardada) => {
@@ -1514,7 +1528,7 @@ const guardarRutaFrecuente = async () => {
               </div>
               <div style={{display:"flex", gap:"8px"}}>
                 <button style={{flex:1, padding:"10px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoRuta?0.75:1}} onClick={guardarRutaFrecuente} disabled={guardandoRuta}>
-                  {guardandoRuta?"Guardando...":"Guardar ruta"}
+                  {guardandoRuta ? <><span className="navira-spinner" /> Guardando...</> : "Guardar ruta"}
                 </button>
                 <button style={{padding:"10px 14px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, cursor:"pointer"}} onClick={()=>{setMostrarGuardar(false);setNombreRuta("");}}>
                   Cancelar
@@ -1529,8 +1543,11 @@ const guardarRutaFrecuente = async () => {
           onClick={guardarViaje}
           disabled={guardando}
         >
-          <Save size={18} color="#fff" strokeWidth={2} />
-          {guardando ? "Guardando..." : "Guardar viaje"}
+          {guardando ? (
+            <><span className="navira-spinner" /> Guardando...</>
+          ) : (
+            <><Save size={18} color="#fff" strokeWidth={2} /> Guardar viaje</>
+          )}
         </button>
       </div>
 
