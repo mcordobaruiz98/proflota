@@ -12,30 +12,31 @@ export function useFirestore(uid) {
   const [empresas,       setEmpresas]       = useState([]);
   const [rutas,          setRutas]          = useState([]);
   const [mantenimientos, setMantenimientos] = useState([]);
+  const [conductores,    setConductores]    = useState([]);
   const [cargando,       setCargando]       = useState(true);
   const [peajes,         setPeajes]         = useState([]);
   const [configMant,     setConfigMant]     = useState([]);
   const [gastosVehiculo, setGastosVehiculo] = useState([]);
   const [gastosFijos,    setGastosFijos]    = useState([]);
 
-  const rutaVehiculos = uid ? `usuarios/${uid}/vehiculos`     : null;
-  const rutaViajes    = uid ? `usuarios/${uid}/viajes`        : null;
-  const rutaEmpresas  = uid ? `usuarios/${uid}/empresas`      : null;
-  const rutaRutas     = uid ? `usuarios/${uid}/rutas`         : null;
-  const rutaMant      = uid ? `usuarios/${uid}/mantenimiento` : null;
-  const rutaConfigMant = uid ? `usuarios/${uid}/config_mant` : null;
-  const rutaGastos     = uid ? `usuarios/${uid}/gastos_vehiculo` : null;
-  const rutaGastosFijos = uid ? `usuarios/${uid}/gastos_fijos` : null;
+  const rutaVehiculos    = uid ? `usuarios/${uid}/vehiculos`       : null;
+  const rutaViajes       = uid ? `usuarios/${uid}/viajes`          : null;
+  const rutaEmpresas     = uid ? `usuarios/${uid}/empresas`        : null;
+  const rutaRutas        = uid ? `usuarios/${uid}/rutas`           : null;
+  const rutaMant         = uid ? `usuarios/${uid}/mantenimiento`   : null;
+  const rutaConfigMant   = uid ? `usuarios/${uid}/config_mant`     : null;
+  const rutaGastos       = uid ? `usuarios/${uid}/gastos_vehiculo` : null;
+  const rutaGastosFijos  = uid ? `usuarios/${uid}/gastos_fijos`    : null;
+  const rutaConductores  = uid ? `usuarios/${uid}/conductores`     : null;
 
   // ── RESET al cambiar de usuario (previene data leakage entre cuentas) ──
-  // Va ANTES de los listeners para que el estado se limpie sincrónicamente
-  // antes de que los nuevos snapshots empiecen a llenar datos del nuevo usuario.
   useEffect(() => {
     setVehiculos([]);
     setViajes([]);
     setEmpresas([]);
     setRutas([]);
     setMantenimientos([]);
+    setConductores([]);
     setConfigMant([]);
     setGastosVehiculo([]);
     setGastosFijos([]);
@@ -89,40 +90,54 @@ export function useFirestore(uid) {
     return () => unsub();
   }, [rutaMant]);
 
+  // Peajes — colección global, pero solo se lee con usuario autenticado
   useEffect(() => {
-  const q = query(collection(db, "peajes"));
-  const unsub = onSnapshot(q, (snap) => {
-    setPeajes(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
-  });
-  return () => unsub();
-}, []);
+    if (!uid) return;
+    const q = query(collection(db, "peajes"));
+    const unsub = onSnapshot(q, (snap) => {
+      setPeajes(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, [uid]);
 
-useEffect(() => {
-  if (!rutaConfigMant) return;
-  const q = query(collection(db, rutaConfigMant));
-  const unsub = onSnapshot(q, (snap) => {
-    setConfigMant(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
-  });
-  return () => unsub();
-}, [rutaConfigMant]);
+  useEffect(() => {
+    if (!rutaConfigMant) return;
+    const q = query(collection(db, rutaConfigMant));
+    const unsub = onSnapshot(q, (snap) => {
+      setConfigMant(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, [rutaConfigMant]);
 
-useEffect(() => {
-  if (!rutaGastos) return;
-  const q = query(collection(db, rutaGastos), orderBy("fecha", "desc"));
-  const unsub = onSnapshot(q, (snap) => {
-    setGastosVehiculo(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
-  });
-  return () => unsub();
-}, [rutaGastos]);
+  useEffect(() => {
+    if (!rutaGastos) return;
+    const q = query(collection(db, rutaGastos), orderBy("fecha", "desc"));
+    const unsub = onSnapshot(q, (snap) => {
+      setGastosVehiculo(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, [rutaGastos]);
 
-useEffect(() => {
-  if (!rutaGastosFijos) return;
-  const q = query(collection(db, rutaGastosFijos));
-  const unsub = onSnapshot(q, (snap) => {
-    setGastosFijos(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
-  });
-  return () => unsub();
-}, [rutaGastosFijos]);
+  useEffect(() => {
+    if (!rutaGastosFijos) return;
+    const q = query(collection(db, rutaGastosFijos));
+    const unsub = onSnapshot(q, (snap) => {
+      setGastosFijos(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, [rutaGastosFijos]);
+
+  // Conductores
+  useEffect(() => {
+    if (!rutaConductores) return;
+    const q = query(collection(db, rutaConductores));
+    const unsub = onSnapshot(q, (snap) => {
+      setConductores(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, [rutaConductores]);
+
+  // ── CRUD ──
 
   const agregarVehiculo = async (datos) => {
     await addDoc(collection(db, rutaVehiculos), { ...datos, creadoEn: new Date().toISOString() });
@@ -181,15 +196,14 @@ useEffect(() => {
   };
 
   const agregarConfigMant = async (datos) => {
-  await addDoc(collection(db, rutaConfigMant), {
-    ...datos,
-    creadoEn: new Date().toISOString(),
-  });
-};
-
-const eliminarConfigMant = async (firestoreId) => {
-  await deleteDoc(doc(db, rutaConfigMant, firestoreId));
-};
+    await addDoc(collection(db, rutaConfigMant), {
+      ...datos,
+      creadoEn: new Date().toISOString(),
+    });
+  };
+  const eliminarConfigMant = async (firestoreId) => {
+    await deleteDoc(doc(db, rutaConfigMant, firestoreId));
+  };
 
   const agregarGasto = async (datos) => {
     const datosLimpios = JSON.parse(JSON.stringify(datos));
@@ -197,6 +211,10 @@ const eliminarConfigMant = async (firestoreId) => {
   };
   const eliminarGasto = async (firestoreId) => {
     await deleteDoc(doc(db, rutaGastos, firestoreId));
+  };
+  const editarGasto = async (firestoreId, datos) => {
+    const datosLimpios = JSON.parse(JSON.stringify(datos));
+    await updateDoc(doc(db, rutaGastos, firestoreId), datosLimpios);
   };
 
   const agregarGastoFijo = async (datos) => {
@@ -207,15 +225,29 @@ const eliminarConfigMant = async (firestoreId) => {
     await deleteDoc(doc(db, rutaGastosFijos, firestoreId));
   };
 
+  // Conductores CRUD
+  const agregarConductor = async (datos) => {
+    const datosLimpios = JSON.parse(JSON.stringify(datos));
+    await addDoc(collection(db, rutaConductores), { ...datosLimpios, creadoEn: new Date().toISOString() });
+  };
+  const editarConductor = async (firestoreId, datos) => {
+    const datosLimpios = JSON.parse(JSON.stringify(datos));
+    await updateDoc(doc(db, rutaConductores, firestoreId), datosLimpios);
+  };
+  const eliminarConductor = async (firestoreId) => {
+    await deleteDoc(doc(db, rutaConductores, firestoreId));
+  };
+
   return {
-    vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, gastosVehiculo, gastosFijos, cargando,
+    vehiculos, viajes, empresas, rutas, mantenimientos, conductores, configMant, peajes, gastosVehiculo, gastosFijos, cargando,
     agregarVehiculo, eliminarVehiculo, editarVehiculo,
     agregarViaje,    eliminarViaje,    editarViaje,
     agregarEmpresa,  eliminarEmpresa,
     agregarRuta,     eliminarRuta,
     agregarMantenimiento, eliminarMantenimiento,
     agregarConfigMant, eliminarConfigMant,
-    agregarGasto, eliminarGasto,
+    agregarGasto, eliminarGasto, editarGasto,
     agregarGastoFijo, eliminarGastoFijo,
+    agregarConductor, editarConductor, eliminarConductor,
   };
 }
