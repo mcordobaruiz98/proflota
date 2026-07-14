@@ -15,16 +15,15 @@ function Registro() {
   const [verConf,    setVerConf]    = useState(false);
   const [errores,    setErrores]    = useState({});
   const [cargando,   setCargando]   = useState(false);
-  const [codigo, setCodigo]         = useState("");
+  const [codigo,     setCodigo]     = useState("");
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
-
 
   const mensajeError = (codigo) => {
     switch (codigo) {
       case "auth/email-already-in-use": return "Ya existe una cuenta con ese correo";
       case "auth/invalid-email":        return "Correo inválido";
       case "auth/weak-password":        return "La contraseña es muy débil";
-      case "auth/codigo-invalido":      return "Codigo de acceso incorrecto. Contáctanos para obtener tu código,"
+      case "auth/codigo-invalido":      return "Código de acceso incorrecto. Contáctanos para obtener tu código";
       case "auth/terminos-no-aceptados": return "Debes aceptar los Términos y la Política de Privacidad";
       default:                          return "Error al crear la cuenta. Intenta de nuevo";
     }
@@ -37,8 +36,8 @@ function Registro() {
     if (!correo.includes("@"))    e.correo     = "Correo inválido";
     if (contrasena.length < 6)    e.contrasena = "Mínimo 6 caracteres";
     if (contrasena !== confirmar) e.confirmar  = "Las contraseñas no coinciden";
-    if (!codigo.trim()) e.codigo = "Ingresa el código de acceso";
-    if (!aceptaTerminos) e.terminos = "Debes aceptar los Términos y la Política de Privacidad";
+    if (!codigo.trim())           e.codigo     = "Ingresa el código de acceso";
+    if (!aceptaTerminos)          e.terminos   = "Debes aceptar los Términos y la Política de Privacidad";
     return e;
   };
 
@@ -78,77 +77,84 @@ function Registro() {
       <div style={styles.card}>
         <p style={styles.seccionLabel}>Tus datos</p>
 
-        <div style={styles.campo}>
-          <label style={styles.label}>Nombre completo</label>
-          <input
-            type="text"
-            placeholder="Juan Pérez"
-            value={nombre}
-            onChange={(e) => { setNombre(e.target.value); setErrores({ ...errores, nombre: null }); }}
-            style={styles.input}
-          />
-          {errores.nombre && <p style={styles.error}>{errores.nombre}</p>}
-        </div>
+        <form onSubmit={e => e.preventDefault()} autoComplete="on">
 
-        <div style={styles.campo}>
-          <label style={styles.label}>Correo electrónico</label>
-          <input
-            type="email"
-            placeholder="correo@ejemplo.com"
-            value={correo}
-            onChange={(e) => { setCorreo(e.target.value); setErrores({ ...errores, correo: null }); }}
-            style={styles.input}
-          />
-          {errores.correo && <p style={styles.error}>{errores.correo}</p>}
-        </div>
-
-        <div style={styles.campo}>
-          <label style={styles.label}>Contraseña</label>
-          <div style={styles.inputWrap}>
+          <div style={styles.campo}>
+            <label style={styles.label}>Nombre completo</label>
             <input
-              type={verPass ? "text" : "password"}
-              placeholder="Mínimo 6 caracteres"
-              value={contrasena}
-              onChange={(e) => { setContrasena(e.target.value); setErrores({ ...errores, contrasena: null }); }}
-              style={{ ...styles.input, paddingRight: "44px" }}
+              type="text"
+              placeholder="Juan Pérez"
+              value={nombre}
+              onChange={(e) => { setNombre(e.target.value); setErrores({ ...errores, nombre: null }); }}
+              style={styles.input}
+              autoComplete="name"
             />
-            <button style={styles.btnOjo} onClick={() => setVerPass(!verPass)}>
-              {verPass ? "●" : "○"}
-            </button>
+            {errores.nombre && <p style={styles.error}>{errores.nombre}</p>}
           </div>
-          {errores.contrasena && <p style={styles.error}>{errores.contrasena}</p>}
-        </div>
 
-        <div style={styles.campo}>
-          <label style={styles.label}>Confirmar contraseña</label>
-          <div style={styles.inputWrap}>
+          <div style={styles.campo}>
+            <label style={styles.label}>Correo electrónico</label>
             <input
-              type={verConf ? "text" : "password"}
-              placeholder="Repite tu contraseña"
-              value={confirmar}
-              onChange={(e) => { setConfirmar(e.target.value); setErrores({ ...errores, confirmar: null }); }}
-              style={{ ...styles.input, paddingRight: "44px" }}
+              type="email"
+              placeholder="correo@ejemplo.com"
+              value={correo}
+              onChange={(e) => { setCorreo(e.target.value); setErrores({ ...errores, correo: null }); }}
+              style={styles.input}
+              autoComplete="email"
             />
+            {errores.correo && <p style={styles.error}>{errores.correo}</p>}
+          </div>
 
-        <div style={styles.campo}>
-          <label style={styles.label}>Código de acceso beta</label>
-             <input
+          <div style={styles.campo}>
+            <label style={styles.label}>Contraseña</label>
+            <div style={styles.inputWrap}>
+              <input
+                type={verPass ? "text" : "password"}
+                placeholder="Mínimo 6 caracteres"
+                value={contrasena}
+                onChange={(e) => { setContrasena(e.target.value); setErrores({ ...errores, contrasena: null }); }}
+                style={{ ...styles.input, paddingRight: "44px" }}
+                autoComplete="new-password"
+              />
+              <button type="button" style={styles.btnOjo} onClick={() => setVerPass(!verPass)}>
+                {verPass ? "●" : "○"}
+              </button>
+            </div>
+            {errores.contrasena && <p style={styles.error}>{errores.contrasena}</p>}
+          </div>
+
+          <div style={styles.campo}>
+            <label style={styles.label}>Confirmar contraseña</label>
+            <div style={styles.inputWrap}>
+              <input
+                type={verConf ? "text" : "password"}
+                placeholder="Repite tu contraseña"
+                value={confirmar}
+                onChange={(e) => { setConfirmar(e.target.value); setErrores({ ...errores, confirmar: null }); }}
+                style={{ ...styles.input, paddingRight: "44px" }}
+                autoComplete="new-password"
+              />
+              <button type="button" style={styles.btnOjo} onClick={() => setVerConf(!verConf)}>
+                {verConf ? "●" : "○"}
+              </button>
+            </div>
+            {errores.confirmar && <p style={styles.error}>{errores.confirmar}</p>}
+          </div>
+
+          <div style={styles.campo}>
+            <label style={styles.label}>Código de acceso beta</label>
+            <input
               type="text"
               placeholder="Ingresa tu código de invitación"
               value={codigo}
               onChange={(e) => { setCodigo(e.target.value.trim().toUpperCase()); setErrores({ ...errores, codigo: null }); }}
               style={styles.input}
+              autoComplete="off"
             />
             {errores.codigo && <p style={styles.error}>{errores.codigo}</p>}
           </div>
 
-        
-            <button style={styles.btnOjo} onClick={() => setVerConf(!verConf)}>
-              {verConf ? "●" : "○"}
-            </button>
-          </div>
-          {errores.confirmar && <p style={styles.error}>{errores.confirmar}</p>}
-        </div>
+        </form>
 
         {/* ACEPTACIÓN DE TÉRMINOS — Ley 1581/2012 */}
         <div style={{display:"flex",gap:"10px",alignItems:"flex-start",margin:"4px 0 12px",cursor:"pointer"}} onClick={()=>{setAceptaTerminos(!aceptaTerminos); setErrores({...errores, terminos:null});}}>
@@ -179,12 +185,12 @@ function Registro() {
           onClick={handleRegistro}
           disabled={cargando}
         >
-          {cargando ? "Creando cuenta..." : "Crear cuenta"}
+          {cargando ? <><span className="navira-spinner" /> Creando cuenta...</> : "Crear cuenta"}
         </button>
 
       </div>
 
-      <p style={styles.version}>Navira v1.0</p>
+      <p style={styles.version}>NAVIRA v1.0</p>
 
     </div>
   );
