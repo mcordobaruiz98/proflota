@@ -4,7 +4,6 @@ import { useAuth } from "../hooks/useAuth";
 import { subirPeajes } from "../scripts/subirPeajes";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import { theme as t } from "../styles/theme";
 
 function Configuracion({mostrarToast}) {
   const navigate = useNavigate();
