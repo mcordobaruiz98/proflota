@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { subirPeajes } from "../scripts/subirPeajes";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { theme as t } from "../styles/theme";
 
 function Configuracion({mostrarToast}) {
   const navigate = useNavigate();
@@ -179,8 +180,8 @@ function Configuracion({mostrarToast}) {
         ))}
       </div>
 
-      /* VINCULAR TELEGRAM *
-        <div style={styles.card}>
+      {/* VINCULAR TELEGRAM */}
+        <div style={{...styles.seccion, padding:"16px 20px"}}>
           <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 4px"}}>🤖 Registrar viajes por Telegram</p>
           <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 12px", lineHeight:1.5}}>
             Registre sus viajes escribiéndole al bot de NAVIRA, sin abrir la app.
