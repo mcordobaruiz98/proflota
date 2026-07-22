@@ -11,6 +11,9 @@ function Configuracion({mostrarToast}) {
   const [confirmaEliminar, setConfirmaEliminar] = useState(false);
   const [textoConfirm, setTextoConfirm] = useState("");
   const [eliminando, setEliminando] = useState(false);
+  const [codigoTelegram, setCodigoTelegram] = useState(null);
+  const [generandoCodigo, setGenerandoCodigo] = useState(false);
+  
 
   const manejarEliminarCuenta = async () => {
     if (textoConfirm !== "ELIMINAR") {
@@ -92,6 +95,22 @@ function Configuracion({mostrarToast}) {
     }
   };
 
+  const generarCodigoTelegram = async () => {
+    setGenerandoCodigo(true);
+    try {
+      const codigo = Math.random().toString(36).slice(2, 8).toUpperCase();
+      await setDoc(doc(db, "telegram_vinculos", codigo), {
+        uid: usuario.uid,
+        creadoEn: new Date().toISOString(),
+      });
+      setCodigoTelegram(codigo);
+    } catch (err) {
+      mostrarToast("Error generando código", "error");
+    } finally {
+      setGenerandoCodigo(false);
+    }
+  };
+
   return (
     <div style={styles.pantalla}>
 
@@ -159,6 +178,44 @@ function Configuracion({mostrarToast}) {
           </div>
         ))}
       </div>
+
+      /* VINCULAR TELEGRAM *
+        <div style={styles.card}>
+          <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 4px"}}>🤖 Registrar viajes por Telegram</p>
+          <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 12px", lineHeight:1.5}}>
+            Registre sus viajes escribiéndole al bot de NAVIRA, sin abrir la app.
+            El bot conoce sus vehículos y rutas, y le calcula la ganancia al instante.
+          </p>
+ 
+          {!codigoTelegram ? (
+            <button
+              style={{width:"100%", padding:"12px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer"}}
+              onClick={generarCodigoTelegram}
+              disabled={generandoCodigo}
+            >
+              {generandoCodigo ? "Generando..." : "Generar código de vinculación"}
+            </button>
+          ) : (
+            <div>
+              <div style={{textAlign:"center", padding:"14px", background:t.colors.bgSection, borderRadius:t.radius.md, marginBottom:"10px"}}>
+                <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 4px"}}>Su código:</p>
+                <p style={{fontSize:"26px", fontWeight:t.fonts.weightBlack, color:t.colors.green, letterSpacing:"4px", margin:0}}>{codigoTelegram}</p>
+              </div>
+              <ol style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, paddingLeft:"18px", margin:"0 0 10px", lineHeight:1.7}}>
+                <li>Abra Telegram y busque <b style={{color:t.colors.textPrimary}}>@Naviraflota_bot</b></li>
+                <li>Escríbale: <b style={{color:t.colors.textPrimary}}>/vincular {codigoTelegram}</b></li>
+                <li>Listo — escriba /nuevo para su primer viaje</li>
+              </ol>
+              <a
+                href={`https://t.me/Naviraflota_bot`}
+                target="_blank" rel="noreferrer"
+                style={{display:"block", textAlign:"center", padding:"11px", background:t.colors.greenSoft, border:`1.5px solid ${t.colors.greenBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.green, textDecoration:"none"}}
+              >
+                Abrir el bot en Telegram
+              </a>
+            </div>
+          )}
+        </div>
 
       {/* DATOS */}
       <div style={styles.seccionTitulo}>Datos</div>
