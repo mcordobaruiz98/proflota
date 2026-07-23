@@ -563,7 +563,7 @@ const styles = {
   gananciaSub:       { fontSize: t.fonts.sizeXs, color: "rgba(255,255,255,0.65)", margin: 0 },
   gananciaDer:       { marginLeft: "16px" },
   vehMetrica:        { background: "rgba(255,255,255,0.15)", borderRadius: t.radius.md, padding: "12px 16px", textAlign: "center", backdropFilter: "blur(10px)" },
-  vehMetricaValor:   { fontSize: "24px", fontWeight: t.fonts.weightBlack, color: "#fff", margin: 0 },
+  vehMetricaValor:   { fontSize: "28px", fontWeight: t.fonts.weightBlack, color: "#fff", margin: 0 },
   vehMetricaLabel:   { fontSize: "10px", color: "rgba(255,255,255,0.75)", margin: "2px 0 0", textTransform: "uppercase", letterSpacing: "0.05em" },
   seccionHeader:     { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 20px 8px" },
   seccionTitulo:     { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightBold, color: t.colors.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", padding: "12px 20px 8px", margin: 0 },

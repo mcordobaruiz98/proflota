@@ -331,9 +331,9 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
 
       // Toast de éxito
       if (viajes.length === 0) {
-        mostrarToast("🎉 ¡Primer viaje registrado! Guárdelo como ruta frecuente y el próximo lo calcula en 10 segundos","exito");
+        mostrarToast(`🎉 ¡Primer viaje! Ganancia: ${fmt(gananciaNeta)} — Guárdelo como ruta frecuente`,"exito");
       } else {
-        mostrarToast("Viaje guardado correctamente","exito");
+        mostrarToast(`✓ Viaje guardado — Ganancia: ${fmt(gananciaNeta)} (${margen.toFixed(1)}%)`,"exito");
       }
 
       // Limpiar formulario (solo si guardó exitosamente)
@@ -1569,7 +1569,7 @@ const styles = {
   input:            { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
   valorViajeBox:    { display:"flex", justifyContent:"space-between", alignItems:"center", background:t.colors.bgCard, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, padding:"12px 14px", marginTop:"4px" },
   valorViajeLabel:  { fontSize:t.fonts.sizeSm, color:t.colors.blue, fontWeight:t.fonts.weightMedium },
-  valorViajeNum:    { fontSize:"20px", fontWeight:t.fonts.weightBlack, color:t.colors.blue },
+  valorViajeNum:    { fontSize:"26px", fontWeight:t.fonts.weightBlack, color:t.colors.blue },
   resumenBox:       { background:t.colors.bgSection, borderRadius:t.radius.sm, padding:"10px 12px", marginTop:"8px" },
   resumenFila:      { display:"flex", justifyContent:"space-between", fontSize:t.fonts.sizeXs, padding:"4px 0", borderBottom:`1px solid ${t.colors.borderLight}` },
   resumenL:         { color:t.colors.textSecondary },
@@ -1591,7 +1591,7 @@ const styles = {
   metVal:           { fontSize:"17px", fontWeight:t.fonts.weightBold, margin:0 },
   gananciaResultBox:{ borderRadius:t.radius.md, padding:"16px", border:"1.5px solid", marginBottom:"14px", textAlign:"center" },
   gananciaResultLabel:{ fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, textTransform:"uppercase", letterSpacing:"0.08em", color:t.colors.textSecondary, margin:"0 0 6px" },
-  gananciaResultVal:{ fontSize:"32px", fontWeight:t.fonts.weightBlack, margin:0, letterSpacing:"-0.5px" },
+  gananciaResultVal:{ fontSize:"38px", fontWeight:t.fonts.weightBlack, margin:0, letterSpacing:"-0.5px" },
   desgloseFila:     { display:"flex", justifyContent:"space-between", fontSize:t.fonts.sizeSm, padding:"7px 0", borderBottom:`1px solid ${t.colors.borderLight}` },
   desgloseL:        { color:t.colors.textSecondary },
   desgloseV:        { fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary },
