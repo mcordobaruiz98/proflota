@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Search, ChevronDown, ChevronUp, MapPin, Plus } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard } from "../components/Skeleton";
+import {EstadoVacio } from "../components/EstadoVacio";
 
 // VIAJES — Memoria de costos por ruta
 // Catálogo de consulta rápida: agrupa los viajes por ruta y muestra la
@@ -86,30 +87,23 @@ function Viajes({ viajes = [], cargando }) {
       <div style={styles.contenido}>
 
         {/* BUSCADOR */}
-        {viajes.length > 0 && (
-          <div style={styles.buscadorBox}>
-            <Search size={16} color={t.colors.textTertiary} />
-            <input
-              type="text"
-              placeholder="Buscar ruta, empresa o producto..."
-              value={busqueda}
-              onChange={e => setBusqueda(e.target.value)}
-              style={styles.buscadorInput}
+        {viajes.length === 0 && (
+          <EstadoVacio
+            titulo="Sin viajes registrados"
+            sub="Use la calculadora para registrar su primer viaje, o escríbale al bot de Telegram."
+            btnLabel="Calcular flete"
+            onBtnClick={() => navigate("/calculadora")}
             />
-          </div>
-        )}
+          )}
 
         {/* VACÍO */}
-        {viajes.length === 0 && (
-          <div style={{ textAlign: "center", padding: "50px 20px" }}>
-            <p style={{ fontSize: "36px", margin: "0 0 8px" }}>🚛</p>
-            <p style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: "0 0 4px" }}>Aún no hay viajes</p>
-            <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "0 0 16px" }}>Cuando calcule viajes, aquí quedará la memoria de costos de cada ruta</p>
-            <button style={styles.btnCalcular} onClick={() => navigate("/calculadora")}>
-              Calcular mi primer viaje
-            </button>
-          </div>
-        )}
+        {viajes.length > 0 && viajesFiltrados.length === 0 && (
+          <EstadoVacio
+            icono="buscar"
+            titulo="Sin resultados"
+            sub={`No hay viajes que coincidan con "${busqueda}"`}
+            />
+          )}
 
         {/* RUTAS */}
         {grupos.map(g => {

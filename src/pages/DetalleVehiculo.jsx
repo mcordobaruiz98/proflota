@@ -4,6 +4,7 @@ import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Tra
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
 import { useAuth } from "../hooks/useAuth";
 import { theme as t } from "../styles/theme";
+import {EstadoVacio } from "../components/EstadoVacio";
 
 
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -650,7 +651,13 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
             {viajesFiltrados.length===0?(
               <div style={styles.vacio}>
                 <Route size={40} color={t.colors.textTertiary} strokeWidth={1.5} />
-                <p style={styles.vacioTexto}>Sin viajes registrados</p>
+                <EstadoVacio
+                  compacto
+                  titulo="Sin viajes para este vehículo"
+                  sub="Los viajes aparecerán aquí cuando use la calculadora."
+                  btnLabel="Calcular flete"
+                  onBtnClick={() => navigate("/calculadora", {state:{placa:vehiculo.placa, vehiculoId:id, volverTab:"viajes"}})}
+                />
                 <p style={styles.vacioSub}>Los viajes aparecerán aquí cuando uses la calculadora.</p>
               </div>
             ):(
@@ -769,7 +776,12 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
             {viajesMes.length===0&&(
               <div style={styles.vacio}>
                 <TrendingUp size={40} color={t.colors.textTertiary} strokeWidth={1.5} />
-                <p style={styles.vacioTexto}>Sin datos este mes</p>
+                <EstadoVacio
+                  compacto
+                  icono="cuentas"
+                  titulo="Sin datos este mes"
+                  sub="Registre viajes para ver sus cuentas aquí."
+                  />
                 <p style={styles.vacioSub}>Registra viajes para ver tus cuentas aquí.</p>
               </div>
             )}
@@ -893,9 +905,12 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                     )}
 
                     {gfVehiculo.length === 0 && !verFormGF && (
-                      <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textTertiary,textAlign:"center",padding:"12px 0",margin:0}}>
-                        Sin gastos fijos configurados
-                      </p>
+                      <EstadoVacio
+                        compacto
+                        icono="llave"
+                        titulo="Sin gastos fijos configurados"
+                        sub="Agregue cuota, seguro, parqueadero y otros gastos fijos del vehículo."
+                      />
                     )}
 
                     {gfVehiculo.map((g, i, arr) => {
@@ -1059,9 +1074,12 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                     )}
 
                     {gastosMesVeh.length === 0 && !verFormGasto && (
-                      <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textTertiary,textAlign:"center",padding:"12px 0",margin:0}}>
-                        Sin gastos adicionales este mes
-                      </p>
+                      <EstadoVacio
+                        compacto
+                        icono="llave"
+                        titulo="Sin gastos adicionales"
+                        sub="Los gastos como llantas, aceite y reparaciones aparecerán aquí."
+                      />
                     )}
 
                     {gastosMesVeh.map((g, i, arr) => (

@@ -3,6 +3,7 @@ import { useAuth }     from "../hooks/useAuth";
 import { theme as t }  from "../styles/theme";
 import {Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake, AlertCircle, Wrench} from "lucide-react";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
+import {EstadoVacio} from "../components/EstadoVacio";
 
 function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [], conductores = [], gastosFijos = [], cargando}) {
   const navigate = useNavigate();
@@ -496,20 +497,13 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
       </div>
 
       {recientes.length === 0 ? (
-        <div style={styles.vacio}>
-          <p style={styles.vacioIcono}>📋</p>
-          <p style={styles.vacioTexto}>Sin viajes registrados</p>
-          <p style={styles.vacioSub}>
-            Usa la calculadora para registrar tu primer viaje.
-          </p>
-          <button
-            style={styles.btnCalcular}
-            onClick={() => navigate("/calculadora")}
-          >
-            Calcular flete
-          </button>
-        </div>
-      ) : (
+          <EstadoVacio
+            titulo="Sin viajes registrados"
+            sub="Calcule su primer viaje y empiece a ver cuánto le queda de verdad."
+            btnLabel="Calcular flete"
+            onBtnClick={() => navigate("/calculadora")}
+          />
+          ) : (
         <div style={styles.viajesList}>
           {recientes.map((v) => {
             const positivo = (v.neta || 0) >= 0;

@@ -232,7 +232,10 @@ function Comparativo({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehi
         {/* RANKING */}
         {ordenados.length === 0 && (
           <div style={{ textAlign: "center", padding: "40px 20px" }}>
-            <p style={{ fontSize: t.fonts.sizeSm, color: t.colors.textTertiary }}>No hay vehículos registrados</p>
+            <EstadoVacio
+              titulo="Necesita al menos 2 vehículos"
+              sub="Registre su flota para comparar rendimiento, costos y ganancia entre camiones."
+            />
           </div>
         )}
 
