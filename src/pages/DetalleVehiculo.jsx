@@ -4,7 +4,7 @@ import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Tra
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
 import { useAuth } from "../hooks/useAuth";
 import { theme as t } from "../styles/theme";
-import {EstadoVacio } from "../components/EstadoVacio";
+import   EstadoVacio  from "../components/EstadoVacio";
 
 
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
