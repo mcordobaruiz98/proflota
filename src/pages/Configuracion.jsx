@@ -13,6 +13,13 @@ function Configuracion({mostrarToast}) {
   const [eliminando, setEliminando] = useState(false);
   const [codigoTelegram, setCodigoTelegram] = useState(null);
   const [generandoCodigo, setGenerandoCodigo] = useState(false);
+  const [perfilFact, setPerfilFact] = useState({
+    nombreCompleto: "", tipoDoc: "CC", numeroDoc: "",
+    direccion: "", ciudad: "", telefono: "", correo: "",
+    banco: "", tipoCuenta: "Ahorros", numeroCuenta: "", titularCuenta: "",
+  });
+  const [guardandoPerfil, setGuardandoPerfil] = useState(false);
+
   
 
   const manejarEliminarCuenta = async () => {
@@ -83,6 +90,17 @@ function Configuracion({mostrarToast}) {
     }).catch(()=>{});
   }, [usuario?.uid]);
 
+  useEffect(() => {
+    if (!usuario?.uid) return;
+    getDoc(doc(db, "usuarios", usuario.uid)).then(snap => {
+      if (snap.exists()) {
+        const data = snap.data();
+        if (data.diaLiquidacion !== undefined) setDiaLiq(String(data.diaLiquidacion));
+        if (data.perfilFacturacion) setPerfilFact(prev => ({ ...prev, ...data.perfilFacturacion }));
+      }
+    }).catch(()=>{});
+  }, [usuario?.uid]);
+
   const guardarDiaLiq = async (valor) => {
     setDiaLiq(valor);
     try {
@@ -110,6 +128,26 @@ function Configuracion({mostrarToast}) {
       setGenerandoCodigo(false);
     }
   };
+
+  const guardarPerfilFact = async (campo, valor) => {
+    const nuevo = { ...perfilFact, [campo]: valor };
+    if (campo === "nombreCompleto" && !perfilFact.titularCuenta) {
+      nuevo.titularCuenta = valor;
+    }
+    setPerfilFact(nuevo);
+    setGuardandoPerfil(true);
+    try {
+      await setDoc(doc(db, "usuarios", usuario.uid), {
+        perfilFacturacion: nuevo,
+      }, { merge: true });
+    } catch(err) {
+      mostrarToast("Error al guardar", "error");
+    } finally {
+      setGuardandoPerfil(false);
+    }
+  };
+
+  const perfilCompleto = perfilFact.nombreCompleto && perfilFact.numeroDoc && perfilFact.ciudad && perfilFact.telefono;
 
   return (
     <div style={styles.pantalla}>
@@ -216,6 +254,154 @@ function Configuracion({mostrarToast}) {
             </div>
           )}
         </div>
+
+        {/* PERFIL DE FACTURACIÓN */}
+      <div style={styles.seccionTitulo}>Datos de facturación</div>
+      <div style={{...styles.seccion, padding:"16px 20px"}}>
+        <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 12px", lineHeight:1.5}}>
+          Estos datos se usarán para generar sus cuentas de cobro. Se llenan una sola vez.
+        </p>
+ 
+        {/* Estado */}
+        <div style={{
+          padding:"9px 12px",
+          background: perfilCompleto ? t.colors.greenSoft : "#FEF3C7",
+          border: `1.5px solid ${perfilCompleto ? t.colors.greenBorder : "#F59E0B33"}`,
+          borderRadius: t.radius.sm,
+          marginBottom: "16px",
+          fontSize: t.fonts.sizeXs,
+          color: perfilCompleto ? t.colors.green : "#92400E",
+          fontWeight: t.fonts.weightSemibold,
+        }}>
+          {perfilCompleto ? "✓ Listo para generar cuentas de cobro" : "⚠️ Complete los campos obligatorios (*) para poder generar cuentas de cobro"}
+        </div>
+ 
+        {/* IDENTIFICACIÓN */}
+        <p style={{fontSize:"10px", fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"10px 0 8px"}}>👤 Identificación</p>
+ 
+        <div style={{marginBottom:"12px"}}>
+          <label style={styles.label}>Nombre completo *</label>
+          <input type="text" placeholder="Mario Córdoba Ruiz"
+            value={perfilFact.nombreCompleto}
+            onChange={(e)=>setPerfilFact({...perfilFact, nombreCompleto: e.target.value})}
+            onBlur={(e)=>guardarPerfilFact("nombreCompleto", e.target.value)}
+            style={styles.inputPerfil}/>
+        </div>
+ 
+        <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"12px"}}>
+          <div>
+            <label style={styles.label}>Tipo doc.</label>
+            <select
+              value={perfilFact.tipoDoc}
+              onChange={(e)=>guardarPerfilFact("tipoDoc", e.target.value)}
+              style={styles.inputPerfil}
+            >
+              <option value="CC">Cédula de Ciudadanía</option>
+              <option value="CE">Cédula de Extranjería Colombiana</option>
+              <option value="CX">Cédula Extranjera</option>
+              <option value="DE">Documento Extranjero</option>
+              <option value="PA">Pasaporte</option>
+              <option value="RC">Registro Civil</option>
+              <option value="TI">Tarjeta de Identidad</option>
+              <option value="NIT">NIT</option>
+            </select>
+          </div>
+          <div>
+            <label style={styles.label}>Número *</label>
+            <input type="text" placeholder="1234567890"
+              value={perfilFact.numeroDoc}
+              onChange={(e)=>setPerfilFact({...perfilFact, numeroDoc: e.target.value})}
+              onBlur={(e)=>guardarPerfilFact("numeroDoc", e.target.value)}
+              style={styles.inputPerfil}/>
+          </div>
+        </div>
+ 
+        {/* UBICACIÓN */}
+        <p style={{fontSize:"10px", fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"14px 0 8px"}}>📍 Ubicación</p>
+ 
+        <div style={{marginBottom:"12px"}}>
+          <label style={styles.label}>Dirección</label>
+          <input type="text" placeholder="Cra 45 #10-20"
+            value={perfilFact.direccion}
+            onChange={(e)=>setPerfilFact({...perfilFact, direccion: e.target.value})}
+            onBlur={(e)=>guardarPerfilFact("direccion", e.target.value)}
+            style={styles.inputPerfil}/>
+        </div>
+ 
+        <div style={{marginBottom:"12px"}}>
+          <label style={styles.label}>Ciudad *</label>
+          <input type="text" placeholder="Barranquilla"
+            value={perfilFact.ciudad}
+            onChange={(e)=>setPerfilFact({...perfilFact, ciudad: e.target.value})}
+            onBlur={(e)=>guardarPerfilFact("ciudad", e.target.value)}
+            style={styles.inputPerfil}/>
+        </div>
+ 
+        {/* CONTACTO */}
+        <p style={{fontSize:"10px", fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"14px 0 8px"}}>📞 Contacto</p>
+ 
+        <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"12px"}}>
+          <div>
+            <label style={styles.label}>Teléfono *</label>
+            <input type="tel" placeholder="3005551234"
+              value={perfilFact.telefono}
+              onChange={(e)=>setPerfilFact({...perfilFact, telefono: e.target.value})}
+              onBlur={(e)=>guardarPerfilFact("telefono", e.target.value)}
+              style={styles.inputPerfil}/>
+          </div>
+          <div>
+            <label style={styles.label}>Correo</label>
+            <input type="email" placeholder="correo@ejemplo.com"
+              value={perfilFact.correo}
+              onChange={(e)=>setPerfilFact({...perfilFact, correo: e.target.value})}
+              onBlur={(e)=>guardarPerfilFact("correo", e.target.value)}
+              style={styles.inputPerfil}/>
+          </div>
+        </div>
+ 
+        {/* CUENTA BANCARIA */}
+        <p style={{fontSize:"10px", fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"14px 0 8px"}}>🏦 Cuenta bancaria</p>
+ 
+        <div style={{marginBottom:"12px"}}>
+          <label style={styles.label}>Banco</label>
+          <input type="text" placeholder="Bancolombia, Davivienda, Nequi..."
+            value={perfilFact.banco}
+            onChange={(e)=>setPerfilFact({...perfilFact, banco: e.target.value})}
+            onBlur={(e)=>guardarPerfilFact("banco", e.target.value)}
+            style={styles.inputPerfil}/>
+        </div>
+ 
+        <div style={{display:"grid", gridTemplateColumns:"1fr 2fr", gap:"10px", marginBottom:"12px"}}>
+          <div>
+            <label style={styles.label}>Tipo</label>
+            <select
+              value={perfilFact.tipoCuenta}
+              onChange={(e)=>guardarPerfilFact("tipoCuenta", e.target.value)}
+              style={styles.inputPerfil}
+            >
+              <option value="Ahorros">Ahorros</option>
+              <option value="Corriente">Corriente</option>
+            </select>
+          </div>
+          <div>
+            <label style={styles.label}>Número de cuenta</label>
+            <input type="text" placeholder="12345678901"
+              value={perfilFact.numeroCuenta}
+              onChange={(e)=>setPerfilFact({...perfilFact, numeroCuenta: e.target.value})}
+              onBlur={(e)=>guardarPerfilFact("numeroCuenta", e.target.value)}
+              style={styles.inputPerfil}/>
+          </div>
+        </div>
+ 
+        <div style={{marginBottom:"6px"}}>
+          <label style={styles.label}>Titular de la cuenta</label>
+          <input type="text" placeholder="Nombre del titular"
+            value={perfilFact.titularCuenta}
+            onChange={(e)=>setPerfilFact({...perfilFact, titularCuenta: e.target.value})}
+            onBlur={(e)=>guardarPerfilFact("titularCuenta", e.target.value)}
+            style={styles.inputPerfil}/>
+        </div>
+      </div>
 
       {/* DATOS */}
       <div style={styles.seccionTitulo}>Datos</div>
@@ -332,6 +518,7 @@ const styles = {
   filaIcono:     { fontSize:"20px", width:"38px", height:"38px", background:t.colors.bgSection, borderRadius:t.radius.sm, display:"flex", alignItems:"center", justifyContent:"center" },
   filaLabel:     { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0 },
   filaSub:       { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0" },
+   inputPerfil:  { width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, background: t.colors.bgPrimary, color: t.colors.textPrimary, fontSize: t.fonts.sizeSm, outline: "none"},
   toggle:        { width:"44px", height:"24px", borderRadius:"12px", border:"none", cursor:"pointer", position:"relative", transition:"background 0.2s", flexShrink:0 },
   toggleCircle:  { width:"20px", height:"20px", background:"white", borderRadius:"50%", position:"absolute", top:"2px", transition:"transform 0.2s", boxShadow:"0 1px 3px rgba(0,0,0,0.2)" },
 };
