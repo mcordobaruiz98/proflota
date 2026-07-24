@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Truck, TrendingUp, Fuel, Route, DollarSign } from "lucide-react";
 import { theme as t } from "../styles/theme";
+import EstadoVacio from "../components/EstadoVacio";
 
 function Comparativo({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo = [] }) {
   const navigate = useNavigate();
