@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth }     from "../hooks/useAuth";
 import { theme as t }  from "../styles/theme";
-import {Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake, AlertCircle, Wrench} from "lucide-react";
+import { Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake, AlertCircle, Wrench} from "lucide-react";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
-import {EstadoVacio} from "../components/EstadoVacio";
+import   EstadoVacio from "../components/EstadoVacio";
 
 function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [], conductores = [], gastosFijos = [], cargando}) {
   const navigate = useNavigate();
