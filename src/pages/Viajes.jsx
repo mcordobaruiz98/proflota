@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Search, ChevronDown, ChevronUp, MapPin, Plus } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard } from "../components/Skeleton";
-import {EstadoVacio } from "../components/EstadoVacio";
+import   EstadoVacio  from "../components/EstadoVacio";
 
 // VIAJES — Memoria de costos por ruta
 // Catálogo de consulta rápida: agrupa los viajes por ruta y muestra la
