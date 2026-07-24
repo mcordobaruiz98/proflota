@@ -13,14 +13,8 @@ function Configuracion({mostrarToast}) {
   const [eliminando, setEliminando] = useState(false);
   const [codigoTelegram, setCodigoTelegram] = useState(null);
   const [generandoCodigo, setGenerandoCodigo] = useState(false);
-  const [perfilFact, setPerfilFact] = useState({
-    nombreCompleto: "", tipoDoc: "CC", numeroDoc: "",
-    direccion: "", ciudad: "", telefono: "", correo: "",
-    banco: "", tipoCuenta: "Ahorros", numeroCuenta: "", titularCuenta: "",
-  });
+  const [perfilFact, setPerfilFact] = useState({ nombreCompleto: "", tipoDoc: "CC", numeroDoc: "", direccion: "", ciudad: "", telefono: "", correo: "", banco: "", tipoCuenta: "Ahorros", numeroCuenta: "", titularCuenta: "",});
   const [guardandoPerfil, setGuardandoPerfil] = useState(false);
-
-  
 
   const manejarEliminarCuenta = async () => {
     if (textoConfirm !== "ELIMINAR") {
@@ -84,15 +78,6 @@ function Configuracion({mostrarToast}) {
   useEffect(() => {
     if (!usuario?.uid) return;
     getDoc(doc(db, "usuarios", usuario.uid)).then(snap => {
-      if (snap.exists() && snap.data().diaLiquidacion !== undefined) {
-        setDiaLiq(String(snap.data().diaLiquidacion));
-      }
-    }).catch(()=>{});
-  }, [usuario?.uid]);
-
-  useEffect(() => {
-    if (!usuario?.uid) return;
-    getDoc(doc(db, "usuarios", usuario.uid)).then(snap => {
       if (snap.exists()) {
         const data = snap.data();
         if (data.diaLiquidacion !== undefined) setDiaLiq(String(data.diaLiquidacion));
@@ -100,6 +85,8 @@ function Configuracion({mostrarToast}) {
       }
     }).catch(()=>{});
   }, [usuario?.uid]);
+
+  
 
   const guardarDiaLiq = async (valor) => {
     setDiaLiq(valor);
@@ -146,7 +133,7 @@ function Configuracion({mostrarToast}) {
       setGuardandoPerfil(false);
     }
   };
-
+ 
   const perfilCompleto = perfilFact.nombreCompleto && perfilFact.numeroDoc && perfilFact.ciudad && perfilFact.telefono;
 
   return (
@@ -255,7 +242,7 @@ function Configuracion({mostrarToast}) {
           )}
         </div>
 
-        {/* PERFIL DE FACTURACIÓN */}
+      {/* PERFIL DE FACTURACIÓN */}
       <div style={styles.seccionTitulo}>Datos de facturación</div>
       <div style={{...styles.seccion, padding:"16px 20px"}}>
         <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 12px", lineHeight:1.5}}>
@@ -401,7 +388,7 @@ function Configuracion({mostrarToast}) {
             onBlur={(e)=>guardarPerfilFact("titularCuenta", e.target.value)}
             style={styles.inputPerfil}/>
         </div>
-      </div>
+      </div>  
 
       {/* DATOS */}
       <div style={styles.seccionTitulo}>Datos</div>
@@ -518,9 +505,19 @@ const styles = {
   filaIcono:     { fontSize:"20px", width:"38px", height:"38px", background:t.colors.bgSection, borderRadius:t.radius.sm, display:"flex", alignItems:"center", justifyContent:"center" },
   filaLabel:     { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0 },
   filaSub:       { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0" },
-   inputPerfil:  { width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, background: t.colors.bgPrimary, color: t.colors.textPrimary, fontSize: t.fonts.sizeSm, outline: "none"},
   toggle:        { width:"44px", height:"24px", borderRadius:"12px", border:"none", cursor:"pointer", position:"relative", transition:"background 0.2s", flexShrink:0 },
   toggleCircle:  { width:"20px", height:"20px", background:"white", borderRadius:"50%", position:"absolute", top:"2px", transition:"transform 0.2s", boxShadow:"0 1px 3px rgba(0,0,0,0.2)" },
+  inputPerfil: {
+    width: "100%",
+    boxSizing: "border-box",
+    padding: "10px 12px",
+    borderRadius: t.radius.sm,
+    border: `1.5px solid ${t.colors.border}`,
+    background: t.colors.bgPrimary,
+    color: t.colors.textPrimary,
+    fontSize: t.fonts.sizeSm,
+    outline: "none",
+  },
 };
 
 export default Configuracion;
