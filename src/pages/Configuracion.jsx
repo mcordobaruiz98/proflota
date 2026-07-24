@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { subirPeajes } from "../scripts/subirPeajes";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { theme as t } from "../styles/theme";
 
 function Configuracion({mostrarToast}) {
   const navigate = useNavigate();
@@ -13,7 +14,11 @@ function Configuracion({mostrarToast}) {
   const [eliminando, setEliminando] = useState(false);
   const [codigoTelegram, setCodigoTelegram] = useState(null);
   const [generandoCodigo, setGenerandoCodigo] = useState(false);
-  const [perfilFact, setPerfilFact] = useState({ nombreCompleto: "", tipoDoc: "CC", numeroDoc: "", direccion: "", ciudad: "", telefono: "", correo: "", banco: "", tipoCuenta: "Ahorros", numeroCuenta: "", titularCuenta: "",});
+  const [perfilFact, setPerfilFact] = useState({
+    nombreCompleto: "", tipoDoc: "CC", numeroDoc: "",
+    direccion: "", ciudad: "", telefono: "", correo: "",
+    banco: "", tipoCuenta: "Ahorros", numeroCuenta: "", titularCuenta: "",
+  });
   const [guardandoPerfil, setGuardandoPerfil] = useState(false);
 
   const manejarEliminarCuenta = async () => {
@@ -24,7 +29,6 @@ function Configuracion({mostrarToast}) {
     setEliminando(true);
     try {
       await eliminarCuenta();
-      // Al eliminar la cuenta, onAuthStateChanged redirige solo al login
     } catch (err) {
       if (err.code === "auth/requires-recent-login") {
         mostrarToast("Por seguridad, cierra sesión, vuelve a entrar y repite la eliminación", "error");
@@ -75,6 +79,7 @@ function Configuracion({mostrarToast}) {
 
   const [diaLiq, setDiaLiq] = useState("");
 
+  // Cargar día de liquidación y perfil de facturación
   useEffect(() => {
     if (!usuario?.uid) return;
     getDoc(doc(db, "usuarios", usuario.uid)).then(snap => {
@@ -85,8 +90,6 @@ function Configuracion({mostrarToast}) {
       }
     }).catch(()=>{});
   }, [usuario?.uid]);
-
-  
 
   const guardarDiaLiq = async (valor) => {
     setDiaLiq(valor);
@@ -133,7 +136,7 @@ function Configuracion({mostrarToast}) {
       setGuardandoPerfil(false);
     }
   };
- 
+
   const perfilCompleto = perfilFact.nombreCompleto && perfilFact.numeroDoc && perfilFact.ciudad && perfilFact.telefono;
 
   return (
@@ -178,7 +181,7 @@ function Configuracion({mostrarToast}) {
             key={op.label}
             style={{
               ...styles.fila,
-              borderBottom: i === arr.length - 1 ? "none" : "1px solid #f5f5f5",
+              borderBottom: i === arr.length - 1 ? "none" : `1px solid ${t.colors.borderLight}`,
             }}
           >
             <div style={styles.filaIzq}>
@@ -191,7 +194,7 @@ function Configuracion({mostrarToast}) {
             <button
               style={{
                 ...styles.toggle,
-                background: op.valor ? "#2563eb" : "#e5e7eb",
+                background: op.valor ? t.colors.blue : "#e5e7eb",
               }}
               onClick={op.accion}
             >
@@ -205,42 +208,43 @@ function Configuracion({mostrarToast}) {
       </div>
 
       {/* VINCULAR TELEGRAM */}
-        <div style={{...styles.seccion, padding:"16px 20px"}}>
-          <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 4px"}}>🤖 Registrar viajes por Telegram</p>
-          <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 12px", lineHeight:1.5}}>
-            Registre sus viajes escribiéndole al bot de NAVIRA, sin abrir la app.
-            El bot conoce sus vehículos y rutas, y le calcula la ganancia al instante.
-          </p>
- 
-          {!codigoTelegram ? (
-            <button
-              style={{width:"100%", padding:"12px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer"}}
-              onClick={generarCodigoTelegram}
-              disabled={generandoCodigo}
-            >
-              {generandoCodigo ? "Generando..." : "Generar código de vinculación"}
-            </button>
-          ) : (
-            <div>
-              <div style={{textAlign:"center", padding:"14px", background:t.colors.bgSection, borderRadius:t.radius.md, marginBottom:"10px"}}>
-                <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 4px"}}>Su código:</p>
-                <p style={{fontSize:"26px", fontWeight:t.fonts.weightBlack, color:t.colors.green, letterSpacing:"4px", margin:0}}>{codigoTelegram}</p>
-              </div>
-              <ol style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, paddingLeft:"18px", margin:"0 0 10px", lineHeight:1.7}}>
-                <li>Abra Telegram y busque <b style={{color:t.colors.textPrimary}}>@Naviraflota_bot</b></li>
-                <li>Escríbale: <b style={{color:t.colors.textPrimary}}>/vincular {codigoTelegram}</b></li>
-                <li>Listo — escriba /nuevo para su primer viaje</li>
-              </ol>
-              <a
-                href={`https://t.me/Naviraflota_bot`}
-                target="_blank" rel="noreferrer"
-                style={{display:"block", textAlign:"center", padding:"11px", background:t.colors.greenSoft, border:`1.5px solid ${t.colors.greenBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.green, textDecoration:"none"}}
-              >
-                Abrir el bot en Telegram
-              </a>
+      <div style={styles.seccionTitulo}>Registro por chat</div>
+      <div style={{...styles.seccion, padding:"16px 20px"}}>
+        <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 4px"}}>🤖 Registrar viajes por Telegram</p>
+        <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 12px", lineHeight:1.5}}>
+          Registre sus viajes escribiéndole al bot de NAVIRA, sin abrir la app.
+          El bot conoce sus vehículos y rutas, y le calcula la ganancia al instante.
+        </p>
+
+        {!codigoTelegram ? (
+          <button
+            style={{width:"100%", padding:"12px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer"}}
+            onClick={generarCodigoTelegram}
+            disabled={generandoCodigo}
+          >
+            {generandoCodigo ? "Generando..." : "Generar código de vinculación"}
+          </button>
+        ) : (
+          <div>
+            <div style={{textAlign:"center", padding:"14px", background:t.colors.bgSection, borderRadius:t.radius.md, marginBottom:"10px"}}>
+              <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 4px"}}>Su código:</p>
+              <p style={{fontSize:"26px", fontWeight:t.fonts.weightBlack, color:t.colors.green, letterSpacing:"4px", margin:0}}>{codigoTelegram}</p>
             </div>
-          )}
-        </div>
+            <ol style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, paddingLeft:"18px", margin:"0 0 10px", lineHeight:1.7}}>
+              <li>Abra Telegram y busque <b style={{color:t.colors.textPrimary}}>@Naviraflota_bot</b></li>
+              <li>Escríbale: <b style={{color:t.colors.textPrimary}}>/vincular {codigoTelegram}</b></li>
+              <li>Listo — escriba /nuevo para su primer viaje</li>
+            </ol>
+            <a
+              href="https://t.me/Naviraflota_bot"
+              target="_blank" rel="noreferrer"
+              style={{display:"block", textAlign:"center", padding:"11px", background:t.colors.greenSoft, border:`1.5px solid ${t.colors.greenBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.green, textDecoration:"none"}}
+            >
+              Abrir el bot en Telegram
+            </a>
+          </div>
+        )}
+      </div>
 
       {/* PERFIL DE FACTURACIÓN */}
       <div style={styles.seccionTitulo}>Datos de facturación</div>
@@ -248,8 +252,7 @@ function Configuracion({mostrarToast}) {
         <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 12px", lineHeight:1.5}}>
           Estos datos se usarán para generar sus cuentas de cobro. Se llenan una sola vez.
         </p>
- 
-        {/* Estado */}
+
         <div style={{
           padding:"9px 12px",
           background: perfilCompleto ? t.colors.greenSoft : "#FEF3C7",
@@ -262,10 +265,9 @@ function Configuracion({mostrarToast}) {
         }}>
           {perfilCompleto ? "✓ Listo para generar cuentas de cobro" : "⚠️ Complete los campos obligatorios (*) para poder generar cuentas de cobro"}
         </div>
- 
-        {/* IDENTIFICACIÓN */}
-        <p style={{fontSize:"10px", fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"10px 0 8px"}}>👤 Identificación</p>
- 
+
+        <p style={styles.subSeccion}>👤 Identificación</p>
+
         <div style={{marginBottom:"12px"}}>
           <label style={styles.label}>Nombre completo *</label>
           <input type="text" placeholder="Mario Córdoba Ruiz"
@@ -274,7 +276,7 @@ function Configuracion({mostrarToast}) {
             onBlur={(e)=>guardarPerfilFact("nombreCompleto", e.target.value)}
             style={styles.inputPerfil}/>
         </div>
- 
+
         <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"12px"}}>
           <div>
             <label style={styles.label}>Tipo doc.</label>
@@ -284,7 +286,7 @@ function Configuracion({mostrarToast}) {
               style={styles.inputPerfil}
             >
               <option value="CC">Cédula de Ciudadanía</option>
-              <option value="CE">Cédula de Extranjería Colombiana</option>
+              <option value="CE">Cédula de Extranjería Col.</option>
               <option value="CX">Cédula Extranjera</option>
               <option value="DE">Documento Extranjero</option>
               <option value="PA">Pasaporte</option>
@@ -302,10 +304,9 @@ function Configuracion({mostrarToast}) {
               style={styles.inputPerfil}/>
           </div>
         </div>
- 
-        {/* UBICACIÓN */}
-        <p style={{fontSize:"10px", fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"14px 0 8px"}}>📍 Ubicación</p>
- 
+
+        <p style={styles.subSeccion}>📍 Ubicación</p>
+
         <div style={{marginBottom:"12px"}}>
           <label style={styles.label}>Dirección</label>
           <input type="text" placeholder="Cra 45 #10-20"
@@ -314,7 +315,7 @@ function Configuracion({mostrarToast}) {
             onBlur={(e)=>guardarPerfilFact("direccion", e.target.value)}
             style={styles.inputPerfil}/>
         </div>
- 
+
         <div style={{marginBottom:"12px"}}>
           <label style={styles.label}>Ciudad *</label>
           <input type="text" placeholder="Barranquilla"
@@ -323,10 +324,9 @@ function Configuracion({mostrarToast}) {
             onBlur={(e)=>guardarPerfilFact("ciudad", e.target.value)}
             style={styles.inputPerfil}/>
         </div>
- 
-        {/* CONTACTO */}
-        <p style={{fontSize:"10px", fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"14px 0 8px"}}>📞 Contacto</p>
- 
+
+        <p style={styles.subSeccion}>📞 Contacto</p>
+
         <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"12px"}}>
           <div>
             <label style={styles.label}>Teléfono *</label>
@@ -345,10 +345,9 @@ function Configuracion({mostrarToast}) {
               style={styles.inputPerfil}/>
           </div>
         </div>
- 
-        {/* CUENTA BANCARIA */}
-        <p style={{fontSize:"10px", fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"14px 0 8px"}}>🏦 Cuenta bancaria</p>
- 
+
+        <p style={styles.subSeccion}>🏦 Cuenta bancaria</p>
+
         <div style={{marginBottom:"12px"}}>
           <label style={styles.label}>Banco</label>
           <input type="text" placeholder="Bancolombia, Davivienda, Nequi..."
@@ -357,7 +356,7 @@ function Configuracion({mostrarToast}) {
             onBlur={(e)=>guardarPerfilFact("banco", e.target.value)}
             style={styles.inputPerfil}/>
         </div>
- 
+
         <div style={{display:"grid", gridTemplateColumns:"1fr 2fr", gap:"10px", marginBottom:"12px"}}>
           <div>
             <label style={styles.label}>Tipo</label>
@@ -379,7 +378,7 @@ function Configuracion({mostrarToast}) {
               style={styles.inputPerfil}/>
           </div>
         </div>
- 
+
         <div style={{marginBottom:"6px"}}>
           <label style={styles.label}>Titular de la cuenta</label>
           <input type="text" placeholder="Nombre del titular"
@@ -388,7 +387,30 @@ function Configuracion({mostrarToast}) {
             onBlur={(e)=>guardarPerfilFact("titularCuenta", e.target.value)}
             style={styles.inputPerfil}/>
         </div>
-      </div>  
+      </div>
+
+      {/* DÍA DE LIQUIDACIÓN */}
+      <div style={styles.seccionTitulo}>Liquidación de conductores</div>
+      <div style={styles.seccion}>
+        <div style={{padding:"12px 16px"}}>
+          <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textPrimary,fontWeight:t.fonts.weightSemibold,margin:"0 0 4px"}}>Día de pago semanal</p>
+          <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"0 0 10px"}}>Ese día aparecerá un recordatorio de liquidación en el inicio</p>
+          <select
+            value={diaLiq}
+            onChange={e=>guardarDiaLiq(e.target.value)}
+            style={styles.inputPerfil}
+          >
+            <option value="">Sin recordatorio</option>
+            <option value="1">Lunes</option>
+            <option value="2">Martes</option>
+            <option value="3">Miércoles</option>
+            <option value="4">Jueves</option>
+            <option value="5">Viernes</option>
+            <option value="6">Sábado</option>
+            <option value="0">Domingo</option>
+          </select>
+        </div>
+      </div>
 
       {/* DATOS */}
       <div style={styles.seccionTitulo}>Datos</div>
@@ -405,7 +427,7 @@ function Configuracion({mostrarToast}) {
           <div style={styles.filaIzq}>
             <span style={styles.filaIcono}>🗑️</span>
             <div>
-              <p style={{ ...styles.filaLabel, color: "#ef4444" }}>
+              <p style={{ ...styles.filaLabel, color: t.colors.red }}>
                 Limpiar caché local
               </p>
               <p style={styles.filaSub}>Borra datos temporales del dispositivo</p>
@@ -414,32 +436,9 @@ function Configuracion({mostrarToast}) {
         </button>
       </div>
 
-      {/* DÍA DE LIQUIDACIÓN */}
-      <div style={styles.seccionTitulo}>Liquidación de conductores</div>
-      <div style={styles.seccion}>
-        <div style={{padding:"12px 16px"}}>
-          <p style={{fontSize:"13px",color:"#fff",fontWeight:600,margin:"0 0 4px"}}>Día de pago semanal</p>
-          <p style={{fontSize:"12px",color:"#8B9CB3",margin:"0 0 10px"}}>Ese día aparecerá un recordatorio de liquidación en el inicio</p>
-          <select
-            value={diaLiq}
-            onChange={e=>guardarDiaLiq(e.target.value)}
-            style={{width:"100%",boxSizing:"border-box",padding:"11px 12px",borderRadius:"8px",border:"1.5px solid #1E3A5F",background:"#0A1A2F",color:"#fff",fontSize:"14px",outline:"none"}}
-          >
-            <option value="">Sin recordatorio</option>
-            <option value="1">Lunes</option>
-            <option value="2">Martes</option>
-            <option value="3">Miércoles</option>
-            <option value="4">Jueves</option>
-            <option value="5">Viernes</option>
-            <option value="6">Sábado</option>
-            <option value="0">Domingo</option>
-          </select>
-        </div>
-      </div>
-
-      {/* ZONA DE PELIGRO — Derecho de supresión (Ley 1581/2012) */}
-      <div style={{...styles.seccionTitulo, color:"#ef4444"}}>Zona de peligro</div>
-      <div style={{...styles.seccion, border:"1.5px solid #ef444433"}}>
+      {/* ZONA DE PELIGRO */}
+      <div style={{...styles.seccionTitulo, color:t.colors.red}}>Zona de peligro</div>
+      <div style={{...styles.seccion, border:`1.5px solid ${t.colors.redBorder}`}}>
         {!confirmaEliminar ? (
           <button
             style={{ ...styles.filaBtn, borderBottom: "none" }}
@@ -448,36 +447,36 @@ function Configuracion({mostrarToast}) {
             <div style={styles.filaIzq}>
               <span style={styles.filaIcono}>⚠️</span>
               <div>
-                <p style={{ ...styles.filaLabel, color: "#ef4444" }}>Eliminar mi cuenta</p>
+                <p style={{ ...styles.filaLabel, color: t.colors.red }}>Eliminar mi cuenta</p>
                 <p style={styles.filaSub}>Borra permanentemente todos tus datos: vehículos, viajes, conductores y archivos</p>
               </div>
             </div>
           </button>
         ) : (
           <div style={{padding:"14px 16px"}}>
-            <p style={{fontSize:"13px", color:"#ef4444", fontWeight:700, margin:"0 0 6px"}}>
+            <p style={{fontSize:t.fonts.sizeSm, color:t.colors.red, fontWeight:t.fonts.weightBold, margin:"0 0 6px"}}>
               Esta acción es permanente e irreversible
             </p>
-            <p style={{fontSize:"12px", color:"#8B9CB3", margin:"0 0 12px", lineHeight:1.5}}>
-              Se eliminarán todos tus vehículos, viajes, conductores, gastos, rutas frecuentes, archivos adjuntos y tu cuenta de acceso. Escribe <strong style={{color:"#ef4444"}}>ELIMINAR</strong> para confirmar.
+            <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 12px", lineHeight:1.5}}>
+              Se eliminarán todos tus vehículos, viajes, conductores, gastos, rutas frecuentes, archivos adjuntos y tu cuenta de acceso. Escribe <strong style={{color:t.colors.red}}>ELIMINAR</strong> para confirmar.
             </p>
             <input
               type="text"
               placeholder="Escribe ELIMINAR"
               value={textoConfirm}
               onChange={e=>setTextoConfirm(e.target.value.toUpperCase())}
-              style={{width:"100%",boxSizing:"border-box",padding:"11px 12px",borderRadius:"8px",border:"1.5px solid #ef444455",background:"transparent",color:"#fff",fontSize:"14px",fontWeight:700,letterSpacing:"2px",textAlign:"center",outline:"none",marginBottom:"10px"}}
+              style={{...styles.inputPerfil, border:`1.5px solid ${t.colors.redBorder}`, fontWeight:t.fonts.weightBold, letterSpacing:"2px", textAlign:"center", marginBottom:"10px"}}
             />
             <div style={{display:"flex",gap:"8px"}}>
               <button
-                style={{flex:1,padding:"11px",background: textoConfirm==="ELIMINAR" ? "#ef4444" : "#ef444455",color:"#fff",border:"none",borderRadius:"8px",fontSize:"13px",fontWeight:700,cursor:"pointer",opacity:eliminando?0.6:1}}
+                style={{flex:1, padding:"11px", background: textoConfirm==="ELIMINAR" ? t.colors.red : `${t.colors.red}55`, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:eliminando?0.6:1}}
                 onClick={manejarEliminarCuenta}
                 disabled={eliminando}
               >
-                {eliminando ? "Eliminando..." : "Eliminar definitivamente"}
+                {eliminando ? <><span className="navira-spinner" /> Eliminando...</> : "Eliminar definitivamente"}
               </button>
               <button
-                style={{padding:"11px 16px",background:"none",border:"1px solid #1E3A5F",borderRadius:"8px",fontSize:"13px",color:"#8B9CB3",cursor:"pointer"}}
+                style={{padding:"11px 16px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, cursor:"pointer"}}
                 onClick={()=>{setConfirmaEliminar(false); setTextoConfirm("");}}
               >
                 Cancelar
@@ -490,8 +489,6 @@ function Configuracion({mostrarToast}) {
   );
 }
 
-import { theme as t } from "../styles/theme";
-
 const styles = {
   pantalla:      { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:        { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"20px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
@@ -499,25 +496,17 @@ const styles = {
   titulo:        { fontSize:"20px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
   seccionTitulo: { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", padding:"16px 20px 8px" },
   seccion:       { background:t.colors.bgCard, borderRadius:t.radius.lg, margin:"0 16px 4px", overflow:"hidden", boxShadow:t.shadows.card },
+  subSeccion:    { fontSize:"10px", fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"14px 0 8px" },
   fila:          { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"14px 16px", borderBottom:`1px solid ${t.colors.borderLight}` },
   filaBtn:       { width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:"14px 16px", background:"none", border:"none", cursor:"pointer", textAlign:"left", borderBottom:`1px solid ${t.colors.borderLight}` },
   filaIzq:       { display:"flex", alignItems:"center", gap:"12px" },
   filaIcono:     { fontSize:"20px", width:"38px", height:"38px", background:t.colors.bgSection, borderRadius:t.radius.sm, display:"flex", alignItems:"center", justifyContent:"center" },
   filaLabel:     { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0 },
   filaSub:       { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0" },
+  label:         { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, display:"block", marginBottom:"4px" },
+  inputPerfil:   { width:"100%", boxSizing:"border-box", padding:"10px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, background:t.colors.bgPrimary, color:t.colors.textPrimary, fontSize:t.fonts.sizeSm, outline:"none" },
   toggle:        { width:"44px", height:"24px", borderRadius:"12px", border:"none", cursor:"pointer", position:"relative", transition:"background 0.2s", flexShrink:0 },
   toggleCircle:  { width:"20px", height:"20px", background:"white", borderRadius:"50%", position:"absolute", top:"2px", transition:"transform 0.2s", boxShadow:"0 1px 3px rgba(0,0,0,0.2)" },
-  inputPerfil: {
-    width: "100%",
-    boxSizing: "border-box",
-    padding: "10px 12px",
-    borderRadius: t.radius.sm,
-    border: `1.5px solid ${t.colors.border}`,
-    background: t.colors.bgPrimary,
-    color: t.colors.textPrimary,
-    fontSize: t.fonts.sizeSm,
-    outline: "none",
-  },
 };
 
 export default Configuracion;
