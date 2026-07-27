@@ -30,6 +30,7 @@ import Filtros          from "./pages/mantenimiento/Filtros";
 import Frenos           from "./pages/mantenimiento/Frenos";
 import HistorialMant    from "./pages/mantenimiento/HistorialMant";
 import Tanqueos         from "./pages/mantenimiento/Tanqueos";
+import Cobros           from "./pages/Cobros";
 
 import { useAuth }      from "./hooks/useAuth";
 import { useFirestore } from "./hooks/useFirestore";
@@ -40,7 +41,7 @@ function AppContenido() {
   const { toasts, mostrar, cerrar } = useToast();
 
  const {
-  vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, gastosVehiculo, gastosFijos, conductores, cargando,
+  vehiculos, viajes, empresas, rutas, mantenimientos, configMant, peajes, gastosVehiculo, gastosFijos, conductores, cargando, cuentasCobro,
   agregarVehiculo, eliminarVehiculo, editarVehiculo,
   agregarViaje,    eliminarViaje,    editarViaje,
   agregarEmpresa,  eliminarEmpresa,
@@ -50,6 +51,7 @@ function AppContenido() {
   agregarGasto, editarGasto, eliminarGasto,
   agregarGastoFijo, eliminarGastoFijo,
   agregarConductor, editarConductor, eliminarConductor,
+  agregarCuenta, editarCuenta,
 } = useFirestore(usuario?.uid);
 
 // Estado automático: liberar vehículos cuyo viaje ya terminó
@@ -290,6 +292,19 @@ function AppContenido() {
 <Route path="/vehiculo/:id/historial-mant" element={
   <RutaProtegida>
     <HistorialMant vehiculos={vehiculos} mantenimientos={mantenimientos} onEliminar={eliminarMantenimiento} mostrarToast={mostrar}/>
+  </RutaProtegida>
+} />
+
+<Route path="/cobros" element={
+  <RutaProtegida>
+    <Cobros
+      viajes={viajes}
+      perfilFacturacion={perfilFacturacion || {}}
+      onGuardarCuenta={agregarCuenta}
+      cuentasCobro={cuentasCobro}
+      onEditarCuenta={editarCuenta}
+      mostrarToast={mostrarToast}
+    />
   </RutaProtegida>
 } />
 

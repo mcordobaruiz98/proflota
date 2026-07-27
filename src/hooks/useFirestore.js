@@ -18,6 +18,7 @@ export function useFirestore(uid) {
   const [configMant,     setConfigMant]     = useState([]);
   const [gastosVehiculo, setGastosVehiculo] = useState([]);
   const [gastosFijos,    setGastosFijos]    = useState([]);
+  const [cuentasCobro, setCuentasCobro]     = useState([]);
 
   const rutaVehiculos    = uid ? `usuarios/${uid}/vehiculos`       : null;
   const rutaViajes       = uid ? `usuarios/${uid}/viajes`          : null;
@@ -28,6 +29,7 @@ export function useFirestore(uid) {
   const rutaGastos       = uid ? `usuarios/${uid}/gastos_vehiculo` : null;
   const rutaGastosFijos  = uid ? `usuarios/${uid}/gastos_fijos`    : null;
   const rutaConductores  = uid ? `usuarios/${uid}/conductores`     : null;
+  const rutaCuentas      = uid ? `usuarios/${uid}/cuentas_cobro`   : null;
 
   // ── RESET al cambiar de usuario (previene data leakage entre cuentas) ──
   useEffect(() => {
@@ -42,6 +44,7 @@ export function useFirestore(uid) {
     setGastosFijos([]);
     setPeajes([]);
     setCargando(true);
+    setCuentasCobro([]);
   }, [uid]);
 
   useEffect(() => {
@@ -136,6 +139,16 @@ export function useFirestore(uid) {
     });
     return () => unsub();
   }, [rutaConductores]);
+
+  // Cuenta de cobro
+  useEffect(() => {
+  if (!rutaCuentas) return;
+  const q = query(collection(db, rutaCuentas), orderBy("fecha", "desc"));
+  const unsub = onSnapshot(q, (snap) => {
+    setCuentasCobro(snap.docs.map((d) => ({ firestoreId: d.id, ...d.data() })));
+  });
+  return () => unsub();
+}, [rutaCuentas]);
 
   // ── CRUD ──
 
@@ -238,6 +251,16 @@ export function useFirestore(uid) {
     await deleteDoc(doc(db, rutaConductores, firestoreId));
   };
 
+  // Cuenta de cobro CRUD
+  const agregarCuenta = async (datos) => {
+  const datosLimpios = JSON.parse(JSON.stringify(datos));
+  await addDoc(collection(db, rutaCuentas), { ...datosLimpios, creadoEn: new Date().toISOString() });
+};
+const editarCuenta = async (firestoreId, datos) => {
+  const datosLimpios = JSON.parse(JSON.stringify(datos));
+  await updateDoc(doc(db, rutaCuentas, firestoreId), datosLimpios);
+};
+
   return {
     vehiculos, viajes, empresas, rutas, mantenimientos, conductores, configMant, peajes, gastosVehiculo, gastosFijos, cargando,
     agregarVehiculo, eliminarVehiculo, editarVehiculo,
@@ -249,5 +272,6 @@ export function useFirestore(uid) {
     agregarGasto, eliminarGasto, editarGasto,
     agregarGastoFijo, eliminarGastoFijo,
     agregarConductor, editarConductor, eliminarConductor,
+    cuentasCobro, agregarCuenta, editarCuenta,
   };
 }
