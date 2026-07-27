@@ -3,7 +3,8 @@ import { useAuth }     from "../hooks/useAuth";
 import { theme as t }  from "../styles/theme";
 import { Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake, AlertCircle, Wrench} from "lucide-react";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
-import   EstadoVacio from "../components/EstadoVacio";
+import   EstadoVacio       from "../components/EstadoVacio";
+import   AlertasDocumentos from "../components/AlertasDocumentos";
 
 function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [], conductores = [], gastosFijos = [], cargando}) {
   const navigate = useNavigate();
@@ -394,6 +395,9 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
           </div>
         </div>
       )}
+
+      {/* ALERTAS DE DOCUMENTOS */}
+      <AlertasDocumentos vehiculos={vehiculos} />
 
       {/* ALERTA DOCUMENTOS POR VENCER */}
       {docsAlerta.length > 0 && (
