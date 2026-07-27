@@ -179,6 +179,22 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
         </div>
       </div>
 
+      {/* ACCIONES RÁPIDAS */}
+      <div style={{display:"flex", gap:"10px", margin:"0 16px 12px"}}>
+        <button
+          style={{flex:1, padding:"14px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px"}}
+          onClick={() => navigate("/calculadora")}
+        >
+          Calcular
+        </button>
+        <button
+          style={{flex:1, padding:"14px", background:t.colors.bgCard, color:t.colors.blue, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px"}}
+          onClick={() => navigate("/cotizador")}
+        >
+           Cotizar
+        </button>
+      </div>
+
       {/* SEMÁFORO DE FLOTA */}
       {vehiculos.length > 1 && (
         <div style={{margin:"0 16px 10px",padding:"10px 14px",background:t.colors.bgCard,borderRadius:t.radius.md,boxShadow:t.shadows.card}}>

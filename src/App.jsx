@@ -32,6 +32,7 @@ import Aceite           from "./pages/mantenimiento/Aceite";
 import Filtros          from "./pages/mantenimiento/Filtros";
 import Frenos           from "./pages/mantenimiento/Frenos";
 import HistorialMant    from "./pages/mantenimiento/HistorialMant";
+import Cotizador        from "./pages/Cotizador";
 
 import { useAuth }      from "./hooks/useAuth";
 import { useFirestore } from "./hooks/useFirestore";
@@ -320,6 +321,12 @@ function AppContenido() {
         <Route path="/vehiculo/:id/historial-mant" element={
           <RutaProtegida>
             <HistorialMant vehiculos={vehiculos} mantenimientos={mantenimientos} onEliminar={eliminarMantenimiento} mostrarToast={mostrar} />
+          </RutaProtegida>
+        } />
+
+        <Route path="/cotizador" element={
+          <RutaProtegida>
+            <Cotizador vehiculos={vehiculos} rutas={rutas} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 
