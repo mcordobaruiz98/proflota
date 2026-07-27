@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, FileText, Check, Eye, Share2 } from "lucide-react";
+import { ArrowLeft, Plus, FileText, Check, Eye, Share2, Trash2 } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import EstadoVacio from "../components/EstadoVacio";
 
@@ -48,7 +48,7 @@ function numeroALetras(n) {
   }
 }
 
-function Cobros({ viajes = [], perfilFacturacion = {}, onGuardarCuenta, cuentasCobro = [], onEditarCuenta, mostrarToast }) {
+function Cobros({ viajes = [], perfilFacturacion = {}, onGuardarCuenta, cuentasCobro = [], onEditarCuenta, onEliminarCuenta, mostrarToast }) {
   const navigate = useNavigate();
 
   // Estados del flujo de creación
@@ -460,9 +460,20 @@ ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${p.banco} - $
                       } catch(err) { mostrarToast("Error", "error"); }
                     }}
                   >
-                    <Check size={14} strokeWidth={2} /> Marcar pagada
+                    <Check size={14} strokeWidth={2} /> Pagada
                   </button>
                 )}
+                <button style={{...styles.btnAccion, background:t.colors.redSoft, borderColor:t.colors.redBorder, color:t.colors.red}}
+                  onClick={async () => {
+                    if (!window.confirm(`¿Eliminar la cuenta N° ${String(c.numero).padStart(3,"0")}?`)) return;
+                    try {
+                      await onEliminarCuenta(c.firestoreId);
+                      mostrarToast("Cuenta eliminada", "info");
+                    } catch(err) { mostrarToast("Error al eliminar", "error"); }
+                  }}
+                >
+                  <Trash2 size={14} strokeWidth={2} />
+                </button>
               </div>
             </div>
           ))

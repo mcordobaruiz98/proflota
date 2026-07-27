@@ -261,8 +261,12 @@ const editarCuenta = async (firestoreId, datos) => {
   await updateDoc(doc(db, rutaCuentas, firestoreId), datosLimpios);
 };
 
+const eliminarCuenta = async (firestoreId) => {
+  await deleteDoc(doc(db, rutaCuentas, firestoreId));
+};
+
   return {
-    vehiculos, viajes, empresas, rutas, mantenimientos, conductores, configMant, peajes, gastosVehiculo, gastosFijos, cargando,
+    vehiculos, viajes, empresas, rutas, mantenimientos, conductores, configMant, peajes, gastosVehiculo, gastosFijos, cargando, cuentasCobro,
     agregarVehiculo, eliminarVehiculo, editarVehiculo,
     agregarViaje,    eliminarViaje,    editarViaje,
     agregarEmpresa,  eliminarEmpresa,
@@ -272,6 +276,6 @@ const editarCuenta = async (firestoreId, datos) => {
     agregarGasto, eliminarGasto, editarGasto,
     agregarGastoFijo, eliminarGastoFijo,
     agregarConductor, editarConductor, eliminarConductor,
-    cuentasCobro, agregarCuenta, editarCuenta,
+    agregarCuenta, editarCuenta, eliminarCuenta,
   };
 }

@@ -53,7 +53,7 @@ function AppContenido() {
     agregarGasto, eliminarGasto, editarGasto,
     agregarGastoFijo, eliminarGastoFijo,
     agregarConductor, editarConductor, eliminarConductor,
-    agregarCuenta, editarCuenta,
+    agregarCuenta, editarCuenta, eliminarCuenta,
   } = useFirestore(usuario?.uid);
 
   // Perfil de facturación (vive en usuarios/{uid}, no en subcolección)
@@ -153,6 +153,7 @@ function AppContenido() {
               cuentasCobro={cuentasCobro}
               onEditarCuenta={editarCuenta}
               mostrarToast={mostrar}
+              onEliminarCuenta={eliminarCuenta}
             />
           </RutaProtegida>
         } />

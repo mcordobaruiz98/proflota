@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle, Clock, AlertCircle, Search, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, AlertCircle, Search, ChevronUp, ChevronDown, FileText } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
 function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
@@ -128,6 +128,15 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
             <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "4px 0 0" }}>{vencidos.length} viaje{vencidos.length !== 1 ? "s" : ""}</p>
           </div>
         </div>
+
+            {/* CUENTA DE COBRO */}
+        <button
+          style={{width:"100%", padding:"11px", background:"transparent", border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.blue, cursor:"pointer", marginBottom:"10px", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px"}}
+          onClick={() => navigate("/cobros")}
+        >
+          <FileText size={15} strokeWidth={2} />
+          Generar cuenta de cobro
+        </button>
 
         {/* BÚSQUEDA */}
         <div style={{ position: "relative", marginBottom: "10px" }}>
