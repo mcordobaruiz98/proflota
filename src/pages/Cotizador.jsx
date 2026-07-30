@@ -4,7 +4,26 @@ import { ArrowLeft, Zap, TrendingUp, TrendingDown, AlertTriangle, ChevronDown, C
 import { theme as t } from "../styles/theme";
 
 const fmt = (n) => "$" + Math.round(n || 0).toLocaleString("es-CO");
-const num = (v) => parseFloat(String(v).replace(/[.\s]/g, "").replace(",", ".")) || 0;
+
+// Parser numérico colombiano: distingue decimal de miles
+// "4.5" → 4.5 (decimal) · "10.800" → 10800 (miles) · "33,2" → 33.2 · "1.500.000" → 1500000
+const num = (v) => {
+  let t = String(v).trim().replace(/\s/g, "");
+  if (!t) return 0;
+  // Coma = decimal siempre
+  if (t.includes(",")) {
+    const n = parseFloat(t.replace(/\./g, "").replace(",", "."));
+    return isNaN(n) ? 0 : n;
+  }
+  // Solo puntos: 1-2 dígitos tras el punto = decimal; 3 dígitos = miles
+  const partes = t.split(".");
+  if (partes.length === 2 && partes[1].length <= 2) {
+    const n = parseFloat(t);
+    return isNaN(n) ? 0 : n;
+  }
+  const n = parseFloat(t.replace(/\./g, ""));
+  return isNaN(n) ? 0 : n;
+};
 
 const DEFAULT_ADBLUE = 0.05;
 
@@ -31,6 +50,10 @@ function Cotizador({ vehiculos = [], rutas = [], mostrarToast }) {
   const [modoConductor, setModoConductor] = useState("porcentaje");
   const [valorConductor, setValorConductor] = useState("");
   const [otrosGastos, setOtrosGastos] = useState("");
+
+  // Utilidad deseada (para calcular tarifa mínima sugerida)
+  const [modoUtilidad, setModoUtilidad] = useState("porcentaje"); // porcentaje | porViaje | porTon
+  const [utilidadDeseada, setUtilidadDeseada] = useState("");
 
   // Prellenar desde ruta frecuente (opcional, atajo)
   const [mostrarRutas, setMostrarRutas] = useState(false);
@@ -98,12 +121,43 @@ function Cotizador({ vehiculos = [], rutas = [], mostrarToast }) {
     const fleteMinimoTotal = totalGastos;
     const fleteMinimoPorTon = ton > 0 ? fleteMinimoTotal / ton : 0;
 
+    // ── Tarifa sugerida según utilidad deseada (piso / objetivo / ideal) ──
+    // Los gastos que dependen del valor del flete (conductor %, descuentos) hacen
+    // que el cálculo sea circular. Resolvemos: si el conductor es %, el flete que
+    // deja utilidad U debe cumplir: flete - (costosFijos + flete*pctVar) = U
+    // → flete = (costosFijos + U) / (1 - pctVar)
+    const pctVariable = modoConductor === "porcentaje" ? (num(valorConductor) / 100) : 0;
+    const costosFijos = costoComb + totPeajes + gastos + (modoConductor === "fijo" ? num(valorConductor) : 0);
+
+    const fleteParaUtilidad = (utilidadObjetivo) => {
+      const f = (costosFijos + utilidadObjetivo) / (1 - pctVariable);
+      return f > 0 ? f : 0;
+    };
+
+    let tarifaPiso = 0, tarifaObjetivo = 0, tarifaIdeal = 0;
+    const uDeseada = num(utilidadDeseada);
+    if (uDeseada > 0) {
+      let utilObjetivoPesos;
+      if (modoUtilidad === "porViaje") {
+        utilObjetivoPesos = uDeseada;
+      } else if (modoUtilidad === "porTon") {
+        utilObjetivoPesos = uDeseada * ton;
+      } else {
+        // porcentaje sobre costos
+        utilObjetivoPesos = costosFijos * (uDeseada / 100);
+      }
+      tarifaObjetivo = fleteParaUtilidad(utilObjetivoPesos);
+      tarifaPiso = fleteParaUtilidad(utilObjetivoPesos * 0.6);   // 60% de la meta = piso
+      tarifaIdeal = fleteParaUtilidad(utilObjetivoPesos * 1.4);  // 140% = ideal
+    }
+
     return {
       valorViaje, costoComb, totPeajes, costoConduct, gastos,
       totalGastos, gananciaNeta, margen, kmTotal, gananciaPorKm, galTotal,
       fleteMinimoTotal, fleteMinimoPorTon,
+      tarifaPiso, tarifaObjetivo, tarifaIdeal, ton,
     };
-  }, [placa, toneladas, fleteOfrecido, modoFlete, kmCargado, kmVacio, rendCargado, rendVacio, precioAcpm, peajes, modoConductor, valorConductor, otrosGastos, vehiculos]);
+  }, [placa, toneladas, fleteOfrecido, modoFlete, kmCargado, kmVacio, rendCargado, rendVacio, precioAcpm, peajes, modoConductor, valorConductor, otrosGastos, modoUtilidad, utilidadDeseada, vehiculos]);
 
   const veredicto = useMemo(() => {
     if (!calculo) return null;
@@ -226,6 +280,50 @@ function Cotizador({ vehiculos = [], rutas = [], mostrarToast }) {
         <input type="text" inputMode="numeric" placeholder="200000" value={otrosGastos}
           onChange={e => setOtrosGastos(e.target.value)} style={styles.input} />
 
+        {/* UTILIDAD DESEADA */}
+        <p style={styles.subSeccion}>🎯 ¿Cuánto quiere ganar? (opcional)</p>
+        <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 8px", lineHeight:1.4}}>
+          Le sugerimos qué tarifa pedir para lograr esa utilidad.
+        </p>
+        <div style={{display:"flex", gap:"6px", marginBottom:"6px"}}>
+          <button onClick={()=>setModoUtilidad("porcentaje")} style={{...styles.toggleBtn, fontSize:"11px", ...(modoUtilidad==="porcentaje"?styles.toggleActivo:{})}}>% sobre costos</button>
+          <button onClick={()=>setModoUtilidad("porViaje")} style={{...styles.toggleBtn, fontSize:"11px", ...(modoUtilidad==="porViaje"?styles.toggleActivo:{})}}>$ por viaje</button>
+          <button onClick={()=>setModoUtilidad("porTon")} style={{...styles.toggleBtn, fontSize:"11px", ...(modoUtilidad==="porTon"?styles.toggleActivo:{})}}>$ por ton</button>
+        </div>
+        <input type="text" inputMode="decimal"
+          placeholder={modoUtilidad==="porcentaje"?"30 (%)":modoUtilidad==="porViaje"?"900000":"25000"}
+          value={utilidadDeseada}
+          onChange={e => setUtilidadDeseada(e.target.value)} style={styles.input} />
+
+        {/* TARIFA SUGERIDA (rango) */}
+        {calculo && calculo.tarifaObjetivo > 0 && (
+          <div style={styles.rangoBox}>
+            <p style={{fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, textTransform:"uppercase", letterSpacing:"0.05em", margin:"0 0 12px", textAlign:"center"}}>
+              Tarifa sugerida {modoFlete==="porTon" && calculo.ton>0 ? "(por tonelada)" : "(total viaje)"}
+            </p>
+            <div style={{display:"flex", justifyContent:"space-between", gap:"8px"}}>
+              {[
+                { label:"PISO", desc:"mínimo aceptable", val:calculo.tarifaPiso, color:t.colors.amber||"#F59E0B" },
+                { label:"OBJETIVO", desc:"su meta", val:calculo.tarifaObjetivo, color:t.colors.blue, destacado:true },
+                { label:"IDEAL", desc:"si negocia bien", val:calculo.tarifaIdeal, color:t.colors.green },
+              ].map((tier, i) => {
+                const mostrarPorTon = modoFlete==="porTon" && calculo.ton>0;
+                const valor = mostrarPorTon ? tier.val / calculo.ton : tier.val;
+                return (
+                  <div key={i} style={{flex:1, textAlign:"center", padding:"12px 6px", background:tier.destacado?tier.color+"18":t.colors.bgSection, borderRadius:t.radius.md, border:tier.destacado?`2px solid ${tier.color}`:`1px solid ${t.colors.borderLight}`}}>
+                    <p style={{fontSize:"10px", fontWeight:t.fonts.weightBold, color:tier.color, margin:"0 0 4px", letterSpacing:"0.05em"}}>{tier.label}</p>
+                    <p style={{fontSize:tier.destacado?"16px":"14px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:0, lineHeight:1.1}}>{fmt(valor)}</p>
+                    <p style={{fontSize:"9px", color:t.colors.textTertiary, margin:"3px 0 0"}}>{tier.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+            <p style={{fontSize:"11px", color:t.colors.textTertiary, textAlign:"center", margin:"10px 0 0", fontStyle:"italic"}}>
+              No acepte por debajo del piso. Empiece pidiendo el ideal.
+            </p>
+          </div>
+        )}
+
         {/* RESULTADO */}
         {calculo && veredicto && (
           <div style={{...styles.resultado, background: veredicto.color+"11", border:`2px solid ${veredicto.color}`}}>
@@ -281,9 +379,9 @@ const styles = {
   btnRutaFrec:{ width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:"11px 12px", background:t.colors.bgSection, border:`1.5px dashed ${t.colors.border}`, borderRadius:t.radius.sm, color:t.colors.textSecondary, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, cursor:"pointer" },
   rutaFrecItem:{ width:"100%", textAlign:"left", padding:"10px 12px", background:t.colors.bgCard, border:`1px solid ${t.colors.borderLight}`, borderRadius:t.radius.sm, color:t.colors.textPrimary, fontSize:t.fonts.sizeXs, cursor:"pointer", marginBottom:"4px" },
   resultado:  { borderRadius:t.radius.lg, padding:"18px", marginTop:"22px" },
+  rangoBox:   { borderRadius:t.radius.lg, padding:"16px", marginTop:"16px", background:t.colors.bgCard, border:`1.5px solid ${t.colors.border}` },
   desglose:   { display:"flex", flexDirection:"column", gap:"6px" },
   desgloseRow:{ display:"flex", justifyContent:"space-between", fontSize:t.fonts.sizeXs, color:t.colors.textSecondary },
 };
 
 export default Cotizador;
-
