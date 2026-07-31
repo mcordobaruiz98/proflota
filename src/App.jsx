@@ -226,6 +226,7 @@ function AppContenido() {
             <DetalleVehiculo
               vehiculos={vehiculos}
               viajes={viajes}
+              conductores={conductores}
               mantenimientos={mantenimientos}
               configMant={configMant}
               gastosVehiculo={gastosVehiculo}
@@ -241,7 +242,7 @@ function AppContenido() {
               onAgregarGastoFijo={agregarGastoFijo}
               onEliminarGastoFijo={eliminarGastoFijo}
               mostrarToast={mostrar}
-            />
+              />
           </RutaProtegida>
         } />
 
@@ -249,6 +250,7 @@ function AppContenido() {
           <RutaProtegida>
             <DetalleViaje
               viajes={viajes}
+              conductores={conductores}     
               vehiculos={vehiculos}
               onEliminar={eliminarViaje}
               onEditar={editarViaje}
