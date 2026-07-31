@@ -229,9 +229,9 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
               <div class="valor azul" style="color:#2563eb">${fmt(totalAnticiposMes)}</div>
               <div style="font-size:11px;color:#888;margin-top:4px">Pendiente: ${fmt(saldosPendientesMes)}</div>
             </div>
-            <div class="resumen-card" style="border-color:${utilidadReal>=0?"#22c55e":"#ef4444"}">
-              <div class="label">${totalPE>0||totalGastosAdic>0?"Utilidad real":"Ganancia neta"}</div>
-              <div class="valor ${utilidadReal>=0?"verde":"rojo"}">${fmt(utilidadReal)}</div>
+            <div class="resumen-card" style="border-color:${(viajesMes.length>0 && utilidadReal>=0)||viajesMes.length===0?"#22c55e":"#ef4444"}">
+              <div class="label">${viajesMes.length>0 && (totalPE>0||totalGastosAdic>0)?"Utilidad real":"Ganancia neta"}</div>
+              <div class="valor ${utilidadReal>=0?"verde":"rojo"}">${fmt(viajesMes.length>0?utilidadReal:netaMes)}</div>
               <div style="font-size:11px;color:#888;margin-top:4px">Rentabilidad: ${rentabilidad}% ${varPct(utilidadReal, utilidadAnt)}</div>
             </div>
           </div>
@@ -268,7 +268,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos fijos mensuales:</td></tr>
             <tr><td style="padding-left:20px">🏦 Gastos fijos (cuota, seguro, GPS...)</td><td style="color:#dc2626">-${fmt(totalPE)}</td></tr>`:""}
             ${totalGastosAdic>0?`<tr><td style="padding-left:20px">🔧 Gastos adicionales (taller, repuestos...)</td><td style="color:#dc2626">-${fmt(totalGastosAdic)}</td></tr>`:""}
-            ${totalPE>0||totalGastosAdic>0?`<tr class="total" style="background:#f0fdf4"><td>= Utilidad real del período</td><td class="${utilidadReal>=0?"verde":"rojo"}">${fmt(utilidadReal)}</td></tr>`:""}
+            ${viajesMes.length>0 && (totalPE>0||totalGastosAdic>0)?`<tr class="total" style="background:#f0fdf4"><td>= Utilidad real del período</td><td class="${utilidadReal>=0?"verde":"rojo"}">${fmt(utilidadReal)}</td></tr>`:""}
           </table>
           <table>
             <tr><td>Kilómetros recorridos</td><td>${kmMes.toLocaleString("es-CO")} km</td></tr>
@@ -575,7 +575,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
 </div>
 
         {/* UTILIDAD REAL DE LA FLOTA */}
-        {(totalPE > 0 || totalGastosAdic > 0) && (
+        {viajesMes.length > 0 && (totalPE > 0 || totalGastosAdic > 0) && (
           <div style={{...styles.card, border:`1.5px solid ${utilidadReal >= 0 ? t.colors.greenBorder : t.colors.redBorder}`}}>
             <p style={styles.cardTitulo}>Utilidad real de la flota</p>
             <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>

@@ -149,6 +149,33 @@ async function buscarMemoriaRuta(uid, rutaTexto) {
   return null;
 }
 
+// Busca el NIT de una empresa en el directorio. Devuelve {nit, existe}.
+async function buscarEmpresa(uid, nombreEmp) {
+  const norm = (nombreEmp || "").trim().toLowerCase();
+  if (!norm) return { nit: "", existe: false };
+  const snap = await db.collection(`usuarios/${uid}/empresas`).get();
+  for (const d of snap.docs) {
+    const e = d.data();
+    if ((e.razonSocial || e.nombre || "").trim().toLowerCase() === norm) {
+      return { nit: e.nit || "", existe: true };
+    }
+  }
+  return { nit: "", existe: false };
+}
+
+// Registra una empresa nueva en el directorio invisible (con NIT)
+async function registrarEmpresa(uid, nombre, nit) {
+  if (!nombre.trim() || !nit.trim()) return;
+  await db.collection(`usuarios/${uid}/empresas`).add({
+    razonSocial: nombre.trim(),
+    nit: nit.trim(),
+    tipo: "cliente",
+    ciudad: "", contacto: "", telefono: "", correo: "",
+    origenRegistro: "telegram",
+    creadoEn: new Date().toISOString(),
+  });
+}
+
 // ── Cálculo ─────────────────────────────────────────────────
 
 function calcular(v) {
@@ -211,7 +238,7 @@ function calcular(v) {
 const P = {
   INICIO: "inicio",
   PLACA: "placa", RUTA: "ruta", FECHA: "fecha", FECHA_DESC: "fechaDesc",
-  EMPRESA: "empresa", PRODUCTO: "producto", LUGARES: "lugares",
+  EMPRESA: "empresa", NIT_EMPRESA: "nitEmpresa", PRODUCTO: "producto", LUGARES: "lugares",
   KM: "km", PEAJES: "peajes", COMBUSTIBLE: "combustible", PRECIO_GALON: "precioGalon",
   TON_FLETE: "tonFlete", PCOND: "pcond", GASTOS: "gastos",
   DESCUENTOS: "descuentos", ANTICIPO: "anticipo", MANI_REMESA: "maniRemesa",
@@ -298,6 +325,10 @@ async function procesarMensaje(chatId, texto) {
         v.modoExpres = true;
         v.ruta = r.nombre || r.ruta || "";
         v.emp = r.empresa || "";
+        if (v.emp) {
+          const infoEmp = await buscarEmpresa(uid, v.emp);
+          v.nitEmpresa = infoEmp.nit || "";
+        }
         v.prod = r.producto || "";
         v.tipoCarga = r.tipoCarga || "";
         v.condNom = r.conductor || "";
@@ -442,7 +473,29 @@ async function procesarMensaje(chatId, texto) {
     }
 
     case P.EMPRESA: {
-      v.emp = esNo(t) ? "" : t;
+      if (esNo(t)) {
+        v.emp = "";
+        await setSesion(chatId, { paso: P.PRODUCTO, viaje: v });
+        return enviar(chatId, '¿Producto y tipo de carga? (ej: carbón, granel — o "no")');
+      }
+      v.emp = t;
+      // ¿Ya está en el directorio? Si sí, trae el NIT y sigue. Si no, lo pregunta.
+      const infoEmp = await buscarEmpresa(uid, t);
+      if (infoEmp.existe) {
+        v.nitEmpresa = infoEmp.nit;
+        await setSesion(chatId, { paso: P.PRODUCTO, viaje: v });
+        return enviar(chatId, `✓ ${t}${infoEmp.nit ? ` (NIT ${infoEmp.nit})` : ""}\n\n¿Producto y tipo de carga? (ej: carbón, granel — o "no")`);
+      }
+      await setSesion(chatId, { paso: P.NIT_EMPRESA, viaje: v });
+      return enviar(chatId, `✓ ${t} (empresa nueva)\n\n¿NIT de la empresa? Se guarda para sus cuentas de cobro. (ej: 900123456-7 — o "no")`);
+    }
+
+    case P.NIT_EMPRESA: {
+      if (!esNo(t)) {
+        v.nitEmpresa = t.trim();
+        // Registrar en el directorio invisible
+        await registrarEmpresa(uid, v.emp, v.nitEmpresa).catch(() => {});
+      }
       await setSesion(chatId, { paso: P.PRODUCTO, viaje: v });
       return enviar(chatId, '¿Producto y tipo de carga? (ej: carbón, granel — o "no")');
     }
@@ -741,6 +794,7 @@ async function procesarMensaje(chatId, texto) {
       placa: vj.placa,
       ruta: vj.ruta,
       emp: vj.emp || "",
+      nitEmpresa: vj.nitEmpresa || "",
       condNom: vj.condNom || "",
       prod: vj.prod || "",
       tipoCarga: vj.tipoCarga || "",
