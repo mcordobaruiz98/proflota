@@ -451,7 +451,6 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
       <div style={{background:t.colors.bgCard, padding:"0 16px 12px"}}>
         <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
           <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,fontWeight:t.fonts.weightSemibold}}>Conductor:</span>
-          <span style={{fontSize:"12px",color:"red",fontWeight:"bold"}}>[{conductores.length}]</span>
           <select
             value={vehiculo.conductorAsignado || ""}
             onChange={async(e)=>{
