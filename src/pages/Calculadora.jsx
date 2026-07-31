@@ -80,6 +80,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [rutaRet,          setRutaRet]            = useState("");
   const [tipoCargaRet,     setTipoCargaRet]       = useState("");
   const [empresaRet,       setempresaRet]         = useState("");
+  const [nitEmpresaRet,    setNitEmpresaRet]      = useState("");
   const [productoRet,      setProductoRet]        = useState("");
   const [maniRet,          setManiRet]            = useState("");
   const [remesaRet,        setRemesaRet]          = useState("");
@@ -288,6 +289,21 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
           ciudad: "", contacto: "", telefono: "", correo: "",
         }).catch(() => {}); // silencioso, no interrumpe el guardado del viaje
       }
+  // Auto-registrar empresa de retorno nueva en el directorio
+    if (empresaRet.trim() && nitEmpresaRet.trim() && onAgregarEmpresa) {
+      const yaExisteRet = empresas.some(e =>
+        (e.razonSocial || e.nombre || "").trim().toLowerCase() === empresaRet.trim().toLowerCase()
+      );
+      if (!yaExisteRet) {
+        onAgregarEmpresa({
+          razonSocial: empresaRet.trim(),
+          nit: nitEmpresaRet.trim(),
+          tipo: "cliente",
+          ciudad: "", contacto: "", telefono: "", correo: "",
+        }).catch(() => {});
+      }
+    }
+
     }
       await onGuardar({
         fecha, fechaDescarga, mani: sanitizar(mani), placa, tipoCarga, prod: sanitizar(producto),
@@ -304,7 +320,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
         saldoFlete: valorViaje - n(montoAnticipoFlete) - n(montoAnticipoFleteRet),
         tieneRetorno, valorViajeIda, valorViajeRetorno, tonelajeRetorno: n(tonelajeRetorno), fleteRetorno: n(fleteRetorno),
         rutaRet: sanitizar(rutaRet), tipoCargaRet, productoRet: sanitizar(productoRet),
-        empresaRet: sanitizar(empresaRet),
+        empresaRet: sanitizar(empresaRet), nitEmpresaRet: nitEmpresaRet.trim(),
         maniRet: sanitizar(maniRet), remesaRet: sanitizar(remesaRet),
         pesoBasRet: validarNumero(pesoBasRet, 0, 999),
         lugarCargueRet: sanitizar(lugarCargueRet), lugarDescargueRet: sanitizar(lugarDescargueRet),
@@ -366,7 +382,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       setObservaciones(""); setPlaca(""); setTipoCarga(""); setProducto(""); setRuta(""); setModoFlete("");
       setEmpresa(""); setNitEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio(""); setKmCargadoRet(""); setKmVacioRet(""); setModoComb("");
       setTonelaje(""); setFleteTon(""); setTieneRetorno(false); setFleteRetorno("");
-      setTonelajeRetorno(""); setRutaRet(""); setempresaRet(""); setProductoRet("");
+      setTonelajeRetorno(""); setRutaRet(""); setempresaRet(""); setNitEmpresaRet(""); setProductoRet("");
       setManiRet(""); setRemesaRet(""); setPesoBasRet("");
       setLugarCargueRet(""); setLugarDescargueRet(""); setFechaCargueRet(""); setFechaDescargueRet("");
       setExtras([]); setPorcCond(""); setCarpado(""); setGastosViaje("");
@@ -1107,8 +1123,36 @@ const guardarRutaFrecuente = async () => {
         
           <div style={styles.campo}>
             <label style={styles.label}>Empresa</label>
-            <input type="text" placeholder="Nombre empresa" value={empresaRet}
-              onChange={e=>setempresaRet(e.target.value)} style={styles.input} />
+            {empresasFrecuentes.length > 0 && (
+              <select
+                value={empresasFrecuentes.includes(empresaRet) ? empresaRet : "__nueva__"}
+                onChange={e => {
+                  if (e.target.value === "__nueva__") {
+                    setempresaRet("");
+                    setNitEmpresaRet("");
+                  } else {
+                    setempresaRet(e.target.value);
+                    setNitEmpresaRet(nitDeEmpresa(e.target.value));
+                  }
+                }}
+                style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
+              >
+                <option value="__nueva__">Nueva empresa</option>
+                {empresasFrecuentes.map((emp, i) => (
+                  <option key={i} value={emp}>{emp}{nitDeEmpresa(emp) ? " ✓" : ""}</option>
+                ))}
+              </select>
+            )}
+            {(!empresasFrecuentes.includes(empresaRet) || empresasFrecuentes.length === 0) && (
+              <>
+                <input type="text" placeholder="Nombre empresa" value={empresaRet}
+                  onChange={e=>setempresaRet(e.target.value)} style={styles.input} />
+                <input type="text" placeholder="NIT (opcional, ej: 900.123.456-7)"
+                  value={nitEmpresaRet}
+                  onChange={e=>setNitEmpresaRet(e.target.value)}
+                  style={{...styles.input, marginTop:"6px"}} />
+              </>
+            )}
           </div>
           
         
