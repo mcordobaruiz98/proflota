@@ -266,10 +266,12 @@ function AppContenido() {
                 rutas={rutas}
                 peajes={peajes}
                 conductores={conductores}
+                empresas={empresas}
                 onGuardar={agregarViaje}
                 onGuardarRuta={agregarRuta}
                 onEliminarRuta={eliminarRuta}
                 onEditarVehiculo={editarVehiculo}
+                onAgregarEmpresa={agregarEmpresa}
                 mostrarToast={mostrar}
               />
             </Layout>

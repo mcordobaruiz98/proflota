@@ -6,7 +6,7 @@ import { sanitizar, validarNumero } from "../utils/validar";
 
 const DEFAULT_ADBLUE = 0.18925;
 
-function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores = [], onGuardar, onGuardarRuta, onEliminarRuta, onEditarVehiculo, mostrarToast }) {
+function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores = [], empresas = [], onGuardar, onGuardarRuta, onEliminarRuta, onEditarVehiculo, onAgregarEmpresa, mostrarToast }) {
   const PEAJES_CO = peajes.length > 0 
   ? [...peajes].sort((a, b) => a.n.localeCompare(b.n, 'es')) 
   : [];
@@ -26,6 +26,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [producto,         setProducto]           = useState("");
   const [ruta,             setRuta]               = useState("");
   const [empresa,          setEmpresa]            = useState("");
+  const [nitEmpresa,       setNitEmpresa]         = useState("");
   const [conductor,        setConductor]          = useState("");
   const [kmCargado,        setKmCargado]          = useState("");
   const [kmVacio,          setKmVacio]            = useState("");
@@ -109,9 +110,17 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     .filter(c => c && c.trim() !=="")
   )]
 
-  const empresasFrecuentes = [...new Set(
-  viajes.map(v => v.emp).filter(emp => emp && emp.trim() !== "")
-  )];
+  // Empresas del directorio (con NIT) + las que aparecen en viajes
+  const empresasDirectorio = empresas.map(e => (e.razonSocial || e.nombre || "").trim()).filter(Boolean);
+  const empresasDeViajes = viajes.map(v => v.emp).filter(emp => emp && emp.trim() !== "");
+  const empresasFrecuentes = [...new Set([...empresasDirectorio, ...empresasDeViajes])];
+
+  // Buscar NIT de una empresa en el directorio
+  const nitDeEmpresa = (nombre) => {
+    const norm = (nombre || "").trim().toLowerCase();
+    const emp = empresas.find(e => (e.razonSocial || e.nombre || "").trim().toLowerCase() === norm);
+    return emp?.nit || "";
+  };
 
   const productosFrecuentes = [...new Set(
   viajes.map(v => v.prod).filter(p => p && p.trim() !== "")
@@ -265,9 +274,24 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     if (viajes.length >= 5000) { mostrarToast("Límite de viajes alcanzado","error"); return; }
     setGuardando(true);
     try {
+
+  // Auto-registrar empresa nueva en el directorio invisible (opción B)
+    if (empresa.trim() && nitEmpresa.trim() && onAgregarEmpresa) {
+      const yaExiste = empresas.some(e =>
+        (e.razonSocial || e.nombre || "").trim().toLowerCase() === empresa.trim().toLowerCase()
+      );
+      if (!yaExiste) {
+        onAgregarEmpresa({
+          razonSocial: empresa.trim(),
+          nit: nitEmpresa.trim(),
+          tipo: "cliente",
+          ciudad: "", contacto: "", telefono: "", correo: "",
+        }).catch(() => {}); // silencioso, no interrumpe el guardado del viaje
+      }
+    }
       await onGuardar({
         fecha, fechaDescarga, mani: sanitizar(mani), placa, tipoCarga, prod: sanitizar(producto),
-        ruta: sanitizar(ruta), emp: sanitizar(empresa), condNom: sanitizar(conductor),
+        ruta: sanitizar(ruta), emp: sanitizar(empresa), nitEmpresa: nitEmpresa.trim(), condNom: sanitizar(conductor),
         remesa: sanitizar(remesa), pesoBascula: validarNumero(pesoBascula, 0, 999),
         lugarCargue: sanitizar(lugarCargue), lugarDescargue: sanitizar(lugarDescargue),
         observaciones: sanitizar(observaciones).slice(0, 500),
@@ -340,7 +364,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       setFecha(new Date().toISOString().slice(0,10)); setFechaDescarga("");
       setMani(""); setRemesa(""); setPesoBascula(""); setLugarCargue(""); setLugarDescargue("");
       setObservaciones(""); setPlaca(""); setTipoCarga(""); setProducto(""); setRuta(""); setModoFlete("");
-      setEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio(""); setKmCargadoRet(""); setKmVacioRet(""); setModoComb("");
+      setEmpresa(""); setNitEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio(""); setKmCargadoRet(""); setKmVacioRet(""); setModoComb("");
       setTonelaje(""); setFleteTon(""); setTieneRetorno(false); setFleteRetorno("");
       setTonelajeRetorno(""); setRutaRet(""); setempresaRet(""); setProductoRet("");
       setManiRet(""); setRemesaRet(""); setPesoBasRet("");
@@ -658,36 +682,49 @@ const guardarRutaFrecuente = async () => {
 
 </div>
           
-          <div style={styles.campo}>
+   <div style={styles.campo}>
   <label style={styles.label}>Empresa</label>
   {empresasFrecuentes.length > 0 && (
     <select
       value={empresasFrecuentes.includes(empresa) ? empresa : "__nueva__"}
       onChange={e => {
-  if (e.target.value === "__nueva__") {
-    setEmpresa("");
-  } else {
-    setEmpresa(e.target.value);
-  }
-}}
+        if (e.target.value === "__nueva__") {
+          setEmpresa("");
+          setNitEmpresa("");
+        } else {
+          setEmpresa(e.target.value);
+          setNitEmpresa(nitDeEmpresa(e.target.value)); // trae el NIT si lo tiene
+        }
+      }}
       style={{...styles.input, marginBottom:"6px", color: t.colors.textPrimary}}
     >
       <option value="__nueva__">Nueva empresa</option>
       {empresasFrecuentes.map((emp, i) => (
-        <option key={i} value={emp}>{emp}</option>
+        <option key={i} value={emp}>{emp}{nitDeEmpresa(emp) ? " ✓" : ""}</option>
       ))}
     </select>
   )}
-  {(!empresasFrecuentes.includes(empresa)  || empresasFrecuentes.length === 0) && (
-  <input 
-    type="text" 
-    placeholder="TransABC" 
-    value={empresa}
-    onChange={e => setEmpresa(e.target.value)} 
-    style={styles.input} 
-    />
-)}
-
+  {(!empresasFrecuentes.includes(empresa) || empresasFrecuentes.length === 0) && (
+    <>
+      <input
+        type="text"
+        placeholder="TransABC"
+        value={empresa}
+        onChange={e => setEmpresa(e.target.value)}
+        style={styles.input}
+      />
+      <input
+        type="text"
+        placeholder="NIT (opcional, ej: 900.123.456-7)"
+        value={nitEmpresa}
+        onChange={e => setNitEmpresa(e.target.value)}
+        style={{...styles.input, marginTop:"6px"}}
+      />
+      <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"4px 0 0"}}>
+        El NIT se guarda una vez y se usa para sus cuentas de cobro.
+      </p>
+    </>
+  )}
 </div>
 
         </div>
