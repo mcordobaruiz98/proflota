@@ -6,7 +6,7 @@ import { useSubirArchivo } from "../hooks/useSubirArchivo";
 import { useAuth } from "../hooks/useAuth";
 
 
-function AgregarVehiculo({ vehiculos, onGuardar }) {
+function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
   const navigate = useNavigate();
   const { usuario } = useAuth();
 
@@ -22,6 +22,7 @@ function AgregarVehiculo({ vehiculos, onGuardar }) {
   const [guardando,     setGuardando]     = useState(false);
   const {subirArchivo, progreso, subiendo} = useSubirArchivo();
   const [fotoUrl,       setFotoUrl]       = useState("");
+  const [conductorAsignado, setConductorAsignado] = useState("");
 
   
   
@@ -45,6 +46,7 @@ function AgregarVehiculo({ vehiculos, onGuardar }) {
       placa:         placa.trim().toUpperCase(),
       placaRemolque: placaRemolque.trim().toUpperCase(),
       marca, modelo,
+      conductor: conductorAsignado,
       propietario:   propietario.trim(),
       tenedor:       tenedor.trim(),
       fotoUrl,
@@ -227,6 +229,29 @@ function AgregarVehiculo({ vehiculos, onGuardar }) {
               min="1970" max="2100"
               style={styles.input}
             />
+          </div>
+        </div>
+
+        <div style={styles.fila2}>
+          <div style={{...styles.campo, gridColumn:"1 / -1"}}>
+            <label style={styles.label}>Conductor asignado</label>
+            <select
+              value={conductorAsignado}
+              onChange={(e) => setConductorAsignado(e.target.value)}
+              style={{ ...styles.input, color: conductorAsignado ? t.colors.textPrimary : t.colors.textTertiary }}
+            >
+              <option value="">Sin conductor asignado</option>
+              {conductores.map((c) => (
+                <option key={c.firestoreId} value={c.nombre}>
+                  {c.nombre}{c.catLic ? ` · Cat ${c.catLic}` : ""}
+                </option>
+              ))}
+            </select>
+            {conductores.length === 0 && (
+              <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"4px 0 0"}}>
+                No tiene conductores registrados aún. Puede asignarlo después.
+              </p>
+            )}
           </div>
         </div>
 
