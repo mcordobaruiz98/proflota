@@ -48,7 +48,7 @@ function numeroALetras(n) {
   }
 }
 
-function Cobros({ viajes = [], perfilFacturacion = {}, onGuardarCuenta, cuentasCobro = [], onEditarCuenta, onEliminarCuenta, mostrarToast }) {
+function Cobros({ viajes = [], empresas = [], perfilFacturacion = {}, onGuardarCuenta, cuentasCobro = [], onEditarCuenta, onEliminarCuenta, mostrarToast }) {
   const navigate = useNavigate();
 
   // Estados del flujo de creación
@@ -71,6 +71,16 @@ function Cobros({ viajes = [], perfilFacturacion = {}, onGuardarCuenta, cuentasC
   }, [viajes]);
 
   const perfilOk = perfilFacturacion?.nombreCompleto && perfilFacturacion?.numeroDoc && perfilFacturacion?.ciudad && perfilFacturacion?.telefono;
+
+  // Cruzar nombre de empresa con el directorio para traer su NIT
+  const buscarNitEmpresa = (nombreEmp) => {
+    if (!nombreEmp) return "";
+    const norm = nombreEmp.trim().toLowerCase();
+    const emp = empresas.find(e =>
+      (e.razonSocial || e.nombre || "").trim().toLowerCase() === norm
+    );
+    return emp?.nit || "";
+  };
 
   // Total seleccionado
   const totalSel = viajesSel.reduce((s, v) => s + (v.saldoFlete ?? v.vViaje ?? 0), 0);
@@ -108,7 +118,7 @@ function Cobros({ viajes = [], perfilFacturacion = {}, onGuardarCuenta, cuentasC
         emisor: { ...perfilFacturacion },
         cliente: {
           nombre: empresaSel,
-          nit: viajesSel[0]?.nitEmpresa || "",
+          nit: buscarNitEmpresa(empresaSel),
         },
         concepto: concepto.trim(),
         viajes: viajesSel.map(v => ({
@@ -308,6 +318,15 @@ ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${p.banco} - $
                   </div>
                 )}
               </div>
+
+              {empresaSel && !buscarNitEmpresa(empresaSel) && (
+                <div style={{padding:"10px 12px", background:"#FEF3C7", border:"1.5px solid #F59E0B33", borderRadius:t.radius.sm, marginBottom:"12px", display:"flex", alignItems:"flex-start", gap:"8px"}}>
+                  <span style={{fontSize:"14px"}}>⚠️</span>
+                  <p style={{fontSize:t.fonts.sizeXs, color:"#92400E", margin:0, lineHeight:1.4}}>
+                    <strong>{empresaSel}</strong> no tiene NIT registrado. La cuenta saldrá sin NIT. Agréguelo en <strong>Empresas</strong> para que aparezca.
+                  </p>
+                </div>
+              )}
 
               <button
                 style={{...styles.btnPrimario, opacity: viajesSel.length === 0 ? 0.5 : 1}}

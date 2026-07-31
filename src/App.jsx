@@ -146,18 +146,19 @@ function AppContenido() {
         } />
 
         <Route path="/cobros" element={
-          <RutaProtegida>
-            <Cobros
-              viajes={viajes}
-              perfilFacturacion={perfilFacturacion}
-              onGuardarCuenta={agregarCuenta}
-              cuentasCobro={cuentasCobro}
-              onEditarCuenta={editarCuenta}
-              mostrarToast={mostrar}
-              onEliminarCuenta={eliminarCuenta}
-            />
-          </RutaProtegida>
-        } />
+  <RutaProtegida>
+    <Cobros
+      viajes={viajes}
+      empresas={empresas}
+      perfilFacturacion={perfilFacturacion}
+      onGuardarCuenta={agregarCuenta}
+      cuentasCobro={cuentasCobro}
+      onEditarCuenta={editarCuenta}
+      onEliminarCuenta={eliminarCuenta}
+      mostrarToast={mostrar}
+    />
+  </RutaProtegida>
+} />
 
         <Route path="/comparativo" element={
           <RutaProtegida>
