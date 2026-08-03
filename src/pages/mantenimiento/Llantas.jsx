@@ -169,6 +169,17 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
   const [seleccionada, setSeleccionada] = useState(null);
   const [guardando,    setGuardando]    = useState(false);
 
+  // Sincronizar cuando llantasData carga o cambia en Firestore.
+  // Sin esto, si el componente monta antes de que el vehículo cargue,
+  // el estado queda en {} y al guardar se borran las demás llantas.
+  // Solo sincroniza cuando no hay panel de edición abierto, para no
+  // pisar cambios mientras el usuario edita una llanta.
+  useEffect(() => {
+    if (vehiculo?.llantasData && seleccionada === null) {
+      setLlantas(vehiculo.llantasData);
+    }
+  }, [vehiculo?.llantasData, seleccionada]);
+
   const [marca,  setMarca]  = useState("");
   const [ref,    setRef]    = useState("");
   const [prof,   setProf]   = useState("");
