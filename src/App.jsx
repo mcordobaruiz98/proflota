@@ -31,6 +31,7 @@ import Llantas          from "./pages/mantenimiento/Llantas";
 import Aceite           from "./pages/mantenimiento/Aceite";
 import Filtros          from "./pages/mantenimiento/Filtros";
 import Frenos           from "./pages/mantenimiento/Frenos";
+import Tanqueos from "./pages/mantenimiento/Tanqueos";
 import HistorialMant    from "./pages/mantenimiento/HistorialMant";
 import Cotizador        from "./pages/Cotizador";
 
@@ -322,6 +323,12 @@ function AppContenido() {
           <RutaProtegida>
             <Frenos vehiculos={vehiculos} mantenimientos={mantenimientos} onAgregar={agregarMantenimiento} mostrarToast={mostrar} />
           </RutaProtegida>
+        } />
+
+        <Route path="/vehiculo/:id/tanqueos" element={
+          <RutaProtegida>
+             <Tanqueos vehiculos={vehiculos} viajes={viajes} mostrarToast={mostrar} />
+         </RutaProtegida>
         } />
 
         <Route path="/vehiculo/:id/historial-mant" element={
