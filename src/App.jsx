@@ -31,9 +31,7 @@ import Llantas          from "./pages/mantenimiento/Llantas";
 import Aceite           from "./pages/mantenimiento/Aceite";
 import Filtros          from "./pages/mantenimiento/Filtros";
 import Frenos           from "./pages/mantenimiento/Frenos";
-import Tanqueos from "./pages/mantenimiento/Tanqueos";
 import HistorialMant    from "./pages/mantenimiento/HistorialMant";
-import Cotizador        from "./pages/Cotizador";
 
 import { useAuth }      from "./hooks/useAuth";
 import { useFirestore } from "./hooks/useFirestore";
@@ -55,7 +53,7 @@ function AppContenido() {
     agregarGasto, eliminarGasto, editarGasto,
     agregarGastoFijo, eliminarGastoFijo,
     agregarConductor, editarConductor, eliminarConductor,
-    agregarCuenta, editarCuenta, eliminarCuenta,
+    agregarCuenta, editarCuenta,
   } = useFirestore(usuario?.uid);
 
   // Perfil de facturación (vive en usuarios/{uid}, no en subcolección)
@@ -147,19 +145,17 @@ function AppContenido() {
         } />
 
         <Route path="/cobros" element={
-  <RutaProtegida>
-    <Cobros
-      viajes={viajes}
-      empresas={empresas}
-      perfilFacturacion={perfilFacturacion}
-      onGuardarCuenta={agregarCuenta}
-      cuentasCobro={cuentasCobro}
-      onEditarCuenta={editarCuenta}
-      onEliminarCuenta={eliminarCuenta}
-      mostrarToast={mostrar}
-    />
-  </RutaProtegida>
-} />
+          <RutaProtegida>
+            <Cobros
+              viajes={viajes}
+              perfilFacturacion={perfilFacturacion}
+              onGuardarCuenta={agregarCuenta}
+              cuentasCobro={cuentasCobro}
+              onEditarCuenta={editarCuenta}
+              mostrarToast={mostrar}
+            />
+          </RutaProtegida>
+        } />
 
         <Route path="/comparativo" element={
           <RutaProtegida>
@@ -216,7 +212,6 @@ function AppContenido() {
           <RutaProtegida>
             <AgregarVehiculo
               vehiculos={vehiculos}
-              conductores={conductores}
               onGuardar={agregarVehiculo}
             />
           </RutaProtegida>
@@ -227,7 +222,6 @@ function AppContenido() {
             <DetalleVehiculo
               vehiculos={vehiculos}
               viajes={viajes}
-              conductores={conductores}
               mantenimientos={mantenimientos}
               configMant={configMant}
               gastosVehiculo={gastosVehiculo}
@@ -243,7 +237,7 @@ function AppContenido() {
               onAgregarGastoFijo={agregarGastoFijo}
               onEliminarGastoFijo={eliminarGastoFijo}
               mostrarToast={mostrar}
-              />
+            />
           </RutaProtegida>
         } />
 
@@ -251,7 +245,6 @@ function AppContenido() {
           <RutaProtegida>
             <DetalleViaje
               viajes={viajes}
-              conductores={conductores}     
               vehiculos={vehiculos}
               onEliminar={eliminarViaje}
               onEditar={editarViaje}
@@ -270,12 +263,10 @@ function AppContenido() {
                 rutas={rutas}
                 peajes={peajes}
                 conductores={conductores}
-                empresas={empresas}
                 onGuardar={agregarViaje}
                 onGuardarRuta={agregarRuta}
                 onEliminarRuta={eliminarRuta}
                 onEditarVehiculo={editarVehiculo}
-                onAgregarEmpresa={agregarEmpresa}
                 mostrarToast={mostrar}
               />
             </Layout>
@@ -325,21 +316,9 @@ function AppContenido() {
           </RutaProtegida>
         } />
 
-        <Route path="/vehiculo/:id/tanqueos" element={
-          <RutaProtegida>
-             <Tanqueos vehiculos={vehiculos} viajes={viajes} mostrarToast={mostrar} />
-         </RutaProtegida>
-        } />
-
         <Route path="/vehiculo/:id/historial-mant" element={
           <RutaProtegida>
-            <HistorialMant vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar} />
-          </RutaProtegida>
-        } />
-
-        <Route path="/cotizador" element={
-          <RutaProtegida>
-            <Cotizador vehiculos={vehiculos} rutas={rutas} mostrarToast={mostrar} />
+            <HistorialMant vehiculos={vehiculos} mantenimientos={mantenimientos} onEliminar={eliminarMantenimiento} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 
