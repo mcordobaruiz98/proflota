@@ -235,6 +235,7 @@ function AppContenido() {
             <DetalleVehiculo
               vehiculos={vehiculos}
               viajes={viajes}
+              conductores={conductores}
               mantenimientos={mantenimientos}
               configMant={configMant}
               gastosVehiculo={gastosVehiculo}
