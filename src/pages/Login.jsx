@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { theme as t } from "../styles/theme";
+import SplashScreen from "../components/SplashScreen";
 
 function Login() {
   const navigate = useNavigate();
@@ -58,8 +59,18 @@ function Login() {
     }
   };
 
+  const [mostrarSplash, setMostrarSplash] = useState(() => {
+    // Solo mostrar el splash una vez por sesión del navegador
+    if (sessionStorage.getItem("navira_splash_shown")) return false;
+    sessionStorage.setItem("navira_splash_shown", "1");
+    return true;
+  });
+
   return (
     <div style={styles.pantalla}>
+
+      {/* Animación de entrada — tractomula recorriendo el rayo del logo */}
+      {mostrarSplash && <SplashScreen onFinish={() => setMostrarSplash(false)} />}
 
       {/* HERO */}
       <div style={styles.hero}>
