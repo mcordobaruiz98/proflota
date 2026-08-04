@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Upload, Trash2 } from "lucide-react";
 import { theme as t } from "../../styles/theme";
@@ -13,6 +13,15 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
   const vehiculo   = vehiculos.find(v => String(v.firestoreId) === String(id));
 
   const [historial, setHistorial] = useState(vehiculo?.aceiteHistorial || []);
+
+  // Sincronizar cuando aceiteHistorial carga o cambia en Firestore.
+  // Evita que al refrescar (antes de que el vehículo cargue) el estado
+  // quede vacío y borre el historial al guardar.
+  useEffect(() => {
+    if (vehiculo?.aceiteHistorial) {
+      setHistorial(vehiculo.aceiteHistorial);
+    }
+  }, [vehiculo?.aceiteHistorial]);
 
   const [marca,       setMarca]       = useState("");
   const [referencia,  setReferencia]  = useState("");
@@ -37,6 +46,23 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
     onEditarVehiculo(vehiculo.firestoreId, { aceiteHistorial: nuevos }).catch(()=>{});
+
+    // Registrar también en el historial general de mantenimiento (opción A)
+    if (onAgregar) {
+      onAgregar({
+        vehiculoId: vehiculo.firestoreId,
+        placa: vehiculo.placa || "",
+        tipo: "Aceite",
+        descripcion: `Cambio de aceite ${marca} ${viscosidad}${referencia ? ` · ${referencia}` : ""}`,
+        fecha,
+        km: Number(kmCambio),
+        costo: Number(costo) || 0,
+        taller: taller || "",
+        nitTaller: nitTaller || "",
+        nota: nota || "",
+        refId: nuevo.id, // vínculo con el registro del módulo
+      }).catch(()=>{});
+    }
     setMarca(""); setReferencia(""); setGalones(""); setKmCambio(""); setTaller(""); setnitTaller(""); setCosto(""); setNota("");
     setMostrarForm(false);
     mostrarToast("Cambio de aceite registrado","exito");
