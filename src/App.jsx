@@ -294,25 +294,25 @@ function AppContenido() {
         {/* ── MANTENIMIENTO ── */}
         <Route path="/vehiculo/:id/llantas" element={
           <RutaProtegida>
-            <Llantas vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar} />
+            <Llantas vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} onAgregar={agregarMantenimiento} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 
         <Route path="/vehiculo/:id/aceite" element={
           <RutaProtegida>
-            <Aceite vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar} />
+            <Aceite vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} onAgregar={agregarMantenimiento} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 
         <Route path="/vehiculo/:id/filtros" element={
           <RutaProtegida>
-            <Filtros vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar} />
+            <Filtros vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} onAgregar={agregarMantenimiento} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 
         <Route path="/vehiculo/:id/frenos" element={
           <RutaProtegida>
-            <Frenos vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar} />
+            <Frenos vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} onAgregar={agregarMantenimiento} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 
