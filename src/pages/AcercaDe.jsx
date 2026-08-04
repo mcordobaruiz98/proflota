@@ -93,6 +93,9 @@ function AcercaDe() {
                 {texto:"12.2. El uso continuado de la Aplicación después de la notificación constituye aceptación de los nuevos Términos."},
                 {titulo:"13. Cancelación y terminación", texto:"13.1.Estos Términos se rigen por las leyes de la República de Colombia."},
                 {texto:"13.2. Cualquier controversia será sometida a la jurisdicción de los jueces y tribunales de Barranquilla, Atlántico, Colombia."},
+                {titulo:"14. Canales de terceros", texto:"NAVIRA ofrece canales opcionales de registro de información a través de plataformas de mensajería de terceros, como Telegram. Al vincular su cuenta con dichos canales, el usuario reconoce que: (i) la transmisión de los mensajes se realiza a través de la infraestructura del tercero (Telegram FZ-LLC), sujeta a sus propios términos y políticas de privacidad; (ii) NAVIRA no controla la seguridad, disponibilidad ni el tratamiento de datos que dicho tercero realice sobre los mensajes en tránsito; (iii) la vinculación es voluntaria y puede revocarse en cualquier momento desde la aplicación o dejando de usar el canal."},
+                {titulo:"15. Responsabilidad sobre registros por chat", texto:"Los registros creados a través de canales de chat (como el bot de Telegram) tienen la misma validez y efecto dentro de la plataforma que los creados en la aplicación. El usuario es responsable de verificar el resumen presentado por el bot antes de confirmar el guardado. NAVIRA no se hace responsable por errores derivados de información digitada incorrectamente por el usuario en cualquier canal."},
+
               ].map((item,i)=>(
                 <div key={i} style={{marginBottom:"12px"}}>
                   <p style={{fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 4px"}}>{item.titulo}</p>
@@ -169,7 +172,8 @@ function AcercaDe() {
                 {texto:"13.2. Las modificaciones serán comunicadas al Usuario a través de la Aplicación o por correo electrónico."},
                 {texto:"13.3. El uso continuado de la Aplicación después de la notificación constituye aceptación de la política actualizada."},
                 {texto:"13.4. La versión vigente estará siempre disponible en la sección \"Acerca de\" dentro de la Aplicación."},
-                {titulo:"14. Autorización.", texto:"Al registrarse en NAVIRA, el Usuario declara que:"},
+                {titulo:"14. Datos recolectados por el bot de Telegram", texto:"Cuando el usuario registra información a través del bot de Telegram, NAVIRA almacena: el identificador de chat de Telegram asociado a su cuenta (para la vinculación), el estado temporal de la conversación en curso, y los datos del viaje que el usuario confirme guardar. NAVIRA no accede a otros chats, contactos ni información del dispositivo del usuario en Telegram. Los mensajes intercambiados con el bot son procesados exclusivamente para completar el registro solicitado por el usuario."},
+                {titulo:"15. Autorización.", texto:"Al registrarse en NAVIRA, el Usuario declara que:"},
                 {texto:"* Ha leído y comprendido esta Política de Privacidad."},
                 {texto:"* Autoriza de manera libre, expresa, previa e informada el tratamiento de sus datos personales conforme a las finalidades aquí descritas."},
                 {texto:"* Conoce sus derechos como titular de datos personales según la Ley 1581 de 2012."},
