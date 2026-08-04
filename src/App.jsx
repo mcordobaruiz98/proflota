@@ -303,7 +303,7 @@ function AppContenido() {
         {/* ── MANTENIMIENTO ── */}
         <Route path="/vehiculo/:id/llantas" element={
           <RutaProtegida>
-            <Llantas vehiculos={vehiculos} mantenimientos={mantenimientos} onAgregar={agregarMantenimiento} mostrarToast={mostrar} />
+            <Llantas vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 
