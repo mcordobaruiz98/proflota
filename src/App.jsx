@@ -15,6 +15,7 @@ import Cuentas          from "./pages/Cuentas";
 import Viajes           from "./pages/Viajes";
 import Cartera          from "./pages/Cartera";
 import Cobros           from "./pages/Cobros";
+import Cotizador        from "./pages/Cotizador";
 import Comparativo      from "./pages/Comparativo";
 import Conductores      from "./pages/Conductores";
 import Objetivos        from "./pages/Objetivos";
@@ -54,7 +55,7 @@ function AppContenido() {
     agregarGasto, eliminarGasto, editarGasto,
     agregarGastoFijo, eliminarGastoFijo,
     agregarConductor, editarConductor, eliminarConductor,
-    agregarCuenta, editarCuenta,
+    agregarCuenta, editarCuenta, eliminarCuenta,
   } = useFirestore(usuario?.uid);
 
   // Perfil de facturación (vive en usuarios/{uid}, no en subcolección)
@@ -149,14 +150,23 @@ function AppContenido() {
           <RutaProtegida>
             <Cobros
               viajes={viajes}
+              empresas={empresas}
               perfilFacturacion={perfilFacturacion}
               onGuardarCuenta={agregarCuenta}
               cuentasCobro={cuentasCobro}
               onEditarCuenta={editarCuenta}
+              onEliminarCuenta={eliminarCuenta}
               mostrarToast={mostrar}
             />
           </RutaProtegida>
         } />
+
+        <Route path="/cotizador" element={
+          <RutaProtegida>
+            <Cotizador vehiculos={vehiculos} rutas={rutas} mostrarToast={mostrar} />
+          </RutaProtegida>
+        } />
+
 
         <Route path="/comparativo" element={
           <RutaProtegida>
