@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { theme as t } from "../../styles/theme";
@@ -146,7 +146,7 @@ function DiagramaFrenas({ ejes, estadoEjes, onSelect, ejeActivo, tipoVehiculo })
   );
 }
 
-function Frenos({ vehiculos, mostrarToast, onEditarVehiculo }) {
+function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
   const navigate = useNavigate();
   const { id }   = useParams();
 
@@ -156,6 +156,14 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo }) {
 
   const [estadoEjes, setEstadoEjes] = useState(vehiculo?.frenosData || {});
   const [historial,   setHistorial]   = useState(vehiculo?.frenosHistorial || []);
+
+  // Sincronizar cuando los datos cargan/cambian en Firestore (evita borrado al refrescar)
+  useEffect(() => {
+    if (vehiculo?.frenosData) setEstadoEjes(vehiculo.frenosData);
+  }, [vehiculo?.frenosData]);
+  useEffect(() => {
+    if (vehiculo?.frenosHistorial) setHistorial(vehiculo.frenosHistorial);
+  }, [vehiculo?.frenosHistorial]);
   const [ejeEdit,     setEjeEdit]     = useState(null);
   const [estadoSel,   setEstadoSel]   = useState("bueno");
   const [grosor,      setGrosor]      = useState("");
@@ -199,6 +207,21 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo }) {
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
     onEditarVehiculo(vehiculo.firestoreId, { frenosHistorial: nuevos }).catch(()=>{});
+
+    // Registrar en el historial general de mantenimiento (opción A)
+    if (onAgregar) {
+      onAgregar({
+        vehiculoId: vehiculo.firestoreId,
+        placa: vehiculo.placa || "",
+        tipo: "Frenos",
+        descripcion: `Reparación de frenos · ${ejeReg}`,
+        fecha: fechaReg,
+        km: Number(kmReg),
+        costo: Number(costoReg) || 0,
+        taller: tallerReg || "",
+        refId: nuevo.id,
+      }).catch(()=>{});
+    }
     setKmReg(""); setTallerReg(""); setCostoReg("");
     setMostrarForm(false);
     mostrarToast("Reparación registrada","exito");
