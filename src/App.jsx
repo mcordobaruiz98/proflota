@@ -103,7 +103,9 @@ function AppContenido() {
               <Vehiculos
                 vehiculos={vehiculos}
                 viajes={viajes}
+                conductores={conductores}
                 onEliminar={eliminarVehiculo}
+                onEditarVehiculo={editarVehiculo}
                 mostrarToast={mostrar}
                 cargando={cargando}
               />
