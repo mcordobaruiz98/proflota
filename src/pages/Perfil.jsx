@@ -252,7 +252,7 @@ function Perfil({ mostrarToast }) {
           </div>
         )}
 
-        <p style={{textAlign:"center", fontSize:"11px", color:t.colors.textTertiary, marginTop:"18px"}}>NAVIRA v1.0</p>
+        <p style={{textAlign:"center", fontSize:"11px", color:t.colors.textTertiary, marginTop:"18px"}}>NAVIRA v1.1</p>
 
       </div>
     </div>
