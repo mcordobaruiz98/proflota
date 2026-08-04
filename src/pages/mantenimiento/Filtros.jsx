@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Trash2, Droplets, Wind, Fuel, Filter, Thermometer, Droplet } from "lucide-react";
 import { theme as t } from "../../styles/theme";
@@ -12,13 +12,18 @@ const TIPOS_FILTRO = [
   { id:"hidraulico",   label:"Filtro hidráulico",      Icono:Droplet,      color:"#3B82F6" },
 ];
 
-function Filtros({ vehiculos, mostrarToast, onEditarVehiculo }) {
+function Filtros({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
   const navigate = useNavigate();
   const { id }   = useParams();
 
   const vehiculo   = vehiculos.find(v => String(v.firestoreId) === String(id));
 
   const [historial, setHistorial] = useState(vehiculo?.filtrosHistorial || []);
+
+  // Sincronizar cuando carga/cambia en Firestore (evita borrado al refrescar)
+  useEffect(() => {
+    if (vehiculo?.filtrosHistorial) setHistorial(vehiculo.filtrosHistorial);
+  }, [vehiculo?.filtrosHistorial]);
 
   const [tipoFiltro,  setTipoFiltro]  = useState("aceite");
   const [marca,       setMarca]       = useState("");
@@ -41,6 +46,23 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo }) {
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
     onEditarVehiculo(vehiculo.firestoreId, { filtrosHistorial: nuevos }).catch(()=>{});
+
+    // Registrar en el historial general de mantenimiento (opción A)
+    if (onAgregar) {
+      onAgregar({
+        vehiculoId: vehiculo.firestoreId,
+        placa: vehiculo.placa || "",
+        tipo: "Filtro",
+        descripcion: `Cambio de filtro de ${tipoFiltro}${marca ? ` · ${marca}` : ""}`,
+        fecha,
+        km: Number(kmCambio),
+        costo: Number(costo) || 0,
+        taller: taller || "",
+        nitTaller: nitTaller || "",
+        nota: nota || "",
+        refId: nuevo.id,
+      }).catch(()=>{});
+    }
     setMarca(""); setReferencia(""); setKmCambio(""); setTaller("");setnitTaller(""); setCosto(""); setNota("");
     setMostrarForm(false);
     mostrarToast("Filtro registrado","exito");

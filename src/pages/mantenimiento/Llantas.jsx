@@ -238,6 +238,21 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
     };
     setLlantas(nuevas);
     guardarLocal(nuevas);
+
+    // Registrar en el historial general si la llanta tiene valor (compra nueva)
+    if (onAgregar && Number(valor) > 0) {
+      onAgregar({
+        vehiculoId: vehiculo.firestoreId,
+        placa: vehiculo.placa || "",
+        tipo: "Llanta",
+        descripcion: `Llanta posición ${seleccionada}${marca ? ` · ${marca}` : ""}${ref ? ` ${ref}` : ""}`,
+        fecha: fechaMont || new Date().toISOString().slice(0,10),
+        km: Number(kmMont) || 0,
+        costo: Number(valor) || 0,
+        refId: seleccionada,
+      }).catch(()=>{});
+    }
+
     setSeleccionada(null);
     mostrarToast("Llanta guardada","exito");
   };
