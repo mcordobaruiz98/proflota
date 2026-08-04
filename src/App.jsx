@@ -309,19 +309,19 @@ function AppContenido() {
 
         <Route path="/vehiculo/:id/aceite" element={
           <RutaProtegida>
-            <Aceite vehiculos={vehiculos} mantenimientos={mantenimientos} onAgregar={agregarMantenimiento} mostrarToast={mostrar} />
+            <Aceite vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 
         <Route path="/vehiculo/:id/filtros" element={
           <RutaProtegida>
-            <Filtros vehiculos={vehiculos} mantenimientos={mantenimientos} onAgregar={agregarMantenimiento} mostrarToast={mostrar} />
+            <Filtros vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 
         <Route path="/vehiculo/:id/frenos" element={
           <RutaProtegida>
-            <Frenos vehiculos={vehiculos} mantenimientos={mantenimientos} onAgregar={agregarMantenimiento} mostrarToast={mostrar} />
+            <Frenos vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 
@@ -333,7 +333,7 @@ function AppContenido() {
 
         <Route path="/vehiculo/:id/historial-mant" element={
           <RutaProtegida>
-            <HistorialMant vehiculos={vehiculos} mantenimientos={mantenimientos} onEliminar={eliminarMantenimiento} mostrarToast={mostrar} />
+            <HistorialMant vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 
