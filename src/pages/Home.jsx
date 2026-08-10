@@ -112,12 +112,12 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
   licAlerta.sort((a,b) => a.dias - b.dias);
 
   const accesos = [
-  { label: "Vehículos",   Icono: Truck,       ruta: "/vehiculos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
-  { label: "Cuentas",     Icono: TrendingUp,  ruta: "/cuentas",     color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
-  { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
-  { label: "Cartera",     Icono: AlertCircle, ruta: "/cartera",     color: "#0F2340", border: "#1E3A5F", iconColor: vencidos.length > 0 ? "#EF4444" : "#22C55E" },
-  { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
-  { label: "Mant.",       Icono: Wrench,      ruta: "/vehiculos",   color: "#0F2340", border: "#1E3A5F", iconColor: "#22C55E" },
+  { label: "Vehículos",   Icono: Truck,       ruta: "/vehiculos",   iconColor: t.colors.green },
+  { label: "Cuentas",     Icono: TrendingUp,  ruta: "/cuentas",     iconColor: t.colors.green },
+  { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", iconColor: t.colors.green },
+  { label: "Cartera",     Icono: AlertCircle, ruta: "/cartera",     iconColor: vencidos.length > 0 ? t.colors.red : t.colors.green },
+  { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      iconColor: t.colors.green },
+  { label: "Mant.",       Icono: Wrench,      ruta: "/vehiculos",   iconColor: t.colors.green },
 ];
 
   if (cargando) return (
@@ -153,7 +153,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
           <p style={styles.gananciaLabel}>Ganancia este mes</p>
           <p style={{
             ...styles.gananciaValor,
-            color: gananciaMes >= 0 ? "#064E3B" : "#7F1D1D",
+            color: gananciaMes >= 0 ? "#FFFFFF" : "#FFE0DC",
           }}>
             {fmt(gananciaMes)}
           </p>
@@ -161,20 +161,20 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             {viajesMes.length} viaje{viajesMes.length !== 1 ? "s" : ""} · {fmt(ingresosMes)} brutos
           </p>
           {totalPE > 0 && (
-            <div style={{marginTop:"8px"}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"4px"}}>
-                <span style={{fontSize:"10px",color:"#065F46",fontWeight:"600"}}>Punto de equilibrio</span>
-                <span style={{fontSize:"10px",color:pctPE>=100?"#065F46":"#7F1D1D",fontWeight:"700"}}>{pctPE}%</span>
+            <div style={{marginTop:"10px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"5px"}}>
+                <span style={{fontSize:"10px",color:"rgba(255,255,255,0.85)",fontWeight:"600",textTransform:"uppercase",letterSpacing:"0.05em"}}>Punto de equilibrio</span>
+                <span style={{fontSize:"10px",color:"#fff",fontWeight:"700",...t.numeric}}>{pctPE}%</span>
               </div>
-              <div style={{height:"4px",borderRadius:"2px",background:"rgba(0,0,0,0.15)",overflow:"hidden"}}>
-                <div style={{height:"100%",borderRadius:"2px",width:`${Math.min(pctPE,100)}%`,background:pctPE>=100?"#065F46":pctPE>=60?"#D97706":"#DC2626",transition:"width 0.4s"}}/>
+              <div style={{height:"5px",borderRadius:"3px",background:"rgba(0,0,0,0.22)",overflow:"hidden"}}>
+                <div style={{height:"100%",borderRadius:"3px",width:`${Math.min(pctPE,100)}%`,background:"rgba(255,255,255,0.92)",transition:"width 0.4s"}}/>
               </div>
             </div>
           )}
         </div>
         <div style={styles.gananciaDer}>
           <div style={styles.vehMetrica}>
-            <p style={styles.vehMetricaValor}>{vehiculos.length}</p>
+            <p style={{...styles.vehMetricaValor, ...t.numeric}}>{vehiculos.length}</p>
             <p style={styles.vehMetricaLabel}>Vehículos</p>
           </div>
         </div>
@@ -186,27 +186,27 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
           style={{flex:1, padding:"14px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px"}}
           onClick={() => navigate("/calculadora")}
         >
-          Calcular
+          <Calculator size={16} color="#fff" strokeWidth={2.2} /> Calcular
         </button>
         <button
-          style={{flex:1, padding:"14px", background:t.colors.bgCard, color:t.colors.blue, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px"}}
+          style={{flex:1, padding:"14px", background:t.colors.bgCard, color:t.colors.blueText, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px"}}
           onClick={() => navigate("/cotizador")}
         >
-           Cotizar
+          <Handshake size={16} color={t.colors.blueText} strokeWidth={2.2} /> Cotizar
         </button>
       </div>
 
       {/* SEMÁFORO DE FLOTA */}
       {vehiculos.length > 1 && (
-        <div style={{margin:"0 16px 10px",padding:"10px 14px",background:t.colors.bgCard,borderRadius:t.radius.md,boxShadow:t.shadows.card}}>
-          <div style={{display:"flex",gap:"12px",overflowX:"auto",paddingBottom:"2px"}}>
+        <div style={{margin:"0 16px 10px",padding:"11px 14px",background:t.colors.bgCard,borderRadius:t.radius.md,border:`1px solid ${t.colors.borderLight}`,boxShadow:t.shadows.card}}>
+          <div style={{display:"flex",gap:"14px",overflowX:"auto",paddingBottom:"2px"}}>
             {vehiculos.map(v => {
               const est = v.estado || "disponible";
               const colores = {
                 disponible:      { c: t.colors.green,  label: "Disponible" },
-                en_viaje:        { c: t.colors.blue,   label: "En viaje" },
+                en_viaje:        { c: t.colors.blueText,label: "En viaje" },
                 en_taller:       { c: t.colors.amber,  label: "En taller" },
-                esperando_carga: { c: "#8B9CB3",       label: "Esperando" },
+                esperando_carga: { c: t.colors.textTertiary, label: "Esperando" },
               };
               const e = colores[est] || colores.disponible;
               return (
@@ -214,8 +214,8 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
                   onClick={()=>navigate(`/vehiculo/${v.firestoreId}`)}
                   style={{display:"flex",alignItems:"center",gap:"6px",cursor:"pointer",flexShrink:0}}
                 >
-                  <span style={{width:"10px",height:"10px",borderRadius:"50%",background:e.c,boxShadow:`0 0 6px ${e.c}66`,flexShrink:0}} />
-                  <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.textSecondary}}>{v.placa}</span>
+                  <span style={{width:"9px",height:"9px",borderRadius:"50%",background:e.c,boxShadow:`0 0 8px ${e.c}88`,flexShrink:0}} />
+                  <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.textSecondary,...t.numeric}}>{v.placa}</span>
                 </div>
               );
             })}
@@ -232,14 +232,14 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
         const ingresosHoy = viajesHoy.reduce((s,v) => s + (v.vViaje||0), 0);
         if (viajesHoy.length === 0) return null;
         return (
-          <div style={{margin:"0 16px 10px",padding:"10px 16px",background:t.colors.bgCard,borderRadius:t.radius.md,display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:t.shadows.card}}>
+          <div style={{margin:"0 16px 10px",padding:"11px 16px",background:t.colors.bgCard,borderRadius:t.radius.md,border:`1px solid ${t.colors.borderLight}`,display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:t.shadows.card}}>
             <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-              <Truck size={14} color={t.colors.blue} strokeWidth={2}/>
+              <Truck size={14} color={t.colors.blueText} strokeWidth={2}/>
               <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>
                 Hoy: {viajesHoy.length} viaje{viajesHoy.length!==1?"s":""} · {fmt(ingresosHoy)} brutos
               </span>
             </div>
-            <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:gananciaHoy>=0?t.colors.green:t.colors.red}}>
+            <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:gananciaHoy>=0?t.colors.green:t.colors.red,...t.numeric}}>
               {fmt(gananciaHoy)}
             </span>
           </div>
@@ -249,9 +249,9 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
       {/* ONBOARDING — flujo guiado */}
       {(vehiculos.length === 0 || gastosFijos.length === 0 || viajes.length === 0) && (
         <div style={{margin:"0 16px 10px"}}>
-          <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"20px",boxShadow:t.shadows.card}}>
+          <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"20px",border:`1px solid ${t.colors.borderLight}`,boxShadow:t.shadows.card}}>
             <p style={{fontSize:"16px",fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:"0 0 4px",textAlign:"center"}}>
-              {vehiculos.length === 0 ? "¡Bienvenido a NAVIRA!" : viajes.length === 0 ? "¡Ya casi!" : "🎉 ¡Todo listo!"}
+              {vehiculos.length === 0 ? "¡Bienvenido a NAVIRA!" : viajes.length === 0 ? "¡Ya casi!" : "¡Todo listo!"}
             </p>
             <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"0 0 4px",textAlign:"center"}}>
               {vehiculos.length === 0 ? "Configura tu flota en 5 minutos" : "Completa los pasos restantes"}
@@ -269,7 +269,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
               const done = vehiculos.length > 0;
               return (
                 <div style={{display:"flex",gap:"12px",padding:"12px 0",borderBottom:`1px solid ${t.colors.borderLight}`,opacity:done?0.6:1}}>
-                  <div style={{width:"32px",height:"32px",borderRadius:"50%",background:done?t.colors.green:t.colors.green+"22",border:`1.5px solid ${t.colors.green}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <div style={{width:"32px",height:"32px",borderRadius:"50%",background:done?t.colors.green:t.colors.greenSoft,border:`1.5px solid ${t.colors.green}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                     {done
                       ? <span style={{color:"#fff",fontSize:"14px",fontWeight:"900"}}>✓</span>
                       : <span style={{fontSize:"14px",fontWeight:t.fonts.weightBlack,color:t.colors.green}}>1</span>
@@ -299,10 +299,10 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
               const done = gastosFijos.length > 0;
               return (
                 <div style={{display:"flex",gap:"12px",padding:"12px 0",borderBottom:`1px solid ${t.colors.borderLight}`,opacity:done?0.6:!prev?0.4:1}}>
-                  <div style={{width:"32px",height:"32px",borderRadius:"50%",background:done?t.colors.blue:t.colors.blue+"22",border:`1.5px solid ${done?t.colors.blue:!prev?"#333":t.colors.blue}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <div style={{width:"32px",height:"32px",borderRadius:"50%",background:done?t.colors.blue:t.colors.blueSoft,border:`1.5px solid ${done?t.colors.blue:!prev?t.colors.border:t.colors.blue}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                     {done
                       ? <span style={{color:"#fff",fontSize:"14px",fontWeight:"900"}}>✓</span>
-                      : <span style={{fontSize:"14px",fontWeight:t.fonts.weightBlack,color:!prev?"#555":t.colors.blue}}>2</span>
+                      : <span style={{fontSize:"14px",fontWeight:t.fonts.weightBlack,color:!prev?t.colors.textTertiary:t.colors.blueText}}>2</span>
                     }
                   </div>
                   <div style={{flex:1}}>
@@ -329,10 +329,10 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
               const done = viajes.length > 0;
               return (
                 <div style={{display:"flex",gap:"12px",padding:"12px 0",opacity:done?0.6:!prev?0.4:1}}>
-                  <div style={{width:"32px",height:"32px",borderRadius:"50%",background:done?t.colors.amber:t.colors.amber+"22",border:`1.5px solid ${done?t.colors.amber:!prev?"#333":t.colors.amber}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <div style={{width:"32px",height:"32px",borderRadius:"50%",background:done?t.colors.amber:t.colors.amberSoft,border:`1.5px solid ${done?t.colors.amber:!prev?t.colors.border:t.colors.amber}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                     {done
                       ? <span style={{color:"#fff",fontSize:"14px",fontWeight:"900"}}>✓</span>
-                      : <span style={{fontSize:"14px",fontWeight:t.fonts.weightBlack,color:!prev?"#555":t.colors.amber}}>3</span>
+                      : <span style={{fontSize:"14px",fontWeight:t.fonts.weightBlack,color:!prev?t.colors.textTertiary:t.colors.amber}}>3</span>
                     }
                   </div>
                   <div style={{flex:1}}>
@@ -357,7 +357,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             {vehiculos.length > 0 && gastosFijos.length > 0 && viajes.length > 0 && totalPE > 0 && (
               <div style={{marginTop:"12px",padding:"14px",background:t.colors.greenSoft,border:`1.5px solid ${t.colors.greenBorder}`,borderRadius:t.radius.md,textAlign:"center"}}>
                 <p style={{fontSize:t.fonts.sizeXs,color:t.colors.green,fontWeight:t.fonts.weightBold,margin:"0 0 4px",textTransform:"uppercase"}}>Su punto de equilibrio mensual</p>
-                <p style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:t.colors.green,margin:"0 0 4px"}}>{fmt(totalPE)}</p>
+                <p style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:t.colors.green,margin:"0 0 4px",...t.numeric}}>{fmt(totalPE)}</p>
                 <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:0}}>
                   Con su primer viaje ya cubrió el {pctPE}%. ¡Siga así!
                 </p>
@@ -386,7 +386,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
         >
           <AlertCircle size={20} color={t.colors.red} strokeWidth={2} />
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.red, margin: 0 }}>
+            <p style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.redText, margin: 0 }}>
               {vencidos.length} pago{vencidos.length !== 1 ? "s" : ""} vencido{vencidos.length !== 1 ? "s" : ""}
             </p>
             <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textSecondary, margin: "2px 0 0" }}>
@@ -405,14 +405,14 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
           style={{
             margin: "0 16px 10px",
             padding: "12px 16px",
-            background: docsAlerta.some(d=>d.vencido) ? t.colors.redSoft : "#FEF3C7",
-            border: `1.5px solid ${docsAlerta.some(d=>d.vencido) ? t.colors.redBorder : "#F59E0B33"}`,
+            background: docsAlerta.some(d=>d.vencido) ? t.colors.redSoft : t.colors.amberSoft,
+            border: `1.5px solid ${docsAlerta.some(d=>d.vencido) ? t.colors.redBorder : t.colors.amberBorder}`,
             borderRadius: t.radius.lg,
           }}
         >
           <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
             <AlertCircle size={18} color={docsAlerta.some(d=>d.vencido)?t.colors.red:t.colors.amber} strokeWidth={2} />
-            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:docsAlerta.some(d=>d.vencido)?t.colors.red:t.colors.amber,margin:0}}>
+            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:docsAlerta.some(d=>d.vencido)?t.colors.redText:t.colors.amber,margin:0}}>
               Documentos por vencer
             </p>
           </div>
@@ -425,7 +425,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
               <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>
                 {d.doc} · {d.placa}
               </span>
-              <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:d.vencido?t.colors.red:d.dias<=7?t.colors.amber:t.colors.textSecondary}}>
+              <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:d.vencido?t.colors.redText:d.dias<=7?t.colors.amber:t.colors.textSecondary}}>
                 {d.vencido?`Venció hace ${Math.abs(d.dias)}d`:d.dias===0?"Vence hoy":`Vence en ${d.dias}d`}
               </span>
             </div>
@@ -435,17 +435,17 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
 
       {/* ALERTA MANTENIMIENTOS POR KM */}
       {mantAlerta.length > 0 && (
-        <div style={{margin:"0 16px 10px",padding:"12px 16px",background:mantAlerta.some(m=>m.vencido)?"#FEF2F2":"#FEF3C7",border:`1.5px solid ${mantAlerta.some(m=>m.vencido)?"#EF444433":"#F59E0B33"}`,borderRadius:t.radius.lg}}>
+        <div style={{margin:"0 16px 10px",padding:"12px 16px",background:mantAlerta.some(m=>m.vencido)?t.colors.redSoft:t.colors.amberSoft,border:`1.5px solid ${mantAlerta.some(m=>m.vencido)?t.colors.redBorder:t.colors.amberBorder}`,borderRadius:t.radius.lg}}>
           <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
             <Wrench size={18} color={mantAlerta.some(m=>m.vencido)?t.colors.red:t.colors.amber} strokeWidth={2} />
-            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:mantAlerta.some(m=>m.vencido)?t.colors.red:t.colors.amber,margin:0}}>Mantenimientos pendientes</p>
+            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:mantAlerta.some(m=>m.vencido)?t.colors.redText:t.colors.amber,margin:0}}>Mantenimientos pendientes</p>
           </div>
           {mantAlerta.map((m,i) => (
             <div key={`${m.placa}-${m.tipo}-${i}`}
               style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0",cursor:"pointer"}}
               onClick={()=>navigate(`/vehiculo/${m.vehiculoId}`,{state:{tab:"mant"}})}>
               <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>{m.tipo} · {m.placa}</span>
-              <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:m.vencido?t.colors.red:t.colors.amber}}>
+              <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:m.vencido?t.colors.redText:t.colors.amber}}>
                 {m.vencido?`Pasado ${Math.abs(m.kmFaltantes).toLocaleString("es-CO")} km`:`Faltan ${m.kmFaltantes.toLocaleString("es-CO")} km`}
               </span>
             </div>
@@ -455,17 +455,17 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
 
       {/* ALERTA LICENCIAS CONDUCTORES */}
       {licAlerta.length > 0 && (
-        <div style={{margin:"0 16px 10px",padding:"12px 16px",background:licAlerta.some(l=>l.vencido)?"#FEF2F2":"#FEF3C7",border:`1.5px solid ${licAlerta.some(l=>l.vencido)?"#EF444433":"#F59E0B33"}`,borderRadius:t.radius.lg}}>
+        <div style={{margin:"0 16px 10px",padding:"12px 16px",background:licAlerta.some(l=>l.vencido)?t.colors.redSoft:t.colors.amberSoft,border:`1.5px solid ${licAlerta.some(l=>l.vencido)?t.colors.redBorder:t.colors.amberBorder}`,borderRadius:t.radius.lg}}>
           <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
             <AlertCircle size={18} color={licAlerta.some(l=>l.vencido)?t.colors.red:t.colors.amber} strokeWidth={2} />
-            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:licAlerta.some(l=>l.vencido)?t.colors.red:t.colors.amber,margin:0}}>Licencias de conducir</p>
+            <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:licAlerta.some(l=>l.vencido)?t.colors.redText:t.colors.amber,margin:0}}>Licencias de conducir</p>
           </div>
           {licAlerta.map((l,i) => (
             <div key={`lic-${i}`}
               style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0",cursor:"pointer"}}
               onClick={()=>navigate("/conductores")}>
               <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>{l.nombre}</span>
-              <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:l.vencido?t.colors.red:t.colors.amber}}>
+              <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:l.vencido?t.colors.redText:t.colors.amber}}>
                 {l.vencido?`Vencida hace ${Math.abs(l.dias)}d`:`Vence en ${l.dias}d`}
               </span>
             </div>
@@ -479,18 +479,14 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
   {accesos.map((a) => (
     <button
       key={a.ruta}
-      style={{
-        ...styles.accesoCard,
-        background: a.color,
-        border: `1.5px solid ${a.border}`,
-      }}
+      style={styles.accesoCard}
       onClick={() => navigate(a.ruta)}
     >
       <div style={{
-        width: "40px",
-        height: "40px",
-        borderRadius: t.radius.sm,
-        background: a.border,
+        width: "42px",
+        height: "42px",
+        borderRadius: t.radius.md,
+        background: a.iconColor + "1F",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -501,7 +497,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
       <span style={styles.accesoLabel}>{a.label}</span>
     </button>
      ))}
-      </div>  
+      </div>
 
       {/* VIAJES RECIENTES */}
       <div style={styles.seccionHeader}>
@@ -527,6 +523,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
         <div style={styles.viajesList}>
           {recientes.map((v) => {
             const positivo = (v.neta || 0) >= 0;
+            const pagado   = v.estadoPago === "pagado";
             return (
               <div
                 key={v.firestoreId}
@@ -535,24 +532,29 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
               >
                 <div style={{
                   ...styles.viajeIndicador,
-                  background: positivo ? t.colors.greenSoft : t.colors.redSoft,
-                  borderColor: positivo ? t.colors.greenBorder : t.colors.redBorder,
+                  background: positivo ? t.colors.green : t.colors.red,
                 }} />
                 <div style={styles.viajeInfo}>
                   <p style={styles.viajeRuta}>{v.ruta || "Sin ruta"}</p>
                   <p style={styles.viajeMeta}>
                     {v.fecha || ""}
                     {v.placa ? ` · ${v.placa}` : ""}
+                    <span style={{
+                      ...styles.tagPago,
+                      background: pagado ? t.colors.greenSoft : t.colors.amberSoft,
+                      color:      pagado ? t.colors.green     : t.colors.amber,
+                    }}>{pagado ? "Pagado" : "Por cobrar"}</span>
                   </p>
                 </div>
                 <div style={styles.viajeDer}>
                   <p style={{
                     ...styles.viajeNeta,
+                    ...t.numeric,
                     color: positivo ? t.colors.green : t.colors.red,
                   }}>
                     {positivo ? "+" : ""}{fmt(v.neta || 0)}
                   </p>
-                  <p style={styles.viajeFlete}>{fmt(v.vViaje || 0)}</p>
+                  <p style={{...styles.viajeFlete, ...t.numeric}}>{fmt(v.vViaje || 0)}</p>
                 </div>
               </div>
             );
@@ -569,34 +571,34 @@ const styles = {
   header:            { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 20px 16px", background: t.colors.bgCard, borderBottom: `1px solid ${t.colors.borderLight}` },
   saludo:            { fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "0 0 2px", fontWeight: t.fonts.weightMedium, textTransform: "uppercase", letterSpacing: "0.06em" },
   nombre:            { fontSize: "22px", fontWeight: t.fonts.weightBlack, color: t.colors.textPrimary, margin: 0, letterSpacing: "-0.3px" },
-  avatar:            { width: "44px", height: "44px", borderRadius: t.radius.full, background: t.colors.blue, color: "#fff", border: "none", fontSize: "15px", fontWeight: t.fonts.weightBold, cursor: "pointer", flexShrink: 0 },
-  gananciaCard:      { background: `linear-gradient(135deg, #15803D 0%, ${t.colors.green} 100%)`, margin: "16px", borderRadius: t.radius.lg, padding: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 4px 14px rgba(22,163,74,0.3)" },
+  avatar:            { width: "44px", height: "44px", borderRadius: t.radius.lg, background: t.colors.blue, color: "#fff", border: "none", fontSize: "15px", fontWeight: t.fonts.weightBold, cursor: "pointer", flexShrink: 0, letterSpacing: "0.5px" },
+  gananciaCard:      { background: `linear-gradient(140deg, #0F7A44 0%, #159F51 55%, ${t.colors.green} 100%)`, margin: "16px", borderRadius: t.radius.xl, padding: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 18px 40px -18px rgba(34,197,94,0.45)" },
   gananciaIzq:       { flex: 1 },
-  gananciaLabel:     { fontSize: t.fonts.sizeXs, color: "rgba(255,255,255,0.75)", margin: "0 0 4px", fontWeight: t.fonts.weightMedium, textTransform: "uppercase", letterSpacing: "0.06em" },
-  gananciaValor:     { fontSize: "38px", fontWeight: t.fonts.weightBlack, color: "#fff", margin: "0 0 4px", letterSpacing: "-0.5px" },
-  gananciaSub:       { fontSize: t.fonts.sizeXs, color: "rgba(255,255,255,0.65)", margin: 0 },
+  gananciaLabel:     { fontSize: t.fonts.sizeXs, color: "rgba(255,255,255,0.82)", margin: "0 0 4px", fontWeight: t.fonts.weightMedium, textTransform: "uppercase", letterSpacing: "0.06em" },
+  gananciaValor:     { fontSize: "38px", fontWeight: t.fonts.weightBlack, color: "#fff", margin: "0 0 4px", letterSpacing: "-0.8px", fontVariantNumeric: "tabular-nums" },
+  gananciaSub:       { fontSize: t.fonts.sizeXs, color: "rgba(255,255,255,0.72)", margin: 0 },
   gananciaDer:       { marginLeft: "16px" },
   vehMetrica:        { background: "rgba(255,255,255,0.15)", borderRadius: t.radius.md, padding: "12px 16px", textAlign: "center", backdropFilter: "blur(10px)" },
   vehMetricaValor:   { fontSize: "28px", fontWeight: t.fonts.weightBlack, color: "#fff", margin: 0 },
-  vehMetricaLabel:   { fontSize: "10px", color: "rgba(255,255,255,0.75)", margin: "2px 0 0", textTransform: "uppercase", letterSpacing: "0.05em" },
+  vehMetricaLabel:   { fontSize: "10px", color: "rgba(255,255,255,0.78)", margin: "2px 0 0", textTransform: "uppercase", letterSpacing: "0.05em" },
   seccionHeader:     { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 20px 8px" },
   seccionTitulo:     { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightBold, color: t.colors.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", padding: "12px 20px 8px", margin: 0 },
-  btnVerTodos:       { background: "none", border: "none", fontSize: t.fonts.sizeXs, color: t.colors.blue, fontWeight: t.fonts.weightBold, cursor: "pointer", padding: "12px 20px 8px" },
+  btnVerTodos:       { background: "none", border: "none", fontSize: t.fonts.sizeXs, color: t.colors.blueText, fontWeight: t.fonts.weightBold, cursor: "pointer", padding: "12px 20px 8px" },
   grid:              { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", padding: "0 16px 4px" },
-  accesoCard:        { display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "16px", borderRadius: t.radius.lg, cursor: "pointer", transition: "transform 0.1s", background:"#0F2340" },
-  accesoIcono:       { width:"44px", height:"44px", borderRadius: t.radius.md, background: "#1565ff22", display: "flex", alignItems:"center", justifyContent:"center", },
-  accesoLabel:       { fontSize: t.fonts.sixeXs, fontWeight: t.fonts.weightSemibold, color: "#ffffff", textAlign:"center", },
+  accesoCard:        { display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "16px", borderRadius: t.radius.lg, cursor: "pointer", transition: "transform 0.1s", background: t.colors.bgCard, border: `1px solid ${t.colors.borderLight}` },
+  accesoLabel:       { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightSemibold, color: t.colors.textPrimary, textAlign: "center" },
   vacio:             { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "40px 20px", textAlign: "center", margin: "0 16px", boxShadow: t.shadows.card },
   vacioIcono:        { fontSize: "36px", marginBottom: "10px" },
   vacioTexto:        { fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: "0 0 6px" },
   vacioSub:          { fontSize: t.fonts.sizeSm, color: t.colors.textSecondary, margin: "0 0 20px" },
   btnCalcular:       { padding: "12px 28px", background: t.colors.green, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, cursor: "pointer" },
-  viajesList:        { padding: "0 16px", display: "flex", flexDirection: "column", gap: "8px" },
-  viajeCard:         { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "14px", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", boxShadow: t.shadows.card },
-  viajeIndicador:    { width: "4px", height: "40px", borderRadius: "2px", border: "1.5px solid", flexShrink: 0 },
+  viajesList:        { padding: "0 16px", display: "flex", flexDirection: "column", gap: "9px" },
+  viajeCard:         { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "14px", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", border: `1px solid ${t.colors.borderLight}`, boxShadow: t.shadows.card },
+  viajeIndicador:    { width: "3px", height: "40px", borderRadius: "2px", flexShrink: 0 },
   viajeInfo:         { flex: 1, minWidth: 0 },
-  viajeRuta:         { fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightSemibold, color: t.colors.textPrimary, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
-  viajeMeta:         { fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "3px 0 0" },
+  viajeRuta:         { fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
+  viajeMeta:         { fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "4px 0 0", display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" },
+  tagPago:           { fontSize: "9.5px", fontWeight: t.fonts.weightBold, letterSpacing: "0.3px", padding: "2px 7px", borderRadius: "6px" },
   viajeDer:          { textAlign: "right", flexShrink: 0 },
   viajeNeta:         { fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBold, margin: 0 },
   viajeFlete:        { fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "2px 0 0" },
