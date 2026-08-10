@@ -2,39 +2,42 @@ export const theme = {
 
   // ── COLORES ──
   colors: {
-    // Fondos
+    // Fondos (se mantiene tu identidad azul marino)
     bgPrimary:   "#0A1A2F",  // fondo principal
     bgCard:      "#0F2340",  // cards
-    bgSection:   "#071527",  // secciones secundarias
+    bgSection:   "#081527",  // secciones secundarias / inputs sobre card
 
-    // Texto
-    textPrimary:   "#FFFFFF", // títulos
-    textSecondary: "#94A3B8", // labels
-    textTertiary:  "#475569", // hints, placeholders
+    // Texto (un poco más legible sobre oscuro)
+    textPrimary:   "#F4F7FC", // títulos (blanco cálido, menos duro que #FFF)
+    textSecondary: "#9DB0C8", // labels
+    textTertiary:  "#647C99", // hints, placeholders, metadatos
 
-    // Acciones
-    blue:        "#1565FF",  // azul petróleo
-    blueSoft:    "#EEF3FF",  // fondo azul petróleo suave
-    blueBorder:  "#93B4FF",  // borde azul petróleo suave
-    blueDark:    "#0A1A2F",  // azul petróleo oscuro para gradientes
+    // Acciones — azul
+    blue:        "#1565FF",  // azul de marca (botones sólidos)
+    blueText:    "#5AA0FF",  // azul legible para TEXTO sobre fondo oscuro
+    blueSoft:    "#122540",  // fondo azul suave (tinte oscuro)
+    blueBorder:  "#274A7D",  // borde azul suave
+    blueDark:    "#0A1A2F",  // azul oscuro para gradientes
 
     // Ganancia — el color más importante
     green:       "#22C55E",  // ganancia, éxito
-    greenSoft:   "#DCFCE7",  // fondo verde suave
-    greenBorder: "#86EFAC",  // borde verde suave
+    greenSoft:   "#0F2C20",  // fondo verde suave (tinte oscuro)
+    greenBorder: "#1E5138",  // borde verde suave
 
     // Gastos
-    red:         "#DC2626",  // gastos, pérdida, eliminar
-    redSoft:     "#FEF2F2",  // fondo rojo suave
-    redBorder:   "#FECACA",  // borde rojo suave
+    red:         "#EF4444",  // gastos, pérdida, eliminar (más legible sobre oscuro)
+    redText:     "#FF7B73",  // rojo aún más legible para texto pequeño
+    redSoft:     "#2C1517",  // fondo rojo suave (tinte oscuro)
+    redBorder:   "#5A2A2C",  // borde rojo suave
 
-    // Advertencia
-    amber:       "#D97706",  // margen bajo, advertencia
-    amberSoft:   "#FFFBEB",  // fondo amber suave
+    // Advertencia (unificado con el #F59E0B que ya usabas suelto en varias pantallas)
+    amber:       "#F59E0B",  // margen bajo, advertencia
+    amberSoft:   "#2A2012",  // fondo amber suave (tinte oscuro)
+    amberBorder: "#5A431A",  // borde amber suave
 
     // Bordes
-    border:      "#1E3A5F",  // borde general
-    borderLight: "#152D4A",  // borde muy suave
+    border:      "#213A5C",  // borde general
+    borderLight: "#193150",  // borde muy suave (hairline visible)
   },
 
   // ── TIPOGRAFÍA ──
@@ -54,6 +57,15 @@ export const theme = {
     weightBlack:   "800",
   },
 
+  // ── NÚMEROS ──
+  // Spread this en cualquier cifra de dinero para que los dígitos queden
+  // alineados en columna: style={{ ...t.numeric }}
+  numeric: {
+    fontVariantNumeric: "tabular-nums",
+    fontFeatureSettings: '"tnum" 1',
+    letterSpacing: "-0.3px",
+  },
+
   // ── ESPACIADO ──
   spacing: {
     xs:  "4px",
@@ -64,19 +76,18 @@ export const theme = {
     xxl: "24px",
   },
 
-  // ── BORDES ──
+  // ── BORDES (un pelín más redondeados = más moderno) ──
   radius: {
-    sm:  "8px",
-    md:  "10px",
-    lg:  "14px",
-    xl:  "16px",
+    sm:  "10px",
+    md:  "12px",
+    lg:  "16px",
+    xl:  "20px",
     full:"9999px",
   },
 
-  // ── SOMBRAS ──
+  // ── SOMBRAS (más profundas para que las cards "floten" sobre el oscuro) ──
   shadows: {
-    card: "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-    md:   "0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04)",
+    card: "0 10px 30px -18px rgba(0,0,0,0.55)",
+    md:   "0 18px 40px -22px rgba(0,0,0,0.60)",
   },
 };
-
