@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Search, ChevronDown, ChevronUp, MapPin, Plus } from "lucide-react";
+import { ArrowLeft, Search, ChevronDown, ChevronUp, ChevronRight, MapPin, Plus, Truck } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard } from "../components/Skeleton";
 
@@ -50,7 +50,7 @@ function Viajes({ viajes = [], cargando }) {
       <div style={styles.pantalla}>
         <div style={styles.header}>
           <button style={styles.btnVolver} onClick={() => navigate(-1)}>
-            <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
+            <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
             <span>Volver</span>
           </button>
           <div>
@@ -71,7 +71,7 @@ function Viajes({ viajes = [], cargando }) {
       {/* HEADER */}
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
           <span>Volver</span>
         </button>
         <div style={{ flex: 1 }}>
@@ -102,7 +102,7 @@ function Viajes({ viajes = [], cargando }) {
         {/* VACÍO */}
         {viajes.length === 0 && (
           <div style={{ textAlign: "center", padding: "50px 20px" }}>
-            <p style={{ fontSize: "36px", margin: "0 0 8px" }}>🚛</p>
+            <Truck size={40} color={t.colors.textTertiary} strokeWidth={1.5} style={{ margin: "0 auto 12px" }} />
             <p style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: "0 0 4px" }}>Aún no hay viajes</p>
             <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "0 0 16px" }}>Cuando calcule viajes, aquí quedará la memoria de costos de cada ruta</p>
             <button style={styles.btnCalcular} onClick={() => navigate("/calculadora")}>
@@ -122,8 +122,10 @@ function Viajes({ viajes = [], cargando }) {
 
               {/* Cabecera de ruta */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }} onClick={() => toggleRuta(g.ruta)}>
-                <div style={{ display: "flex", gap: "10px", alignItems: "center", flex: 1, minWidth: 0 }}>
-                  <MapPin size={16} color={t.colors.blue} strokeWidth={2} style={{ flexShrink: 0 }} />
+                <div style={{ display: "flex", gap: "11px", alignItems: "center", flex: 1, minWidth: 0 }}>
+                  <div style={styles.routeIc}>
+                    <MapPin size={16} color={t.colors.blueText} strokeWidth={2} />
+                  </div>
                   <div style={{ minWidth: 0 }}>
                     <p style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{g.ruta}</p>
                     <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "2px 0 0" }}>
@@ -132,7 +134,7 @@ function Viajes({ viajes = [], cargando }) {
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-                  <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBlack, color: (u.neta || 0) >= 0 ? t.colors.green : t.colors.red }}>{fmt(u.neta || 0)}</span>
+                  <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBlack, color: (u.neta || 0) >= 0 ? t.colors.green : t.colors.red, ...t.numeric }}>{fmt(u.neta || 0)}</span>
                   {abierta ? <ChevronUp size={16} color={t.colors.textTertiary} /> : <ChevronDown size={16} color={t.colors.textTertiary} />}
                 </div>
               </div>
@@ -145,7 +147,7 @@ function Viajes({ viajes = [], cargando }) {
 
                   <div style={styles.refFila}>
                     <span style={styles.refL}>Flete cobrado</span>
-                    <span style={{ ...styles.refV, color: t.colors.blue }}>
+                    <span style={{ ...styles.refV, color: t.colors.blueText }}>
                       {fmt(u.vViaje || 0)}{u.ton > 0 && u.fleteTon > 0 ? ` (${u.ton} ton × ${fmt(u.fleteTon)})` : ""}
                     </span>
                   </div>
@@ -170,7 +172,7 @@ function Viajes({ viajes = [], cargando }) {
                       {u.peajesDetalle.map((p, i) => (
                         <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: t.fonts.sizeXs, padding: "2px 0" }}>
                           <span style={{ color: t.colors.textTertiary }}>{p.n}{p.iv ? " (ida y vuelta)" : ""}</span>
-                          <span style={{ color: t.colors.textSecondary, fontWeight: t.fonts.weightSemibold }}>{fmt(p.total || p.tarifa || 0)}</span>
+                          <span style={{ color: t.colors.textSecondary, fontWeight: t.fonts.weightSemibold, ...t.numeric }}>{fmt(p.total || p.tarifa || 0)}</span>
                         </div>
                       ))}
                     </div>
@@ -218,8 +220,8 @@ function Viajes({ viajes = [], cargando }) {
                     >
                       <span style={{ color: t.colors.textSecondary }}>{fFecha(v.fecha)} · {v.placa || "—"}{v.emp ? ` · ${v.emp}` : ""}</span>
                       <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <span style={{ fontWeight: t.fonts.weightBold, color: (v.neta || 0) >= 0 ? t.colors.green : t.colors.red }}>{fmt(v.neta || 0)}</span>
-                        <span style={{ color: t.colors.textTertiary }}>›</span>
+                        <span style={{ fontWeight: t.fonts.weightBold, color: (v.neta || 0) >= 0 ? t.colors.green : t.colors.red, ...t.numeric }}>{fmt(v.neta || 0)}</span>
+                        <ChevronRight size={14} color={t.colors.textTertiary} />
                       </span>
                     </div>
                   ))}
@@ -247,19 +249,20 @@ function Viajes({ viajes = [], cargando }) {
 const styles = {
   pantalla:      { maxWidth: "430px", margin: "0 auto", minHeight: "100vh", background: t.colors.bgPrimary, paddingBottom: "30px" },
   header:        { display: "flex", alignItems: "center", gap: "12px", padding: "16px 20px 12px", background: t.colors.bgCard, borderBottom: `1px solid ${t.colors.borderLight}` },
-  btnVolver:     { display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", color: t.colors.blue, cursor: "pointer", padding: 0, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightSemibold },
+  btnVolver:     { display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", color: t.colors.blueText, cursor: "pointer", padding: 0, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightSemibold },
   titulo:        { fontSize: "18px", fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: 0 },
   headerSub:     { fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "2px 0 0" },
   btnNuevo:      { width: "36px", height: "36px", borderRadius: "10px", background: t.colors.green, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
   contenido:     { padding: "14px 16px" },
-  buscadorBox:   { display: "flex", alignItems: "center", gap: "8px", background: t.colors.bgCard, borderRadius: t.radius.md, padding: "10px 14px", marginBottom: "12px", boxShadow: t.shadows.card },
+  buscadorBox:   { display: "flex", alignItems: "center", gap: "8px", background: t.colors.bgCard, borderRadius: t.radius.md, padding: "10px 14px", marginBottom: "12px", border: `1px solid ${t.colors.borderLight}`, boxShadow: t.shadows.card },
   buscadorInput: { flex: 1, border: "none", outline: "none", background: "transparent", fontSize: t.fonts.sizeSm, color: t.colors.textPrimary },
   btnCalcular:   { padding: "12px 24px", background: t.colors.green, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, cursor: "pointer" },
-  card:          { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "14px 16px", marginBottom: "10px", boxShadow: t.shadows.card },
+  card:          { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "14px 16px", marginBottom: "10px", border: `1px solid ${t.colors.borderLight}`, boxShadow: t.shadows.card },
+  routeIc:       { width: "34px", height: "34px", borderRadius: t.radius.sm, background: t.colors.blueSoft, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
   refTitulo:     { fontSize: "10px", fontWeight: t.fonts.weightBold, color: t.colors.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 6px" },
   refFila:       { display: "flex", justifyContent: "space-between", fontSize: t.fonts.sizeSm, padding: "5px 0", borderBottom: `1px solid ${t.colors.borderLight}` },
   refL:          { color: t.colors.textSecondary, fontSize: t.fonts.sizeXs },
-  refV:          { fontWeight: t.fonts.weightSemibold, color: t.colors.textPrimary, fontSize: t.fonts.sizeXs },
+  refV:          { fontWeight: t.fonts.weightSemibold, color: t.colors.textPrimary, fontSize: t.fonts.sizeXs, fontVariantNumeric: "tabular-nums" },
 };
 
 export default Viajes;
