@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle, Clock, AlertCircle, Search, ChevronUp, ChevronDown, FileText } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clock, AlertCircle, Search, ChevronUp, ChevronDown, FileText, Calendar } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
 function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
@@ -107,7 +107,7 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
     <div style={styles.pantalla}>
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
           <span>Volver</span>
         </button>
         <h1 style={styles.titulo}>Cartera</h1>
@@ -117,21 +117,21 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
 
         {/* RESUMEN */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
-          <div style={{ ...styles.card, border: `1.5px solid ${t.colors.amberBorder || t.colors.amber}33` }}>
+          <div style={{ ...styles.card, border: `1.5px solid ${t.colors.amberBorder || t.colors.amber}` }}>
             <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Pendiente</p>
-            <p style={{ fontSize: "20px", fontWeight: t.fonts.weightBlack, color: t.colors.amber, margin: 0 }}>{fmt(totalPendiente)}</p>
+            <p style={{ fontSize: "20px", fontWeight: t.fonts.weightBlack, color: t.colors.amber, margin: 0, ...t.numeric }}>{fmt(totalPendiente)}</p>
             <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "4px 0 0" }}>{pendientes.length} viaje{pendientes.length !== 1 ? "s" : ""}</p>
           </div>
           <div style={{ ...styles.card, border: `1.5px solid ${t.colors.redBorder}` }}>
             <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>Vencido</p>
-            <p style={{ fontSize: "20px", fontWeight: t.fonts.weightBlack, color: t.colors.red, margin: 0 }}>{fmt(totalVencido)}</p>
+            <p style={{ fontSize: "20px", fontWeight: t.fonts.weightBlack, color: t.colors.red, margin: 0, ...t.numeric }}>{fmt(totalVencido)}</p>
             <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "4px 0 0" }}>{vencidos.length} viaje{vencidos.length !== 1 ? "s" : ""}</p>
           </div>
         </div>
 
             {/* CUENTA DE COBRO */}
         <button
-          style={{width:"100%", padding:"11px", background:"transparent", border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.blue, cursor:"pointer", marginBottom:"10px", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px"}}
+          style={{width:"100%", padding:"11px", background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.blueText, cursor:"pointer", marginBottom:"10px", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px"}}
           onClick={() => navigate("/cobros")}
         >
           <FileText size={15} strokeWidth={2} />
@@ -156,13 +156,19 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
             { id: "todo", label: "Todo" },
             { id: "mes", label: "Este mes" },
             { id: "trimestre", label: "Trimestre" },
-            { id: "rango", label: "📅 Fechas" },
-          ].map(p => (
-            <button key={p.id}
-              style={{ ...styles.chip, ...(periodo === p.id || (p.id === "rango" && verRango) ? styles.chipActivo : {}) }}
-              onClick={() => { if (p.id === "rango") { setVerRango(!verRango); } else { setPeriodo(p.id); setVerRango(false); }}}
-            >{p.label}</button>
-          ))}
+            { id: "rango", label: "Fechas", icono: true },
+          ].map(p => {
+            const activo = periodo === p.id || (p.id === "rango" && verRango);
+            return (
+              <button key={p.id}
+                style={{ ...styles.chip, ...(activo ? styles.chipActivo : {}) }}
+                onClick={() => { if (p.id === "rango") { setVerRango(!verRango); } else { setPeriodo(p.id); setVerRango(false); }}}
+              >
+                {p.icono && <Calendar size={13} color={activo ? t.colors.blueText : t.colors.textSecondary} strokeWidth={2} style={{ marginRight: "5px" }} />}
+                {p.label}
+              </button>
+            );
+          })}
         </div>
 
         {verRango && (
@@ -196,7 +202,7 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
               onClick={() => setFiltro(f.id)}
             >
               {f.id === "vencidos" && vencidos.length > 0 && (
-                <span style={{ background: t.colors.red, color: "#fff", borderRadius: "50%", width: "16px", height: "16px", fontSize: "10px", display: "inline-flex", alignItems: "center", justifyContent: "center", marginRight: "4px" }}>
+                <span style={{ background: t.colors.red, color: "#fff", borderRadius: "50%", width: "16px", height: "16px", fontSize: "10px", display: "inline-flex", alignItems: "center", justifyContent: "center", marginRight: "4px", ...t.numeric }}>
                   {vencidos.length}
                 </span>
               )}
@@ -229,7 +235,7 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
                 <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "2px 0 0" }}>{data.viajes.length} viaje{data.viajes.length !== 1 ? "s" : ""}</p>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-                <p style={{ fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBlack, color: t.colors.textPrimary, margin: 0 }}>{fmt(data.total)}</p>
+                <p style={{ fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBlack, color: t.colors.textPrimary, margin: 0, ...t.numeric }}>{fmt(data.total)}</p>
                 {abierta ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
               </div>
             </div>
@@ -252,7 +258,7 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
                     <p style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightSemibold, color: t.colors.textPrimary, margin: 0 }}>
                       {v.ruta || "Sin ruta"}
                     </p>
-                    <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "2px 0 0" }}>
+                    <p style={{ fontSize: t.fonts.sizeXs, color: vencido && !pagado ? t.colors.redText : t.colors.textTertiary, margin: "2px 0 0" }}>
                       {v.fecha} · {placa}
                       {pagado ? ` · Pagado ${v.fechaPago || ""}` :
                         vencido ? ` · Vencido hace ${Math.abs(dias)} días` :
@@ -264,11 +270,11 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
 
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "10px" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
-                      <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: pagado ? t.colors.green : t.colors.textPrimary }}>
+                      <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: pagado ? t.colors.green : t.colors.textPrimary, ...t.numeric }}>
                         {fmt(pagado ? (v.vViaje || 0) : obtenerSaldoPendiente(v))}
                       </span>
                       {!pagado && ((v.anticipoFleteMonto || 0) > 0 || (v.anticipoFleteMontoRet || 0) > 0) && (
-                        <span style={{ fontSize: "10px", color: t.colors.textTertiary }}>
+                        <span style={{ fontSize: "10px", color: t.colors.textTertiary, ...t.numeric }}>
                           Saldo de {fmt(v.vViaje || 0)}
                         </span>
                       )}
@@ -315,14 +321,14 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
 const styles = {
   pantalla:  { maxWidth: "430px", margin: "0 auto", minHeight: "100vh", background: t.colors.bgPrimary, paddingBottom: "30px" },
   header:    { display: "flex", alignItems: "center", gap: "12px", padding: "16px 20px 12px", background: t.colors.bgCard, borderBottom: `1px solid ${t.colors.borderLight}` },
-  btnVolver: { display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", color: t.colors.blue, cursor: "pointer", padding: 0, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightSemibold },
+  btnVolver: { display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", color: t.colors.blueText, cursor: "pointer", padding: 0, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightSemibold },
   titulo:    { fontSize: "18px", fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: 0 },
   contenido: { padding: "12px 16px 16px" },
-  card:      { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "16px", marginBottom: "10px", boxShadow: t.shadows.card },
+  card:      { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "16px", marginBottom: "10px", border: `1px solid ${t.colors.borderLight}`, boxShadow: t.shadows.card },
   input:     { width: "100%", padding: "11px 12px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeSm, background: t.colors.bgPrimary, color: t.colors.textPrimary, outline: "none", boxSizing: "border-box" },
   chips:     { display: "flex", gap: "6px", marginBottom: "12px", overflowX: "auto" },
   chip:      { padding: "7px 14px", borderRadius: t.radius.full, border: `1.5px solid ${t.colors.border}`, background: "none", color: t.colors.textSecondary, fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightSemibold, cursor: "pointer", whiteSpace: "nowrap", display: "flex", alignItems: "center" },
-  chipActivo: { background: "#1E3A5F", borderColor: t.colors.blue, color: t.colors.blue },
+  chipActivo: { background: t.colors.blueSoft, borderColor: t.colors.blue, color: t.colors.blueText },
 };
 
 export default Cartera;
