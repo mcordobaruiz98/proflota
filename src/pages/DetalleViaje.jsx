@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2, Edit3, Save, X, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send, Repeat, Camera, Paperclip, Calendar, Truck, FileText, Building2, User } from "lucide-react";
+import { ArrowLeft, Trash2, Edit3, Save, X, Check, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send, Repeat, Camera, Paperclip, Calendar, Truck, FileText, Building2, User } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { sanitizar } from "../utils/validar";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
@@ -409,7 +409,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       <div style={styles.pantalla}>
         <div style={styles.header}>
           <button style={styles.btnVolver} onClick={()=>navigate(-1)}>
-            <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
+            <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
             <span>Volver</span>
           </button>
         </div>
@@ -444,7 +444,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       {/* HEADER */}
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={()=>navigate(-1)}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
           <span>Volver</span>
         </button>
         <div style={{display:"flex", gap:"8px"}}>
@@ -458,8 +458,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 <Send size={16} color="#fff" strokeWidth={2} />
               </button>
               <button style={styles.btnEditar} onClick={abrirEdicion}>
-                <Edit3 size={16} color={t.colors.blue} strokeWidth={2} />
-                <span style={{fontSize:t.fonts.sizeXs, color:t.colors.blue, fontWeight:t.fonts.weightSemibold}}>Editar</span>
+                <Edit3 size={16} color={t.colors.blueText} strokeWidth={2} />
+                <span style={{fontSize:t.fonts.sizeXs, color:t.colors.blueText, fontWeight:t.fonts.weightSemibold}}>Editar</span>
               </button>
             </>
           )}
@@ -580,16 +580,16 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 padding: "12px",
                 background: t.colors.bgSection,
                 borderRadius: t.radius.md,
-                border: `1.5px solid ${t.colors.border}33`,
+                border: `1.5px solid ${t.colors.borderLight}`,
                 marginBottom: "12px"
               }}>
                 <p style={{
                   fontSize: t.fonts.sizeSm,
                   fontWeight: t.fonts.weightBold,
-                  color: t.colors.blue,
+                  color: t.colors.blueText,
                   margin: "0 0 10px 0"
                 }}>Anticipos del Flete (Empresa)</p>
-                
+
                 {/* Ida */}
                 <div style={{ marginBottom: retornoE ? "12px" : "0" }}>
                   {retornoE && <p style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700, margin: "0 0 6px" }}>1. TRAYECTO DE IDA</p>}
@@ -618,7 +618,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                   {retornoE && (
                     <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
                       <span style={{ fontSize: "11px", color: t.colors.textTertiary }}>Saldo por cobrar Ida:</span>
-                      <span style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700 }}>{fmt(editFleteIda - n(montoAnticipoFleteE))}</span>
+                      <span style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700, ...t.numeric }}>{fmt(editFleteIda - n(montoAnticipoFleteE))}</span>
                     </div>
                   )}
                 </div>
@@ -651,11 +651,11 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
                       <span style={{ fontSize: "11px", color: t.colors.textTertiary }}>Saldo por cobrar Retorno:</span>
-                      <span style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700 }}>{fmt(editFleteRet - n(montoAnticipoFleteRetE))}</span>
+                      <span style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700, ...t.numeric }}>{fmt(editFleteRet - n(montoAnticipoFleteRetE))}</span>
                     </div>
                   </div>
                 )}
-                
+
                 {/* Consolidado */}
                 <div style={{
                   display: "flex",
@@ -670,7 +670,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                   <span style={{
                     fontSize: t.fonts.sizeSm,
                     fontWeight: t.fonts.weightBold,
-                    color: t.colors.green
+                    color: t.colors.green,
+                    ...t.numeric
                   }}>{fmt(editValorViaje - n(montoAnticipoFleteE) - n(montoAnticipoFleteRetE))}</span>
                 </div>
               </div>
@@ -679,7 +680,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
             {/* Flete de retorno */}
             <div style={{marginBottom:"12px"}}>
               <div style={{display:"flex",alignItems:"center",gap:"10px",cursor:"pointer",marginBottom:retornoE?"10px":"0"}} onClick={()=>setRetornoE(!retornoE)}>
-                <div style={{width:"36px",height:"20px",borderRadius:"10px",background:retornoE?t.colors.blue:"#1E3A5F",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                <div style={{width:"36px",height:"20px",borderRadius:"10px",background:retornoE?t.colors.blue:t.colors.border,position:"relative",transition:"background 0.2s",flexShrink:0}}>
                   <div style={{width:"16px",height:"16px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:retornoE?"18px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
                 </div>
                 <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textPrimary}}>Flete de retorno</span>
@@ -720,7 +721,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
           <div style={styles.hero}>
             <p style={styles.heroRuta}>{viaje.ruta||"Sin ruta"}</p>
             {viaje.tieneRetorno && viaje.rutaRet && (
-              <p style={{fontSize:t.fonts.sizeSm,color:t.colors.blue,margin:"4px 0 0",fontWeight:t.fonts.weightSemibold}}>↩ {viaje.rutaRet}</p>
+              <p style={{fontSize:t.fonts.sizeSm,color:t.colors.blueText,margin:"4px 0 0",fontWeight:t.fonts.weightSemibold}}>↩ {viaje.rutaRet}</p>
             )}
             <div style={styles.heroPills}>
               {viaje.fecha&&<span style={styles.pill}><Calendar size={12} strokeWidth={2} /> {viaje.fecha}{viaje.fechaDescarga ? ` → ${viaje.fechaDescarga}` : ""}</span>}
@@ -729,7 +730,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
               {viaje.mani&&<span style={styles.pill}><FileText size={12} strokeWidth={2} /> {viaje.mani}</span>}
               {viaje.emp&&<span style={styles.pill}><Building2 size={12} strokeWidth={2} /> {viaje.emp}</span>}
               {viaje.tieneRetorno && viaje.empresaRet && viaje.empresaRet !== viaje.emp && (
-              <span style={{...styles.pill, background:`${t.colors.blue}22`, border:`1px solid ${t.colors.blueBorder}`}}><Building2 size={12} strokeWidth={2} /> {viaje.empresaRet} <span style={{fontSize:"9px",opacity:0.7}}>(ret)</span></span>
+              <span style={{...styles.pill, background:t.colors.blueSoft, border:`1px solid ${t.colors.blueBorder}`}}><Building2 size={12} strokeWidth={2} /> {viaje.empresaRet} <span style={{fontSize:"9px",opacity:0.7}}>(ret)</span></span>
               )}
             </div>
           </div>
@@ -740,7 +741,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
             <div style={styles.dosColumnas}>
               <div style={styles.kpiCard}>
                 <p style={styles.kpiLabel}>Valor flete</p>
-                <p style={{...styles.kpiVal, color:t.colors.blue}}>{fmt(viaje.vViaje)}</p>
+                <p style={{...styles.kpiVal, color:t.colors.blueText}}>{fmt(viaje.vViaje)}</p>
                 {((viaje.anticipoFleteMonto || 0) > 0 || (viaje.anticipoFleteMontoRet || 0) > 0) ? (
                   <p style={{fontSize:"10px", color:t.colors.textTertiary, margin:"4px 0 0"}}>
                     Ida Ant: {fmt(viaje.anticipoFleteMonto || 0)} ({viaje.anticipoFletePct || 0}%)
@@ -780,7 +781,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
             {gastos.length>0&&(
               <div style={styles.card}>
                 <div style={styles.cardHeader}>
-                  <Receipt size={16} color={t.colors.blue} strokeWidth={2} />
+                  <Receipt size={16} color={t.colors.blueText} strokeWidth={2} />
                   <p style={styles.cardTitulo}>Desglose de gastos</p>
                 </div>
                 {gastos.map((g,i,arr)=>(
@@ -803,7 +804,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
             {/* INDICADORES */}
             <div style={styles.card}>
               <div style={styles.cardHeader}>
-                <TrendingUp size={16} color={t.colors.blue} strokeWidth={2} />
+                <TrendingUp size={16} color={t.colors.blueText} strokeWidth={2} />
                 <p style={styles.cardTitulo}>Indicadores del viaje</p>
               </div>
               <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}>
@@ -824,7 +825,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
             {(viaje.carga||viaje.prod||viaje.condNom||viaje.contactoEmpresa||viaje.celularEmpresa)&&(
               <div style={styles.card}>
                 <div style={styles.cardHeader}>
-                  <Package size={16} color={t.colors.blue} strokeWidth={2} />
+                  <Package size={16} color={t.colors.blueText} strokeWidth={2} />
                   <p style={styles.cardTitulo}>Datos del viaje</p>
                 </div>
                 {viaje.carga&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Tipo de carga</span><span style={styles.filaValor}>{viaje.carga}</span></div>}
@@ -835,7 +836,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 {viaje.lugarCargue&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Lugar de cargue</span><span style={styles.filaValor}>{viaje.lugarCargue}</span></div>}
                 {viaje.lugarDescargue&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Lugar de descargue</span><span style={styles.filaValor}>{viaje.lugarDescargue}</span></div>}
                 {viaje.contactoEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Contacto empresa</span><span style={styles.filaValor}>{viaje.contactoEmpresa}</span></div>}
-                {viaje.celularEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Celular contacto</span><a href={`tel:${viaje.celularEmpresa}`} style={{...styles.filaValor,color:t.colors.blue,textDecoration:"none"}}>{viaje.celularEmpresa}</a></div>}
+                {viaje.celularEmpresa&&<div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Celular contacto</span><a href={`tel:${viaje.celularEmpresa}`} style={{...styles.filaValor,color:t.colors.blueText,textDecoration:"none"}}>{viaje.celularEmpresa}</a></div>}
                 {viaje.observaciones&&<div style={{...styles.fila,borderBottom:"none"}}><span style={styles.filaLabel}>Observaciones</span><span style={{...styles.filaValor,color:t.colors.textSecondary,fontStyle:"italic"}}>{viaje.observaciones}</span></div>}
               </div>
             )}
@@ -845,10 +846,10 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
               <div style={{...styles.card, border:`1.5px solid ${t.colors.blueBorder}`}}>
                 <div style={{...styles.cardHeader, justifyContent:"space-between"}}>
                   <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-                    <Repeat size={16} color={t.colors.blue} strokeWidth={2} />
-                    <p style={{...styles.cardTitulo, color:t.colors.blue}}>Viaje de retorno</p>
+                    <Repeat size={16} color={t.colors.blueText} strokeWidth={2} />
+                    <p style={{...styles.cardTitulo, color:t.colors.blueText}}>Viaje de retorno</p>
                   </div>
-                  <span style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBlack, color:t.colors.blue}}>{fmt(viaje.valorViajeRetorno || 0)}</span>
+                  <span style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBlack, color:t.colors.blueText, ...t.numeric}}>{fmt(viaje.valorViajeRetorno || 0)}</span>
                 </div>
                 {viaje.rutaRet && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Ruta</span><span style={styles.filaValor}>{viaje.rutaRet}</span></div>}
                 {(viaje.fechaCargueRet || viaje.fechaDescargueRet) && <div style={{...styles.fila,borderBottom:`1px solid ${t.colors.borderLight}`}}><span style={styles.filaLabel}>Cargue / Descargue</span><span style={styles.filaValor}>{viaje.fechaCargueRet || "—"} · {viaje.fechaDescargueRet || "—"}</span></div>}
@@ -879,7 +880,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                 <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
                   {viaje.manifiestoFotoUrl && (
                     <a href={viaje.manifiestoFotoUrl} target="_blank" rel="noreferrer"
-                      style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold,textDecoration:"none"}}>Ver</a>
+                      style={{fontSize:t.fonts.sizeXs,color:t.colors.blueText,fontWeight:t.fonts.weightSemibold,textDecoration:"none"}}>Ver</a>
                   )}
                   {viaje.manifiestoFotoUrl && (
                     <button
@@ -908,7 +909,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                   <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
                     {viaje.manifiestoRetFotoUrl && (
                       <a href={viaje.manifiestoRetFotoUrl} target="_blank" rel="noreferrer"
-                        style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold,textDecoration:"none"}}>Ver</a>
+                        style={{fontSize:t.fonts.sizeXs,color:t.colors.blueText,fontWeight:t.fonts.weightSemibold,textDecoration:"none"}}>Ver</a>
                     )}
                     {viaje.manifiestoRetFotoUrl && (
                       <button
@@ -934,7 +935,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
             {viaje.peajesDetalle&&viaje.peajesDetalle.length>0&&(
               <div style={styles.card}>
                 <div style={styles.cardHeader}>
-                  <Route size={16} color={t.colors.blue} strokeWidth={2} />
+                  <Route size={16} color={t.colors.blueText} strokeWidth={2} />
                   <p style={styles.cardTitulo}>Peajes ({viaje.peajesDetalle.length})</p>
                 </div>
                 {viaje.peajesDetalle.map((p,i,arr)=>(
@@ -954,7 +955,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
             {viaje.extrasList&&viaje.extrasList.length>0&&(
               <div style={styles.card}>
                 <div style={styles.cardHeader}>
-                  <Fuel size={16} color={t.colors.blue} strokeWidth={2} />
+                  <Fuel size={16} color={t.colors.blueText} strokeWidth={2} />
                   <p style={styles.cardTitulo}>Otros gastos</p>
                 </div>
                 {viaje.extrasList.map((e,i,arr)=>(
@@ -1014,7 +1015,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
               <div style={{padding:"8px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
                 {!verFormAnticipo ? (
                   <button
-                    style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,background:"none",border:"none",cursor:"pointer",fontWeight:t.fonts.weightSemibold}}
+                    style={{fontSize:t.fonts.sizeXs,color:t.colors.blueText,background:"none",border:"none",cursor:"pointer",fontWeight:t.fonts.weightSemibold}}
                     onClick={()=>setVerFormAnticipo(true)}
                   >
                     + Agregar gasto del conductor
@@ -1030,7 +1031,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                         style={{width:"100%",padding:"6px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}} />
                     </div>
                     <button
-                      style={{padding:"6px 10px",background:t.colors.green,border:"none",borderRadius:t.radius.sm,color:"#fff",fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,cursor:"pointer",whiteSpace:"nowrap"}}
+                      style={{padding:"6px 10px",background:t.colors.green,border:"none",borderRadius:t.radius.sm,color:"#fff",fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center"}}
                       onClick={async()=>{
                         if (!antDesc.trim()) { mostrarToast("Ingresa descripción","error"); return; }
                         if (!antMonto || Number(antMonto)<=0) { mostrarToast("Ingresa monto","error"); return; }
@@ -1040,11 +1041,11 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                           setAntDesc(""); setAntMonto(""); setVerFormAnticipo(false);
                         } catch(err) { mostrarToast("Error","error"); }
                       }}
-                    >✓</button>
+                    ><Check size={15} color="#fff" strokeWidth={3}/></button>
                     <button
-                      style={{padding:"6px 8px",background:"none",border:`1px solid ${t.colors.border}`,borderRadius:t.radius.sm,color:t.colors.textTertiary,fontSize:t.fonts.sizeXs,cursor:"pointer"}}
+                      style={{padding:"6px 8px",background:"none",border:`1px solid ${t.colors.border}`,borderRadius:t.radius.sm,color:t.colors.textTertiary,fontSize:t.fonts.sizeXs,cursor:"pointer",display:"flex",alignItems:"center"}}
                       onClick={()=>{setVerFormAnticipo(false);setAntDesc("");setAntMonto("");}}
-                    >✕</button>
+                    ><X size={15} strokeWidth={2.5}/></button>
                   </div>
                 )}
               </div>
@@ -1059,7 +1060,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                     <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>
                       {saldo >= 0 ? "Conductor debe devolver" : "Se le debe al conductor"}
                     </span>
-                    <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:saldo>=0?t.colors.amber:t.colors.red}}>
+                    <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:saldo>=0?t.colors.amber:t.colors.red, ...t.numeric}}>
                       {fmt(Math.abs(saldo))}
                     </span>
                   </div>
@@ -1094,8 +1095,9 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                     fontSize:t.fonts.sizeXs,
                     fontWeight:t.fonts.weightBold,
                     cursor:"pointer",
-                    background: viaje.estadoPago==="pagado" ? t.colors.greenSoft : t.colors.amberSoft || "#FEF3C7",
+                    background: viaje.estadoPago==="pagado" ? t.colors.greenSoft : t.colors.amberSoft,
                     color: viaje.estadoPago==="pagado" ? t.colors.green : t.colors.amber,
+                    display:"inline-flex", alignItems:"center", gap:"6px",
                   }}
                   onClick={async()=>{
                     const nuevo = viaje.estadoPago==="pagado" ? "pendiente" : "pagado";
@@ -1110,7 +1112,9 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                     }
                   }}
                 >
-                  {viaje.estadoPago==="pagado" ? "✓ Pagado" : "⏳ Pendiente"}
+                  {viaje.estadoPago==="pagado"
+                    ? <><CheckCircle size={13} strokeWidth={2.5}/> Pagado</>
+                    : <><Clock size={13} strokeWidth={2.5}/> Pendiente</>}
                 </button>
               </div>
 
@@ -1153,7 +1157,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                     const diasRestantes = Math.ceil((vencimiento - hoy)/(1000*60*60*24));
                     const vencido = diasRestantes < 0;
                     return (
-                      <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:vencido?t.colors.red:diasRestantes<=7?t.colors.amber:t.colors.textSecondary}}>
+                      <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:vencido?t.colors.redText:diasRestantes<=7?t.colors.amber:t.colors.textSecondary}}>
                         {vencido ? `Vencido hace ${Math.abs(diasRestantes)} días` : `En ${diasRestantes} días`}
                       </span>
                     );
@@ -1172,25 +1176,25 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
 const styles = {
   pantalla:        { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary },
   header:          { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:       { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  btnVolver:       { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blueText, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
   btnEditar:       { display:"flex", alignItems:"center", gap:"6px", padding:"8px 12px", background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, cursor:"pointer" },
   btnEliminar:     { background:t.colors.redSoft, border:`1.5px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, padding:"8px", cursor:"pointer", display:"flex", alignItems:"center" },
   hero:            { background:t.colors.bgCard, padding:"16px 20px", borderBottom:`1px solid ${t.colors.borderLight}` },
   heroRuta:        { fontSize:"20px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:"0 0 10px", letterSpacing:"-0.3px" },
   heroPills:       { display:"flex", flexWrap:"wrap", gap:"6px" },
-  pill:            { fontSize:t.fonts.sizeXs, background:t.colors.bgSection, padding:"4px 10px", borderRadius:t.radius.full, display:"inline-flex", alignItems:"center", gap:"4px",  },
+  pill:            { fontSize:t.fonts.sizeXs, background:t.colors.bgSection, padding:"4px 10px", borderRadius:t.radius.full, display:"inline-flex", alignItems:"center", gap:"4px", color:t.colors.textSecondary },
   contenido:       { padding:"12px 16px 30px" },
   dosColumnas:     { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" },
-  kpiCard:         { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", boxShadow:t.shadows.card, border:`1.5px solid ${t.colors.border}` },
+  kpiCard:         { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", boxShadow:t.shadows.card, border:`1px solid ${t.colors.borderLight}` },
   kpiLabel:        { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 6px", textTransform:"uppercase", letterSpacing:"0.05em" },
-  kpiVal:          { fontSize:"17px", fontWeight:t.fonts.weightBold, margin:0 },
-  card:            { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
+  kpiVal:          { fontSize:"17px", fontWeight:t.fonts.weightBold, margin:0, fontVariantNumeric:"tabular-nums", letterSpacing:"-0.3px" },
+  card:            { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card },
   cardTitulo:      { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:0 },
   cardTituloEdit:  { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 16px" },
   cardHeader:      { display:"flex", alignItems:"center", gap:"8px", marginBottom:"12px" },
   fila:            { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0" },
   filaLabel:       { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary },
-  filaValor:       { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary },
+  filaValor:       { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, fontVariantNumeric:"tabular-nums" },
   campo:           { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
   fila2:           { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },
   label:           { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
