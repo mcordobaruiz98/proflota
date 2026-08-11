@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp, FileDown, Scale } from "lucide-react";
+import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp, FileDown, Scale, Calendar, BarChart3 } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
@@ -426,11 +426,11 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           w.document.close();
           setTimeout(()=>w.print(), 500);
         }}>
-          <FileDown size={16} color={t.colors.blue} strokeWidth={2} />
+          <FileDown size={16} color={t.colors.blueText} strokeWidth={2} />
           Exportar
         </button>
         <button style={{...styles.btnHistorial, marginLeft:"6px"}} onClick={()=>navigate("/comparativo")}>
-          <Scale size={16} color={t.colors.blue} strokeWidth={2} />
+          <Scale size={16} color={t.colors.blueText} strokeWidth={2} />
           Comparar
         </button>
       </div>
@@ -444,10 +444,12 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
 
       {/* CONSULTA POR RANGO DE FECHAS */}
       <div style={{padding:"0 16px 6px"}}>
-        <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"12px 16px",boxShadow:t.shadows.card}}>
+        <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"12px 16px",border:`1px solid ${t.colors.borderLight}`,boxShadow:t.shadows.card}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setVerRango(!verRango)}>
-            <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary}}>📅 Consultar por fechas</span>
-            <span style={{color:t.colors.textTertiary}}>{verRango?"▲":"▼"}</span>
+            <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,display:"flex",alignItems:"center",gap:"8px"}}>
+              <Calendar size={15} color={t.colors.blueText} strokeWidth={2} /> Consultar por fechas
+            </span>
+            {verRango ? <ChevronUp size={15} color={t.colors.textTertiary}/> : <ChevronDown size={15} color={t.colors.textTertiary}/>}
           </div>
           {verRango && (()=>{
             const viajesRango = (rangoDesde && rangoHasta && rangoDesde <= rangoHasta)
@@ -483,12 +485,12 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
                         <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:0}}>{viajesRango.length} viaje{viajesRango.length!==1?"s":""} · {rKm.toLocaleString("es-CO")} km</p>
                         <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>Ingresos {fmt(rIngresos)} · Gastos {fmt(rGastos)}</p>
                       </div>
-                      <p style={{fontSize:"18px",fontWeight:t.fonts.weightBlack,color:rNeta>=0?t.colors.green:t.colors.red,margin:0,alignSelf:"center"}}>{fmt(rNeta)}</p>
+                      <p style={{fontSize:"18px",fontWeight:t.fonts.weightBlack,color:rNeta>=0?t.colors.green:t.colors.red,margin:0,alignSelf:"center",...t.numeric}}>{fmt(rNeta)}</p>
                     </div>
                     {rPorVeh.map(([placa,d])=>(
                       <div key={placa} style={{display:"flex",justifyContent:"space-between",padding:"7px 4px",borderBottom:`1px solid ${t.colors.borderLight}`,fontSize:t.fonts.sizeSm}}>
                         <span style={{color:t.colors.textSecondary}}>{placa} · {d.viajes} viaje{d.viajes!==1?"s":""}</span>
-                        <span style={{fontWeight:t.fonts.weightBold,color:d.neta>=0?t.colors.green:t.colors.red}}>{fmt(d.neta)}</span>
+                        <span style={{fontWeight:t.fonts.weightBold,color:d.neta>=0?t.colors.green:t.colors.red,...t.numeric}}>{fmt(d.neta)}</span>
                       </div>
                     ))}
                   </div>
@@ -508,8 +510,9 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
         <div style={{
           ...styles.gananciaHero,
           background: netaMes>=0
-            ? `linear-gradient(135deg, #15803D 0%, ${t.colors.green} 100%)`
-            : `linear-gradient(135deg, #B91C1C 0%, ${t.colors.red} 100%)`,
+            ? `linear-gradient(140deg, #0F7A44 0%, #159F51 55%, ${t.colors.green} 100%)`
+            : `linear-gradient(140deg, #8f2723 0%, #B91C1C 55%, ${t.colors.red} 100%)`,
+          boxShadow: netaMes>=0 ? "0 18px 40px -18px rgba(34,197,94,0.4)" : "0 18px 40px -18px rgba(240,82,75,0.35)",
         }}>
           <div>
             <p style={styles.gananciaHeroLabel}>Ganancia neta del mes</p>
@@ -531,7 +534,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
         <div style={styles.dosColumnas}>
           <div style={styles.metricaCard}>
             <p style={styles.metricaLabel}>Ingresos brutos</p>
-            <p style={{...styles.metricaVal, color: t.colors.blue}}>{fmt(ingresosMes)}</p>
+            <p style={{...styles.metricaVal, color: t.colors.blueText}}>{fmt(ingresosMes)}</p>
           </div>
           <div style={styles.metricaCard}>
             <p style={styles.metricaLabel}>Total gastos</p>
@@ -545,16 +548,16 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             ...styles.metricaCard,
             marginBottom: "16px",
             background: t.colors.bgSection,
-            border: `1.5px solid ${t.colors.border}22`
+            border: `1.5px solid ${t.colors.border}`
           }}>
-            <p style={{ ...styles.metricaLabel, color: t.colors.blue, fontWeight: 700, margin: "0 0 10px 0" }}>Flujo de Caja (Fletes del Mes)</p>
+            <p style={{ ...styles.metricaLabel, color: t.colors.blueText, fontWeight: 700, margin: "0 0 10px 0" }}>Flujo de Caja (Fletes del Mes)</p>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "8px", borderBottom: `1px solid ${t.colors.borderLight}`, paddingBottom: "6px" }}>
               <span style={{ fontSize: t.fonts.sizeSm, color: t.colors.textSecondary }}>Anticipos Recibidos en Ruta:</span>
-              <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary }}>{fmt(anticiposMes)}</span>
+              <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, ...t.numeric }}>{fmt(anticiposMes)}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", paddingTop: "6px" }}>
               <span style={{ fontSize: t.fonts.sizeSm, color: t.colors.textSecondary }}>Pendiente por Cobrar (Saldos):</span>
-              <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.amber }}>{fmt(saldosMes)}</span>
+              <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.amber, ...t.numeric }}>{fmt(saldosMes)}</span>
             </div>
           </div>
         )}
@@ -580,23 +583,23 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             <p style={styles.cardTitulo}>Utilidad real de la flota</p>
             <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
               <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Ganancia neta viajes</span>
-              <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:netaMes>=0?t.colors.green:t.colors.red}}>{fmt(netaMes)}</span>
+              <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:netaMes>=0?t.colors.green:t.colors.red,...t.numeric}}>{fmt(netaMes)}</span>
             </div>
             {totalPE > 0 && (
               <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
                 <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos fijos (P.E.)</span>
-                <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(totalPE)}</span>
+                <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red,...t.numeric}}>-{fmt(totalPE)}</span>
               </div>
             )}
             {totalGastosAdic > 0 && (
               <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
                 <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos adicionales</span>
-                <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(totalGastosAdic)}</span>
+                <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red,...t.numeric}}>-{fmt(totalGastosAdic)}</span>
               </div>
             )}
             <div style={{display:"flex",justifyContent:"space-between",padding:"10px 0 0"}}>
               <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Utilidad</span>
-              <span style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:utilidadReal>=0?t.colors.green:t.colors.red}}>{fmt(utilidadReal)}</span>
+              <span style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:utilidadReal>=0?t.colors.green:t.colors.red,...t.numeric}}>{fmt(utilidadReal)}</span>
             </div>
           </div>
         )}
@@ -611,7 +614,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
               const diff = actual - anterior;
               if (anterior === 0 && actual === 0) return null;
               return (
-                <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:diff>=0?t.colors.green:t.colors.red}}>
+                <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:diff>=0?t.colors.green:t.colors.red,...t.numeric}}>
                   {diff>=0?"↑":"↓"} {diff!==0?fmtCorto(Math.abs(diff)):"="} vs mes anterior
                 </span>
               );
@@ -624,13 +627,13 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
               const color  = m.activo ? t.colors.blue : m.neta>=0 ? t.colors.green : t.colors.red;
               return (
                 <div key={i} style={styles.graficaCol}>
-                  <p style={{fontSize:"10px", color:m.activo?t.colors.blue:t.colors.textTertiary, margin:"0 0 4px", textAlign:"center", fontWeight:m.activo?t.fonts.weightBold:t.fonts.weightNormal}}>
+                  <p style={{fontSize:"10px", color:m.activo?t.colors.blueText:t.colors.textTertiary, margin:"0 0 4px", textAlign:"center", fontWeight:m.activo?t.fonts.weightBold:t.fonts.weightNormal, ...t.numeric}}>
                     {m.neta!==0?fmtCorto(m.neta):""}
                   </p>
                   <div style={styles.graficaBarraWrap}>
                     <div style={{...styles.graficaBarra, height:`${altura}%`, background:color, opacity:m.activo?1:0.7}} />
                   </div>
-                  <p style={{fontSize:"11px", color:m.activo?t.colors.blue:t.colors.textTertiary, fontWeight:m.activo?t.fonts.weightBold:t.fonts.weightNormal, margin:"6px 0 0", textAlign:"center"}}>
+                  <p style={{fontSize:"11px", color:m.activo?t.colors.blueText:t.colors.textTertiary, fontWeight:m.activo?t.fonts.weightBold:t.fonts.weightNormal, margin:"6px 0 0", textAlign:"center"}}>
                     {m.mes}
                   </p>
                 </div>
@@ -656,7 +659,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
                 <div key={item.label} style={{marginBottom:"12px"}}>
                   <div style={{display:"flex", justifyContent:"space-between", marginBottom:"5px"}}>
                     <span style={{fontSize:t.fonts.sizeSm, color:t.colors.textSecondary}}>{item.label}</span>
-                    <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold}}>
+                    <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, ...t.numeric}}>
                       {fmt(item.valor)} <span style={{color:t.colors.textTertiary, fontWeight:t.fonts.weightNormal}}>{pct}%</span>
                     </span>
                   </div>
@@ -685,10 +688,10 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
                 <div style={{flex:1}}>
                   <div style={{display:"flex", justifyContent:"space-between", marginBottom:"5px"}}>
                     <div>
-                      <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary}}>{v.placa}</span>
+                      <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, ...t.numeric}}>{v.placa}</span>
                       <span style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, marginLeft:"8px"}}>{v.tipo} · {v.viajes} viaje{v.viajes!==1?"s":""}· {v.km.toLocaleString("es-CO")} km</span>
                     </div>
-                    <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:col}}>
+                    <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:col, ...t.numeric}}>
                       {v.neta>=0?"+":""}{fmt(v.neta)}
                     </span>
                   </div>
@@ -704,7 +707,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
         {/* ESTADO VACÍO */}
         {viajesMes.length === 0 && (
           <div style={styles.vacio}>
-            <p style={{fontSize:"32px", marginBottom:"8px"}}>📊</p>
+            <BarChart3 size={34} color={t.colors.textTertiary} strokeWidth={1.5} style={{margin:"0 auto 10px"}} />
             <p style={styles.vacioTexto}>Sin datos este mes</p>
             <p style={styles.vacioSub}>Registra viajes en la calculadora para ver tus cuentas aquí.</p>
             <button style={styles.btnCalcular} onClick={()=>navigate("/calculadora")}>
@@ -713,7 +716,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           </div>
         )}
 
-       
+
       </div>
     </div>
   );
@@ -724,28 +727,28 @@ const styles = {
   header:           { display:"flex", justifyContent:"space-between", alignItems:"flex-end", padding:"20px 20px 16px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
   headerSub:        { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 2px", fontWeight:t.fonts.weightMedium, textTransform:"uppercase", letterSpacing:"0.06em" },
   titulo:           { fontSize:"22px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:0, letterSpacing:"-0.3px" },
-  btnHistorial:     { display:"flex", alignItems:"center", gap:"6px", padding:"8px 14px", background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.blue, cursor:"pointer" },
+  btnHistorial:     { display:"flex", alignItems:"center", gap:"6px", padding:"8px 14px", background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.blueText, cursor:"pointer" },
   navMes:           { display:"flex", justifyContent:"space-between", alignItems:"center", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}`, padding:"10px 20px" },
-  btnMes:           { background:"none", border:"none", fontSize:"22px", color:t.colors.blue, cursor:"pointer", padding:"0 8px", fontWeight:t.fonts.weightNormal },
+  btnMes:           { background:"none", border:"none", fontSize:"22px", color:t.colors.blueText, cursor:"pointer", padding:"0 8px", fontWeight:t.fonts.weightNormal },
   labelMes:         { fontSize:"15px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
   contenido:        { padding:"12px 16px 16px" },
-  gananciaHero:     { borderRadius:t.radius.lg, padding:"20px", marginBottom:"12px", display:"flex", justifyContent:"space-between", alignItems:"center", boxShadow:"0 4px 14px rgba(0,0,0,0.12)" },
-  gananciaHeroLabel:{ fontSize:t.fonts.sizeXs, color:"rgba(255,255,255,0.75)", margin:"0 0 4px", fontWeight:t.fonts.weightMedium, textTransform:"uppercase", letterSpacing:"0.06em" },
-  gananciaHeroVal:  { fontSize:"42px", fontWeight:t.fonts.weightBlack, color:"#fff", margin:"0 0 4px", letterSpacing:"-0.5px" },
-  gananciaHeroSub:  { fontSize:t.fonts.sizeXs, color:"rgba(255,255,255,0.7)", margin:0 },
+  gananciaHero:     { borderRadius:t.radius.xl, padding:"20px", marginBottom:"12px", display:"flex", justifyContent:"space-between", alignItems:"center", boxShadow:"0 4px 14px rgba(0,0,0,0.12)" },
+  gananciaHeroLabel:{ fontSize:t.fonts.sizeXs, color:"rgba(255,255,255,0.82)", margin:"0 0 4px", fontWeight:t.fonts.weightMedium, textTransform:"uppercase", letterSpacing:"0.06em" },
+  gananciaHeroVal:  { fontSize:"42px", fontWeight:t.fonts.weightBlack, color:"#fff", margin:"0 0 4px", letterSpacing:"-0.8px", fontVariantNumeric:"tabular-nums" },
+  gananciaHeroSub:  { fontSize:t.fonts.sizeXs, color:"rgba(255,255,255,0.75)", margin:0 },
   gananciaHeroBadge:{ background:"rgba(255,255,255,0.15)", borderRadius:t.radius.md, padding:"12px", backdropFilter:"blur(10px)" },
   dosColumnas:      { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"12px" },
-  metricaCard:      { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", boxShadow:t.shadows.card },
+  metricaCard:      { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card },
   metricaLabel:     { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 6px", textTransform:"uppercase", letterSpacing:"0.05em" },
-  metricaVal:       { fontSize:"18px", fontWeight:t.fonts.weightBold, margin:0 },
-  card:             { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"12px", boxShadow:t.shadows.card },
+  metricaVal:       { fontSize:"18px", fontWeight:t.fonts.weightBold, margin:0, fontVariantNumeric:"tabular-nums", letterSpacing:"-0.3px" },
+  card:             { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"12px", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card },
   cardTitulo:       { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 14px" },
   grafica:          { display:"flex", alignItems:"flex-end", gap:"6px", height:"120px", paddingTop:"20px" },
   graficaCol:       { flex:1, display:"flex", flexDirection:"column", alignItems:"center", height:"100%" },
   graficaBarraWrap: { flex:1, width:"100%", display:"flex", alignItems:"flex-end", justifyContent:"center" },
   graficaBarra:     { width:"100%", borderRadius:"4px 4px 0 0", transition:"height 0.4s ease", minHeight:"2px" },
   vehFila:          { padding:"12px 0" },
-  vacio:            { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"40px 20px", textAlign:"center", marginBottom:"12px", boxShadow:t.shadows.card },
+  vacio:            { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"40px 20px", textAlign:"center", marginBottom:"12px", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card },
   vacioTexto:       { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 6px" },
   vacioSub:         { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, margin:"0 0 20px" },
   btnCalcular:      { padding:"12px 28px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer" },
