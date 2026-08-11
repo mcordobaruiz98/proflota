@@ -1,14 +1,14 @@
 import { useState, useEffect} from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronUp, MapPin, Lightbulb, AlertTriangle, Check } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { sanitizar, validarNumero } from "../utils/validar";
 
 const DEFAULT_ADBLUE = 0.18925;
 
 function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores = [], empresas = [], onGuardar, onGuardarRuta, onEliminarRuta, onEditarVehiculo, onAgregarEmpresa, mostrarToast }) {
-  const PEAJES_CO = peajes.length > 0 
-  ? [...peajes].sort((a, b) => a.n.localeCompare(b.n, 'es')) 
+  const PEAJES_CO = peajes.length > 0
+  ? [...peajes].sort((a, b) => a.n.localeCompare(b.n, 'es'))
   : [];
   const navigate = useNavigate();
   const location = useLocation();
@@ -186,6 +186,13 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const cxkm   = kmTotal > 0 ? totalGastos / kmTotal : 0;
   const margenColor = margen >= 40 ? t.colors.green : margen >= 20 ? t.colors.amber : t.colors.red;
 
+  // Estado de cada sección (para los pasos numerados) — solo presentación
+  const okDatos  = !!ruta.trim() && valorViaje > 0;
+  const okComb   = costoComb > 0;
+  const okPeajes = peajesRuta.length > 0;
+  const okCostos = costoConduct > 0 || n(carpado) > 0 || n(gastosViaje) > 0 || extras.length > 0;
+  const okDesc   = totalDesc > 0;
+
   // Lógica de anticipo para el viaje de Ida (depende de valorViajeIda para recalculado)
   useEffect(() => {
     if (pctAnticipoFlete !== "" && valorViajeIda > 0) {
@@ -337,7 +344,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
         extras: totExtras, extrasList: extras,
         total: totalGastos, neta: gananciaNeta,
         mrg: margen, margen, cxk: cxkm,
-        descuentos: { 
+        descuentos: {
           retefuente: valRetefuente,
           reteica: valReteica,
           fopat: valFopat,
@@ -515,13 +522,26 @@ const guardarRutaFrecuente = async () => {
     if (veh.rendVacioDef > 0 && !rendVacio) setRendVacio(String(veh.rendVacioDef));
   }, [placa]);
 
+  // Encabezado de sección con paso numerado (solo presentación)
+  const SeccionHeader = ({ num, ok, label, abierta, onToggle }) => (
+    <div style={styles.seccionHeader} onClick={onToggle}>
+      <span style={styles.seccionHead}>
+        <span style={{...styles.stepBadge, ...(ok ? styles.stepBadgeDone : {})}}>
+          {ok ? <Check size={13} strokeWidth={3} /> : num}
+        </span>
+        <span style={styles.seccionLabel}>{label}</span>
+      </span>
+      {abierta ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
+    </div>
+  );
+
   return (
     <div style={styles.pantalla}>
 
       {/* HEADER */}
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
           <span>Volver</span>
         </button>
         <h1 style={styles.titulo}>Calculadora</h1>
@@ -535,12 +555,13 @@ const guardarRutaFrecuente = async () => {
         width:"100%", padding:"11px", background:t.colors.blueSoft,
         border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md,
         fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold,
-        color:t.colors.blue, cursor:"pointer",
-        display:"flex", alignItems:"center", justifyContent:"center", gap:"6px"
+        color:t.colors.blueText, cursor:"pointer",
+        display:"flex", alignItems:"center", justifyContent:"center", gap:"7px"
       }}
       onClick={()=>setMostrarRutas(!mostrarRutas)}
     >
-      📍 {mostrarRutas ? "Cerrar rutas" : `Cargar ruta guardada (${rutas.length})`}
+      <MapPin size={15} color={t.colors.blueText} strokeWidth={2.2} />
+      {mostrarRutas ? "Cerrar rutas" : `Cargar ruta guardada (${rutas.length})`}
     </button>
 
     {rutaCargada && (
@@ -552,20 +573,20 @@ const guardarRutaFrecuente = async () => {
     borderRadius:t.radius.md,
     marginTop:"6px"
   }}>
-    <span style={{fontSize:t.fonts.sizeXs, color:t.colors.green, fontWeight:t.fonts.weightSemibold}}>
-      📍 Ruta cargada: {rutaCargada}
+    <span style={{fontSize:t.fonts.sizeXs, color:t.colors.green, fontWeight:t.fonts.weightSemibold, display:"flex", alignItems:"center", gap:"6px"}}>
+      <MapPin size={13} color={t.colors.green} strokeWidth={2.2} /> Ruta cargada: {rutaCargada}
     </span>
     <button
-      style={{background:"none", border:"none", cursor:"pointer", fontSize:"14px", color:t.colors.green, padding:0}}
+      style={{background:"none", border:"none", cursor:"pointer", color:t.colors.green, padding:0, display:"flex"}}
       onClick={()=>setRutaCargada(null)}
     >
-      ✕
+      <X size={14} color={t.colors.green} />
     </button>
   </div>
 )}
 
     {mostrarRutas && (
-      <div style={{background:t.colors.bgCard, borderRadius:t.radius.lg, marginTop:"8px", overflow:"hidden", boxShadow:t.shadows.card}}>
+      <div style={{background:t.colors.bgCard, borderRadius:t.radius.lg, marginTop:"8px", overflow:"hidden", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card}}>
         {rutas.map((r,i,arr)=>(
           <div key={r.firestoreId} style={{
             display:"flex", justifyContent:"space-between", alignItems:"center",
@@ -577,8 +598,8 @@ const guardarRutaFrecuente = async () => {
                 {r.nombre}
               </p>
               <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0"}}>
-                {r.kmCargado>0?`${r.kmCargado} km`:""} 
-                {r.peajesRuta?.length>0?` · ${r.peajesRuta.length} peajes`:""} 
+                {r.kmCargado>0?`${r.kmCargado} km`:""}
+                {r.peajesRuta?.length>0?` · ${r.peajesRuta.length} peajes`:""}
                 {r.conductor?` · ${r.conductor}`:""}
                 {r.empresa?` · ${r.empresa}`:""}
                 {r.producto?` . ${r.producto}`:""}
@@ -592,10 +613,10 @@ const guardarRutaFrecuente = async () => {
                 Cargar
               </button>
               <button
-                style={{padding:"6px 10px", background:t.colors.redSoft, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, cursor:"pointer"}}
+                style={{padding:"6px 10px", background:t.colors.redSoft, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, cursor:"pointer", display:"flex", alignItems:"center"}}
                 onClick={()=>onEliminarRuta(r.firestoreId)}
               >
-                ✕
+                <X size={13} color={t.colors.red} />
               </button>
             </div>
           </div>
@@ -607,8 +628,8 @@ const guardarRutaFrecuente = async () => {
 
       {/* GUÍA PRIMERA VEZ */}
       {viajes.length === 0 && (
-        <div style={{margin:"10px 16px 0",padding:"10px 14px",background:"#1565FF15",border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.md,display:"flex",gap:"8px",alignItems:"flex-start"}}>
-          <span style={{fontSize:"16px"}}>💡</span>
+        <div style={{margin:"10px 16px 0",padding:"11px 14px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.md,display:"flex",gap:"10px",alignItems:"flex-start"}}>
+          <Lightbulb size={17} color={t.colors.blueText} strokeWidth={2} style={{flexShrink:0, marginTop:"1px"}} />
           <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:0,lineHeight:1.5}}>
             <strong style={{color:t.colors.textPrimary}}>Su primer cálculo:</strong> solo necesita ruta, kilómetros, toneladas y flete. Las demás secciones (combustible, peajes, costos) las abre tocándolas. Todo lo demás es opcional.
           </p>
@@ -616,10 +637,7 @@ const guardarRutaFrecuente = async () => {
       )}
 
       {/* ── DATOS DEL VIAJE ── */}
-      <div style={styles.seccionHeader} onClick={()=>setSecDatos(!secDatos)}>
-        <span style={styles.seccionLabel}>Datos del viaje</span>
-        {secDatos ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
-      </div>
+      <SeccionHeader num="1" ok={okDatos} label="Datos del viaje" abierta={secDatos} onToggle={()=>setSecDatos(!secDatos)} />
       {secDatos && (<div style={{padding:"0 20px"}}>
       <div style={styles.card}>
         <div style={styles.fila2}>
@@ -687,17 +705,17 @@ const guardarRutaFrecuente = async () => {
     </select>
   )}
   {(!productosFrecuentes.includes(producto) || productosFrecuentes.length === 0) && (
-  <input 
-    type="text" 
-    placeholder="Maíz" 
+  <input
+    type="text"
+    placeholder="Maíz"
     value={producto}
-    onChange={e => setProducto(e.target.value)} 
-    style={styles.input} 
+    onChange={e => setProducto(e.target.value)}
+    style={styles.input}
     />
 )}
 
 </div>
-          
+
    <div style={styles.campo}>
   <label style={styles.label}>Empresa</label>
   {empresasFrecuentes.length > 0 && (
@@ -766,8 +784,8 @@ const guardarRutaFrecuente = async () => {
   <input type="text" placeholder="123456789" value={mani}
     onChange={e=>setMani(e.target.value)} style={styles.input}/>
   {mani.trim() && viajes.some(v => v.mani && v.mani.trim().toLowerCase() === mani.trim().toLowerCase()) && (
-    <p style={{fontSize:t.fonts.sizeXs,color:"#F59E0B",margin:"4px 0 0",display:"flex",alignItems:"center",gap:"4px"}}>
-      ⚠️ Este manifiesto ya existe en otro viaje. Verifique el número.
+    <p style={{fontSize:t.fonts.sizeXs,color:t.colors.amber,margin:"4px 0 0",display:"flex",alignItems:"center",gap:"5px"}}>
+      <AlertTriangle size={13} color={t.colors.amber} strokeWidth={2.2} /> Este manifiesto ya existe en otro viaje. Verifique el número.
     </p>
   )}
 </div>
@@ -898,11 +916,11 @@ const guardarRutaFrecuente = async () => {
         {valorViaje > 0 && (
           <div>
             {modoFlete === "porTon" && n(fleteTon) > 300000 && (
-              <div style={{padding:"8px 12px",background:"#FEF3C7",border:"1.5px solid #F59E0B33",borderRadius:t.radius.sm,marginBottom:"6px",display:"flex",alignItems:"center",gap:"8px"}}>
-                <span style={{fontSize:"16px"}}>⚠️</span>
+              <div style={{padding:"9px 12px",background:t.colors.amberSoft,border:`1.5px solid ${t.colors.amberBorder}`,borderRadius:t.radius.sm,marginBottom:"6px",display:"flex",alignItems:"flex-start",gap:"9px"}}>
+                <AlertTriangle size={16} color={t.colors.amber} strokeWidth={2.2} style={{flexShrink:0, marginTop:"1px"}} />
                 <div>
-                  <p style={{fontSize:t.fonts.sizeXs,color:"#92400E",fontWeight:t.fonts.weightBold,margin:0}}>¿Seguro que es $/ton?</p>
-                  <p style={{fontSize:t.fonts.sizeXs,color:"#92400E",margin:"2px 0 0"}}>
+                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.amber,fontWeight:t.fonts.weightBold,margin:0}}>¿Seguro que es $/ton?</p>
+                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>
                     El flete por tonelada normalmente es entre $40.000 y $300.000/ton. Si el valor es el total del viaje, cambie a modo "Fijo ($/Viaje)".
                   </p>
                 </div>
@@ -954,15 +972,15 @@ const guardarRutaFrecuente = async () => {
             padding: "12px",
             background: t.colors.bgSection,
             borderRadius: t.radius.md,
-            border: `1.5px solid ${t.colors.border}33`
+            border: `1.5px solid ${t.colors.borderLight}`
           }}>
             <p style={{
               fontSize: t.fonts.sizeSm,
               fontWeight: t.fonts.weightBold,
-              color: t.colors.blue,
+              color: t.colors.blueText,
               margin: "0 0 10px 0"
             }}>Anticipos del Flete (Empresa)</p>
-            
+
             {/* Ida */}
             <div style={{ marginBottom: tieneRetorno ? "12px" : "0" }}>
               {tieneRetorno && <p style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700, margin: "0 0 6px" }}>1. TRAYECTO DE IDA</p>}
@@ -1028,7 +1046,7 @@ const guardarRutaFrecuente = async () => {
                 </div>
               </div>
             )}
-            
+
             {/* Consolidado */}
             <div style={{
               display: "flex",
@@ -1050,11 +1068,11 @@ const guardarRutaFrecuente = async () => {
         )}
       </div>
 
-  
+
         {/* RETORNO */}
       <div style={{marginTop:"10px"}}>
       <div style={{display:"flex", alignItems:"center", gap:"10px", cursor:"pointer"}} onClick={()=>setTieneRetorno(!tieneRetorno)}>
-      <div style={{width:"42px",height:"24px",borderRadius:"12px",background:tieneRetorno?t.colors.blue:"#1E3A5F",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+      <div style={{width:"42px",height:"24px",borderRadius:"12px",background:tieneRetorno?t.colors.blue:t.colors.border,position:"relative",transition:"background 0.2s",flexShrink:0}}>
         <div style={{width:"20px",height:"20px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:tieneRetorno?"20px":"2px",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}} />
       </div>
         <label style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightMedium, color:t.colors.textPrimary, cursor:"pointer"}}>
@@ -1120,7 +1138,7 @@ const guardarRutaFrecuente = async () => {
           </div>
         </div>
 
-        
+
           <div style={styles.campo}>
             <label style={styles.label}>Empresa</label>
             {empresasFrecuentes.length > 0 && (
@@ -1154,8 +1172,8 @@ const guardarRutaFrecuente = async () => {
               </>
             )}
           </div>
-          
-        
+
+
 
         <div style={styles.fila2}>
           <div style={styles.campo}>
@@ -1163,8 +1181,8 @@ const guardarRutaFrecuente = async () => {
             <input type="text" placeholder="MAN-001" value={maniRet}
               onChange={e=>setManiRet(e.target.value)} style={styles.input} />
               {maniRet.trim() && viajes.some(v => (v.mani && v.mani.trim().toLowerCase() === maniRet.trim().toLowerCase()) || (v.maniRet && v.maniRet.trim().toLowerCase() === maniRet.trim().toLowerCase())) && (
-               <p style={{fontSize:t.fonts.sizeXs,color:"#F59E0B",margin:"4px 0 0",display:"flex",alignItems:"center",gap:"4px"}}>
-                ⚠️ Este manifiesto ya existe en otro viaje. Verifique el número.
+               <p style={{fontSize:t.fonts.sizeXs,color:t.colors.amber,margin:"4px 0 0",display:"flex",alignItems:"center",gap:"5px"}}>
+                <AlertTriangle size={13} color={t.colors.amber} strokeWidth={2.2} /> Este manifiesto ya existe en otro viaje. Verifique el número.
                 </p>
               )}
           </div>
@@ -1216,7 +1234,7 @@ const guardarRutaFrecuente = async () => {
       {valorViajeRetorno > 0 && (
         <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", paddingTop:"8px", borderTop:`1px solid ${t.colors.border}`}}>
           <span style={{fontSize:t.fonts.sizeSm, color:t.colors.textSecondary}}>Flete retorno</span>
-          <span style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.blue}}>{fmt(valorViajeRetorno)}</span>
+          <span style={{fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.blueText}}>{fmt(valorViajeRetorno)}</span>
         </div>
       )}
     </div>
@@ -1226,10 +1244,7 @@ const guardarRutaFrecuente = async () => {
       </div>)}
 
       {/* ── COMBUSTIBLE ── */}
-      <div style={styles.seccionHeader} onClick={()=>setSecComb(!secComb)}>
-        <span style={styles.seccionLabel}>Combustible / Adblue</span>
-        {secComb ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
-      </div>
+      <SeccionHeader num="2" ok={okComb} label="Combustible / Adblue" abierta={secComb} onToggle={()=>setSecComb(!secComb)} />
       {secComb && (<div style={{padding:"0 20px"}}>
       <div style={styles.card}>
         <div style={styles.campo}>
@@ -1285,10 +1300,7 @@ const guardarRutaFrecuente = async () => {
       </div>)}
 
       {/* ── PEAJES ── */}
-      <div style={styles.seccionHeader} onClick={()=>setSecPeajes(!secPeajes)}>
-        <span style={styles.seccionLabel}>Peajes de ruta</span>
-        {secPeajes ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
-      </div>
+      <SeccionHeader num="3" ok={okPeajes} label="Peajes de ruta" abierta={secPeajes} onToggle={()=>setSecPeajes(!secPeajes)} />
       {secPeajes && (<div style={{padding:"0 20px"}}>
       <div style={styles.card}>
         <div style={styles.campo}>
@@ -1334,7 +1346,7 @@ const guardarRutaFrecuente = async () => {
                 <div key={p.c} style={styles.peajeTag}>
                   <span style={styles.peajeTagNom}>{p.n} — {fmt(total)}</span>
                   <button
-                    style={{...styles.peajeTagBtn, background: p.iv ? t.colors.greenSoft : t.colors.blueSoft, color: p.iv ? t.colors.green : t.colors.blue}}
+                    style={{...styles.peajeTagBtn, background: p.iv ? t.colors.greenSoft : t.colors.blueSoft, color: p.iv ? t.colors.green : t.colors.blueText}}
                     onClick={()=>toggleIV(p.c)}
                   >
                     {p.iv ? "Ida y vuelta" : "Ida"}
@@ -1357,10 +1369,7 @@ const guardarRutaFrecuente = async () => {
       </div>)}
 
       {/* ── COSTOS ── */}
-      <div style={styles.seccionHeader} onClick={()=>setSecCostos(!secCostos)}>
-        <span style={styles.seccionLabel}>Costos del viaje</span>
-        {secCostos ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
-      </div>
+      <SeccionHeader num="4" ok={okCostos} label="Costos del viaje" abierta={secCostos} onToggle={()=>setSecCostos(!secCostos)} />
       {secCostos && (<div style={{padding:"0 20px"}}>
       <div style={styles.card}>
         <div style={styles.campo}>
@@ -1426,7 +1435,7 @@ const guardarRutaFrecuente = async () => {
             style={{...styles.input, marginBottom:0}} />
         </div>
         <button style={styles.btnAgregarExtra} onClick={agregarExtra}>
-          <Plus size={14} color={t.colors.blue} strokeWidth={2.5} />
+          <Plus size={14} color={t.colors.blueText} strokeWidth={2.5} />
           Agregar costo
         </button>
       </div>
@@ -1434,10 +1443,7 @@ const guardarRutaFrecuente = async () => {
       </div>)}
 
       {/* ── DESCUENTOS DE LEY ── */}
-<div style={styles.seccionHeader} onClick={()=>setSecDesc(!secDesc)}>
-  <span style={styles.seccionLabel}>Descuentos de ley</span>
-  {secDesc ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
-</div>
+      <SeccionHeader num="5" ok={okDesc} label="Descuentos de ley" abierta={secDesc} onToggle={()=>setSecDesc(!secDesc)} />
 {secDesc && (<div style={{padding:"0 20px"}}>
 <div style={styles.card}>
   <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 14px"}}>
@@ -1470,7 +1476,7 @@ const guardarRutaFrecuente = async () => {
       borderBottom: i===arr.length-1 ? "none" : `1px solid ${t.colors.borderLight}`,
     }}>
       <div style={{display:"flex", alignItems:"center", gap:"10px", cursor:"pointer"}} onClick={()=>d.setActivo(!d.activo)}>
-        <div style={{width:"36px",height:"20px",borderRadius:"10px",background:d.activo?t.colors.blue:"#1E3A5F",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+        <div style={{width:"36px",height:"20px",borderRadius:"10px",background:d.activo?t.colors.blue:t.colors.border,position:"relative",transition:"background 0.2s",flexShrink:0}}>
           <div style={{width:"16px",height:"16px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:d.activo?"18px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
         </div>
         <div>
@@ -1495,7 +1501,7 @@ const guardarRutaFrecuente = async () => {
   {/* OTRO */}
   <div style={{borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px", marginTop:"4px"}}>
     <div style={{display:"flex", alignItems:"center", gap:"10px", marginBottom:"8px", cursor:"pointer"}} onClick={()=>setDescOtro(!descOtro)}>
-      <div style={{width:"36px",height:"20px",borderRadius:"10px",background:descOtro?t.colors.blue:"#1E3A5F",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+      <div style={{width:"36px",height:"20px",borderRadius:"10px",background:descOtro?t.colors.blue:t.colors.border,position:"relative",transition:"background 0.2s",flexShrink:0}}>
         <div style={{width:"16px",height:"16px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:descOtro?"18px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
       </div>
       <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>Otro descuento</p>
@@ -1535,72 +1541,100 @@ const guardarRutaFrecuente = async () => {
       <span style={{fontSize:t.fonts.sizeLg, fontWeight:t.fonts.weightBold, color:t.colors.red}}>{fmt(totalDesc)}</span>
     </div>
   )}
-</div>  
+</div>
 
       </div>)}
 
       {/* ── RESULTADO ── */}
       <div style={{...styles.seccionHeader, cursor:"default"}}>
-        <span style={styles.seccionLabel}>Resultado del viaje</span>
+        <span style={styles.seccionHead}>
+          <span style={{...styles.stepBadge, background:t.colors.greenSoft, color:t.colors.green}}>
+            <Check size={13} strokeWidth={3} />
+          </span>
+          <span style={styles.seccionLabel}>Resultado del viaje</span>
+        </span>
       </div>
       <div style={styles.card}>
         <div style={styles.fila2}>
           <div style={styles.metCard}>
             <p style={styles.metLabel}>Total viaje</p>
-            <p style={{...styles.metVal, color: t.colors.blue}}>{valorViaje>0?fmt(valorViaje):"$—"}</p>
+            <p style={{...styles.metVal, ...t.numeric, color: t.colors.blueText}}>{valorViaje>0?fmt(valorViaje):"$—"}</p>
           </div>
           <div style={styles.metCard}>
             <p style={styles.metLabel}>Total gastos</p>
-            <p style={{...styles.metVal, color: t.colors.red}}>{totalGastos>0?fmt(totalGastos):"$—"}</p>
+            <p style={{...styles.metVal, ...t.numeric, color: t.colors.red}}>{totalGastos>0?fmt(totalGastos):"$—"}</p>
           </div>
         </div>
 
-        {/* GANANCIA — protagonista */}
+        {/* GANANCIA — protagonista (titular a lo ancho) */}
         <div style={{
           ...styles.gananciaResultBox,
           background: gananciaNeta >= 0 ? t.colors.greenSoft : t.colors.redSoft,
           borderColor: gananciaNeta >= 0 ? t.colors.greenBorder : t.colors.redBorder,
         }}>
           <p style={styles.gananciaResultLabel}>Ganancia neta</p>
-          <p style={{...styles.gananciaResultVal, color: gananciaNeta>=0?t.colors.green:t.colors.red}}>
+          <p style={{...styles.gananciaResultVal, ...t.numeric, color: gananciaNeta>=0?t.colors.green:t.colors.red}}>
             {valorViaje>0?fmt(gananciaNeta):"$—"}
           </p>
         </div>
 
         {valorViaje > 0 && <>
-          {[
-            {l:`ACPM (${fnD(galTotal,1)} gal)`,  v: costoAcpm},
-            {l:`Adblue (${fnD(adblLt,1)} lt)`,   v: costoAdbl},
-            {l:"Peajes",                          v: totPeajes},
-            {l: modoConductor === "porcentaje" ?  "Conductor (" + n(porcCond) + "%)" : "Conductor (valor fijo)", v: costoConduct},
-            {l:"Carpado/Descarpado",              v: n(carpado)},
-            {l:"Gastos de viaje",                 v: n(gastosViaje)},
-            {l:"Otros gastos",                    v: totExtras},
-            {l:"Descuentos de ley",               v: totalDesc},
-          ].filter(r=>r.v>0).map(r=>(
-            <div key={r.l} style={styles.desgloseFila}>
-              <span style={styles.desgloseL}>{r.l}</span>
-              <span style={styles.desgloseV}>{fmt(r.v)}</span>
+          {/* MEDIDOR DE MARGEN + métricas clave */}
+          <div style={styles.gaugeRow}>
+            <div style={styles.gauge}>
+              {(() => {
+                const r = 42, circ = 2 * Math.PI * r;
+                const pct = Math.min(Math.max(margen, 0), 100);
+                const off = circ * (1 - pct / 100);
+                return (
+                  <svg width="100" height="100" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r={r} fill="none" stroke={t.colors.bgSection} strokeWidth="11" />
+                    <circle cx="50" cy="50" r={r} fill="none" stroke={margenColor} strokeWidth="11" strokeLinecap="round"
+                      strokeDasharray={circ} strokeDashoffset={off} transform="rotate(-90 50 50)" />
+                  </svg>
+                );
+              })()}
+              <div style={styles.gaugeCap}>
+                <span style={{...styles.gaugePc, ...t.numeric, color: margenColor}}>{margen.toFixed(0)}%</span>
+                <span style={styles.gaugePl}>Margen</span>
+              </div>
             </div>
-          ))}
-          <div style={styles.desgloseFila}><span style={styles.desgloseL}>Recorrido total</span><span style={styles.desgloseV}>{kmTotal>0?kmTotal.toLocaleString("es-CO")+" km":"—"}</span></div>
-          <div style={styles.desgloseFila}><span style={styles.desgloseL}>Costo/km</span><span style={styles.desgloseV}>{kmTotal>0?fmt(cxkm)+"/km":"—"}</span></div>
-          <div style={{...styles.desgloseFila, borderBottom:"none"}}>
-            <span style={styles.desgloseL}>Margen neto</span>
-            <span style={{...styles.desgloseV, color: margenColor, fontWeight: t.fonts.weightBold}}>{margen.toFixed(1)}%</span>
+            <div style={styles.gaugeStats}>
+              <div style={styles.gStat}><span style={styles.gStatL}>Costo por km</span><span style={{...styles.gStatV, ...t.numeric}}>{kmTotal>0?fmt(cxkm):"—"}</span></div>
+              <div style={styles.gStat}><span style={styles.gStatL}>Recorrido</span><span style={{...styles.gStatV, ...t.numeric}}>{kmTotal>0?kmTotal.toLocaleString("es-CO")+" km":"—"}</span></div>
+              <div style={styles.gStat}><span style={styles.gStatL}>Ganancia / ton</span><span style={{...styles.gStatV, ...t.numeric, color: gananciaNeta>=0?t.colors.green:t.colors.red}}>{n(tonelaje)>0?fmt(gananciaNeta/n(tonelaje)):"—"}</span></div>
+            </div>
           </div>
-          <div style={styles.barraFondo}>
-            <div style={{...styles.barraRelleno, width:`${Math.min(Math.max(margen,0),100)}%`, background: margenColor}} />
+
+          {/* DESGLOSE de gastos */}
+          <div style={{marginTop:"14px", borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"4px"}}>
+            {[
+              {l:`ACPM (${fnD(galTotal,1)} gal)`,  v: costoAcpm},
+              {l:`Adblue (${fnD(adblLt,1)} lt)`,   v: costoAdbl},
+              {l:"Peajes",                          v: totPeajes},
+              {l: modoConductor === "porcentaje" ?  "Conductor (" + n(porcCond) + "%)" : "Conductor (valor fijo)", v: costoConduct},
+              {l:"Carpado/Descarpado",              v: n(carpado)},
+              {l:"Gastos de viaje",                 v: n(gastosViaje)},
+              {l:"Otros gastos",                    v: totExtras},
+              {l:"Descuentos de ley",               v: totalDesc},
+            ].filter(r=>r.v>0).map((r,idx,arr)=>(
+              <div key={r.l} style={{...styles.desgloseFila, borderBottom: idx===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
+                <span style={styles.desgloseL}>{r.l}</span>
+                <span style={{...styles.desgloseV, ...t.numeric}}>{fmt(r.v)}</span>
+              </div>
+            ))}
           </div>
         </>}
 
         {/* GUARDAR RUTA */}
-        <div style={{borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px", marginBottom:"12px"}}>
+        <div style={{borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"12px", marginTop:"14px", marginBottom:"12px"}}>
           {!mostrarGuardar ? (
             <button
-              style={{width:"100%", padding:"9px", background:"none", border:`1.5px dashed ${t.colors.blueBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, color:t.colors.blue, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px", fontWeight:t.fonts.weightSemibold}}
+              style={{width:"100%", padding:"9px", background:"none", border:`1.5px dashed ${t.colors.blueBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, color:t.colors.blueText, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px", fontWeight:t.fonts.weightSemibold}}
               onClick={()=>setMostrarGuardar(true)}
-            >+ Guardar como ruta frecuente</button>
+            >
+              <Plus size={15} color={t.colors.blueText} strokeWidth={2.5} /> Guardar como ruta frecuente
+            </button>
           ) : (
             <div>
               <div style={styles.campo}>
@@ -1639,24 +1673,27 @@ const guardarRutaFrecuente = async () => {
 const styles = {
   pantalla:         { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:           { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:        { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  btnVolver:        { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blueText, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
   titulo:           { fontSize:"18px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
+  seccionHead:      { display:"flex", alignItems:"center", gap:"10px" },
+  stepBadge:        { width:"22px", height:"22px", borderRadius:"7px", background:t.colors.blueSoft, color:t.colors.blueText, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"12px", fontWeight:t.fonts.weightBold, flexShrink:0 },
+  stepBadgeDone:    { background:t.colors.greenSoft, color:t.colors.green },
   seccionLabel:     { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", padding:"0" },
   seccionHeader:    { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"14px 20px 8px", cursor:"pointer" },
-  card:             { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", margin:"0 16px 4px", boxShadow:t.shadows.card },
+  card:             { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", margin:"0 16px 4px", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card },
   campo:            { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
   fila2:            { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },
   label:            { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
   input:            { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
-  valorViajeBox:    { display:"flex", justifyContent:"space-between", alignItems:"center", background:t.colors.bgCard, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, padding:"12px 14px", marginTop:"4px" },
-  valorViajeLabel:  { fontSize:t.fonts.sizeSm, color:t.colors.blue, fontWeight:t.fonts.weightMedium },
-  valorViajeNum:    { fontSize:"26px", fontWeight:t.fonts.weightBlack, color:t.colors.blue },
+  valorViajeBox:    { display:"flex", justifyContent:"space-between", alignItems:"center", background:t.colors.bgSection, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, padding:"12px 14px", marginTop:"4px" },
+  valorViajeLabel:  { fontSize:t.fonts.sizeSm, color:t.colors.blueText, fontWeight:t.fonts.weightMedium },
+  valorViajeNum:    { fontSize:"24px", fontWeight:t.fonts.weightBlack, color:t.colors.blueText, fontVariantNumeric:"tabular-nums", letterSpacing:"-0.5px" },
   resumenBox:       { background:t.colors.bgSection, borderRadius:t.radius.sm, padding:"10px 12px", marginTop:"8px" },
   resumenFila:      { display:"flex", justifyContent:"space-between", fontSize:t.fonts.sizeXs, padding:"4px 0", borderBottom:`1px solid ${t.colors.borderLight}` },
   resumenL:         { color:t.colors.textSecondary },
-  resumenV:         { fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary },
+  resumenV:         { fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, fontVariantNumeric:"tabular-nums" },
   filaAgregar:      { display:"flex", gap:"8px", alignItems:"center", marginBottom:"10px" },
-  btnAgregarP:      { padding:"11px 14px", background:t.colors.blue, border:"none", borderRadius:t.radius.sm, cursor:"pointer", flexShrink:0 },
+  btnAgregarP:      { padding:"11px 14px", background:t.colors.blue, border:"none", borderRadius:t.radius.sm, cursor:"pointer", flexShrink:0, display:"flex", alignItems:"center" },
   peajesTags:       { display:"flex", flexWrap:"wrap", gap:"6px", marginBottom:"10px" },
   peajeTag:         { display:"inline-flex", alignItems:"center", background:t.colors.bgSection, border:`1px solid ${t.colors.border}`, borderRadius:t.radius.full, overflow:"hidden", fontSize:t.fonts.sizeXs },
   peajeTagNom:      { padding:"5px 10px", color:t.colors.textPrimary, fontWeight:t.fonts.weightMedium },
@@ -1664,21 +1701,28 @@ const styles = {
   peajeTagDel:      { padding:"5px 8px", background:"none", border:"none", borderLeft:`1px solid ${t.colors.border}`, cursor:"pointer", display:"flex", alignItems:"center" },
   totalPeajesRow:   { display:"flex", justifyContent:"space-between", alignItems:"center", paddingTop:"8px" },
   totalPeajesL:     { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary },
-  totalPeajesV:     { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary },
+  totalPeajesV:     { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, fontVariantNumeric:"tabular-nums" },
   extraFila:        { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0", borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnAgregarExtra:  { display:"flex", alignItems:"center", gap:"6px", width:"100%", padding:"10px", background:"none", border:`1.5px dashed ${t.colors.blueBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, color:t.colors.blue, cursor:"pointer", justifyContent:"center", marginTop:"8px", fontWeight:t.fonts.weightSemibold },
+  btnAgregarExtra:  { display:"flex", alignItems:"center", gap:"6px", width:"100%", padding:"10px", background:"none", border:`1.5px dashed ${t.colors.blueBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, color:t.colors.blueText, cursor:"pointer", justifyContent:"center", marginTop:"8px", fontWeight:t.fonts.weightSemibold },
   metCard:          { background:t.colors.bgSection, borderRadius:t.radius.sm, padding:"12px", marginBottom:"10px" },
   metLabel:         { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 4px", textTransform:"uppercase", letterSpacing:"0.05em" },
   metVal:           { fontSize:"17px", fontWeight:t.fonts.weightBold, margin:0 },
   gananciaResultBox:{ borderRadius:t.radius.md, padding:"16px", border:"1.5px solid", marginBottom:"14px", textAlign:"center" },
   gananciaResultLabel:{ fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, textTransform:"uppercase", letterSpacing:"0.08em", color:t.colors.textSecondary, margin:"0 0 6px" },
-  gananciaResultVal:{ fontSize:"38px", fontWeight:t.fonts.weightBlack, margin:0, letterSpacing:"-0.5px" },
+  gananciaResultVal:{ fontSize:"38px", fontWeight:t.fonts.weightBlack, margin:0, letterSpacing:"-0.8px" },
+  gaugeRow:         { display:"flex", alignItems:"center", gap:"16px", marginBottom:"2px" },
+  gauge:            { position:"relative", width:"100px", height:"100px", flexShrink:0 },
+  gaugeCap:         { position:"absolute", top:0, left:0, right:0, bottom:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" },
+  gaugePc:          { fontSize:"23px", fontWeight:t.fonts.weightBlack, lineHeight:1 },
+  gaugePl:          { fontSize:"9px", letterSpacing:"0.08em", textTransform:"uppercase", color:t.colors.textTertiary, fontWeight:t.fonts.weightBold, marginTop:"3px" },
+  gaugeStats:       { flex:1, display:"flex", flexDirection:"column", gap:"11px" },
+  gStat:            { display:"flex", justifyContent:"space-between", alignItems:"center" },
+  gStatL:           { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary },
+  gStatV:           { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary },
   desgloseFila:     { display:"flex", justifyContent:"space-between", fontSize:t.fonts.sizeSm, padding:"7px 0", borderBottom:`1px solid ${t.colors.borderLight}` },
   desgloseL:        { color:t.colors.textSecondary },
   desgloseV:        { fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary },
-  barraFondo:       { height:"6px", borderRadius:"3px", background:t.colors.bgSection, overflow:"hidden", margin:"10px 0 14px" },
-  barraRelleno:     { height:"100%", borderRadius:"3px", transition:"width 0.4s ease" },
-  btnGuardar:       { width:"100%", padding:"15px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" },
+  btnGuardar:       { width:"100%", padding:"15px", background:`linear-gradient(135deg, ${t.colors.green} 0%, ${t.colors.greenDeep || "#12A150"} 100%)`, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" },
 };
 
 
