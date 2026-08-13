@@ -24,8 +24,8 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
   const [fotoUrl,       setFotoUrl]       = useState("");
   const [conductorAsignado, setConductorAsignado] = useState("");
 
-  
-  
+
+
   const validar = () => {
     const e = {};
     if (!tipoVehiculo)       e.tipoVehiculo = "Selecciona el tipo de vehículo";
@@ -60,7 +60,7 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
       {/* HEADER */}
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
           <span>Vehículos</span>
         </button>
         <h1 style={styles.titulo}>Agregar vehículo</h1>
@@ -315,6 +315,9 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
 
       {/* BOTÓN GUARDAR */}
       <div style={{ padding: "0 16px" }}>
+        {errores.general && (
+          <p style={{...styles.error, textAlign:"center", margin:"0 0 8px"}}>{errores.general}</p>
+        )}
         <button
           style={{ ...styles.btnGuardar, opacity: guardando ? 0.75 : 1 }}
           onClick={guardarVehiculo}
@@ -332,16 +335,16 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
 const styles = {
   pantalla:     { maxWidth: "430px", margin: "0 auto", minHeight: "100vh", background: t.colors.bgPrimary, paddingBottom: "30px" },
   header:       { display: "flex", alignItems: "center", gap: "12px", padding: "16px 20px 12px", background: t.colors.bgCard, borderBottom: `1px solid ${t.colors.borderLight}` },
-  btnVolver:    { display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", color: t.colors.blue, cursor: "pointer", padding: 0, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightSemibold },
+  btnVolver:    { display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", color: t.colors.blueText, cursor: "pointer", padding: 0, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightSemibold },
   titulo:       { fontSize: "18px", fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: 0 },
   seccionLabel: { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightBold, color: t.colors.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", padding: "16px 20px 8px" },
-  card:         { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "16px", margin: "0 16px 4px", boxShadow: t.shadows.card },
+  card:         { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "16px", margin: "0 16px 4px", border: `1px solid ${t.colors.borderLight}`, boxShadow: t.shadows.card },
   campo:        { display: "flex", flexDirection: "column", gap: "5px", marginBottom: "12px" },
   fila2:        { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" },
   label:        { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightSemibold, color: t.colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.05em" },
   input:        { padding: "11px 12px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeSm, background: t.colors.bgPrimary, color: t.colors.textPrimary, outline: "none", width: "100%", boxSizing: "border-box" },
   error:        { fontSize: t.fonts.sizeXs, color: t.colors.red, margin: "3px 0 0", fontWeight: t.fonts.weightMedium },
-  btnGuardar:   { width: "100%", padding: "15px", background: t.colors.green, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBold, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginTop: "8px" },
+  btnGuardar:   { width: "100%", padding: "15px", background: `linear-gradient(135deg, ${t.colors.green} 0%, ${t.colors.greenDeep || "#12A150"} 100%)`, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBold, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginTop: "8px" },
 };
 
 export default AgregarVehiculo;
