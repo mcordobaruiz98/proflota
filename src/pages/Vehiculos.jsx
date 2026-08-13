@@ -84,7 +84,7 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}
       {vehiculos.length === 0 && (
         <div style={styles.vacio}>
           <div style={styles.vacioIconoWrap}>
-            <Truck size={40} color={t.colors.blue} strokeWidth={1.5} />
+            <Truck size={40} color={t.colors.blueText} strokeWidth={1.5} />
           </div>
           <p style={styles.vacioTexto}>Agrega tu primer vehículo</p>
           <p style={styles.vacioSub}>
@@ -112,9 +112,9 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}
           const viajesVeh  = viajes.filter((v) => v.placa === vehiculo.placa);
           const estado = vehiculo.estado || "disponible";
           const ESTADOS = {
-            disponible:      { label:"Disponible",      color:t.colors.green,  bg:t.colors.greenSoft },
-            en_viaje:        { label:"En viaje",         color:t.colors.blue,   bg:t.colors.blueSoft },
-            en_taller:       { label:"En taller",        color:t.colors.amber,  bg:"#FEF3C7" },
+            disponible:      { label:"Disponible",      color:t.colors.green,     bg:t.colors.greenSoft },
+            en_viaje:        { label:"En viaje",         color:t.colors.blueText,  bg:t.colors.blueSoft },
+            en_taller:       { label:"En taller",        color:t.colors.amber,     bg:t.colors.amberSoft },
             esperando_carga: { label:"Esperando carga",  color:t.colors.textTertiary, bg:t.colors.bgSection },
           };
           const est = ESTADOS[estado] || ESTADOS.disponible;
@@ -197,14 +197,14 @@ const styles = {
   btnAgregar:        { display: "flex", alignItems: "center", gap: "6px", padding: "10px 16px", background: t.colors.blue, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, cursor: "pointer" },
   buscadorWrap:      { display: "flex", alignItems: "center", gap: "10px", margin: "16px 16px 8px", background: t.colors.bgCard, border: `1.5px solid ${t.colors.border}`, borderRadius: t.radius.md, padding: "11px 14px", boxShadow: t.shadows.card },
   buscadorInput:     { flex: 1, border: "none", outline: "none", fontSize: t.fonts.sizeSm, color: t.colors.textPrimary, background: "transparent" },
-  vacio:             { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "48px 24px", textAlign: "center", margin: "8px 16px", boxShadow: t.shadows.card },
+  vacio:             { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "48px 24px", textAlign: "center", margin: "8px 16px", border: `1px solid ${t.colors.borderLight}`, boxShadow: t.shadows.card },
   vacioIconoWrap:    { width: "72px", height: "72px", background: t.colors.blueSoft, borderRadius: t.radius.xl, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" },
   vacioTexto:        { fontSize: t.fonts.sizeLg, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: "0 0 8px" },
   vacioSub:          { fontSize: t.fonts.sizeSm, color: t.colors.textSecondary, margin: "0 0 24px", lineHeight: "1.5" },
   btnAgregarVacio:   { display: "inline-flex", alignItems: "center", gap: "6px", padding: "12px 24px", background: t.colors.blue, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, cursor: "pointer" },
   sinResultados:     { textAlign: "center", padding: "32px 20px" },
   lista:             { padding: "8px 16px", display: "flex", flexDirection: "column", gap: "10px" },
-  tarjeta:           { background: t.colors.bgCard, borderRadius: t.radius.lg, display: "flex", alignItems: "center", overflow: "hidden", boxShadow: t.shadows.card },
+  tarjeta:           { background: t.colors.bgCard, borderRadius: t.radius.lg, display: "flex", alignItems: "center", overflow: "hidden", border: `1px solid ${t.colors.borderLight}`, boxShadow: t.shadows.card },
   tarjetaFranja:     { width: "4px", alignSelf: "stretch", background: t.colors.blue, flexShrink: 0 },
   tarjetaContenido:  { display: "flex", alignItems: "center", gap: "12px", flex: 1, padding: "14px 12px", cursor: "pointer" },
   tarjetaIconoWrap:  { width: "44px", height: "44px", background: t.colors.blueSoft, borderRadius: t.radius.sm, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
