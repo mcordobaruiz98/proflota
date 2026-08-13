@@ -347,4 +347,4 @@ const styles = {
   btnGuardar:   { width: "100%", padding: "15px", background: `linear-gradient(135deg, ${t.colors.green} 0%, ${t.colors.greenDeep || "#12A150"} 100%)`, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBold, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginTop: "8px" },
 };
 
-export default AgregarVehiculo;
+export default AgregarVehiculo; 

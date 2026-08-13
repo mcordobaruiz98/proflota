@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, Wrench, Camera, Edit2, Save, X, CircleDot, Droplets, Filter, Disc, ClipboardList, Fuel } from "lucide-react";
+import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, ChevronRight, Wrench, Camera, Edit2, Save, X, Check, Paperclip, CircleDot, Droplets, Filter, Disc, ClipboardList, Fuel } from "lucide-react";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
 import { useAuth } from "../hooks/useAuth";
 import { theme as t } from "../styles/theme";
@@ -206,7 +206,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
       <div style={styles.pantalla}>
         <div style={styles.header}>
           <button style={styles.btnVolver} onClick={()=>navigate("/vehiculos")}>
-            <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
+            <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
             <span>Volver</span>
           </button>
         </div>
@@ -381,7 +381,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
       {/* HEADER */}
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={()=>navigate("/vehiculos")}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
           <span>Vehículos</span>
         </button>
       </div>
@@ -394,7 +394,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               <img src={vehiculo.fotoUrl} alt={vehiculo.placa} style={{width:"50px",height:"50px",borderRadius:t.radius.md,objectFit:"cover"}} />
             ) : (
               <div style={styles.vehiculoIconoWrap}>
-                <Truck size={26} color={t.colors.blue} strokeWidth={1.8} />
+                <Truck size={26} color={t.colors.blueText} strokeWidth={1.8} />
               </div>
             )}
             <label style={{position:"absolute",bottom:"-4px",right:"-4px",width:"22px",height:"22px",borderRadius:"50%",background:t.colors.blue,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",border:`2px solid ${t.colors.bgCard}`}}>
@@ -412,7 +412,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
         </div>
         <div style={styles.metricas}>
           <div style={styles.metrica}>
-            <p style={styles.metricaVal}>{totalViajes}</p>
+            <p style={{...styles.metricaVal, ...t.numeric}}>{totalViajes}</p>
             <p style={styles.metricaLabel}>Viajes totales</p>
           </div>
           <div style={styles.metricaSep} />
@@ -421,7 +421,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               const estado = vehiculo.estado || "disponible";
               const EST = {
                 disponible:      { label:"Disponible",     color:t.colors.green },
-                en_viaje:        { label:"En viaje",        color:t.colors.blue },
+                en_viaje:        { label:"En viaje",        color:t.colors.blueText },
                 en_taller:       { label:"En taller",       color:t.colors.amber },
                 esperando_carga: { label:"Esperando carga", color:t.colors.textTertiary },
               };
@@ -476,8 +476,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               style={{...styles.tab, ...(activo?styles.tabActivo:{})}}
               onClick={()=>setTabActivo(tab.id)}
             >
-              <tab.Icono size={14} color={activo?t.colors.blue:t.colors.textTertiary} strokeWidth={activo?2.5:1.8} />
-              <span style={{color:activo?t.colors.blue:t.colors.textTertiary, 
+              <tab.Icono size={14} color={activo?t.colors.green:t.colors.textTertiary} strokeWidth={activo?2.5:1.8} />
+              <span style={{color:activo?t.colors.green:t.colors.textTertiary,
                 fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.04em",
                 fontWeight: activo ? t.fonts.weightBold : t.fonts.weightMedium,
               }}>{tab.label}</span>
@@ -495,7 +495,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
               <p style={{...styles.cardTitulo,margin:0}}>Información del vehículo</p>
               {!editando ? (
-                <button style={{display:"flex",alignItems:"center",gap:"5px",padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,cursor:"pointer"}} onClick={iniciarEdicion}>
+                <button style={{display:"flex",alignItems:"center",gap:"5px",padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blueText,cursor:"pointer"}} onClick={iniciarEdicion}>
                   <Edit2 size={12} /> Editar
                 </button>
               ) : (
@@ -593,7 +593,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 </div>
                 {/* ADBLUE — toggle + porcentaje */}
                 <div style={{display:"flex", alignItems:"center", gap:"10px", margin:"4px 0 10px", cursor:"pointer"}} onClick={()=>setEditData({...editData, usaAdblue: !editData.usaAdblue})}>
-                  <div style={{width:"38px",height:"21px",borderRadius:"11px",background:editData.usaAdblue?t.colors.blue:"#1E3A5F",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                  <div style={{width:"38px",height:"21px",borderRadius:"11px",background:editData.usaAdblue?t.colors.blue:t.colors.border,position:"relative",transition:"background 0.2s",flexShrink:0}}>
                     <div style={{width:"17px",height:"17px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:editData.usaAdblue?"19px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
                   </div>
                   <label style={{fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, cursor:"pointer"}}>¿Este vehículo usa Adblue?</label>
@@ -671,7 +671,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         <p style={styles.tarjetaRuta}>{viaje.ruta||"Sin ruta"}</p>
                         <p style={styles.tarjetaMeta}>{viaje.fecha||""}{viaje.empresa?` · ${viaje.empresa}`:""}</p>
                       </div>
-                      <p style={{...styles.tarjetaNeta, color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
+                      <p style={{...styles.tarjetaNeta, ...t.numeric, color:(viaje.neta||0)>=0?t.colors.green:t.colors.red}}>
                         {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
                       </p>
                     </div>
@@ -697,14 +697,14 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               <p style={styles.cardTitulo}>Punto de equilibrio</p>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:"12px"}}>
                 <div>
-                  <p style={{fontSize:"28px",fontWeight:t.fonts.weightBlack,margin:0,color:netaMes>=puntoEquilibrio?t.colors.green:netaMes>0?t.colors.amber:t.colors.red}}>
+                  <p style={{fontSize:"28px",fontWeight:t.fonts.weightBlack,margin:0, ...t.numeric, color:netaMes>=puntoEquilibrio?t.colors.green:netaMes>0?t.colors.amber:t.colors.red}}>
                     {fmt(netaMes)}
                   </p>
                   <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"4px 0 0"}}>Ganancia neta del mes</p>
                 </div>
                 {puntoEquilibrio > 0 && (
                   <div style={{textAlign:"right"}}>
-                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,margin:0,color:t.colors.textPrimary}}>{fmt(puntoEquilibrio)}</p>
+                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,margin:0, ...t.numeric, color:t.colors.textPrimary}}>{fmt(puntoEquilibrio)}</p>
                     <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>Meta gastos fijos</p>
                   </div>
                 )}
@@ -714,7 +714,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 <div>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
                     <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightSemibold,color:progresoPEColor}}>
-                      {progresoPE >= 100 ? `✓ Equilibrio superado (${progresoPE.toFixed(0)}%)` : `${progresoPE.toFixed(0)}% del equilibrio`}
+                      {progresoPE >= 100 ? `Equilibrio superado (${progresoPE.toFixed(0)}%)` : `${progresoPE.toFixed(0)}% del equilibrio`}
                     </span>
                     <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}>
                       {netaMes >= puntoEquilibrio ? `+${fmt(netaMes - puntoEquilibrio)} utilidad` : `Faltan ${fmt(puntoEquilibrio - netaMes)}`}
@@ -735,7 +735,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
             <div style={styles.dosColumnas}>
               <div style={styles.metricaCard}>
                 <p style={styles.metricaCardLabel}>Ingresos brutos</p>
-                <p style={{...styles.metricaCardVal,color:t.colors.blue}}>{fmt(ingresosMes)}</p>
+                <p style={{...styles.metricaCardVal,color:t.colors.blueText}}>{fmt(ingresosMes)}</p>
               </div>
               <div style={styles.metricaCard}>
                 <p style={styles.metricaCardLabel}>Total gastos</p>
@@ -759,7 +759,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                     <div key={item.label} style={{marginBottom:"12px"}}>
                       <div style={{display:"flex",justifyContent:"space-between",marginBottom:"5px"}}>
                         <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>{item.label}</span>
-                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold}}>
+                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold, ...t.numeric}}>
                           {fmt(item.valor)} <span style={{color:t.colors.textTertiary,fontWeight:t.fonts.weightNormal}}>{pct}%</span>
                         </span>
                       </div>
@@ -803,23 +803,23 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                     <p style={styles.cardTitulo}>Utilidad real del mes</p>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
                       <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Ganancia neta viajes</span>
-                      <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:netaMes>=0?t.colors.green:t.colors.red}}>{fmt(netaMes)}</span>
+                      <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold, ...t.numeric, color:netaMes>=0?t.colors.green:t.colors.red}}>{fmt(netaMes)}</span>
                     </div>
                     {puntoEquilibrio > 0 && (
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
                         <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos fijos (P.E.)</span>
-                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(puntoEquilibrio)}</span>
+                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold, ...t.numeric, color:t.colors.red}}>-{fmt(puntoEquilibrio)}</span>
                       </div>
                     )}
                     {totalGastosAdicionales > 0 && (
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${t.colors.borderLight}`}}>
                         <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Gastos adicionales</span>
-                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>-{fmt(totalGastosAdicionales)}</span>
+                        <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold, ...t.numeric, color:t.colors.red}}>-{fmt(totalGastosAdicionales)}</span>
                       </div>
                     )}
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0 0"}}>
                       <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Utilidad</span>
-                      <span style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:utilidadReal>=0?t.colors.green:t.colors.red}}>
+                      <span style={{fontSize:"22px",fontWeight:t.fonts.weightBlack, ...t.numeric, color:utilidadReal>=0?t.colors.green:t.colors.red}}>
                         {fmt(utilidadReal)}
                       </span>
                     </div>
@@ -833,7 +833,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>Definen tu punto de equilibrio</p>
                       </div>
                       <button
-                        style={{padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,cursor:"pointer"}}
+                        style={{padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blueText,cursor:"pointer"}}
                         onClick={()=>setVerFormGF(!verFormGF)}
                       >
                         {verFormGF ? "Cancelar" : "+ Agregar"}
@@ -924,7 +924,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                             </p>
                           </div>
                           <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-                            <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.amber}}>{fmt(mensual)}</span>
+                            <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold, ...t.numeric, color:t.colors.amber}}>{fmt(mensual)}</span>
                             <button
                               style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
                               onClick={async()=>{
@@ -946,17 +946,17 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                     {gfVehiculo.length > 0 && (
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0 0",marginTop:"6px",borderTop:`1.5px solid ${t.colors.border}`}}>
                         <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>Punto de equilibrio</span>
-                        <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:t.colors.amber}}>{fmt(puntoEquilibrio)}/mes</span>
+                        <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack, ...t.numeric, color:t.colors.amber}}>{fmt(puntoEquilibrio)}/mes</span>
                       </div>
                     )}
 
                     {/* Puente onboarding: gastos listos → primer viaje */}
                     {gfVehiculo.length > 0 && viajes.length === 0 && (
                       <button
-                        style={{width:"100%",marginTop:"12px",padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer"}}
+                        style={{width:"100%",marginTop:"12px",padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px"}}
                         onClick={()=>navigate("/calculadora",{state:{placa:vehiculo.placa}})}
                       >
-                        ✓ ¡Gastos listos! Calcular mi primer viaje →
+                        <Check size={15} strokeWidth={3} /> ¡Gastos listos! Calcular mi primer viaje →
                       </button>
                     )}
                   </div>
@@ -966,7 +966,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
                       <p style={{...styles.cardTitulo,margin:0}}>Gastos adicionales</p>
                       <button
-                        style={{padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blue,cursor:"pointer"}}
+                        style={{padding:"6px 12px",background:t.colors.blueSoft,border:`1.5px solid ${t.colors.blueBorder}`,borderRadius:t.radius.sm,fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.blueText,cursor:"pointer"}}
                         onClick={()=>setVerFormGasto(!verFormGasto)}
                       >
                         {verFormGasto ? "Cancelar" : "+ Agregar"}
@@ -1009,8 +1009,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         </div>
                         <div style={styles.campo}>
                           <label style={styles.label}>Adjuntar factura (opcional)</label>
-                          <label style={{display:"flex",alignItems:"center",gap:"8px",padding:"10px 12px",borderRadius:t.radius.sm,border:`1.5px dashed ${t.colors.border}`,cursor:"pointer",fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold}}>
-                            <Upload size={14} color={t.colors.blue} />
+                          <label style={{display:"flex",alignItems:"center",gap:"8px",padding:"10px 12px",borderRadius:t.radius.sm,border:`1.5px dashed ${t.colors.border}`,cursor:"pointer",fontSize:t.fonts.sizeXs,color:t.colors.blueText,fontWeight:t.fonts.weightSemibold}}>
+                            <Upload size={14} color={t.colors.blueText} />
                             {subiendo?.gastoFactura ? `Subiendo... ${progresoArchivo?.gastoFactura || 0}%` : "Seleccionar archivo"}
                             <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{display:"none"}}
                               onChange={e=>{
@@ -1093,13 +1093,13 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                           </p>
                           {g.facturaUrl && (
                             <a href={g.facturaUrl} target="_blank" rel="noreferrer"
-                              style={{fontSize:t.fonts.sizeXs,color:t.colors.blue,fontWeight:t.fonts.weightSemibold,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"4px",marginTop:"4px"}}>
+                              style={{fontSize:t.fonts.sizeXs,color:t.colors.blueText,fontWeight:t.fonts.weightSemibold,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"4px",marginTop:"4px"}}>
                               <Eye size={12}/> Ver factura
                             </a>
                           )}
                         </div>
                         <div style={{display:"flex",alignItems:"center",gap:"8px",marginLeft:"10px"}}>
-                          <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.red}}>-{fmt(g.monto)}</span>
+                          <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold, ...t.numeric, color:t.colors.red}}>-{fmt(g.monto)}</span>
                           <button
                             style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
                             onClick={()=>{
@@ -1109,7 +1109,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                               setGastoEditId(g.firestoreId); setVerFormGasto(true);
                             }}
                           >
-                            <Edit2 size={14} color={t.colors.blue} />
+                            <Edit2 size={14} color={t.colors.blueText} />
                           </button>
                           <button
                             style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}
@@ -1145,7 +1145,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
       {!editandoKm ? (
         <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
           <div>
-            <p style={{fontSize:"28px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:0}}>
+            <p style={{fontSize:"28px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:0, ...t.numeric}}>
               {(kmOdometro||kmActual).toLocaleString("es-CO")} km
             </p>
             <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"4px 0 0"}}>
@@ -1153,7 +1153,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
             </p>
           </div>
           <button
-            style={{padding:"8px 14px", background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.blue, cursor:"pointer"}}
+            style={{padding:"8px 14px", background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.blueText, cursor:"pointer"}}
             onClick={()=>{setEditandoKm(true); setKmTemp(String(kmOdometro||kmActual));}}
           >
             Actualizar
@@ -1190,9 +1190,9 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
           const proximo     = kmFaltantes > 0 && kmFaltantes <= (item.alerta || 2000);
           const estado      = vencido ? "vencido" : proximo ? "proximo" : "ok";
           const colorMap    = {
-            vencido: {bg:t.colors.redSoft,   border:t.colors.redBorder,   text:t.colors.red,   label:"Vencido"},
-            proximo: {bg:t.colors.amberSoft, border:"#FDE68A",            text:t.colors.amber, label:"Próximo"},
-            ok:      {bg:t.colors.greenSoft, border:t.colors.greenBorder, text:t.colors.green, label:"Al día"},
+            vencido: {bg:t.colors.redSoft,   border:t.colors.redBorder,     text:t.colors.red,   label:"Vencido"},
+            proximo: {bg:t.colors.amberSoft, border:t.colors.amberBorder,   text:t.colors.amber, label:"Próximo"},
+            ok:      {bg:t.colors.greenSoft, border:t.colors.greenBorder,   text:t.colors.green, label:"Al día"},
           };
           const c = colorMap[estado];
           return (
@@ -1286,7 +1286,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
       {[
         {label:"Llantas",  sub:"Diagrama y estado por posición", ruta:`/vehiculo/${id}/llantas`,       Icono:CircleDot,     color:t.colors.textSecondary},
         {label:"Aceite",   sub:"Marca, viscosidad y cambios",    ruta:`/vehiculo/${id}/aceite`,        Icono:Droplets,      color:t.colors.amber},
-        {label:"Filtros",  sub:"Aire, combustible, lubricación", ruta:`/vehiculo/${id}/filtros`,       Icono:Filter,        color:t.colors.blue},
+        {label:"Filtros",  sub:"Aire, combustible, lubricación", ruta:`/vehiculo/${id}/filtros`,       Icono:Filter,        color:t.colors.blueText},
         {label:"Frenos",   sub:"Estado por eje",                 ruta:`/vehiculo/${id}/frenos`,        Icono:Disc,          color:t.colors.red},
         {label:"Tanqueos", sub:"Consumo real vs estimado",       ruta:`/vehiculo/${id}/tanqueos`,      Icono:Fuel,          color:t.colors.green},
         {label:"Historial",sub:"Todos los mantenimientos",       ruta:`/vehiculo/${id}/historial-mant`,Icono:ClipboardList, color:t.colors.textSecondary},
@@ -1305,13 +1305,13 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0"}}>{item.sub}</p>
             </div>
           </div>
-          <span style={{color:t.colors.textTertiary, fontSize:"18px"}}>›</span>
+          <ChevronRight size={16} color={t.colors.textTertiary} />
         </div>
       ))}
     </div>
   </div>
 )}
-  
+
         {/* ── HOJA DE VIDA ── */}
         {tabActivo==="hvida" && (
           <div>
@@ -1324,7 +1324,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   <button style={styles.hvCabecera}
                     onClick={()=>setSeccionesAbiertas(prev=>({...prev,[seccion.id]:!prev[seccion.id]}))}>
                     <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
-                      <span style={{...styles.hvBadge,background:completa?t.colors.greenSoft:t.colors.amberSoft,color:completa?t.colors.green:t.colors.amber,border:`1px solid ${completa?t.colors.greenBorder:"#FDE68A"}`}}>
+                      <span style={{...styles.hvBadge,background:completa?t.colors.greenSoft:t.colors.amberSoft,color:completa?t.colors.green:t.colors.amber,border:`1px solid ${completa?t.colors.greenBorder:t.colors.amberBorder}`}}>
                         {cargados}/{total}
                       </span>
                       <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary}}>{seccion.titulo}</span>
@@ -1349,12 +1349,12 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                               <p style={styles.hvDocLabel}>{doc.label}</p>
                               {cargado&&(
                                 <div style={{marginTop:"4px"}}>
-                                  <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>
-                                    📎 {datos.nombre}
+                                  <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"flex",alignItems:"center",gap:"5px",marginBottom:"4px"}}>
+                                    <Paperclip size={11} /> {datos.nombre}
                                   </span>
                                   <div style={{display:"flex",gap:"6px"}}>
                                     <a href={datos.url} target="_blank" rel="noreferrer" style={styles.hvBtnVer}>
-                                      <Eye size={12} color={t.colors.blue} /> Ver
+                                      <Eye size={12} color={t.colors.blueText} /> Ver
                                     </a>
                                     <button style={styles.hvBtnEliminar} onClick={()=>manejarEliminar(doc.id)}>
                                       <Trash2 size={12} color={t.colors.red} /> Eliminar
@@ -1373,12 +1373,12 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                             </div>
                             {!cargado&&!estaSubiendo&&(
                               <label style={styles.hvBtnSubir}>
-                                <Upload size={12} color={t.colors.blue} /> Subir
+                                <Upload size={12} color={t.colors.blueText} /> Subir
                                 <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{display:"none"}} onChange={e=>manejarArchivo(e,doc.id)} />
                               </label>
                             )}
                             {cargado&&!estaSubiendo&&(
-                              <span style={styles.hvEstadoCargado}>✓ Cargado</span>
+                              <span style={{...styles.hvEstadoCargado, display:"inline-flex", alignItems:"center", gap:"4px"}}><Check size={12} strokeWidth={3}/> Cargado</span>
                             )}
                             {estaSubiendo&&(
                               <span style={styles.hvEstadoSubiendo}>Subiendo...</span>
@@ -1438,7 +1438,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
 const styles = {
   pantalla:            { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary },
   header:              { display:"flex", alignItems:"center", padding:"16px 20px 8px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:           { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  btnVolver:           { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blueText, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
   noEncontrado:        { textAlign:"center", padding:"60px 20px", color:t.colors.textSecondary },
   bloqueTop:           { background:t.colors.bgCard, padding:"16px", borderBottom:`1px solid ${t.colors.borderLight}` },
   vehiculoFila:        { display:"flex", alignItems:"center", gap:"12px", marginBottom:"16px" },
@@ -1452,29 +1452,29 @@ const styles = {
   metricaSep:          { width:"1px", height:"32px", background:t.colors.borderLight },
   tabsWrap:            { display:"flex", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}`, overflowX:"auto" },
   tab:                 { flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:"4px", padding:"12px 2px 10px", border:"none", background:"none", cursor:"pointer", borderBottom:"2px solid transparent", minWidth:"0" },
-  tabActivo:           { borderBottom:`2px solid ${t.colors.blue}`, background:"#1E3A5F" },
+  tabActivo:           { borderBottom:`2px solid ${t.colors.green}`, background:t.colors.blueSoft },
   contenido:           { padding:"12px 16px 80px" },
-  card:                { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
+  card:                { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card },
   cardTitulo:          { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" },
   fila:                { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0" },
   filaLabel:           { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary },
   filaValor:           { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary },
   chips:               { display:"flex", gap:"8px", marginBottom:"12px" },
   chip:                { padding:"6px 14px", borderRadius:t.radius.full, border:`1.5px solid ${t.colors.border}`, background:t.colors.bgCard, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, cursor:"pointer" },
-  chipActivo:          { background:t.colors.blue, color:"#fff", border:`1.5px solid ${t.colors.blue}` },
-  vacio:               { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"40px 20px", textAlign:"center", marginBottom:"10px", boxShadow:t.shadows.card },
+  chipActivo:          { background:t.colors.blueSoft, color:t.colors.blueText, border:`1.5px solid ${t.colors.blue}` },
+  vacio:               { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"40px 20px", textAlign:"center", marginBottom:"10px", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card },
   vacioTexto:          { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"10px 0 6px" },
   vacioSub:            { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, margin:0 },
-  tarjetaViaje:        { background:t.colors.bgCard, borderRadius:t.radius.lg, marginBottom:"8px", display:"flex", overflow:"hidden", boxShadow:t.shadows.card, cursor:"pointer" },
+  tarjetaViaje:        { background:t.colors.bgCard, borderRadius:t.radius.lg, marginBottom:"8px", display:"flex", overflow:"hidden", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card, cursor:"pointer" },
   tarjetaFranja:       { width:"4px", flexShrink:0 },
   tarjetaViajeContenido:{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"13px 14px", flex:1 },
   tarjetaRuta:         { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" },
   tarjetaMeta:         { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"3px 0 0" },
   tarjetaNeta:         { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, marginLeft:"10px", flexShrink:0 },
-  navMes:              { display:"flex", justifyContent:"space-between", alignItems:"center", background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"10px 16px", marginBottom:"10px", boxShadow:t.shadows.card },
-  btnMes:              { background:"none", border:"none", fontSize:"22px", color:t.colors.blue, cursor:"pointer", padding:"0 8px" },
+  navMes:              { display:"flex", justifyContent:"space-between", alignItems:"center", background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"10px 16px", marginBottom:"10px", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card },
+  btnMes:              { background:"none", border:"none", fontSize:"22px", color:t.colors.blueText, cursor:"pointer", padding:"0 8px" },
   labelMes:            { fontSize:"15px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
-  btnMeta:             { background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, padding:"6px 12px", fontSize:t.fonts.sizeXs, color:t.colors.blue, fontWeight:t.fonts.weightBold, cursor:"pointer" },
+  btnMeta:             { background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, padding:"6px 12px", fontSize:t.fonts.sizeXs, color:t.colors.blueText, fontWeight:t.fonts.weightBold, cursor:"pointer" },
   editarMeta:          { marginTop:"14px", background:t.colors.bgSection, borderRadius:t.radius.sm, padding:"12px" },
   input:               { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
   btnGuardarMeta:      { flex:1, padding:"9px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, cursor:"pointer" },
@@ -1482,20 +1482,20 @@ const styles = {
   barraFondo:          { height:"6px", borderRadius:"3px", background:t.colors.bgSection, overflow:"hidden" },
   barraRelleno:        { height:"100%", borderRadius:"3px", transition:"width 0.4s ease" },
   dosColumnas:         { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"10px" },
-  metricaCard:         { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", boxShadow:t.shadows.card },
+  metricaCard:         { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card },
   metricaCardLabel:    { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 6px", textTransform:"uppercase", letterSpacing:"0.05em" },
-  metricaCardVal:      { fontSize:"18px", fontWeight:t.fonts.weightBold, margin:0 },
+  metricaCardVal:      { fontSize:"18px", fontWeight:t.fonts.weightBold, margin:0, fontVariantNumeric:"tabular-nums", letterSpacing:"-0.3px" },
   buscadorWrap:        { background:t.colors.bgCard, border:`1.5px solid ${t.colors.border}`, borderRadius:t.radius.md, padding:"11px 14px", marginBottom:"12px", boxShadow:t.shadows.card },
   buscadorInput:       { width:"100%", border:"none", outline:"none", fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, background:"transparent" },
   grupoMes:            { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.07em", margin:"0 0 8px" },
-  hvSeccion:           { background:t.colors.bgCard, borderRadius:t.radius.lg, marginBottom:"10px", overflow:"hidden", boxShadow:t.shadows.card },
+  hvSeccion:           { background:t.colors.bgCard, borderRadius:t.radius.lg, marginBottom:"10px", overflow:"hidden", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card },
   hvCabecera:          { width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:"14px 16px", background:"none", border:"none", cursor:"pointer" },
   hvBadge:             { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, padding:"3px 8px", borderRadius:t.radius.full },
   hvDocFila:           { display:"flex", justifyContent:"space-between", alignItems:"flex-start", paddingBottom:"12px", marginBottom:"12px", borderBottom:`1px solid ${t.colors.borderLight}` },
   hvDocLabel:          { fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, margin:0, fontWeight:t.fonts.weightMedium },
-  hvBtnVer:            { display:"inline-flex", alignItems:"center", gap:"4px", fontSize:t.fonts.sizeXs, color:t.colors.blue, textDecoration:"none", padding:"3px 8px", border:`1px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, background:t.colors.blueSoft },
+  hvBtnVer:            { display:"inline-flex", alignItems:"center", gap:"4px", fontSize:t.fonts.sizeXs, color:t.colors.blueText, textDecoration:"none", padding:"3px 8px", border:`1px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, background:t.colors.blueSoft },
   hvBtnEliminar:       { display:"inline-flex", alignItems:"center", gap:"4px", fontSize:t.fonts.sizeXs, color:t.colors.red, padding:"3px 8px", border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, background:t.colors.redSoft, cursor:"pointer" },
-  hvBtnSubir:          { display:"inline-flex", alignItems:"center", gap:"4px", padding:"6px 12px", borderRadius:t.radius.full, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, cursor:"pointer", background:t.colors.blueSoft, color:t.colors.blue, border:`1.5px solid ${t.colors.blueBorder}`, whiteSpace:"nowrap", flexShrink:0 },
+  hvBtnSubir:          { display:"inline-flex", alignItems:"center", gap:"4px", padding:"6px 12px", borderRadius:t.radius.full, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, cursor:"pointer", background:t.colors.blueSoft, color:t.colors.blueText, border:`1.5px solid ${t.colors.blueBorder}`, whiteSpace:"nowrap", flexShrink:0 },
   hvEstadoCargado:     { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.green, whiteSpace:"nowrap", flexShrink:0 },
   hvEstadoSubiendo:    { fontSize:t.fonts.sizeXs, color:t.colors.amber, whiteSpace:"nowrap", flexShrink:0 },
   campo:               { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"12px" },
@@ -1503,4 +1503,3 @@ const styles = {
 };
 
 export default DetalleVehiculo;
-
