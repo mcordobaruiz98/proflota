@@ -13,7 +13,7 @@ function AcercaDe() {
     <div style={styles.pantalla}>
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={()=>navigate(-1)}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5}/>
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5}/>
           <span>Volver</span>
         </button>
         <h1 style={styles.titulo}>Acerca de</h1>
@@ -210,11 +210,11 @@ function AcercaDe() {
 const styles = {
   pantalla:    { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:      { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:   { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  btnVolver:   { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blueText, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
   titulo:      { fontSize:"18px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
   contenido:   { padding:"0 16px 16px" },
-  card:        { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
-  seccion:     { background:t.colors.bgCard, borderRadius:t.radius.lg, marginBottom:"10px", overflow:"hidden", boxShadow:t.shadows.card },
+  card:        { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card, border:`1px solid ${t.colors.borderLight}` },
+  seccion:     { background:t.colors.bgCard, borderRadius:t.radius.lg, marginBottom:"10px", overflow:"hidden", boxShadow:t.shadows.card, border:`1px solid ${t.colors.borderLight}` },
   cabecera:    { width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:"14px 16px", background:"none", border:"none", cursor:"pointer" },
   cabeceraTexto: { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary },
   cuerpo:      { padding:"0 16px 16px" },

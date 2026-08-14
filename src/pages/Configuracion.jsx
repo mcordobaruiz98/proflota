@@ -1,5 +1,6 @@
 import { useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft, User, Mail, Bell, Volume2, MessageCircle, MapPin, Phone, Landmark, Trash2, AlertTriangle, Check } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { subirPeajes } from "../scripts/subirPeajes";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -60,7 +61,7 @@ function Configuracion({mostrarToast}) {
 
   const opciones = [
     {
-      icono:   "🔔",
+      Icono:   Bell,
       label:   "Notificaciones",
       sub:     "Alertas de viajes y metas",
       toggle:  true,
@@ -68,7 +69,7 @@ function Configuracion({mostrarToast}) {
       accion:  toggleNotif,
     },
     {
-      icono:   "🔊",
+      Icono:   Volume2,
       label:   "Sonido",
       sub:     "Sonidos de la aplicación",
       toggle:  true,
@@ -144,7 +145,8 @@ function Configuracion({mostrarToast}) {
 
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={() => navigate(-1)}>
-          ← Volver
+          <ArrowLeft size={16} color={t.colors.blueText} strokeWidth={2.5}/>
+          <span>Volver</span>
         </button>
         <h1 style={styles.titulo}>Configuración</h1>
         <div style={{ width: "60px" }} />
@@ -155,7 +157,7 @@ function Configuracion({mostrarToast}) {
       <div style={styles.seccion}>
         <div style={styles.fila}>
           <div style={styles.filaIzq}>
-            <span style={styles.filaIcono}>👤</span>
+            <span style={styles.filaIcono}><User size={18} color={t.colors.blueText} strokeWidth={2}/></span>
             <div>
               <p style={styles.filaLabel}>Nombre</p>
               <p style={styles.filaSub}>{usuario?.displayName || "Usuario"}</p>
@@ -164,7 +166,7 @@ function Configuracion({mostrarToast}) {
         </div>
         <div style={{ ...styles.fila, borderBottom: "none" }}>
           <div style={styles.filaIzq}>
-            <span style={styles.filaIcono}>📧</span>
+            <span style={styles.filaIcono}><Mail size={18} color={t.colors.blueText} strokeWidth={2}/></span>
             <div>
               <p style={styles.filaLabel}>Correo</p>
               <p style={styles.filaSub}>{usuario?.email || "—"}</p>
@@ -185,7 +187,7 @@ function Configuracion({mostrarToast}) {
             }}
           >
             <div style={styles.filaIzq}>
-              <span style={styles.filaIcono}>{op.icono}</span>
+              <span style={styles.filaIcono}><op.Icono size={18} color={t.colors.textSecondary} strokeWidth={2}/></span>
               <div>
                 <p style={styles.filaLabel}>{op.label}</p>
                 <p style={styles.filaSub}>{op.sub}</p>
@@ -194,7 +196,7 @@ function Configuracion({mostrarToast}) {
             <button
               style={{
                 ...styles.toggle,
-                background: op.valor ? t.colors.blue : "#e5e7eb",
+                background: op.valor ? t.colors.blue : t.colors.border,
               }}
               onClick={op.accion}
             >
@@ -210,7 +212,9 @@ function Configuracion({mostrarToast}) {
       {/* VINCULAR TELEGRAM */}
       <div style={styles.seccionTitulo}>Registro por chat</div>
       <div style={{...styles.seccion, padding:"16px 20px"}}>
-        <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 4px"}}>🤖 Registrar viajes por Telegram</p>
+        <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 4px", display:"flex", alignItems:"center", gap:"6px"}}>
+          <MessageCircle size={16} color={t.colors.blueText} strokeWidth={2}/> Registrar viajes por Telegram
+        </p>
         <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 12px", lineHeight:1.5}}>
           Registre sus viajes escribiéndole al bot de NAVIRA, sin abrir la app.
           El bot conoce sus vehículos y rutas, y le calcula la ganancia al instante.
@@ -228,7 +232,7 @@ function Configuracion({mostrarToast}) {
           <div>
             <div style={{textAlign:"center", padding:"14px", background:t.colors.bgSection, borderRadius:t.radius.md, marginBottom:"10px"}}>
               <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 4px"}}>Su código:</p>
-              <p style={{fontSize:"26px", fontWeight:t.fonts.weightBlack, color:t.colors.green, letterSpacing:"4px", margin:0}}>{codigoTelegram}</p>
+              <p style={{fontSize:"26px", fontWeight:t.fonts.weightBlack, color:t.colors.green, letterSpacing:"4px", margin:0, ...t.numeric}}>{codigoTelegram}</p>
             </div>
             <ol style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, paddingLeft:"18px", margin:"0 0 10px", lineHeight:1.7}}>
               <li>Abra Telegram y busque <b style={{color:t.colors.textPrimary}}>@Naviraflota_bot</b></li>
@@ -255,18 +259,21 @@ function Configuracion({mostrarToast}) {
 
         <div style={{
           padding:"9px 12px",
-          background: perfilCompleto ? t.colors.greenSoft : "#FEF3C7",
-          border: `1.5px solid ${perfilCompleto ? t.colors.greenBorder : "#F59E0B33"}`,
+          background: perfilCompleto ? t.colors.greenSoft : t.colors.amberSoft,
+          border: `1.5px solid ${perfilCompleto ? t.colors.greenBorder : t.colors.amberBorder}`,
           borderRadius: t.radius.sm,
           marginBottom: "16px",
           fontSize: t.fonts.sizeXs,
-          color: perfilCompleto ? t.colors.green : "#92400E",
+          color: perfilCompleto ? t.colors.green : t.colors.amber,
           fontWeight: t.fonts.weightSemibold,
+          display:"flex", alignItems:"center", gap:"6px",
         }}>
-          {perfilCompleto ? "✓ Listo para generar cuentas de cobro" : "⚠️ Complete los campos obligatorios (*) para poder generar cuentas de cobro"}
+          {perfilCompleto
+            ? <><Check size={14} color={t.colors.green} strokeWidth={3}/> Listo para generar cuentas de cobro</>
+            : <><AlertTriangle size={14} color={t.colors.amber} strokeWidth={2.5}/> Complete los campos obligatorios (*) para poder generar cuentas de cobro</>}
         </div>
 
-        <p style={styles.subSeccion}>👤 Identificación</p>
+        <p style={styles.subSeccion}><User size={12} color={t.colors.textTertiary} strokeWidth={2}/> Identificación</p>
 
         <div style={{marginBottom:"12px"}}>
           <label style={styles.label}>Nombre completo *</label>
@@ -305,7 +312,7 @@ function Configuracion({mostrarToast}) {
           </div>
         </div>
 
-        <p style={styles.subSeccion}>📍 Ubicación</p>
+        <p style={styles.subSeccion}><MapPin size={12} color={t.colors.textTertiary} strokeWidth={2}/> Ubicación</p>
 
         <div style={{marginBottom:"12px"}}>
           <label style={styles.label}>Dirección</label>
@@ -325,7 +332,7 @@ function Configuracion({mostrarToast}) {
             style={styles.inputPerfil}/>
         </div>
 
-        <p style={styles.subSeccion}>📞 Contacto</p>
+        <p style={styles.subSeccion}><Phone size={12} color={t.colors.textTertiary} strokeWidth={2}/> Contacto</p>
 
         <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"12px"}}>
           <div>
@@ -346,7 +353,7 @@ function Configuracion({mostrarToast}) {
           </div>
         </div>
 
-        <p style={styles.subSeccion}>🏦 Cuenta bancaria</p>
+        <p style={styles.subSeccion}><Landmark size={12} color={t.colors.textTertiary} strokeWidth={2}/> Cuenta bancaria</p>
 
         <div style={{marginBottom:"12px"}}>
           <label style={styles.label}>Banco</label>
@@ -425,9 +432,9 @@ function Configuracion({mostrarToast}) {
           }}
         >
           <div style={styles.filaIzq}>
-            <span style={styles.filaIcono}>🗑️</span>
+            <span style={styles.filaIcono}><Trash2 size={18} color={t.colors.redText} strokeWidth={2}/></span>
             <div>
-              <p style={{ ...styles.filaLabel, color: t.colors.red }}>
+              <p style={{ ...styles.filaLabel, color: t.colors.redText }}>
                 Limpiar caché local
               </p>
               <p style={styles.filaSub}>Borra datos temporales del dispositivo</p>
@@ -437,7 +444,7 @@ function Configuracion({mostrarToast}) {
       </div>
 
       {/* ZONA DE PELIGRO */}
-      <div style={{...styles.seccionTitulo, color:t.colors.red}}>Zona de peligro</div>
+      <div style={{...styles.seccionTitulo, color:t.colors.redText}}>Zona de peligro</div>
       <div style={{...styles.seccion, border:`1.5px solid ${t.colors.redBorder}`}}>
         {!confirmaEliminar ? (
           <button
@@ -445,20 +452,20 @@ function Configuracion({mostrarToast}) {
             onClick={() => setConfirmaEliminar(true)}
           >
             <div style={styles.filaIzq}>
-              <span style={styles.filaIcono}>⚠️</span>
+              <span style={{...styles.filaIcono, background:t.colors.redSoft}}><AlertTriangle size={18} color={t.colors.redText} strokeWidth={2}/></span>
               <div>
-                <p style={{ ...styles.filaLabel, color: t.colors.red }}>Eliminar mi cuenta</p>
+                <p style={{ ...styles.filaLabel, color: t.colors.redText }}>Eliminar mi cuenta</p>
                 <p style={styles.filaSub}>Borra permanentemente todos tus datos: vehículos, viajes, conductores y archivos</p>
               </div>
             </div>
           </button>
         ) : (
           <div style={{padding:"14px 16px"}}>
-            <p style={{fontSize:t.fonts.sizeSm, color:t.colors.red, fontWeight:t.fonts.weightBold, margin:"0 0 6px"}}>
+            <p style={{fontSize:t.fonts.sizeSm, color:t.colors.redText, fontWeight:t.fonts.weightBold, margin:"0 0 6px"}}>
               Esta acción es permanente e irreversible
             </p>
             <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 12px", lineHeight:1.5}}>
-              Se eliminarán todos tus vehículos, viajes, conductores, gastos, rutas frecuentes, archivos adjuntos y tu cuenta de acceso. Escribe <strong style={{color:t.colors.red}}>ELIMINAR</strong> para confirmar.
+              Se eliminarán todos tus vehículos, viajes, conductores, gastos, rutas frecuentes, archivos adjuntos y tu cuenta de acceso. Escribe <strong style={{color:t.colors.redText}}>ELIMINAR</strong> para confirmar.
             </p>
             <input
               type="text"
@@ -492,15 +499,15 @@ function Configuracion({mostrarToast}) {
 const styles = {
   pantalla:      { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:        { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"20px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:     { background:"none", border:"none", fontSize:t.fonts.sizeSm, color:t.colors.blue, cursor:"pointer", padding:0, fontWeight:t.fonts.weightSemibold },
+  btnVolver:     { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", fontSize:t.fonts.sizeSm, color:t.colors.blueText, cursor:"pointer", padding:0, fontWeight:t.fonts.weightSemibold },
   titulo:        { fontSize:"20px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
   seccionTitulo: { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", padding:"16px 20px 8px" },
-  seccion:       { background:t.colors.bgCard, borderRadius:t.radius.lg, margin:"0 16px 4px", overflow:"hidden", boxShadow:t.shadows.card },
-  subSeccion:    { fontSize:"10px", fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"14px 0 8px" },
+  seccion:       { background:t.colors.bgCard, borderRadius:t.radius.lg, margin:"0 16px 4px", overflow:"hidden", boxShadow:t.shadows.card, border:`1px solid ${t.colors.borderLight}` },
+  subSeccion:    { fontSize:"10px", fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"14px 0 8px", display:"flex", alignItems:"center", gap:"5px" },
   fila:          { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"14px 16px", borderBottom:`1px solid ${t.colors.borderLight}` },
   filaBtn:       { width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:"14px 16px", background:"none", border:"none", cursor:"pointer", textAlign:"left", borderBottom:`1px solid ${t.colors.borderLight}` },
   filaIzq:       { display:"flex", alignItems:"center", gap:"12px" },
-  filaIcono:     { fontSize:"20px", width:"38px", height:"38px", background:t.colors.bgSection, borderRadius:t.radius.sm, display:"flex", alignItems:"center", justifyContent:"center" },
+  filaIcono:     { width:"38px", height:"38px", background:t.colors.bgSection, borderRadius:t.radius.sm, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 },
   filaLabel:     { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0 },
   filaSub:       { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0" },
   label:         { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, display:"block", marginBottom:"4px" },

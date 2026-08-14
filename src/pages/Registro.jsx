@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { theme as t } from "../styles/theme";
 
@@ -61,7 +62,8 @@ function Registro() {
       {/* HEADER */}
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={() => navigate("/login")}>
-          ← Volver
+          <ArrowLeft size={16} color={t.colors.blueText} strokeWidth={2.5}/>
+          <span>Volver</span>
         </button>
       </div>
 
@@ -117,7 +119,7 @@ function Registro() {
                 autoComplete="new-password"
               />
               <button type="button" style={styles.btnOjo} onClick={() => setVerPass(!verPass)}>
-                {verPass ? "●" : "○"}
+                {verPass ? <EyeOff size={18} color={t.colors.textTertiary}/> : <Eye size={18} color={t.colors.textTertiary}/>}
               </button>
             </div>
             {errores.contrasena && <p style={styles.error}>{errores.contrasena}</p>}
@@ -135,7 +137,7 @@ function Registro() {
                 autoComplete="new-password"
               />
               <button type="button" style={styles.btnOjo} onClick={() => setVerConf(!verConf)}>
-                {verConf ? "●" : "○"}
+                {verConf ? <EyeOff size={18} color={t.colors.textTertiary}/> : <Eye size={18} color={t.colors.textTertiary}/>}
               </button>
             </div>
             {errores.confirmar && <p style={styles.error}>{errores.confirmar}</p>}
@@ -160,21 +162,21 @@ function Registro() {
         <div style={{display:"flex",gap:"10px",alignItems:"flex-start",margin:"4px 0 12px",cursor:"pointer"}} onClick={()=>{setAceptaTerminos(!aceptaTerminos); setErrores({...errores, terminos:null});}}>
           <div style={{
             width:"20px",height:"20px",borderRadius:"5px",flexShrink:0,marginTop:"1px",
-            border:`2px solid ${aceptaTerminos ? "#22C55E" : (errores.terminos ? "#EF4444" : "#1E3A5F")}`,
-            background: aceptaTerminos ? "#22C55E" : "transparent",
+            border:`2px solid ${aceptaTerminos ? t.colors.green : (errores.terminos ? t.colors.red : t.colors.border)}`,
+            background: aceptaTerminos ? t.colors.green : "transparent",
             display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",
           }}>
             {aceptaTerminos && <span style={{color:"#fff",fontSize:"13px",fontWeight:900,lineHeight:1}}>✓</span>}
           </div>
-          <p style={{fontSize:"12px",color:"#8B9CB3",margin:0,lineHeight:1.5}}>
+          <p style={{fontSize:"12px",color:t.colors.textSecondary,margin:0,lineHeight:1.5}}>
             Acepto los{" "}
-            <span style={{color:"#1565FF",fontWeight:600,textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Términos y Condiciones</span>
+            <span style={{color:t.colors.blueText,fontWeight:600,textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Términos y Condiciones</span>
             {" "}y autorizo el tratamiento de mis datos personales conforme a la{" "}
-            <span style={{color:"#1565FF",fontWeight:600,textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Política de Privacidad</span>
+            <span style={{color:t.colors.blueText,fontWeight:600,textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Política de Privacidad</span>
             {" "}(Ley 1581 de 2012).
           </p>
         </div>
-        {errores.terminos && <p style={{fontSize:"12px",color:"#EF4444",margin:"-6px 0 10px 30px"}}>{errores.terminos}</p>}
+        {errores.terminos && <p style={{fontSize:"12px",color:t.colors.redText,margin:"-6px 0 10px 30px"}}>{errores.terminos}</p>}
 
         {errores.general && (
           <div style={styles.errorBox}>{errores.general}</div>
@@ -199,20 +201,20 @@ function Registro() {
 const styles = {
   pantalla:     { maxWidth: "430px", margin: "0 auto", minHeight: "100vh", background: t.colors.bgPrimary, paddingBottom: "30px" },
   header:       { padding: "16px 20px 0" },
-  btnVolver:    { background: "none", border: "none", fontSize: "15px", color: t.colors.blue, cursor: "pointer", padding: 0, fontWeight: t.fonts.weightSemibold },
+  btnVolver:    { display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", fontSize: "15px", color: t.colors.blueText, cursor: "pointer", padding: 0, fontWeight: t.fonts.weightSemibold },
   tituloWrap:   { padding: "20px 24px 16px" },
   titulo:       { fontSize: "28px", fontWeight: t.fonts.weightBlack, color: t.colors.textPrimary, margin: "0 0 6px", letterSpacing: "-0.5px" },
   sub:          { fontSize: t.fonts.sizeSm, color: t.colors.textSecondary, margin: 0, lineHeight: "1.5" },
-  card:         { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "20px", margin: "0 16px 12px", boxShadow: t.shadows.card },
+  card:         { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "20px", margin: "0 16px 12px", boxShadow: t.shadows.card, border: `1px solid ${t.colors.borderLight}` },
   seccionLabel: { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightBold, color: t.colors.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 16px" },
   campo:        { display: "flex", flexDirection: "column", gap: "6px", marginBottom: "14px" },
   label:        { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightSemibold, color: t.colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.05em" },
   inputWrap:    { position: "relative" },
   input:        { width: "100%", padding: "13px 14px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeMd, background: t.colors.bgPrimary, color: t.colors.textPrimary, outline: "none", boxSizing: "border-box" },
-  btnOjo:       { position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", color: t.colors.textTertiary, padding: "4px" },
-  error:        { fontSize: t.fonts.sizeXs, color: t.colors.red, margin: "3px 0 0", fontWeight: t.fonts.weightMedium },
-  errorBox:     { background: t.colors.redSoft, border: `1.5px solid ${t.colors.redBorder}`, borderRadius: t.radius.sm, padding: "11px 14px", fontSize: t.fonts.sizeSm, color: t.colors.red, marginBottom: "16px", textAlign: "center", fontWeight: t.fonts.weightMedium },
-  btnPrimario:  { width: "100%", padding: "15px", background: t.colors.green, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBold, cursor: "pointer", letterSpacing: "0.02em" },
+  btnOjo:       { position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "4px", display: "flex", alignItems: "center" },
+  error:        { fontSize: t.fonts.sizeXs, color: t.colors.redText, margin: "3px 0 0", fontWeight: t.fonts.weightMedium },
+  errorBox:     { background: t.colors.redSoft, border: `1.5px solid ${t.colors.redBorder}`, borderRadius: t.radius.sm, padding: "11px 14px", fontSize: t.fonts.sizeSm, color: t.colors.redText, marginBottom: "16px", textAlign: "center", fontWeight: t.fonts.weightMedium },
+  btnPrimario:  { width: "100%", padding: "15px", background: `linear-gradient(135deg, ${t.colors.green}, ${t.colors.greenDeep || "#12A150"})`, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBold, cursor: "pointer", letterSpacing: "0.02em", boxShadow: t.shadows.md },
   version:      { textAlign: "center", fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, paddingTop: "16px" },
 };
 

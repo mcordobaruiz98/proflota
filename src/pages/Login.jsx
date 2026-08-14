@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { theme as t } from "../styles/theme";
 
@@ -104,8 +105,8 @@ function Login() {
               style={{ ...styles.input, paddingRight: "44px" }}
               autoComplete="current-password"
             />
-            <button style={styles.btnOjo} onClick={() => setVerPass(!verPass)}>
-              {verPass ? "●" : "○"}
+            <button type="button" style={styles.btnOjo} onClick={() => setVerPass(!verPass)}>
+              {verPass ? <EyeOff size={18} color={t.colors.textTertiary}/> : <Eye size={18} color={t.colors.textTertiary}/>}
             </button>
           </div>
         </div>
@@ -143,14 +144,14 @@ function Login() {
           <div style={{display:"flex",gap:"10px",alignItems:"flex-start",marginBottom:"12px",cursor:"pointer"}} onClick={()=>setAceptaTerminos(!aceptaTerminos)}>
             <div style={{
               width:"18px",height:"18px",borderRadius:"4px",flexShrink:0,marginTop:"1px",
-              border:`2px solid ${aceptaTerminos ? "#22C55E" : "#1E3A5F"}`,
-              background: aceptaTerminos ? "#22C55E" : "transparent",
+              border:`2px solid ${aceptaTerminos ? t.colors.green : t.colors.border}`,
+              background: aceptaTerminos ? t.colors.green : "transparent",
               display:"flex",alignItems:"center",justifyContent:"center",
             }}>
               {aceptaTerminos && <span style={{color:"#fff",fontSize:"11px",fontWeight:900,lineHeight:1}}>✓</span>}
             </div>
-            <p style={{fontSize:"11px",color:"#8B9CB3",margin:0,lineHeight:1.5}}>
-              Acepto los <span style={{color:"#1565FF",textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Términos</span> y autorizo el tratamiento de mis datos según la <span style={{color:"#1565FF",textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Política de Privacidad</span>.
+            <p style={{fontSize:"11px",color:t.colors.textSecondary,margin:0,lineHeight:1.5}}>
+              Acepto los <span style={{color:t.colors.blueText,textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Términos</span> y autorizo el tratamiento de mis datos según la <span style={{color:t.colors.blueText,textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Política de Privacidad</span>.
             </p>
           </div>
         </div>
@@ -193,24 +194,24 @@ const styles = {
   hero:           { background: `linear-gradient(135deg, #155E75 0%, #0E7490 50%, #16A34A 100%)`, padding: "48px 24px 36px", textAlign: "center" },
   logoWrap:       { display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" },
   logoSub:        { fontSize: t.fonts.sizeSm, color: "rgba(255,255,255,0.8)", margin: 0, fontWeight: t.fonts.weightMedium },
-  card:           { background: t.colors.bgCard, borderRadius: `${t.radius.xl} ${t.radius.xl} 0 0`, padding: "28px 24px 24px", marginTop: "-16px", flex: 1, boxShadow: "0 -4px 20px rgba(0,0,0,0.08)" },
+  card:           { background: t.colors.bgCard, borderRadius: `${t.radius.xl} ${t.radius.xl} 0 0`, padding: "28px 24px 24px", marginTop: "-16px", flex: 1, boxShadow: "0 -4px 20px rgba(0,0,0,0.35)" },
   cardTitulo:     { fontSize: t.fonts.sizeXl, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: "0 0 24px" },
   campo:          { display: "flex", flexDirection: "column", gap: "6px", marginBottom: "16px" },
   labelFila:      { display: "flex", justifyContent: "space-between", alignItems: "center" },
   label:          { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightSemibold, color: t.colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.05em" },
   inputWrap:      { position: "relative" },
   input:          { width: "100%", padding: "13px 14px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeMd, background: t.colors.bgPrimary, color: t.colors.textPrimary, outline: "none", boxSizing: "border-box", transition: "border-color 0.15s" },
-  btnOjo:         { position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "16px", color: t.colors.textTertiary, padding: "4px" },
-  btnOlvide:      { background: "none", border: "none", fontSize: t.fonts.sizeXs, color: t.colors.blue, cursor: "pointer", padding: 0, fontWeight: t.fonts.weightSemibold },
-  errorBox:       { background: t.colors.redSoft, border: `1.5px solid ${t.colors.redBorder}`, borderRadius: t.radius.sm, padding: "11px 14px", fontSize: t.fonts.sizeSm, color: t.colors.red, marginBottom: "16px", textAlign: "center", fontWeight: t.fonts.weightMedium },
-  btnPrimario:    { width: "100%", padding: "15px", background: t.colors.green, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBold, cursor: "pointer", marginBottom: "20px", letterSpacing: "0.02em" },
+  btnOjo:         { position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "4px", display: "flex", alignItems: "center" },
+  btnOlvide:      { background: "none", border: "none", fontSize: t.fonts.sizeXs, color: t.colors.blueText, cursor: "pointer", padding: 0, fontWeight: t.fonts.weightSemibold },
+  errorBox:       { background: t.colors.redSoft, border: `1.5px solid ${t.colors.redBorder}`, borderRadius: t.radius.sm, padding: "11px 14px", fontSize: t.fonts.sizeSm, color: t.colors.redText, marginBottom: "16px", textAlign: "center", fontWeight: t.fonts.weightMedium },
+  btnPrimario:    { width: "100%", padding: "15px", background: `linear-gradient(135deg, ${t.colors.green}, ${t.colors.greenDeep || "#12A150"})`, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBold, cursor: "pointer", marginBottom: "20px", letterSpacing: "0.02em", boxShadow: t.shadows.md },
   separador:      { display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" },
   separadorLinea: { flex: 1, height: "1px", background: t.colors.border },
   separadorTexto: { fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, whiteSpace: "nowrap", fontWeight: t.fonts.weightMedium },
   btnGoogle:      { width: "100%", padding: "13px", background: t.colors.bgCard, border: `1.5px solid ${t.colors.border}`, borderRadius: t.radius.md, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightSemibold, color: t.colors.textPrimary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" },
   footer:         { padding: "20px 24px 32px", textAlign: "center", background: t.colors.bgCard },
   footerTexto:    { fontSize: t.fonts.sizeSm, color: t.colors.textSecondary, margin: "0 0 10px" },
-  btnRegistro:    { padding: "12px 28px", background: t.colors.blueSoft, border: `1.5px solid ${t.colors.blueBorder}`, borderRadius: t.radius.md, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.blue, cursor: "pointer" },
+  btnRegistro:    { padding: "12px 28px", background: t.colors.blueSoft, border: `1.5px solid ${t.colors.blueBorder}`, borderRadius: t.radius.md, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.blueText, cursor: "pointer" },
 };
 
 export default Login;
