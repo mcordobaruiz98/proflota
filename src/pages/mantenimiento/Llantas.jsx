@@ -196,19 +196,19 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
     const nuevas = { ...llantas };
     const origenData = nuevas[seleccionada];
     const destinoData = nuevas[dest];
-    
+
     if (origenData) {
       nuevas[dest] = { ...origenData };
     } else {
       delete nuevas[dest];
     }
-    
+
     if (destinoData) {
       nuevas[seleccionada] = { ...destinoData };
     } else {
       delete nuevas[seleccionada];
     }
-    
+
     setLlantas(nuevas);
     guardarLocal(nuevas);
     setSeleccionada(null);
@@ -261,7 +261,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
     <div style={styles.pantalla}>
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={()=>navigate(`/vehiculo/${id}`, { state: { tab: "mant" } })}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5}/>
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5}/>
           <span>Volver</span>
         </button>
       </div>
@@ -273,7 +273,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
     <div style={styles.pantalla}>
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={()=>navigate(`/vehiculo/${id}`, { state: { tab: "mant" } })}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5}/>
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5}/>
           <span>Volver</span>
         </button>
         <h1 style={styles.titulo}>Llantas</h1>
@@ -367,16 +367,16 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
               if (vidaUtil <= 0) return null;
               return (
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}}>
-                  <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"10px",textAlign:"center"}}>
+                  <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"10px",textAlign:"center",border:`1px solid ${t.colors.borderLight}`}}>
                     <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"0 0 2px"}}>Vida útil</p>
-                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:t.colors.green,margin:0}}>
+                    <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:t.colors.green,margin:0,...t.numeric}}>
                       {vidaUtil.toLocaleString("es-CO")} km
                     </p>
                   </div>
                   {costoKm > 0 && (
-                    <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"10px",textAlign:"center"}}>
+                    <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"10px",textAlign:"center",border:`1px solid ${t.colors.borderLight}`}}>
                       <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"0 0 2px"}}>Costo/km</p>
-                      <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:t.colors.amber,margin:0}}>
+                      <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBlack,color:t.colors.amber,margin:0,...t.numeric}}>
                         ${costoKm.toFixed(1)}
                       </p>
                     </div>
@@ -391,7 +391,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
             </div>
             <div style={{display:"flex",gap:"8px"}}>
               <button
-                style={{flex:1,padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px"}}
+                style={{flex:1,padding:"12px",background:`linear-gradient(135deg, ${t.colors.green}, ${t.colors.greenDeep || "#12A150"})`,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px",boxShadow:t.shadows.md}}
                 onClick={guardarLlanta}
               >
                 <Save size={16} color="#fff" strokeWidth={2}/>
@@ -408,7 +408,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
             {/* Rotación de Llanta */}
             {!!llantas[seleccionada] && (
               <div style={{ marginTop: "16px", borderTop: `1px solid ${t.colors.border}22`, paddingTop: "14px" }}>
-                <label style={{ ...styles.label, marginBottom: "8px", display: "block", color: t.colors.blue, fontWeight: 700 }}>
+                <label style={{ ...styles.label, marginBottom: "8px", display: "block", color: t.colors.blueText, fontWeight: 700 }}>
                   Rotar esta llanta a otra posición
                 </label>
                 <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
@@ -477,7 +477,7 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
                       const vida = (vehiculo?.kmOdometro||0) - Number(d.km);
                       const cKm = vida > 0 && d.valor > 0 ? d.valor / vida : 0;
                       return (
-                        <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
+                        <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0",...t.numeric}}>
                           {vida.toLocaleString("es-CO")} km rodados
                           {cKm > 0 ? ` · $${cKm.toFixed(1)}/km` : ""}
                         </p>
@@ -499,10 +499,10 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
 const styles = {
   pantalla:   { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:     { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blueText, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
   titulo:     { fontSize:"18px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
   contenido:  { padding:"12px 16px 16px" },
-  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
+  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card, border:`1px solid ${t.colors.borderLight}` },
   cardTitulo: { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" },
   campo:      { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
   fila2:      { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },
