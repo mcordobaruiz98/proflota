@@ -225,6 +225,7 @@ function AppContenido() {
           <RutaProtegida>
             <AgregarVehiculo
               vehiculos={vehiculos}
+              conductores={conductores}
               onGuardar={agregarVehiculo}
             />
           </RutaProtegida>
