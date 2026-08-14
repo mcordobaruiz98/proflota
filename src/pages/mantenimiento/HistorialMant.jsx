@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, ClipboardList } from "lucide-react";
 import { theme as t } from "../../styles/theme";
 
 function HistorialMant({ vehiculos, mantenimientos = [], onEliminar, mostrarToast }) {
@@ -44,7 +44,7 @@ function HistorialMant({ vehiculos, mantenimientos = [], onEliminar, mostrarToas
     <div style={styles.pantalla}>
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={()=>navigate(`/vehiculo/${id}`, { state: { tab: "mant" } })}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5}/>
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5}/>
           <span>Volver</span>
         </button>
       </div>
@@ -56,7 +56,7 @@ function HistorialMant({ vehiculos, mantenimientos = [], onEliminar, mostrarToas
     <div style={styles.pantalla}>
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={()=>navigate(`/vehiculo/${id}`, { state: { tab: "mant" } })}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5}/>
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5}/>
           <span>Volver</span>
         </button>
         <h1 style={styles.titulo}>Historial</h1>
@@ -68,18 +68,20 @@ function HistorialMant({ vehiculos, mantenimientos = [], onEliminar, mostrarToas
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}}>
           <div style={styles.kpiCard}>
             <p style={styles.kpiLabel}>Total registros</p>
-            <p style={{...styles.kpiVal,color:t.colors.blue}}>{mantVeh.length}</p>
+            <p style={{...styles.kpiVal,color:t.colors.blueText,...t.numeric}}>{mantVeh.length}</p>
           </div>
           <div style={styles.kpiCard}>
             <p style={styles.kpiLabel}>Costo total</p>
-            <p style={{...styles.kpiVal,color:t.colors.red}}>{fmt(totalCosto)}</p>
+            <p style={{...styles.kpiVal,color:t.colors.redText,...t.numeric}}>{fmt(totalCosto)}</p>
           </div>
         </div>
 
         {/* HISTORIAL POR MES */}
         {mantVeh.length === 0 ? (
-          <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"40px 20px",textAlign:"center",boxShadow:t.shadows.card}}>
-            <p style={{fontSize:"32px",marginBottom:"8px"}}>📋</p>
+          <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"40px 20px",textAlign:"center",boxShadow:t.shadows.card,border:`1px solid ${t.colors.borderLight}`}}>
+            <div style={{width:"56px",height:"56px",borderRadius:"50%",background:t.colors.blueSoft,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}}>
+              <ClipboardList size={26} color={t.colors.blueText} strokeWidth={2}/>
+            </div>
             <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:"0 0 6px"}}>Sin registros</p>
             <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary,margin:0}}>Los mantenimientos registrados aparecerán aquí.</p>
           </div>
@@ -91,23 +93,23 @@ function HistorialMant({ vehiculos, mantenimientos = [], onEliminar, mostrarToas
               <div key={mes} style={styles.card}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
                   <p style={styles.cardTitulo}>{nombreMes(mes)}</p>
-                  {costoMes>0&&<span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.red}}>{fmt(costoMes)}</span>}
+                  {costoMes>0&&<span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.redText,...t.numeric}}>{fmt(costoMes)}</span>}
                 </div>
                 {items.map((m,i,arr)=>(
                   <div key={m.firestoreId} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                     <div style={{flex:1}}>
                       <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>{m.tipo}</p>
-                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0",...t.numeric}}>
                         {m.fecha} · {(m.km||0).toLocaleString("es-CO")} km
                         {m.nota?` · ${m.nota}`:""}
                       </p>
                     </div>
                     <div style={{display:"flex",alignItems:"center",gap:"8px",marginLeft:"10px",flexShrink:0}}>
-                      {m.costo>0&&<span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>{fmt(m.costo)}</span>}
+                      {m.costo>0&&<span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.redText,...t.numeric}}>{fmt(m.costo)}</span>}
                       {confirmando===m.firestoreId ? (
                         <div style={{display:"flex",gap:"4px"}}>
                           <button
-                            style={{padding:"4px 8px",background:t.colors.redSoft,border:`1px solid ${t.colors.redBorder}`,borderRadius:t.radius.sm,fontSize:"10px",fontWeight:t.fonts.weightBold,color:t.colors.red,cursor:"pointer"}}
+                            style={{padding:"4px 8px",background:t.colors.redSoft,border:`1px solid ${t.colors.redBorder}`,borderRadius:t.radius.sm,fontSize:"10px",fontWeight:t.fonts.weightBold,color:t.colors.redText,cursor:"pointer"}}
                             onClick={()=>eliminar(m.firestoreId)}
                           >Confirmar</button>
                           <button
@@ -136,10 +138,10 @@ function HistorialMant({ vehiculos, mantenimientos = [], onEliminar, mostrarToas
 const styles = {
   pantalla:   { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:     { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blueText, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
   titulo:     { fontSize:"18px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
   contenido:  { padding:"12px 16px 16px" },
-  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
+  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card, border:`1px solid ${t.colors.borderLight}` },
   cardTitulo: { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:0 },
   kpiCard:    { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", boxShadow:t.shadows.card, border:`1.5px solid ${t.colors.border}` },
   kpiLabel:   { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 6px", textTransform:"uppercase", letterSpacing:"0.05em" },

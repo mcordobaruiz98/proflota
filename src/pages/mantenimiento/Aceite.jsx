@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Upload, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Upload, Trash2, Droplet } from "lucide-react";
 import { theme as t } from "../../styles/theme";
 
 const VISCOSIDADES = ["15W-40","20W-50","10W-40","5W-30","5W-40","15W-50","Otra"];
@@ -82,7 +82,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
     <div style={styles.pantalla}>
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={()=>navigate(`/vehiculo/${id}`, { state: { tab: "mant" } })}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5}/>
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5}/>
           <span>Volver</span>
         </button>
         <h1 style={styles.titulo}>Aceite</h1>
@@ -92,10 +92,10 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
 
         {/* ÚLTIMO CAMBIO */}
         {ultimo && (
-          <div style={{...styles.card, background:`linear-gradient(135deg, #155E75, ${t.colors.blue})`, border:"none"}}>
+          <div style={{...styles.card, background:`linear-gradient(135deg, #155E75, #0E2E5C)`, border:`1px solid #1E5C7A`}}>
             <p style={{fontSize:t.fonts.sizeXs, color:"rgba(255,255,255,0.75)", margin:"0 0 4px", textTransform:"uppercase", letterSpacing:"0.06em", fontWeight:t.fonts.weightBold}}>Último cambio</p>
             <p style={{fontSize:"22px", fontWeight:t.fonts.weightBlack, color:"#fff", margin:"0 0 4px"}}>{ultimo.marca} {ultimo.viscosidad}</p>
-            <p style={{fontSize:t.fonts.sizeXs, color:"rgba(255,255,255,0.75)", margin:0}}>
+            <p style={{fontSize:t.fonts.sizeXs, color:"rgba(255,255,255,0.75)", margin:0, ...t.numeric}}>
               {ultimo.fecha} · {ultimo.km.toLocaleString("es-CO")} km
               {ultimo.galones>0?` · ${ultimo.galones} galones`:""}
               {ultimo.taller?` · ${ultimo.taller}`:""}
@@ -106,7 +106,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
         {/* BOTÓN AGREGAR */}
         {!mostrarForm && (
           <button
-            style={{width:"100%", padding:"13px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", marginBottom:"10px"}}
+            style={{width:"100%", padding:"13px", background:`linear-gradient(135deg, ${t.colors.green}, ${t.colors.greenDeep || "#12A150"})`, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", marginBottom:"10px", boxShadow:t.shadows.md}}
             onClick={()=>setMostrarForm(true)}
           >
             + Registrar cambio de aceite
@@ -188,7 +188,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
 
             <div style={{display:"flex",gap:"8px"}}>
               <button
-                style={{flex:1,padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardando?0.75:1}}
+                style={{flex:1,padding:"12px",background:`linear-gradient(135deg, ${t.colors.green}, ${t.colors.greenDeep || "#12A150"})`,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardando?0.75:1,boxShadow:t.shadows.md}}
                 onClick={guardar} disabled={guardando}
               >
                 <Save size={16} color="#fff" style={{marginRight:"6px",verticalAlign:"-2px"}}/>
@@ -214,7 +214,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
                   <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>
                     {r.marca} {r.viscosidad} {r.referencia?`· ${r.referencia}`:""}
                   </p>
-                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>
+                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0",...t.numeric}}>
                     {r.fecha} · {r.km.toLocaleString("es-CO")} km
                     {r.galones>0?` · ${r.galones} gal`:""}
                   </p>
@@ -222,7 +222,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
                   {r.nota&&<p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{r.nota}</p>}
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:"8px",marginLeft:"10px"}}>
-                  {r.costo>0&&<span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>{fmt(r.costo)}</span>}
+                  {r.costo>0&&<span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.redText,...t.numeric}}>{fmt(r.costo)}</span>}
                   <button style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}} onClick={()=>eliminar(r.id)}>
                     <Trash2 size={14} color={t.colors.red} strokeWidth={1.8}/>
                   </button>
@@ -233,8 +233,10 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
         )}
 
         {historial.length === 0 && !mostrarForm && (
-          <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"40px 20px",textAlign:"center",boxShadow:t.shadows.card}}>
-            <p style={{fontSize:"32px",marginBottom:"8px"}}>🛢️</p>
+          <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"40px 20px",textAlign:"center",boxShadow:t.shadows.card,border:`1px solid ${t.colors.borderLight}`}}>
+            <div style={{width:"56px",height:"56px",borderRadius:"50%",background:t.colors.blueSoft,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}}>
+              <Droplet size={26} color={t.colors.blueText} strokeWidth={2}/>
+            </div>
             <p style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,margin:"0 0 6px"}}>Sin registros de aceite</p>
             <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary,margin:0}}>Registra el primer cambio de aceite.</p>
           </div>
@@ -248,10 +250,10 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
 const styles = {
   pantalla:   { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:     { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blueText, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
   titulo:     { fontSize:"18px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
   contenido:  { padding:"12px 16px 16px" },
-  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
+  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card, border:`1px solid ${t.colors.borderLight}` },
   cardTitulo: { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" },
   campo:      { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
   fila2:      { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },

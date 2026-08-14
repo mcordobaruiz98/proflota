@@ -5,11 +5,11 @@ import { theme as t } from "../../styles/theme";
 
 const TIPOS_FILTRO = [
   { id:"aceite",       label:"Filtro de aceite",       Icono:Droplets,     color:t.colors.amber },
-  { id:"aire",         label:"Filtro de aire",         Icono:Wind,         color:t.colors.blue },
+  { id:"aire",         label:"Filtro de aire",         Icono:Wind,         color:t.colors.blueText },
   { id:"combustible",  label:"Filtro de combustible",  Icono:Fuel,         color:t.colors.green },
   { id:"trampa",       label:"Trampa de combustible",  Icono:Filter,       color:t.colors.textSecondary },
-  { id:"refrigerante", label:"Filtro de refrigerante", Icono:Thermometer,  color:t.colors.red },
-  { id:"hidraulico",   label:"Filtro hidráulico",      Icono:Droplet,      color:"#3B82F6" },
+  { id:"refrigerante", label:"Filtro de refrigerante", Icono:Thermometer,  color:t.colors.redText },
+  { id:"hidraulico",   label:"Filtro hidráulico",      Icono:Droplet,      color:"#5AA0FF" },
 ];
 
 function Filtros({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
@@ -90,7 +90,7 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
     <div style={styles.pantalla}>
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={()=>navigate(`/vehiculo/${id}`, { state: { tab: "mant" } })}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5}/>
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5}/>
           <span>Volver</span>
         </button>
         <h1 style={styles.titulo}>Filtros</h1>
@@ -115,7 +115,7 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
                   {ult ? (
                     <>
                       <p style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightSemibold,color:t.colors.textSecondary,margin:0}}>{ult.fecha}</p>
-                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>{ult.km.toLocaleString("es-CO")} km</p>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0",...t.numeric}}>{ult.km.toLocaleString("es-CO")} km</p>
                     </>
                   ) : (
                     <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:0}}>Sin registro</p>
@@ -129,7 +129,7 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
         {/* BOTÓN AGREGAR */}
         {!mostrarForm && (
           <button
-            style={{width:"100%",padding:"13px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",marginBottom:"10px"}}
+            style={{width:"100%",padding:"13px",background:`linear-gradient(135deg, ${t.colors.green}, ${t.colors.greenDeep || "#12A150"})`,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",marginBottom:"10px",boxShadow:t.shadows.md}}
             onClick={()=>setMostrarForm(true)}
           >
             + Registrar cambio de filtro
@@ -202,7 +202,7 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
 
             <div style={{display:"flex",gap:"8px"}}>
               <button
-                style={{flex:1,padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardando?0.75:1}}
+                style={{flex:1,padding:"12px",background:`linear-gradient(135deg, ${t.colors.green}, ${t.colors.greenDeep || "#12A150"})`,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardando?0.75:1,boxShadow:t.shadows.md}}
                 onClick={guardar} disabled={guardando}
               >
                 {guardando?"Guardando...":"Guardar"}
@@ -231,7 +231,7 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
                       <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>
                         {tf?.label}
                       </p>
-                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>
+                      <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0",...t.numeric}}>
                         {r.fecha} · {r.km.toLocaleString("es-CO")} km
                         {r.marca?` · ${r.marca}`:""}
                         {r.referencia?` ${r.referencia}`:""}
@@ -240,7 +240,7 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
                     </div>
                   </div>
                   <div style={{display:"flex",alignItems:"center",gap:"8px",marginLeft:"10px"}}>
-                    {r.costo>0&&<span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>{fmt(r.costo)}</span>}
+                    {r.costo>0&&<span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.redText,...t.numeric}}>{fmt(r.costo)}</span>}
                     <button style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}} onClick={()=>eliminar(r.id)}>
                       <Trash2 size={14} color={t.colors.red} strokeWidth={1.8}/>
                     </button>
@@ -259,10 +259,10 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
 const styles = {
   pantalla:   { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:     { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blueText, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
   titulo:     { fontSize:"18px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
   contenido:  { padding:"12px 16px 16px" },
-  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
+  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card, border:`1px solid ${t.colors.borderLight}` },
   cardTitulo: { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" },
   campo:      { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
   fila2:      { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },

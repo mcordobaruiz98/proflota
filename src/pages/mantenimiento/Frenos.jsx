@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, ChevronRight, ChevronUp } from "lucide-react";
 import { theme as t } from "../../styles/theme";
 
 const EJES_POR_VEHICULO = {
@@ -239,7 +239,7 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
     <div style={styles.pantalla}>
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={()=>navigate(`/vehiculo/${id}`, { state: { tab: "mant" } })}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5}/>
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5}/>
           <span>Volver</span>
         </button>
         <h1 style={styles.titulo}>Frenos</h1>
@@ -289,7 +289,9 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
                   </div>
                   <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
                     <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:d.estado?color:t.colors.textTertiary}}>{label}</span>
-                    <span style={{color:t.colors.textTertiary,fontSize:"14px"}}>{ejeEdit===eje?"↑":"›"}</span>
+                    {ejeEdit===eje
+                      ? <ChevronUp size={16} color={t.colors.textTertiary} strokeWidth={2}/>
+                      : <ChevronRight size={16} color={t.colors.textTertiary} strokeWidth={2}/>}
                   </div>
                 </div>
 
@@ -345,7 +347,7 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
 
         {/* REGISTRAR REPARACIÓN */}
         {!mostrarForm && (
-          <button style={{width:"100%",padding:"13px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",marginBottom:"10px"}}
+          <button style={{width:"100%",padding:"13px",background:`linear-gradient(135deg, ${t.colors.green}, ${t.colors.greenDeep || "#12A150"})`,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",marginBottom:"10px",boxShadow:t.shadows.md}}
             onClick={()=>setMostrarForm(true)}>
             + Registrar reparación
           </button>
@@ -385,7 +387,7 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
               </div>
             </div>
             <div style={{display:"flex",gap:"8px"}}>
-              <button style={{flex:1,padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardando?0.75:1}}
+              <button style={{flex:1,padding:"12px",background:`linear-gradient(135deg, ${t.colors.green}, ${t.colors.greenDeep || "#12A150"})`,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardando?0.75:1,boxShadow:t.shadows.md}}
                 onClick={guardarReparacion} disabled={guardando}>
                 {guardando?"Guardando...":"Guardar"}
               </button>
@@ -403,13 +405,13 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
               <div key={r.id} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                 <div style={{flex:1}}>
                   <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>{r.eje}</p>
-                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>
+                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0",...t.numeric}}>
                     {r.fecha} · {r.km?.toLocaleString("es-CO")} km
                     {r.taller?` · ${r.taller}`:""}
                   </p>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-                  {r.costo>0&&<span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.red}}>{fmt(r.costo)}</span>}
+                  {r.costo>0&&<span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.redText,...t.numeric}}>{fmt(r.costo)}</span>}
                   <button style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}} onClick={()=>eliminarRep(r.id)}>
                     <Trash2 size={14} color={t.colors.textTertiary} strokeWidth={1.8}/>
                   </button>
@@ -427,10 +429,10 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
 const styles = {
   pantalla:   { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:     { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blueText, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
   titulo:     { fontSize:"18px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
   contenido:  { padding:"12px 16px 16px" },
-  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
+  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card, border:`1px solid ${t.colors.borderLight}` },
   cardTitulo: { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" },
   campo:      { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
   fila2:      { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },

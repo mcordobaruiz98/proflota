@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Fuel, Trash2, TrendingDown, TrendingUp } from "lucide-react";
+import { ArrowLeft, Fuel, Trash2, TrendingDown, TrendingUp, MapPin } from "lucide-react";
 import { theme as t } from "../../styles/theme";
 
 function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
@@ -103,7 +103,7 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
     <div style={styles.pantalla}>
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={()=>navigate(`/vehiculo/${id}`,{state:{tab:"mant"}})}>
-          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5}/>
+          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5}/>
           <span>Volver</span>
         </button>
         <h1 style={styles.titulo}>Tanqueos</h1>
@@ -115,7 +115,7 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}}>
           <div style={styles.card}>
             <p style={styles.labelMini}>Rendimiento real</p>
-            <p style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:rendPromedio>0?t.colors.green:t.colors.textTertiary,margin:0}}>
+            <p style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:rendPromedio>0?t.colors.green:t.colors.textTertiary,margin:0,...t.numeric}}>
               {rendPromedio > 0 ? `${fmtN(rendPromedio)} km/gl` : "—"}
             </p>
             <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
@@ -124,10 +124,10 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
           </div>
           <div style={styles.card}>
             <p style={styles.labelMini}>Total gastado</p>
-            <p style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:t.colors.textPrimary,margin:0}}>
+            <p style={{fontSize:"22px",fontWeight:t.fonts.weightBlack,color:t.colors.textPrimary,margin:0,...t.numeric}}>
               {fmt(totalGastado)}
             </p>
-            <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
+            <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0",...t.numeric}}>
               {fmtN(totalGalones,0)} galones totales
             </p>
           </div>
@@ -140,16 +140,16 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
             {rendimientos.reverse().map((r,i,arr) => (
               <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                 <div>
-                  <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textPrimary,margin:0,fontWeight:t.fonts.weightSemibold}}>
+                  <p style={{fontSize:t.fonts.sizeSm,color:t.colors.textPrimary,margin:0,fontWeight:t.fonts.weightSemibold,...t.numeric}}>
                     {fmtN(r.rendimiento)} km/gl
                   </p>
-                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0"}}>
+                  <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textTertiary,margin:"2px 0 0",...t.numeric}}>
                     {r.fecha} · {r.km.toLocaleString("es-CO")} km · {fmtN(r.gal,0)} gl
                   </p>
                 </div>
                 {r.rendimiento >= rendPromedio
                   ? <TrendingUp size={16} color={t.colors.green} strokeWidth={2} />
-                  : <TrendingDown size={16} color={t.colors.red} strokeWidth={2} />
+                  : <TrendingDown size={16} color={t.colors.redText} strokeWidth={2} />
                 }
               </div>
             ))}
@@ -159,7 +159,7 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
         {/* BOTÓN AGREGAR */}
         {!mostrarForm && (
           <button
-            style={{width:"100%",padding:"13px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",marginBottom:"10px"}}
+            style={{width:"100%",padding:"13px",background:`linear-gradient(135deg, ${t.colors.green}, ${t.colors.greenDeep || "#12A150"})`,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",marginBottom:"10px",boxShadow:t.shadows.md}}
             onClick={()=>setMostrarForm(true)}
           >
             + Registrar tanqueo
@@ -197,9 +197,9 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
             </div>
 
             {galones && precioGal && (
-              <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"10px",marginBottom:"10px",textAlign:"center"}}>
+              <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"10px",marginBottom:"10px",textAlign:"center",border:`1px solid ${t.colors.borderLight}`}}>
                 <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textSecondary}}>Total: </span>
-                <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary}}>
+                <span style={{fontSize:t.fonts.sizeMd,fontWeight:t.fonts.weightBold,color:t.colors.textPrimary,...t.numeric}}>
                   {fmt(Number(galones) * Number(precioGal))}
                 </span>
               </div>
@@ -235,7 +235,7 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
 
             <div style={{display:"flex",gap:"8px"}}>
               <button
-                style={{flex:1,padding:"12px",background:t.colors.green,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardando?0.75:1}}
+                style={{flex:1,padding:"12px",background:`linear-gradient(135deg, ${t.colors.green}, ${t.colors.greenDeep || "#12A150"})`,color:"#fff",border:"none",borderRadius:t.radius.md,fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,cursor:"pointer",opacity:guardando?0.75:1,boxShadow:t.shadows.md}}
                 onClick={guardar} disabled={guardando}
               >
                 {guardando?"Guardando...":"Guardar tanqueo"}
@@ -261,18 +261,19 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
                     <Fuel size={16} color={t.colors.amber} strokeWidth={1.8} />
                   </div>
                   <div style={{flex:1,minWidth:0}}>
-                    <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0}}>
+                    <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,margin:0,...t.numeric}}>
                       {fmtN(r.galones,0)} gl · {fmt(r.precioGalon)}/gl
                     </p>
-                    <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>
+                    <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0",...t.numeric}}>
                       {r.fecha} · {r.kmOdometro?.toLocaleString("es-CO")} km
                       {r.estacion?` · ${r.estacion}`:""}
                     </p>
                     {(() => {
                       const viajeAsoc = r.viajeId ? viajes.find(v => v.firestoreId === r.viajeId) : null;
                       return viajeAsoc ? (
-                        <p style={{ fontSize: "10px", color: t.colors.blue, fontWeight: 700, margin: "2px 0 0" }}>
-                          📍 Viaje: {viajeAsoc.ruta} ({viajeAsoc.fecha})
+                        <p style={{ fontSize: "10px", color: t.colors.blueText, fontWeight: 700, margin: "3px 0 0", display:"flex", alignItems:"center", gap:"3px" }}>
+                          <MapPin size={11} color={t.colors.blueText} strokeWidth={2.2} />
+                          Viaje: {viajeAsoc.ruta} ({viajeAsoc.fecha})
                         </p>
                       ) : null;
                     })()}
@@ -280,7 +281,7 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
                   </div>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:"8px",marginLeft:"10px"}}>
-                  <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.red}}>{fmt(r.total)}</span>
+                  <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.redText,...t.numeric}}>{fmt(r.total)}</span>
                   <button style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}} onClick={()=>eliminar(r.id)}>
                     <Trash2 size={14} color={t.colors.textTertiary} strokeWidth={1.8}/>
                   </button>
@@ -298,10 +299,10 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
 const styles = {
   pantalla:   { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:     { display:"flex", alignItems:"center", gap:"12px", padding:"16px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
+  btnVolver:  { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blueText, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
   titulo:     { fontSize:"18px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
   contenido:  { padding:"12px 16px 16px" },
-  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card },
+  card:       { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", marginBottom:"10px", boxShadow:t.shadows.card, border:`1px solid ${t.colors.borderLight}` },
   cardTitulo: { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" },
   labelMini:  { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 4px", textTransform:"uppercase", letterSpacing:"0.05em" },
   campo:      { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
