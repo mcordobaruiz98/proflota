@@ -158,21 +158,30 @@ function Cobros({ viajes = [], empresas = [], perfilFacturacion = {}, onGuardarC
     const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Cuenta de Cobro N° ${String(cuenta.numero).padStart(3,"0")}</title>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; color: #333; font-size: 14px; line-height: 1.6; }
+  @page { margin: 2cm; }
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; color: #333; font-size: 14px; line-height: 1.6; position: relative; }
+  /* Franjas de identidad NAVIRA — gradiente azul→verde, respetando 2cm de margen */
+  .franja-navira { height: 4px; background: linear-gradient(90deg, #1565FF 0%, #22C55E 100%); border-radius: 2px; }
+  .franja-top { margin: 0 0 24px; }
+  .franja-bottom { margin: 28px 0 0; opacity: 0.85; }
   h2 { text-align: center; margin: 30px 0 5px; font-size: 16px; }
   .fecha { margin-bottom: 30px; text-align: right; }
   .centro { text-align: center; margin: 20px 0; }
   .concepto { margin: 25px 0; }
-  .banco { margin: 25px 0; font-style: italic; }
+  .banco { margin: 25px 0; padding: 14px 16px; background: #F0F5FF; border-left: 4px solid #1565FF; border-radius: 4px; font-size: 14px; color: #0A1A2F; }
+  .banco strong { color: #0A1A2F; }
   .firma { margin-top: 60px; }
   .firma-img { display: block; max-height: 90px; max-width: 250px; margin-bottom: -20px; margin-top: 10px; }
   .linea { border-top: 1px solid #333; width: 250px; margin-top: 40px; padding-top: 5px; }
-  .detalle { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
+  .linea p { margin: 0; line-height: 1.3; }
+  .detalle { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 14px; }
   .detalle th, .detalle td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
-  .detalle th { background: #f5f5f5; }
+  .detalle th { background: #F0F5FF; text-align: center; color: #0A1A2F; }
   .right { text-align: right; }
   @media print { body { margin: 20px; } }
 </style></head><body>
+
+<div class="franja-navira franja-top"></div>
 
 <p class="fecha">${cuenta.ciudad || p.ciudad || "Colombia"}, ${new Date(cuenta.fecha).getDate()} de ${["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][new Date(cuenta.fecha).getMonth()]} de ${new Date(cuenta.fecha).getFullYear()}</p>
 
@@ -197,18 +206,19 @@ function Cobros({ viajes = [], empresas = [], perfilFacturacion = {}, onGuardarC
 
 ${cuenta.viajes && cuenta.viajes.length > 0 ? `
 <table class="detalle">
-  <tr><th>Fecha</th><th>Manifiesto</th><th>Ruta</th><th>Placa</th><th>Ton</th><th class="right">Valor</th></tr>
+  <tr><th>Fecha</th><th>Manifiesto</th><th>Ruta</th><th>Placa</th><th>Ton</th><th class="right">Valor/Ton</th><th class="right">Valor</th></tr>
   ${cuenta.viajes.map(v => `<tr>
     <td>${v.fecha || ""}</td>
     <td>${v.manifiesto || ""}</td>
     <td>${v.ruta || ""}</td>
     <td>${v.placa || ""}</td>
     <td>${v.tonelaje || ""}</td>
+    <td class="right">${v.tonelaje && v.valorBruto ? Math.round((v.valorBruto || 0) / v.tonelaje).toLocaleString("es-CO") : "—"}</td>
     <td class="right">${(v.valorBruto||0).toLocaleString("es-CO")}</td>
   </tr>`).join("")}
-  <tr><td colspan="5"><strong>Subtotal</strong></td><td class="right"><strong>${(cuenta.totalBruto||0).toLocaleString("es-CO")}</strong></td></tr>
-  ${cuenta.totalAnticipos > 0 ? `<tr><td colspan="5">(-) Anticipos recibidos</td><td class="right">${(cuenta.totalAnticipos||0).toLocaleString("es-CO")}</td></tr>` : ""}
-  <tr><td colspan="5"><strong>TOTAL A PAGAR</strong></td><td class="right"><strong>${(cuenta.totalPagar||0).toLocaleString("es-CO")}</strong></td></tr>
+  <tr><td colspan="6"><strong>Subtotal</strong></td><td class="right"><strong>${(cuenta.totalBruto||0).toLocaleString("es-CO")}</strong></td></tr>
+  ${cuenta.totalAnticipos > 0 ? `<tr><td colspan="6">(-) Anticipos recibidos</td><td class="right">${(cuenta.totalAnticipos||0).toLocaleString("es-CO")}</td></tr>` : ""}
+  <tr><td colspan="6"><strong>TOTAL A PAGAR</strong></td><td class="right"><strong>${(cuenta.totalPagar||0).toLocaleString("es-CO")}</strong></td></tr>
 </table>` : ""}
 
 ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${p.banco} - ${p.tipoCuenta || "Ahorros"} - ${p.numeroCuenta || ""}</strong>. A nombre de <strong>${p.titularCuenta || p.nombreCompleto || ""}</strong>.</p>` : ""}
@@ -218,10 +228,12 @@ ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${p.banco} - $
   ${p.firmaUrl ? `<img src="${p.firmaUrl}" alt="Firma" class="firma-img" />` : ""}
   <div class="linea">
     <p><strong>${p.nombreCompleto || ""}</strong></p>
-    <p>${tipoDocLabel[p.tipoDoc] || "C.C."} ${p.numeroDoc || ""}</p>
-    ${p.telefono ? `<p>Tel: ${p.telefono}</p>` : ""}
+    <p><strong>${tipoDocLabel[p.tipoDoc] || "C.C."}</strong> ${p.numeroDoc || ""}</p>
+    ${p.telefono ? `<p><strong>Tel:</strong> ${p.telefono}</p>` : ""}
   </div>
 </div>
+
+<div class="franja-navira franja-bottom"></div>
 
 </body></html>`;
     return html;
