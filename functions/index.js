@@ -243,7 +243,7 @@ const P = {
   TON_FLETE: "tonFlete", PCOND: "pcond", GASTOS: "gastos",
   DESCUENTOS: "descuentos", ANTICIPO: "anticipo", MANI_REMESA: "maniRemesa",
   RETORNO: "retorno", RET_RUTA: "retRuta", RET_TON_FLETE: "retTonFlete", RET_KM: "retKm",
-  XFECHAS: "xFechas", PESO_BASCULA: "pesoBascula", XPRECIO: "xPrecio",
+  XFECHAS: "xFechas", PESO_BASCULA: "pesoBascula", XPRECIO: "xPrecio", XGALONES: "xGalones",
   CONFIRMAR: "confirmar",
 };
 
@@ -694,6 +694,29 @@ async function procesarMensaje(chatId, texto) {
         v.precioGalon = p;
       }
       v.modoComb = "rendimiento";
+      // Si por rendimiento el combustible daría 0 (ruta sin km o sin rendimiento),
+      // preguntar los galones directamente en vez de asumir $0.
+      const kmC = (v.kmCargado || 0) + (v.kmCargadoRet || 0);
+      const kmV = (v.kmVacio || 0) + (v.kmVacioRet || 0);
+      const rC = v.rendCargado || 0;
+      const galEstimados = rC > 0 ? (kmC / rC) + (kmV / (v.rendVacio || rC)) : 0;
+      if (galEstimados <= 0) {
+        await setSesion(chatId, { paso: P.XGALONES, viaje: v });
+        return enviar(chatId, "⛽ Esta ruta no tiene kilómetros o rendimiento configurados.\n¿Cuántos galones gastó en este viaje? (ej: 40 — o \"no\" si no aplica)");
+      }
+      return confirmarViaje(chatId, v);
+    }
+
+    case P.XGALONES: {
+      if (esNo(t)) {
+        v.modoComb = "galones";
+        v.galonesDirectos = 0;
+      } else {
+        const gal = parsearNumero(t);
+        if (!gal || gal <= 0) return enviar(chatId, 'Escriba los galones. Ej: 40 — o "no"');
+        v.modoComb = "galones";
+        v.galonesDirectos = gal;
+      }
       return confirmarViaje(chatId, v);
     }
 
