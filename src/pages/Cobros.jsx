@@ -160,7 +160,7 @@ function Cobros({ viajes = [], empresas = [], perfilFacturacion = {}, onGuardarC
 <style>
   body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; color: #333; font-size: 14px; line-height: 1.6; }
   h2 { text-align: center; margin: 30px 0 5px; font-size: 16px; }
-  .fecha { margin-bottom: 30px; }
+  .fecha { margin-bottom: 30px; text-align: right; }
   .centro { text-align: center; margin: 20px 0; }
   .concepto { margin: 25px 0; }
   .banco { margin: 25px 0; font-style: italic; }
