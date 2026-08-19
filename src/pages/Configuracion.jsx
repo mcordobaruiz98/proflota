@@ -6,6 +6,7 @@ import { subirPeajes } from "../scripts/subirPeajes";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { theme as t } from "../styles/theme";
+import FirmaCanvas from "../components/FirmaCanvas";
 
 function Configuracion({mostrarToast}) {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ function Configuracion({mostrarToast}) {
     banco: "", tipoCuenta: "Ahorros", numeroCuenta: "", titularCuenta: "",
   });
   const [guardandoPerfil, setGuardandoPerfil] = useState(false);
+  const [guardandoFirma, setGuardandoFirma] = useState(false);
 
   const manejarEliminarCuenta = async () => {
     if (textoConfirm !== "ELIMINAR") {
@@ -138,7 +140,24 @@ function Configuracion({mostrarToast}) {
     }
   };
 
+    const guardarFirma = async (dataUrl) => {
+    setGuardandoFirma(true);
+    const nuevo = { ...perfilFact, firmaUrl: dataUrl };
+    setPerfilFact(nuevo);
+    try {
+      await setDoc(doc(db, "usuarios", usuario.uid), {
+        perfilFacturacion: nuevo,
+      }, { merge: true });
+      mostrarToast("Firma guardada", "exito");
+    } catch (err) {
+      mostrarToast("Error al guardar la firma", "error");
+    } finally {
+      setGuardandoFirma(false);
+    }
+  };
+
   const perfilCompleto = perfilFact.nombreCompleto && perfilFact.numeroDoc && perfilFact.ciudad && perfilFact.telefono;
+  
 
   return (
     <div style={styles.pantalla}>
@@ -394,6 +413,17 @@ function Configuracion({mostrarToast}) {
             onBlur={(e)=>guardarPerfilFact("titularCuenta", e.target.value)}
             style={styles.inputPerfil}/>
         </div>
+
+                <p style={styles.subSeccion}>✍️ Firma para cuentas de cobro</p>
+        <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 10px"}}>
+          Esta firma aparecerá en todas sus cuentas de cobro. Fírmela una sola vez.
+        </p>
+        <FirmaCanvas
+          firmaActual={perfilFact.firmaUrl}
+          onGuardar={guardarFirma}
+          guardando={guardandoFirma}
+        />
+        
       </div>
 
       {/* DÍA DE LIQUIDACIÓN */}
