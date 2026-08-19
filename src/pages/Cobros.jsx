@@ -165,6 +165,7 @@ function Cobros({ viajes = [], empresas = [], perfilFacturacion = {}, onGuardarC
   .concepto { margin: 25px 0; }
   .banco { margin: 25px 0; font-style: italic; }
   .firma { margin-top: 60px; }
+  .firma-img { display: block; max-height: 90px; max-width: 250px; margin-bottom: -20px; margin-top: 10px; }
   .linea { border-top: 1px solid #333; width: 250px; margin-top: 40px; padding-top: 5px; }
   .detalle { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
   .detalle th, .detalle td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
@@ -214,6 +215,7 @@ ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${p.banco} - $
 
 <div class="firma">
   <p>Atentamente,</p>
+  ${p.firmaUrl ? `<img src="${p.firmaUrl}" alt="Firma" class="firma-img" />` : ""}
   <div class="linea">
     <p><strong>${p.nombreCompleto || ""}</strong></p>
     <p>${tipoDocLabel[p.tipoDoc] || "C.C."} ${p.numeroDoc || ""}</p>
