@@ -448,6 +448,9 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   if (rutaGuardada.pctReteica)      setPctReteica(rutaGuardada.pctReteica);
   if (rutaGuardada.descFopat !== undefined) setDescFopat(rutaGuardada.descFopat);
   if (rutaGuardada.pctFopat)        setPctFopat(rutaGuardada.pctFopat);
+  if (rutaGuardada.descOtro !== undefined) setDescOtro(rutaGuardada.descOtro);
+  if (rutaGuardada.pctOtro)    setPctOtro(rutaGuardada.pctOtro);
+  if (rutaGuardada.nombreOtro) setNombreOtro(rutaGuardada.nombreOtro);
   if (rutaGuardada.pctAnticipoFlete !== undefined) setPctAnticipoFlete(String(rutaGuardada.pctAnticipoFlete));
   if (rutaGuardada.pctAnticipoFleteRet !== undefined) setPctAnticipoFleteRet(String(rutaGuardada.pctAnticipoFleteRet));
   setMostrarRutas(false);
@@ -498,6 +501,9 @@ const guardarRutaFrecuente = async () => {
     pctReteica:      pctReteica,
     descFopat:       descFopat,
     pctFopat:        pctFopat,
+    descOtro:        descOtro,
+    pctOtro:         pctOtro,
+    nombreOtro:      nombreOtro,
     pctAnticipoFlete: n(pctAnticipoFlete),
     pctAnticipoFleteRet: n(pctAnticipoFleteRet),
   };
