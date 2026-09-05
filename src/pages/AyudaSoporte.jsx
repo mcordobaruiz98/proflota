@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { theme as t } from "../styles/theme";
 
 const FAQS = [
   {
@@ -34,7 +36,9 @@ const FAQS = [
 
 function AyudaSoporte() {
   const navigate = useNavigate();
+  const { usuario } = useAuth();
   const [abiertos, setAbiertos] = useState({});
+  
 
   const toggleFaq = (i) => {
     setAbiertos((prev) => ({ ...prev, [i]: !prev[i] }));
@@ -51,26 +55,48 @@ function AyudaSoporte() {
         <div style={{ width: "60px" }} />
       </div>
 
-      {/* CONTACTO */}
+            {/* CONTACTO */}
       <div style={styles.seccionTitulo}>Contacto</div>
       <div style={styles.seccion}>
-        <div style={styles.fila}>
-          <div style={styles.filaIzq}>
-            <span style={styles.filaIcono}>📧</span>
-            <div>
-              <p style={styles.filaLabel}>Correo de soporte</p>
-              <p style={styles.filaSub}>Naviralatam@gmail.com</p>
-            </div>
-          </div>
-        </div>
-        <div style={{ ...styles.fila, borderBottom: "none" }}>
-          <div style={styles.filaIzq}>
-            <span style={styles.filaIcono}>💬</span>
-            <div>
-              <p style={styles.filaLabel}>WhatsApp</p>
-              <p style={styles.filaSub}>+57 301 658 7224</p>
-            </div>
-          </div>
+        <p style={{fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, margin:0, padding:"14px 16px 4px", lineHeight:1.5}}>
+          ¿Encontró un error o tiene una sugerencia? Escríbanos, respondemos rápido.
+        </p>
+
+        <div style={{padding:"10px 16px 16px"}}>
+          <button
+            style={{width:"100%", padding:"13px", background:"#25D366", color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", marginBottom:"10px"}}
+            onClick={() => {
+              const mensaje = encodeURIComponent(
+                `Hola, le escribo desde NAVIRA.\n\n` +
+                `Mi correo: ${usuario?.email || "—"}\n` +
+                `Versión: 1.1 Beta\n\n` +
+                `Mi consulta o problema:\n`
+              );
+              window.open(`https://wa.me/573016587224?text=${mensaje}`, "_blank");
+            }}
+          >
+            💬 Escribir por WhatsApp
+          </button>
+
+          <button
+            style={{width:"100%", padding:"13px", background:"transparent", color:t.colors.blue, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px"}}
+            onClick={() => {
+              const asunto = encodeURIComponent("Reporte NAVIRA — Beta");
+              const cuerpo = encodeURIComponent(
+                `Correo de mi cuenta: ${usuario?.email || "—"}\n` +
+                `Versión: 1.1 Beta\n\n` +
+                `Describa el problema o sugerencia:\n\n\n` +
+                `¿Qué estaba haciendo cuando ocurrió?\n\n`
+              );
+              window.location.href = `mailto:naviralatam@gmail.com?subject=${asunto}&body=${cuerpo}`;
+            }}
+          >
+            📧 Reportar por correo
+          </button>
+
+          <p style={{fontSize:"11px", color:t.colors.textTertiary, margin:"12px 0 0", textAlign:"center"}}>
+            NAVIRA está en fase beta. Su reporte nos ayuda a mejorarla.
+          </p>
         </div>
       </div>
 
