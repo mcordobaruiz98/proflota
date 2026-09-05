@@ -253,21 +253,21 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
           </div>
 
           <table>
-            <tr style="background:#f0f9ff"><td style="font-weight:700">💰 Ingresos por viajes</td><td style="font-weight:700;color:#1565FF">${fmt(ingresosMes)}</td></tr>
+            <tr style="background:#f0f9ff"><td style="font-weight:700">Ingresos por viajes</td><td style="font-weight:700;color:#1565FF">${fmt(ingresosMes)}</td></tr>
             ${totalAnticiposMes > 0 ? `
             <tr><td style="padding-left:20px;color:#555">↳ Anticipos recibidos en ruta</td><td style="color:#555">${fmt(totalAnticiposMes)}</td></tr>
             <tr><td style="padding-left:20px;color:#555">↳ Saldos por cobrar a empresas</td><td style="color:#555">${fmt(saldosPendientesMes)}</td></tr>` : ""}
             <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos operativos:</td></tr>
-            <tr><td style="padding-left:20px">⛽ Combustible (ACPM + Adblue)</td><td style="color:#dc2626">-${fmt(acpmMes + adblMes)}</td></tr>
-            <tr><td style="padding-left:20px">🛣️ Peajes</td><td style="color:#dc2626">-${fmt(peajesMes)}</td></tr>
-            <tr><td style="padding-left:20px">👤 Conductor</td><td style="color:#dc2626">-${fmt(conductorMes)}</td></tr>
-            ${otrosMes>0?`<tr><td style="padding-left:20px">📋 Otros gastos de viaje</td><td style="color:#dc2626">-${fmt(otrosMes)}</td></tr>`:""}
-            ${descuentosMes>0?`<tr><td style="padding-left:20px">📑 Descuentos de ley</td><td style="color:#dc2626">-${fmt(descuentosMes)}</td></tr>`:""}
+            <tr><td style="padding-left:20px">Combustible (ACPM + Adblue)</td><td style="color:#dc2626">-${fmt(acpmMes + adblMes)}</td></tr>
+            <tr><td style="padding-left:20px">Peajes</td><td style="color:#dc2626">-${fmt(peajesMes)}</td></tr>
+            <tr><td style="padding-left:20px">Conductor</td><td style="color:#dc2626">-${fmt(conductorMes)}</td></tr>
+            ${otrosMes>0?`<tr><td style="padding-left:20px">Otros gastos de viaje</td><td style="color:#dc2626">-${fmt(otrosMes)}</td></tr>`:""}
+            ${descuentosMes>0?`<tr><td style="padding-left:20px">Descuentos de ley</td><td style="color:#dc2626">-${fmt(descuentosMes)}</td></tr>`:""}
             <tr style="background:#f0fdf4"><td style="font-weight:600">= Ganancia neta de viajes</td><td style="font-weight:700;color:${netaMes>=0?"#16a34a":"#dc2626"}">${fmt(netaMes)}</td></tr>
             ${totalPE>0?`
             <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos fijos mensuales:</td></tr>
-            <tr><td style="padding-left:20px">🏦 Gastos fijos (cuota, seguro, GPS...)</td><td style="color:#dc2626">-${fmt(totalPE)}</td></tr>`:""}
-            ${totalGastosAdic>0?`<tr><td style="padding-left:20px">🔧 Gastos adicionales (taller, repuestos...)</td><td style="color:#dc2626">-${fmt(totalGastosAdic)}</td></tr>`:""}
+            <tr><td style="padding-left:20px">Gastos fijos (cuota, seguro, GPS...)</td><td style="color:#dc2626">-${fmt(totalPE)}</td></tr>`:""}
+            ${totalGastosAdic>0?`<tr><td style="padding-left:20px">Gastos adicionales (taller, repuestos...)</td><td style="color:#dc2626">-${fmt(totalGastosAdic)}</td></tr>`:""}
             ${viajesMes.length>0 && (totalPE>0||totalGastosAdic>0)?`<tr class="total" style="background:#f0fdf4"><td>= Utilidad real del período</td><td class="${utilidadReal>=0?"verde":"rojo"}">${fmt(utilidadReal)}</td></tr>`:""}
           </table>
           <table>
