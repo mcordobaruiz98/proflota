@@ -66,11 +66,10 @@ function AyudaSoporte() {
           <button
             style={{width:"100%", padding:"13px", background:"#25D366", color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", marginBottom:"10px"}}
             onClick={() => {
-              const mensaje = encodeURIComponent(
-                `Hola, le escribo desde NAVIRA.\n\n` +
-                `Mi correo: ${usuario?.email || "—"}\n` +
-                `Versión: 1.1 Beta\n\n` +
-                `Mi consulta o problema:\n`
+                            const mensaje = encodeURIComponent(
+                `Hola, soy ${usuario?.displayName || "un usuario"} de NAVIRA.\n\n` +
+                `Mi consulta o problema:\n\n\n` +
+                `— — —\n${usuario?.email || ""} · v1.1 Beta`
               );
               window.open(`https://wa.me/573016587224?text=${mensaje}`, "_blank");
             }}
