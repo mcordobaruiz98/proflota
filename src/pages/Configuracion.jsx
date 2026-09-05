@@ -7,6 +7,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { theme as t } from "../styles/theme";
 import FirmaCanvas from "../components/FirmaCanvas";
+import { MessageCircle, Bug } from "lucide-react";
 
 function Configuracion({mostrarToast}) {
   const navigate = useNavigate();
@@ -450,6 +451,49 @@ function Configuracion({mostrarToast}) {
       </div>
 
       {/* DATOS */}
+            <div style={styles.seccionTitulo}>Soporte</div>
+      <div style={{...styles.seccion, padding:"16px 20px"}}>
+        <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 14px", lineHeight:1.5}}>
+          ¿Encontró un error o tiene una sugerencia? Escríbanos, respondemos rápido.
+        </p>
+
+        <button
+          style={{width:"100%", padding:"13px", background:"#25D366", color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", marginBottom:"10px"}}
+          onClick={() => {
+            const mensaje = encodeURIComponent(
+              `Hola, le escribo desde NAVIRA.\n\n` +
+              `Mi correo: ${usuario?.email || "—"}\n` +
+              `Versión: 1.1 Beta\n\n` +
+              `Mi consulta o problema:\n`
+            );
+            window.open(`https://wa.me/573016587224?text=${mensaje}`, "_blank");
+          }}
+        >
+          <MessageCircle size={17} strokeWidth={2} />
+          Escribir por WhatsApp
+        </button>
+
+        <button
+          style={{width:"100%", padding:"13px", background:"transparent", color:t.colors.blue, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px"}}
+          onClick={() => {
+            const asunto = encodeURIComponent("Reporte NAVIRA — Beta");
+            const cuerpo = encodeURIComponent(
+              `Correo de mi cuenta: ${usuario?.email || "—"}\n` +
+              `Versión: 1.1 Beta\n\n` +
+              `Describa el problema o sugerencia:\n\n\n` +
+              `¿Qué estaba haciendo cuando ocurrió?\n\n`
+            );
+            window.location.href = `mailto:naviralatam@gmail.com?subject=${asunto}&body=${cuerpo}`;
+          }}
+        >
+          <Bug size={17} strokeWidth={2} />
+          Reportar por correo
+        </button>
+
+        <p style={{fontSize:"11px", color:t.colors.textTertiary, margin:"12px 0 0", textAlign:"center"}}>
+          NAVIRA está en fase beta. Su reporte nos ayuda a mejorarla.
+        </p>
+      </div>
       <div style={styles.seccionTitulo}>Datos</div>
       <div style={styles.seccion}>
         <button
