@@ -69,7 +69,7 @@ function AyudaSoporte() {
                             const mensaje = encodeURIComponent(
                 `Hola, soy ${usuario?.displayName || "un usuario"} de NAVIRA.\n\n` +
                 `Mi consulta o problema:\n\n\n` +
-                `— — —\n${usuario?.email || ""} · v1.1 Beta`
+                `\n${usuario?.email || ""} · v1.1 Beta`
               );
               window.open(`https://wa.me/573016587224?text=${mensaje}`, "_blank");
             }}
