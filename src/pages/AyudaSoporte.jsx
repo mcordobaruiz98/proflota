@@ -127,8 +127,6 @@ function AyudaSoporte() {
   );
 }
 
-import { theme as t } from "../styles/theme";
-
 const styles = {
   pantalla:      { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"30px" },
   header:        { display:"flex", justifyContent:"space-between", alignItems:"center", padding:"20px 20px 12px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
