@@ -7,10 +7,13 @@
 
 ---
 
-## Índice General de Tareas Resueltas (20 Tareas)
+## Índice General de Tareas Resueltas (23 Tareas)
 
 | ID | Bloque | Severidad | Área | Título de la Solución | Commit Git | Estado Notion |
 |:---:|:---:|:---:|:---:|---|:---:|:---:|
+| **BE-02** | Paralelo / Backlog | `P0 - Bloqueante` | Reglas / Despliegue | Versionar `firestore.rules` y `storage.rules` vinculados en `firebase.json` | `d6a95bc` | `Done` |
+| **BE-08** | Paralelo / Backlog | `P1 - Alta` | Storage / Seguridad | Reglas de Storage con validación estricta de `contentType` (MIME) y tamaño (10 MiB) | `d6a95bc` | `Done` |
+| **BE-07** | Paralelo / Backlog | `P1 - Alta` | Cloud Functions / DB | Ingesta programada y callable de peajes con Admin SDK y loteo atómico (`db.batch`) | `d6a95bc` | `Done` |
 | **BE-27** | Bloque 8 | `P1 - Alta` | Back / Telegram Bot | Búsquedas indexadas con claves normalizadas (`placaNorm`, `rutaNorm`, `razonSocialNorm`) | `d27db99` | `Done` |
 | **BE-26** | Bloque 8 | `P1 - Alta` | Hosting / DB | Declaración y versionado de índices compuestos y TTL en `firestore.indexes.json` | `d27db99` | `Done` |
 | **CR-01** | Bloque 2 | `P1 - Alta` | Cruces / Auth | Escalonar alta de cuenta centralizada con Cloud Function (unificación Email y Google) | `cbd206b` | `Done` |
@@ -34,83 +37,47 @@
 
 ---
 
-## Detalle Técnico de Soluciones Implementadas
+## Detalle Técnico de las Nuevas Soluciones Implementadas
 
-### Bloque 8: Optimización de Red y Consultas
+### Reglas y Control de Acceso (Paralelo / Backlog)
 
-#### 1. [BE-27] Búsquedas Indexadas por Clave Normalizada en Telegram Bot y Frontend
-* **Problema:** En `functions/index.js`, las funciones `buscarVehiculo`, `buscarMemoriaRuta` y `buscarEmpresa` descargaban colecciones enteras con `.get()` (e incluso hasta 200 viajes ordenados por fecha) e iteraban linealmente en JavaScript en cada mensaje de Telegram. Esto consumía cientos de lecturas de Firestore por interacción elevando costos y latencia.
-* **Archivos Modificados:** `functions/index.js`, `src/hooks/useFirestore.js`.
+#### 1. [BE-02] Versionar `firestore.rules` y `storage.rules` en el Repositorio y Vincular en `firebase.json`
+* **Problema:** Las reglas de seguridad de Firestore y Storage se desplegaban manualmente o no estaban referenciadas formalmente en `firebase.json`. Esto generaba riesgo de sobreescritura accidental o discrepancia entre el código local y producción en un despliegue vía CLI.
+* **Archivos Modificados:** [`firebase.json`](file:///c:/Users/NNhel/Prueba%20de%20sitio%20Git/Navira%20Proyect/proflota/firebase.json), [`storage.rules`](file:///c:/Users/NNhel/Prueba%20de%20sitio%20Git/Navira%20Proyect/proflota/storage.rules), [`firestore.rules`](file:///c:/Users/NNhel/Prueba%20de%20sitio%20Git/Navira%20Proyect/proflota/firestore.rules).
 * **Solución Técnica:**
-  * Se implementaron claves normalizadas (`placaNorm`, `rutaNorm`, `razonSocialNorm`) al guardar registros tanto desde la web como desde Telegram.
-  * Se refactorizaron las búsquedas para consultar directamente contra índices de Firestore con `.limit(1)`:
-    * `buscarVehiculo`: `.where("placaNorm", "==", placa).limit(1)`.
-    * `buscarMemoriaRuta`: consulta indexada a rutas frecuentes y viajes históricos por `rutaNorm`.
-    * `buscarEmpresa`: `.where("razonSocialNorm", "==", norm).limit(1)`.
-  * Se mantuvieron fallbacks acotados con auto-reparación en segundo plano para registros legacy. El consumo de lecturas se redujo de más de 200 a solo 1 lectura por búsqueda.
-* **Commit:** `d27db99` | **Notion:** `Done`
+  * Se configuró en `firebase.json` el bloque `"storage": { "rules": "storage.rules" }` junto al bloque existente `"firestore": { "rules": "firestore.rules", "indexes": "firestore.indexes.json" }`.
+  * Se versionaron ambos archivos en Git bajo la rama `Cambios-Dev-Caliche`, habilitando el despliegue íntegro y auditable de seguridad con `firebase deploy --only firestore:rules,storage`.
+* **Commit:** `d6a95bc` | **Notion:** `Done`
 
-#### 2. [BE-26] Archivo Oficial de Índices Compuestos y TTL (`firestore.indexes.json`)
-* **Problema:** `firebase.json` no declaraba archivo de índices de Firestore. Consultas compuestas indispensables (como viajes filtrados por placa/vehículo y ordenados por fecha descendente, o cartera por estado de pago) corrían el riesgo de fallar en producción con errores `FAILED_PRECONDITION` por falta de índice compuesto.
-* **Archivos Modificados:** `firestore.indexes.json`, `firebase.json`.
+#### 2. [BE-08] Reglas de Storage con Aislamiento de Usuario y Validación de `contentType` y `size`
+* **Problema:** En Firebase Cloud Storage no existían reglas de validación a nivel de backend: la validación de tamaño y formato ocurría exclusivamente en el cliente navegador, dejando abierta la posibilidad de que clientes maliciosos o peticiones directas subieran ejecutables, scripts dañinos o archivos gigantescos (>100MB) consumiendo cuota y vulnerando la seguridad.
+* **Archivos Modificados:** [`storage.rules`](file:///c:/Users/NNhel/Prueba%20de%20sitio%20Git/Navira%20Proyect/proflota/storage.rules).
 * **Solución Técnica:**
-  * Se creó y versionó [`firestore.indexes.json`](file:///c:/Users/NNhel/Prueba%20de%20sitio%20Git/Navira%20Proyect/proflota/firestore.indexes.json) definiendo 10 índices compuestos esenciales para `viajes`, `cuentas_cobro`, `mantenimiento` y `gastos_vehiculo`.
-  * Se vincularon las políticas de TTL para purga automática en `telegram_sesiones` y `telegram_updates` sobre el campo `expiraEn`.
-  * Se vinculó en `firebase.json` bajo la clave `"indexes": "firestore.indexes.json"`.
-* **Commit:** `d27db99` | **Notion:** `Done`
+  * Se implementó [`storage.rules`](file:///c:/Users/NNhel/Prueba%20de%20sitio%20Git/Navira%20Proyect/proflota/storage.rules) con:
+    1. Aislamiento estricto por usuario: `match /usuarios/{uid}/{allPaths=**}` donde solo el propietario autenticado (`request.auth.uid == uid`) tiene permisos de lectura, creación, edición y borrado.
+    2. Validación obligatoria de tipo MIME (`esTipoPermitido`): solo se autorizan `image/jpeg`, `image/png`, `image/webp` y `application/pdf`.
+    3. Límite estricto de tamaño (`esTamanoPermitido`): archivos `<= 10 * 1024 * 1024` (10 MiB).
+    4. Regla general *fail-closed* al final: `match /{allPaths=**} { allow read, write: if false; }`.
+* **Commit:** `d6a95bc` | **Notion:** `Done`
+
+#### 3. [BE-07] Ingesta Programada y Segura de Peajes vía Cloud Function (`ingestarPeajes`)
+* **Problema:** El catálogo de 166 peajes colombianos era administrado por un script de frontend (`subirPeajes.js`) que borraba toda la colección con `deleteDoc` y creaba documentos en bucle desde el cliente con credenciales de usuario. Como la colección global `peajes` quedó protegida con `allow write: if false;`, la ingesta desde el cliente fallaba y era insegura.
+* **Archivos Modificados:**
+  * [`functions/data/peajesData.js`](file:///c:/Users/NNhel/Prueba%20de%20sitio%20Git/Navira%20Proyect/proflota/functions/data/peajesData.js) *(nuevo)*
+  * [`functions/index.js`](file:///c:/Users/NNhel/Prueba%20de%20sitio%20Git/Navira%20Proyect/proflota/functions/index.js)
+  * [`functions/test/peajes.test.js`](file:///c:/Users/NNhel/Prueba%20de%20sitio%20Git/Navira%20Proyect/proflota/functions/test/peajes.test.js) *(nuevo)*
+  * [`src/scripts/subirPeajes.js`](file:///c:/Users/NNhel/Prueba%20de%20sitio%20Git/Navira%20Proyect/proflota/src/scripts/subirPeajes.js)
+* **Solución Técnica:**
+  * Se extrajo el catálogo oficial de 166 peajes a `functions/data/peajesData.js`.
+  * Se creó la Cloud Function programada `ingestarPeajesProgramada` (`onSchedule("0 3 1 * *", ...)`, zona `America/Bogota`) que sincroniza periódicamente las tarifas sin intervención manual.
+  * Se creó el endpoint callable `ingestarPeajes` (`onCall`) que valida autenticación en backend y ejecuta un `db.batch()` atómico e idempotente con IDs deterministas (`PE001`, `PE002`, etc.) y `merge: true`.
+  * Se refactorizó `src/scripts/subirPeajes.js` en el frontend para invocar `httpsCallable(functions, "ingestarPeajes")`, eliminando por completo cualquier intento de escritura directa desde el navegador.
+  * Se añadieron 4 pruebas unitarias que validan el endpoint programado, el callable fail-closed y el procesamiento por lotes.
+* **Commit:** `d6a95bc` | **Notion:** `Done`
 
 ---
 
-### Bloque 2: Eliminar Superficie de Ataque
-
-#### 3. [BE-01] y [CR-01] Cloud Function Callable para Alta Segura de Cuenta y Escalonamiento
-* **Problema:** Validación de código beta en cliente y riesgo de cuentas huérfanas en Google Sign-In.
-* **Archivos Modificados:** `functions/index.js`, `src/firebase.js`, `src/hooks/useAuth.js`, `functions/test/auth.test.js`.
-* **Solución Técnica:** Cloud Function callable `validarAltaUsuario` con Admin SDK, Custom Claims y purga atómica de usuarios no autorizados.
-* **Commit:** `cbd206b` | **Notion:** `Done`
-
-#### 4. [BE-03] Validación Simétrica de Esquema y Tamaño en `Update`
-* **Problema:** Subcolecciones de usuarios sin validación en operaciones de edición (`update`).
-* **Archivos Modificados:** `firestore.rules`.
-* **Solución Técnica:** Validadores estrictos por colección aplicados en `allow create, update`.
-* **Commit:** `cbd206b` | **Notion:** `Done`
-
-#### 5. [BE-16] CSP en Modo Reporte y Corrección COOP en Hosting/CDN
-* **Problema:** Sin Content Security Policy y errores de bloqueo COOP en Google Sign-in.
-* **Archivos Modificados:** `vercel.json`, `firebase.json`.
-* **Solución Técnica:** Cabeceras `Content-Security-Policy-Report-Only` y `Cross-Origin-Opener-Policy: same-origin-allow-popups`.
-* **Commit:** `cbd206b` | **Notion:** `Done`
-
----
-
-### Bloque 1: Cerrar la Puerta (Reglas y Control de Acceso)
-
-#### 6. [BE-06] Invertir a Fail-Closed en Webhook `botNavira`
-* **Problema:** Condición fail-open permitía llamadas anónimas si `TELEGRAM_SECRET` no estaba definido.
-* **Archivos Modificados:** `functions/index.js`.
-* **Solución Técnica:** `cors: false`, filtro estricto POST (405) y validación fail-closed con 403 Forbidden.
-* **Commit:** `71ee5d6` | **Notion:** `Done`
-
-#### 7. [BE-05] Montar Secretos en Cloud Run (`botNavira`) y Test de Despliegue
-* **Problema:** Variables de Secret Manager no montadas en Cloud Run.
-* **Archivos Modificados:** `functions/index.js`, `functions/package.json`, `functions/test/botNavira.test.js`.
-* **Solución Técnica:** `secrets: ["TELEGRAM_SECRET", "TELEGRAM_TOKEN"]`, getters dinámicos y tests unitarios.
-* **Commit:** `71ee5d6` | **Notion:** `Done`
-
-#### 8. [BE-04] `allow get` en vez de `read` para `codigos_beta`
-* **Problema:** `allow read` permitía enumerar la colección vía REST anónimo y extraer el código beta.
-* **Archivos Modificados:** `firestore.rules`, `firebase.json`.
-* **Solución Técnica:** `allow get: if true; allow list, write: if false;` en `firestore.rules`.
-* **Commit:** `71ee5d6` | **Notion:** `Done`
-
----
-
-### Bloques 6, 7, 8 y 9: Infraestructura, DB, CDN y Rendimiento
-*(Ver historial completo de commits `f74ca3d`, `6678c69`, `45cd505`, `50cdaa8`, `a3d8434`, `58c04f3`, `a6f1ea8`, `0541415` con odómetro atómico, consecutivos transaccionales, writeBatch, TTL en sesiones y migración de subcolecciones).*
-
----
-
-### Verificación de Repositorio
+## Verificación de Repositorio
 * **Rama de trabajo:** `Cambios-Dev-Caliche`
 * **Rama de producción:** `main` (intacta, 0 commits fusionados)
 * **Verificación remota:** Todos los commits respaldados en GitHub:  
