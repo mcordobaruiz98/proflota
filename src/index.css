@@ -1,3 +1,4 @@
+/* Hecho por JESUS COSSIO DEV - Estilos base y accesibilidad */
 /* ── RESET BASE ── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -83,4 +84,30 @@ img {
   border-radius: 50%;
   animation: navira-spin 0.6s linear infinite;
   vertical-align: middle;
+}
+
+/* ── FOCO VISIBLE ACCESIBLE (WCAG 2.4.7) ── */
+:focus-visible {
+  outline: 2px solid #22C55E !important;
+  outline-offset: 2px;
+}
+
+/* ── SKIP LINK ACCESIBLE (WCAG 2.4.1) ── */
+.skip-link {
+  position: absolute;
+  top: -120px;
+  left: 16px;
+  background: #0A192F;
+  color: #22C55E;
+  border: 2px solid #22C55E;
+  padding: 8px 16px;
+  z-index: 99999;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 16px;
 }

@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Search, ChevronDown, ChevronUp, ChevronRight, MapPin, Plus, Truck } from "lucide-react";
@@ -78,7 +82,7 @@ function Viajes({ viajes = [], cargando }) {
           <h1 style={styles.titulo}>Viajes</h1>
           <p style={styles.headerSub}>Memoria de costos por ruta</p>
         </div>
-        <button style={styles.btnNuevo} onClick={() => navigate("/calculadora")}>
+        <button type="button" aria-label="Calcular nuevo viaje" style={styles.btnNuevo} onClick={() => navigate("/calculadora")}>
           <Plus size={16} color="#fff" strokeWidth={2.5} />
         </button>
       </div>
@@ -121,7 +125,12 @@ function Viajes({ viajes = [], cargando }) {
             <div key={g.ruta} style={styles.card}>
 
               {/* Cabecera de ruta */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }} onClick={() => toggleRuta(g.ruta)}>
+              <button
+                type="button"
+                aria-expanded={abierta}
+                style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", background: "none", border: "none", padding: 0, textAlign: "left", font: "inherit" }}
+                onClick={() => toggleRuta(g.ruta)}
+              >
                 <div style={{ display: "flex", gap: "11px", alignItems: "center", flex: 1, minWidth: 0 }}>
                   <div style={styles.routeIc}>
                     <MapPin size={16} color={t.colors.blueText} strokeWidth={2} />
@@ -137,7 +146,7 @@ function Viajes({ viajes = [], cargando }) {
                   <span style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBlack, color: (u.neta || 0) >= 0 ? t.colors.green : t.colors.red, ...t.numeric }}>{fmt(u.neta || 0)}</span>
                   {abierta ? <ChevronUp size={16} color={t.colors.textTertiary} /> : <ChevronDown size={16} color={t.colors.textTertiary} />}
                 </div>
-              </div>
+              </button>
 
               {/* Estructura de costos del último viaje */}
               {abierta && (
@@ -255,7 +264,7 @@ const styles = {
   btnNuevo:      { width: "36px", height: "36px", borderRadius: "10px", background: t.colors.green, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
   contenido:     { padding: "14px 16px" },
   buscadorBox:   { display: "flex", alignItems: "center", gap: "8px", background: t.colors.bgCard, borderRadius: t.radius.md, padding: "10px 14px", marginBottom: "12px", border: `1px solid ${t.colors.borderLight}`, boxShadow: t.shadows.card },
-  buscadorInput: { flex: 1, border: "none", outline: "none", background: "transparent", fontSize: t.fonts.sizeSm, color: t.colors.textPrimary },
+  buscadorInput: { flex: 1, border: "none", background: "transparent", fontSize: t.fonts.sizeSm, color: t.colors.textPrimary },
   btnCalcular:   { padding: "12px 24px", background: t.colors.green, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, cursor: "pointer" },
   card:          { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "14px 16px", marginBottom: "10px", border: `1px solid ${t.colors.borderLight}`, boxShadow: t.shadows.card },
   routeIc:       { width: "34px", height: "34px", borderRadius: t.radius.sm, background: t.colors.blueSoft, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },

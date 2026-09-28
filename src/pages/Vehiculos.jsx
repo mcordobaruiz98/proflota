@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -125,60 +129,65 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}
               <div style={{...styles.tarjetaFranja, background:est.color}} />
 
               {/* Contenido */}
-              <div
-  style={styles.tarjetaContenido}
-  onClick={() => navigate(`/vehiculo/${vehiculo.firestoreId}`, tabDestino ? {state:{tab:tabDestino}} : undefined)}
->
-  {vehiculo.fotoUrl ? (
-    <img src={vehiculo.fotoUrl} alt={vehiculo.placa}
-      style={{width:"56px", height:"56px", objectFit:"cover", borderRadius:t.radius.md, flexShrink:0}}/>
-  ) : (
-    <div style={{...styles.tarjetaIconoWrap, background:est.bg}}>
-      <Truck size={24} color={est.color} strokeWidth={1.8} />
-    </div>
-  )}
-  <div style={styles.tarjetaInfo}>
-    <div style={{marginBottom:"2px"}}><Placa valor={vehiculo.placa} size="md" /></div>
-    <p style={styles.tarjetaTipo}>
-      {vehiculo.tipoVehiculo}
-      {vehiculo.tipoRemolque ? ` · ${vehiculo.tipoRemolque}` : ""}
-    </p>
-    <div style={styles.tarjetaStats}>
-      <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:est.color,background:est.bg,padding:"2px 8px",borderRadius:t.radius.full}}>
-        {est.label}
-      </span>
-      <span style={styles.tarjetaStatDot}>·</span>
-      <span style={styles.tarjetaStat}>
-        {viajesVeh.length} viaje{viajesVeh.length !== 1 ? "s" : ""}
-      </span>
-    </div>
-  </div>
-</div>
+              <button
+                type="button"
+                style={{...styles.tarjetaContenido, background: "none", border: "none", textAlign: "left", font: "inherit"}}
+                onClick={() => navigate(`/vehiculo/${vehiculo.firestoreId}`, tabDestino ? {state:{tab:tabDestino}} : undefined)}
+              >
+                {vehiculo.fotoUrl ? (
+                  <img src={vehiculo.fotoUrl} alt={vehiculo.placa}
+                    style={{width:"56px", height:"56px", objectFit:"cover", borderRadius:t.radius.md, flexShrink:0}}/>
+                ) : (
+                  <div style={{...styles.tarjetaIconoWrap, background:est.bg}}>
+                    <Truck size={24} color={est.color} strokeWidth={1.8} />
+                  </div>
+                )}
+                <div style={styles.tarjetaInfo}>
+                  <div style={{marginBottom:"2px"}}><Placa valor={vehiculo.placa} size="md" /></div>
+                  <p style={styles.tarjetaTipo}>
+                    {vehiculo.tipoVehiculo}
+                    {vehiculo.tipoRemolque ? ` · ${vehiculo.tipoRemolque}` : ""}
+                  </p>
+                  <div style={styles.tarjetaStats}>
+                    <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:est.color,background:est.bg,padding:"2px 8px",borderRadius:t.radius.full}}>
+                      {est.label}
+                    </span>
+                    <span style={styles.tarjetaStatDot}>·</span>
+                    <span style={styles.tarjetaStat}>
+                      {viajesVeh.length} viaje{viajesVeh.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </div>
+              </button>
 
               {/* Botón eliminar */}
               {vehiculoAEliminar?.firestoreId === vehiculo.firestoreId ? (
-  <div style={{display:"flex", flexDirection:"column", gap:"4px", padding:"8px"}}>
-    <button
-      style={{padding:"6px 10px", background:t.colors.redSoft, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.red, cursor:"pointer"}}
-      onClick={() => { eliminarVehiculo(vehiculo); setVehiculoAEliminar(null); }}
-    >
-      Confirmar
-    </button>
-    <button
-      style={{padding:"6px 10px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, cursor:"pointer", color:t.colors.textSecondary}}
-      onClick={() => setVehiculoAEliminar(null)}
-    >
-      Cancelar
-    </button>
-  </div>
-) : (
-  <button
-    style={styles.btnEliminar}
-    onClick={() => setVehiculoAEliminar(vehiculo)}
-  >
-    <Trash2 size={16} color={t.colors.red} strokeWidth={1.8} />
-  </button>
-)}
+                <div style={{display:"flex", flexDirection:"column", gap:"4px", padding:"8px"}}>
+                  <button
+                    type="button"
+                    style={{padding:"6px 10px", background:t.colors.redSoft, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.red, cursor:"pointer"}}
+                    onClick={() => { eliminarVehiculo(vehiculo); setVehiculoAEliminar(null); }}
+                  >
+                    Confirmar
+                  </button>
+                  <button
+                    type="button"
+                    style={{padding:"6px 10px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, cursor:"pointer", color:t.colors.textSecondary}}
+                    onClick={() => setVehiculoAEliminar(null)}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  aria-label={`Eliminar vehículo placa ${vehiculo.placa}`}
+                  style={styles.btnEliminar}
+                  onClick={() => setVehiculoAEliminar(vehiculo)}
+                >
+                  <Trash2 size={16} color={t.colors.red} strokeWidth={1.8} />
+                </button>
+              )}
 
             </div>
           );
@@ -196,7 +205,7 @@ const styles = {
   titulo:            { fontSize: "22px", fontWeight: t.fonts.weightBlack, color: t.colors.textPrimary, margin: 0, letterSpacing: "-0.3px" },
   btnAgregar:        { display: "flex", alignItems: "center", gap: "6px", padding: "10px 16px", background: t.colors.blue, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, cursor: "pointer" },
   buscadorWrap:      { display: "flex", alignItems: "center", gap: "10px", margin: "16px 16px 8px", background: t.colors.bgCard, border: `1.5px solid ${t.colors.border}`, borderRadius: t.radius.md, padding: "11px 14px", boxShadow: t.shadows.card },
-  buscadorInput:     { flex: 1, border: "none", outline: "none", fontSize: t.fonts.sizeSm, color: t.colors.textPrimary, background: "transparent" },
+  buscadorInput:     { flex: 1, border: "none", fontSize: t.fonts.sizeSm, color: t.colors.textPrimary, background: "transparent" },
   vacio:             { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "48px 24px", textAlign: "center", margin: "8px 16px", border: `1px solid ${t.colors.borderLight}`, boxShadow: t.shadows.card },
   vacioIconoWrap:    { width: "72px", height: "72px", background: t.colors.blueSoft, borderRadius: t.radius.xl, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" },
   vacioTexto:        { fontSize: t.fonts.sizeLg, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: "0 0 8px" },

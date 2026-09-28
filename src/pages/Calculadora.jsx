@@ -1,4 +1,8 @@
-import { useState, useEffect} from "react";
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronUp, MapPin, Lightbulb, AlertTriangle, Check } from "lucide-react";
 import { theme as t } from "../styles/theme";
@@ -7,6 +11,9 @@ import { sanitizar, validarNumero } from "../utils/validar";
 const DEFAULT_ADBLUE = 0.18925;
 
 function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores = [], empresas = [], onGuardar, onGuardarRuta, onEliminarRuta, onEditarVehiculo, onAgregarEmpresa, mostrarToast }) {
+  const guardandoRef = useRef(false);
+  const guardandoRutaRef = useRef(false);
+
   const PEAJES_CO = peajes.length > 0
   ? [...peajes].sort((a, b) => a.n.localeCompare(b.n, 'es'))
   : [];
@@ -277,9 +284,11 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   };
 
   const guardarViaje = async () => {
+    if (guardandoRef.current) return;
     if (!ruta.trim())  { mostrarToast("Ingresa la ruta del viaje","error"); return; }
     if (!valorViaje)   { mostrarToast("Ingresa tonelaje y flete","error"); return; }
     if (viajes.length >= 5000) { mostrarToast("Límite de viajes alcanzado","error"); return; }
+    guardandoRef.current = true;
     setGuardando(true);
     try {
 
@@ -408,6 +417,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       mostrarToast("No se pudo guardar el viaje. Verifique su conexión e intente de nuevo","error");
       // NO limpia el formulario: el usuario conserva lo digitado para reintentar
     } finally {
+      guardandoRef.current = false;
       setGuardando(false);
     }
   };
@@ -460,8 +470,9 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
 };
 
 const guardarRutaFrecuente = async () => {
-  if (guardandoRuta) return;
+  if (guardandoRutaRef.current || guardandoRuta) return;
   if (!ruta.trim()) { mostrarToast("Ingresa la ruta del viaje primero","error"); return; }
+  guardandoRutaRef.current = true;
   setGuardandoRuta(true);
 
   const datos = {
@@ -516,6 +527,7 @@ const guardarRutaFrecuente = async () => {
   } catch(err) {
     mostrarToast("Error al guardar la ruta", "error");
   } finally {
+    guardandoRutaRef.current = false;
     setGuardandoRuta(false);
   }
 };
@@ -530,7 +542,12 @@ const guardarRutaFrecuente = async () => {
 
   // Encabezado de sección con paso numerado (solo presentación)
   const SeccionHeader = ({ num, ok, label, abierta, onToggle }) => (
-    <div style={styles.seccionHeader} onClick={onToggle}>
+    <button
+      type="button"
+      aria-expanded={abierta}
+      style={{...styles.seccionHeader, width:"100%", background:"none", border:"none", textAlign:"left", cursor:"pointer", font:"inherit"}}
+      onClick={onToggle}
+    >
       <span style={styles.seccionHead}>
         <span style={{...styles.stepBadge, ...(ok ? styles.stepBadgeDone : {})}}>
           {ok ? <Check size={13} strokeWidth={3} /> : num}
@@ -538,7 +555,7 @@ const guardarRutaFrecuente = async () => {
         <span style={styles.seccionLabel}>{label}</span>
       </span>
       {abierta ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
-    </div>
+    </button>
   );
 
   return (
@@ -1077,14 +1094,21 @@ const guardarRutaFrecuente = async () => {
 
         {/* RETORNO */}
       <div style={{marginTop:"10px"}}>
-      <div style={{display:"flex", alignItems:"center", gap:"10px", cursor:"pointer"}} onClick={()=>setTieneRetorno(!tieneRetorno)}>
-      <div style={{width:"42px",height:"24px",borderRadius:"12px",background:tieneRetorno?t.colors.blue:t.colors.border,position:"relative",transition:"background 0.2s",flexShrink:0}}>
-        <div style={{width:"20px",height:"20px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:tieneRetorno?"20px":"2px",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}} />
-      </div>
-        <label style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightMedium, color:t.colors.textPrimary, cursor:"pointer"}}>
-        ¿Regresa con carga? (flete de retorno)
-        </label>
-      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={tieneRetorno}
+        aria-label="¿Regresa con carga? (flete de retorno)"
+        style={{display:"flex", alignItems:"center", gap:"10px", cursor:"pointer", background:"none", border:"none", padding:0, font:"inherit"}}
+        onClick={()=>setTieneRetorno(!tieneRetorno)}
+      >
+        <div style={{width:"42px",height:"24px",borderRadius:"12px",background:tieneRetorno?t.colors.blue:t.colors.border,position:"relative",transition:"background 0.2s",flexShrink:0}}>
+          <div style={{width:"20px",height:"20px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:tieneRetorno?"20px":"2px",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}} />
+        </div>
+        <span style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightMedium, color:t.colors.textPrimary, cursor:"pointer"}}>
+          ¿Regresa con carga? (flete de retorno)
+        </span>
+      </button>
 
         {tieneRetorno && (
         <div style={{marginTop:"12px", padding:"12px", background:t.colors.bgSection, borderRadius:t.radius.md}}>
@@ -1338,7 +1362,7 @@ const guardarRutaFrecuente = async () => {
               </option>
             ))}
           </select>
-          <button style={styles.btnAgregarP} onClick={agregarPeaje}>
+          <button type="button" aria-label="Agregar peaje a la ruta" style={styles.btnAgregarP} onClick={agregarPeaje}>
             <Plus size={16} color="#fff" strokeWidth={2.5} />
           </button>
         </div>
@@ -1481,7 +1505,14 @@ const guardarRutaFrecuente = async () => {
       padding:"10px 0",
       borderBottom: i===arr.length-1 ? "none" : `1px solid ${t.colors.borderLight}`,
     }}>
-      <div style={{display:"flex", alignItems:"center", gap:"10px", cursor:"pointer"}} onClick={()=>d.setActivo(!d.activo)}>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={d.activo}
+        aria-label={d.label}
+        style={{display:"flex", alignItems:"center", gap:"10px", cursor:"pointer", background:"none", border:"none", padding:0, font:"inherit", textAlign:"left"}}
+        onClick={()=>d.setActivo(!d.activo)}
+      >
         <div style={{width:"36px",height:"20px",borderRadius:"10px",background:d.activo?t.colors.blue:t.colors.border,position:"relative",transition:"background 0.2s",flexShrink:0}}>
           <div style={{width:"16px",height:"16px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:d.activo?"18px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
         </div>
@@ -1489,7 +1520,7 @@ const guardarRutaFrecuente = async () => {
           <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>{d.label}</p>
           <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0"}}>{d.sub}</p>
         </div>
-      </div>
+      </button>
       <div style={{display:"flex", alignItems:"center", gap:"6px"}}>
         <input
           type="number" value={d.pct} min="0" max="100" step="0.001"
@@ -1506,12 +1537,19 @@ const guardarRutaFrecuente = async () => {
 
   {/* OTRO */}
   <div style={{borderTop:`1px solid ${t.colors.borderLight}`, paddingTop:"10px", marginTop:"4px"}}>
-    <div style={{display:"flex", alignItems:"center", gap:"10px", marginBottom:"8px", cursor:"pointer"}} onClick={()=>setDescOtro(!descOtro)}>
+    <button
+      type="button"
+      role="switch"
+      aria-checked={descOtro}
+      aria-label="Otro descuento"
+      style={{display:"flex", alignItems:"center", gap:"10px", marginBottom:"8px", cursor:"pointer", background:"none", border:"none", padding:0, font:"inherit"}}
+      onClick={()=>setDescOtro(!descOtro)}
+    >
       <div style={{width:"36px",height:"20px",borderRadius:"10px",background:descOtro?t.colors.blue:t.colors.border,position:"relative",transition:"background 0.2s",flexShrink:0}}>
         <div style={{width:"16px",height:"16px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:descOtro?"18px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
       </div>
       <p style={{fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0}}>Otro descuento</p>
-    </div>
+    </button>
     {descOtro && (
       <div style={styles.fila2}>
         <div style={styles.campo}>
@@ -1690,7 +1728,7 @@ const styles = {
   campo:            { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
   fila2:            { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },
   label:            { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
-  input:            { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
+  input:            { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, width:"100%", boxSizing:"border-box" },
   valorViajeBox:    { display:"flex", justifyContent:"space-between", alignItems:"center", background:t.colors.bgSection, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.md, padding:"12px 14px", marginTop:"4px" },
   valorViajeLabel:  { fontSize:t.fonts.sizeSm, color:t.colors.blueText, fontWeight:t.fonts.weightMedium },
   valorViajeNum:    { fontSize:"24px", fontWeight:t.fonts.weightBlack, color:t.colors.blueText, fontVariantNumeric:"tabular-nums", letterSpacing:"-0.5px" },

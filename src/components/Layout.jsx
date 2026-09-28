@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useNavigate, useLocation } from "react-router-dom";
 import { Home, Truck, Calculator, TrendingUp } from "lucide-react";
 import { theme as t } from "../styles/theme";
@@ -16,12 +20,15 @@ function Layout({ children }) {
 
   return (
     <div style={styles.contenedor}>
+      <a href="#main-content" className="skip-link">
+        Saltar al contenido principal
+      </a>
 
-      <div style={styles.pantalla}>
+      <main id="main-content" style={styles.pantalla}>
         {children}
-      </div>
+      </main>
 
-      <nav style={styles.navbar}>
+      <nav style={styles.navbar} aria-label="Navegación principal">
         {tabs.map((tab) => {
           const activo = ruta === tab.path;
           return (

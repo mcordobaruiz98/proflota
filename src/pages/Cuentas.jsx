@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp, FileDown, Scale, Calendar, BarChart3 } from "lucide-react";
@@ -437,20 +441,25 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
 
       {/* NAV MES */}
       <div style={styles.navMes}>
-        <button style={styles.btnMes} onClick={()=>cambiarMes(-1)}>‹</button>
+        <button type="button" aria-label="Mes anterior" style={styles.btnMes} onClick={()=>cambiarMes(-1)}>‹</button>
         <p style={styles.labelMes}>{MESES[mes]} {anio}</p>
-        <button style={styles.btnMes} onClick={()=>cambiarMes(1)}>›</button>
+        <button type="button" aria-label="Mes siguiente" style={styles.btnMes} onClick={()=>cambiarMes(1)}>›</button>
       </div>
 
       {/* CONSULTA POR RANGO DE FECHAS */}
       <div style={{padding:"0 16px 6px"}}>
         <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"12px 16px",border:`1px solid ${t.colors.borderLight}`,boxShadow:t.shadows.card}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setVerRango(!verRango)}>
+          <button
+            type="button"
+            aria-expanded={verRango}
+            style={{width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",background:"none",border:"none",padding:0,textAlign:"left",font:"inherit"}}
+            onClick={()=>setVerRango(!verRango)}
+          >
             <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightSemibold,color:t.colors.textPrimary,display:"flex",alignItems:"center",gap:"8px"}}>
               <Calendar size={15} color={t.colors.blueText} strokeWidth={2} /> Consultar por fechas
             </span>
             {verRango ? <ChevronUp size={15} color={t.colors.textTertiary}/> : <ChevronDown size={15} color={t.colors.textTertiary}/>}
-          </div>
+          </button>
           {verRango && (()=>{
             const viajesRango = (rangoDesde && rangoHasta && rangoDesde <= rangoHasta)
               ? viajes.filter(v => v.fecha >= rangoDesde && v.fecha <= rangoHasta) : [];
@@ -467,12 +476,12 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
                   <div>
                     <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
                     <input type="date" value={rangoDesde} onChange={e=>setRangoDesde(e.target.value)}
-                      style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
+                      style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm}}/>
                   </div>
                   <div>
                     <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
                     <input type="date" value={rangoHasta} onChange={e=>setRangoHasta(e.target.value)}
-                      style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
+                      style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm}}/>
                   </div>
                 </div>
                 {rangoDesde && rangoHasta && rangoDesde > rangoHasta && (

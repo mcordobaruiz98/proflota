@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useNavigate } from "react-router-dom";
 import { useAuth }     from "../hooks/useAuth";
 import { theme as t }  from "../styles/theme";
@@ -140,9 +144,14 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             <Truck size={14} color={t.colors.green} strokeWidth={2.5} />
             <p style={styles.saludo}>Bienvenido</p>
           </div>
-          <p style={styles.nombre}>{nombreSaludo}</p>
+          <h1 style={styles.nombre}>{nombreSaludo}</h1>
         </div>
-        <button style={styles.avatar} onClick={() => navigate("/perfil")}>
+        <button
+          type="button"
+          aria-label="Ver perfil de usuario"
+          style={styles.avatar}
+          onClick={() => navigate("/perfil")}
+        >
           {iniciales}
         </button>
       </div>
@@ -210,13 +219,15 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
               };
               const e = colores[est] || colores.disponible;
               return (
-                <div key={v.firestoreId}
+                <button
+                  type="button"
+                  key={v.firestoreId}
                   onClick={()=>navigate(`/vehiculo/${v.firestoreId}`)}
-                  style={{display:"flex",alignItems:"center",gap:"6px",cursor:"pointer",flexShrink:0}}
+                  style={{display:"flex",alignItems:"center",gap:"6px",cursor:"pointer",flexShrink:0,background:"none",border:"none",padding:0}}
                 >
                   <span style={{width:"9px",height:"9px",borderRadius:"50%",background:e.c,boxShadow:`0 0 8px ${e.c}88`,flexShrink:0}} />
                   <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:t.colors.textSecondary,...t.numeric}}>{v.placa}</span>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -417,9 +428,10 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             </p>
           </div>
           {docsAlerta.map((d,i) => (
-            <div
+            <button
+              type="button"
               key={`${d.placa}-${d.doc}-${i}`}
-              style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0",cursor:"pointer"}}
+              style={{display:"flex",width:"100%",background:"none",border:"none",justifyContent:"space-between",alignItems:"center",padding:"4px 0",cursor:"pointer",textAlign:"left"}}
               onClick={()=>navigate(`/vehiculo/${d.vehiculoId}`,{state:{tab:"historial"}})}
             >
               <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>
@@ -428,7 +440,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
               <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:d.vencido?t.colors.redText:d.dias<=7?t.colors.amber:t.colors.textSecondary}}>
                 {d.vencido?`Venció hace ${Math.abs(d.dias)}d`:d.dias===0?"Vence hoy":`Vence en ${d.dias}d`}
               </span>
-            </div>
+            </button>
           ))}
         </div>
       )}
@@ -441,14 +453,17 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:mantAlerta.some(m=>m.vencido)?t.colors.redText:t.colors.amber,margin:0}}>Mantenimientos pendientes</p>
           </div>
           {mantAlerta.map((m,i) => (
-            <div key={`${m.placa}-${m.tipo}-${i}`}
-              style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0",cursor:"pointer"}}
-              onClick={()=>navigate(`/vehiculo/${m.vehiculoId}`,{state:{tab:"mant"}})}>
+            <button
+              type="button"
+              key={`${m.placa}-${m.tipo}-${i}`}
+              style={{display:"flex",width:"100%",background:"none",border:"none",justifyContent:"space-between",alignItems:"center",padding:"4px 0",cursor:"pointer",textAlign:"left"}}
+              onClick={()=>navigate(`/vehiculo/${m.vehiculoId}`,{state:{tab:"mant"}})}
+            >
               <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>{m.tipo} · {m.placa}</span>
               <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:m.vencido?t.colors.redText:t.colors.amber}}>
                 {m.vencido?`Pasado ${Math.abs(m.kmFaltantes).toLocaleString("es-CO")} km`:`Faltan ${m.kmFaltantes.toLocaleString("es-CO")} km`}
               </span>
-            </div>
+            </button>
           ))}
         </div>
       )}
@@ -461,14 +476,17 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             <p style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:licAlerta.some(l=>l.vencido)?t.colors.redText:t.colors.amber,margin:0}}>Licencias de conducir</p>
           </div>
           {licAlerta.map((l,i) => (
-            <div key={`lic-${i}`}
-              style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0",cursor:"pointer"}}
-              onClick={()=>navigate("/conductores")}>
+            <button
+              type="button"
+              key={`lic-${i}`}
+              style={{display:"flex",width:"100%",background:"none",border:"none",justifyContent:"space-between",alignItems:"center",padding:"4px 0",cursor:"pointer",textAlign:"left"}}
+              onClick={()=>navigate("/conductores")}
+            >
               <span style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary}}>{l.nombre}</span>
               <span style={{fontSize:t.fonts.sizeXs,fontWeight:t.fonts.weightBold,color:l.vencido?t.colors.redText:t.colors.amber}}>
                 {l.vencido?`Vencida hace ${Math.abs(l.dias)}d`:`Vence en ${l.dias}d`}
               </span>
-            </div>
+            </button>
           ))}
         </div>
       )}
@@ -525,9 +543,10 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             const positivo = (v.neta || 0) >= 0;
             const pagado   = v.estadoPago === "pagado";
             return (
-              <div
+              <button
+                type="button"
                 key={v.firestoreId}
-                style={styles.viajeCard}
+                style={{...styles.viajeCard, width:"100%", textAlign:"left", background:t.colors.bgCard, border:`1px solid ${t.colors.borderLight}`}}
                 onClick={() => navigate(`/viaje/${v.firestoreId}`)}
               >
                 <div style={{
@@ -556,7 +575,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
                   </p>
                   <p style={{...styles.viajeFlete, ...t.numeric}}>{fmt(v.vViaje || 0)}</p>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>

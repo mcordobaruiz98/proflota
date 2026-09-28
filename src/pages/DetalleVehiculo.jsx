@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, ChevronRight, Wrench, Camera, Edit2, Save, X, Check, Paperclip, CircleDot, Droplets, Filter, Disc, ClipboardList, Fuel } from "lucide-react";
@@ -380,7 +384,12 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
 
       {/* HEADER */}
       <div style={styles.header}>
-        <button style={styles.btnVolver} onClick={()=>navigate("/vehiculos")}>
+        <button
+          type="button"
+          aria-label="Volver a lista de vehículos"
+          style={styles.btnVolver}
+          onClick={()=>navigate("/vehiculos")}
+        >
           <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
           <span>Vehículos</span>
         </button>
@@ -403,7 +412,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
             </label>
           </div>
           <div>
-            <p style={styles.vehiculoPlaca}>{vehiculo.placa}</p>
+            <h1 style={styles.vehiculoPlaca}>{vehiculo.placa}</h1>
             <p style={styles.vehiculoTipo}>
               {vehiculo.tipoVehiculo}
               {vehiculo.tipoRemolque?` · ${vehiculo.tipoRemolque}`:""}
@@ -428,8 +437,10 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               const estados = ["disponible","en_viaje","en_taller","esperando_carga"];
               const e = EST[estado] || EST.disponible;
               return (
-                <div
-                  style={{display:"flex",flexDirection:"column",alignItems:"center",cursor:"pointer"}}
+                <button
+                  type="button"
+                  aria-label={`Estado del vehículo: ${e.label}. Clic para cambiar`}
+                  style={{display:"flex",flexDirection:"column",alignItems:"center",cursor:"pointer",background:"none",border:"none",padding:0}}
                   onClick={async()=>{
                     const idx = estados.indexOf(estado);
                     const siguiente = estados[(idx+1) % estados.length];
@@ -440,7 +451,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                     <Truck size={22} color={e.color} strokeWidth={2} />
                   </div>
                   <p style={{fontSize:t.fonts.sizeXs,color:e.color,margin:"4px 0 0",fontWeight:t.fonts.weightBold}}>{e.label}</p>
-                </div>
+                </button>
               );
             })()}
           </div>
@@ -592,12 +603,19 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                     onChange={e=>setEditData({...editData,tenedor:e.target.value})} style={styles.input} />
                 </div>
                 {/* ADBLUE — toggle + porcentaje */}
-                <div style={{display:"flex", alignItems:"center", gap:"10px", margin:"4px 0 10px", cursor:"pointer"}} onClick={()=>setEditData({...editData, usaAdblue: !editData.usaAdblue})}>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={editData.usaAdblue}
+                  aria-label="¿Este vehículo usa Adblue?"
+                  style={{display:"flex", alignItems:"center", gap:"10px", margin:"4px 0 10px", cursor:"pointer", background:"none", border:"none", padding:0, font:"inherit"}}
+                  onClick={()=>setEditData({...editData, usaAdblue: !editData.usaAdblue})}
+                >
                   <div style={{width:"38px",height:"21px",borderRadius:"11px",background:editData.usaAdblue?t.colors.blue:t.colors.border,position:"relative",transition:"background 0.2s",flexShrink:0}}>
                     <div style={{width:"17px",height:"17px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:editData.usaAdblue?"19px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
                   </div>
-                  <label style={{fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, cursor:"pointer"}}>¿Este vehículo usa Adblue?</label>
-                </div>
+                  <span style={{fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, cursor:"pointer"}}>¿Este vehículo usa Adblue?</span>
+                </button>
                 {editData.usaAdblue && (
                   <div style={styles.campo}>
                     <label style={styles.label}>Consumo Adblue (%)</label>
@@ -664,7 +682,12 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
               viajesFiltrados.map(viaje=>{
                 const ok=(viaje.mrg||0)>=25;
                 return (
-                  <div key={viaje.firestoreId} style={styles.tarjetaViaje} onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}>
+                  <button
+                    type="button"
+                    key={viaje.firestoreId}
+                    style={{...styles.tarjetaViaje, width:"100%", textAlign:"left", background:t.colors.bgCard, border:`1px solid ${t.colors.borderLight}`}}
+                    onClick={()=>navigate(`/viaje/${viaje.firestoreId}`)}
+                  >
                     <div style={{...styles.tarjetaFranja, background:ok?t.colors.green:t.colors.amber}} />
                     <div style={styles.tarjetaViajeContenido}>
                       <div style={{flex:1, minWidth:0}}>
@@ -675,7 +698,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         {(viaje.neta||0)>=0?"+":""}{fmt(viaje.neta||0)}
                       </p>
                     </div>
-                  </div>
+                  </button>
                 );
               })
             )}
@@ -1476,7 +1499,7 @@ const styles = {
   labelMes:            { fontSize:"15px", fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
   btnMeta:             { background:t.colors.blueSoft, border:`1.5px solid ${t.colors.blueBorder}`, borderRadius:t.radius.sm, padding:"6px 12px", fontSize:t.fonts.sizeXs, color:t.colors.blueText, fontWeight:t.fonts.weightBold, cursor:"pointer" },
   editarMeta:          { marginTop:"14px", background:t.colors.bgSection, borderRadius:t.radius.sm, padding:"12px" },
-  input:               { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
+  input:               { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, width:"100%", boxSizing:"border-box" },
   btnGuardarMeta:      { flex:1, padding:"9px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, cursor:"pointer" },
   btnCancelarMeta:     { flex:1, padding:"9px", background:"none", color:t.colors.textSecondary, border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, cursor:"pointer" },
   barraFondo:          { height:"6px", borderRadius:"3px", background:t.colors.bgSection, overflow:"hidden" },
@@ -1486,7 +1509,7 @@ const styles = {
   metricaCardLabel:    { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 6px", textTransform:"uppercase", letterSpacing:"0.05em" },
   metricaCardVal:      { fontSize:"18px", fontWeight:t.fonts.weightBold, margin:0, fontVariantNumeric:"tabular-nums", letterSpacing:"-0.3px" },
   buscadorWrap:        { background:t.colors.bgCard, border:`1.5px solid ${t.colors.border}`, borderRadius:t.radius.md, padding:"11px 14px", marginBottom:"12px", boxShadow:t.shadows.card },
-  buscadorInput:       { width:"100%", border:"none", outline:"none", fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, background:"transparent" },
+  buscadorInput:       { width:"100%", border:"none", fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, background:"transparent" },
   grupoMes:            { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.07em", margin:"0 0 8px" },
   hvSeccion:           { background:t.colors.bgCard, borderRadius:t.radius.lg, marginBottom:"10px", overflow:"hidden", border:`1px solid ${t.colors.borderLight}`, boxShadow:t.shadows.card },
   hvCabecera:          { width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:"14px 16px", background:"none", border:"none", cursor:"pointer" },

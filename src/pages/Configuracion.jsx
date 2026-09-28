@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, User, Mail, Bell, Volume2, MessageCircle, MapPin, Phone, Landmark, Trash2, AlertTriangle, Check } from "lucide-react";
@@ -213,6 +217,10 @@ function Configuracion({mostrarToast}) {
               </div>
             </div>
             <button
+              type="button"
+              role="switch"
+              aria-checked={Boolean(op.valor)}
+              aria-label={op.label}
               style={{
                 ...styles.toggle,
                 background: op.valor ? t.colors.blue : t.colors.border,
@@ -541,7 +549,7 @@ const styles = {
   filaLabel:     { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0 },
   filaSub:       { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0" },
   label:         { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, display:"block", marginBottom:"4px" },
-  inputPerfil:   { width:"100%", boxSizing:"border-box", padding:"10px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, background:t.colors.bgPrimary, color:t.colors.textPrimary, fontSize:t.fonts.sizeSm, outline:"none" },
+  inputPerfil:   { width:"100%", boxSizing:"border-box", padding:"10px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, background:t.colors.bgPrimary, color:t.colors.textPrimary, fontSize:t.fonts.sizeSm },
   toggle:        { width:"44px", height:"24px", borderRadius:"12px", border:"none", cursor:"pointer", position:"relative", transition:"background 0.2s", flexShrink:0 },
   toggleCircle:  { width:"20px", height:"20px", background:"white", borderRadius:"50%", position:"absolute", top:"2px", transition:"transform 0.2s", boxShadow:"0 1px 3px rgba(0,0,0,0.2)" },
 };

@@ -1,4 +1,8 @@
-import { useState, useMemo } from "react";
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
+import { useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, FileText, Check, Eye, Share2, Trash2 } from "lucide-react";
 import { theme as t } from "../styles/theme";
@@ -49,6 +53,7 @@ function numeroALetras(n) {
 }
 
 function Cobros({ viajes = [], empresas = [], perfilFacturacion = {}, onGuardarCuenta, cuentasCobro = [], onEditarCuenta, onEliminarCuenta, mostrarToast }) {
+  const guardandoRef = useRef(false);
   const navigate = useNavigate();
 
   // Estados del flujo de creación
@@ -107,7 +112,9 @@ function Cobros({ viajes = [], empresas = [], perfilFacturacion = {}, onGuardarC
 
   // ── GUARDAR ──
   const guardarCuenta = async () => {
+    if (guardandoRef.current || guardando) return;
     if (!concepto.trim()) { mostrarToast("Escriba el concepto de la cuenta", "error"); return; }
+    guardandoRef.current = true;
     setGuardando(true);
     try {
       const numero = ultimoNum + 1;
@@ -147,6 +154,7 @@ function Cobros({ viajes = [], empresas = [], perfilFacturacion = {}, onGuardarC
       console.error("Error guardando cuenta:", err);
       mostrarToast("Error al guardar la cuenta", "error");
     } finally {
+      guardandoRef.current = false;
       setGuardando(false);
     }
   };
@@ -253,7 +261,7 @@ ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${p.banco} - $
     return (
       <div style={styles.pantalla}>
         <div style={styles.header}>
-          <button style={styles.btnVolver} onClick={() => setModo("lista")}>
+          <button type="button" aria-label="Volver a la lista de cuentas" style={styles.btnVolver} onClick={() => setModo("lista")}>
             <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
           </button>
           <h1 style={styles.titulo}>Nueva cuenta de cobro</h1>
@@ -361,7 +369,7 @@ ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${p.banco} - $
     return (
       <div style={styles.pantalla}>
         <div style={styles.header}>
-          <button style={styles.btnVolver} onClick={() => setModo("seleccionar")}>
+          <button type="button" aria-label="Volver a seleccionar empresa" style={styles.btnVolver} onClick={() => setModo("seleccionar")}>
             <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
           </button>
           <h1 style={styles.titulo}>Concepto</h1>
@@ -416,7 +424,7 @@ ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${p.banco} - $
   return (
     <div style={styles.pantalla}>
       <div style={styles.header}>
-        <button style={styles.btnVolver} onClick={() => navigate(-1)}>
+        <button type="button" aria-label="Volver" style={styles.btnVolver} onClick={() => navigate(-1)}>
           <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
         </button>
         <h1 style={styles.titulo}>Cuentas de cobro</h1>
@@ -426,14 +434,16 @@ ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${p.banco} - $
 
         {/* Perfil incompleto */}
         {!perfilOk && (
-          <div style={{padding:"10px 14px", background:"#FEF3C7", border:"1.5px solid #F59E0B33", borderRadius:t.radius.sm, marginBottom:"14px", display:"flex", alignItems:"center", gap:"8px", cursor:"pointer"}}
+          <button
+            type="button"
+            style={{padding:"10px 14px", background:"#FEF3C7", border:"1.5px solid #F59E0B33", borderRadius:t.radius.sm, marginBottom:"14px", display:"flex", alignItems:"center", gap:"8px", cursor:"pointer", width:"100%", textAlign:"left", font: "inherit"}}
             onClick={() => navigate("/configuracion")}
           >
             <span style={{fontSize:"16px"}}>⚠️</span>
             <p style={{fontSize:t.fonts.sizeXs, color:"#92400E", margin:0}}>
               Complete sus datos de facturación en <strong>Configuración</strong> antes de generar cuentas.
             </p>
-          </div>
+          </button>
         )}
 
         {/* Botón nueva cuenta */}
@@ -496,7 +506,10 @@ ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${p.banco} - $
                     <Check size={14} strokeWidth={2} /> Pagada
                   </button>
                 )}
-                <button style={{...styles.btnAccion, background:t.colors.redSoft, borderColor:t.colors.redBorder, color:t.colors.red}}
+                <button
+                  type="button"
+                  aria-label={`Eliminar cuenta N° ${String(c.numero).padStart(3, "0")}`}
+                  style={{...styles.btnAccion, background:t.colors.redSoft, borderColor:t.colors.redBorder, color:t.colors.red}}
                   onClick={async () => {
                     if (!window.confirm(`¿Eliminar la cuenta N° ${String(c.numero).padStart(3,"0")}?`)) return;
                     try {
@@ -526,7 +539,7 @@ const styles = {
   empresaCard: { width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:"14px", background:t.colors.bgCard, borderRadius:t.radius.md, border:`1.5px solid ${t.colors.border}`, cursor:"pointer", marginBottom:"8px", textAlign:"left" },
   viajeCheck:  { width:"100%", display:"flex", alignItems:"center", gap:"10px", padding:"10px 12px", background:t.colors.bgCard, borderRadius:t.radius.sm, border:`1px solid ${t.colors.borderLight}`, cursor:"pointer", marginBottom:"6px", textAlign:"left" },
   plantilla:   { width:"100%", padding:"10px 12px", borderRadius:t.radius.sm, cursor:"pointer", marginBottom:"6px", textAlign:"left" },
-  inputPerfil: { width:"100%", boxSizing:"border-box", padding:"10px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, background:t.colors.bgPrimary, color:t.colors.textPrimary, fontSize:t.fonts.sizeSm, outline:"none" },
+  inputPerfil: { width:"100%", boxSizing:"border-box", padding:"10px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, background:t.colors.bgPrimary, color:t.colors.textPrimary, fontSize:t.fonts.sizeSm },
   cuentaCard:  { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"14px", marginBottom:"10px", boxShadow:t.shadows.card },
   btnAccion:   { display:"flex", alignItems:"center", gap:"4px", padding:"8px 12px", background:t.colors.bgSection, border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, cursor:"pointer" },
 };

@@ -1,10 +1,15 @@
-import { useState } from "react";
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
+import { useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, User, Trash2, Edit2, Save, AlertCircle } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { sanitizar } from "../utils/validar";
 
 function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEliminar, mostrarToast }) {
+  const guardandoRef = useRef(false);
   const navigate = useNavigate();
   const location = useLocation();
   const [verForm, setVerForm] = useState(false);
@@ -87,8 +92,10 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
   };
 
   const guardar = async () => {
+    if (guardandoRef.current || guardando) return;
     if (!nombre.trim()) { mostrarToast("Ingresa el nombre", "error"); return; }
     if (!editId && conductores.length >= 50) { mostrarToast("Máximo 50 conductores por cuenta", "error"); return; }
+    guardandoRef.current = true;
     setGuardando(true);
     const datos = {
       nombre: sanitizar(nombre).slice(0, 100),
@@ -112,6 +119,7 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
     } catch (err) {
       mostrarToast("Error al guardar", "error");
     } finally {
+      guardandoRef.current = false;
       setGuardando(false);
     }
   };
@@ -119,7 +127,12 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
   return (
     <div style={styles.pantalla}>
       <div style={styles.header}>
-        <button style={styles.btnVolver} onClick={() => navigate(-1)}>
+        <button
+          type="button"
+          aria-label="Volver"
+          style={styles.btnVolver}
+          onClick={() => navigate(-1)}
+        >
           <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
           <span>Volver</span>
         </button>
@@ -131,17 +144,22 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
         {/* ── LIQUIDACIÓN SEMANAL ── */}
         {conductores.length > 0 && !verForm && (
           <div style={{background:t.colors.bgCard,borderRadius:t.radius.lg,padding:"12px 16px",marginBottom:"12px",boxShadow:t.shadows.card,border:`1.5px solid ${t.colors.greenBorder}`}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setVerLiquidacion(!verLiquidacion)}>
+            <button
+              type="button"
+              aria-expanded={verLiquidacion}
+              style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",width:"100%",background:"none",border:"none",padding:0,font:"inherit"}}
+              onClick={()=>setVerLiquidacion(!verLiquidacion)}
+            >
               <span style={{fontSize:t.fonts.sizeSm,fontWeight:t.fonts.weightBold,color:t.colors.green}}>Liquidación del conductor</span>
               <span style={{color:t.colors.textTertiary}}>{verLiquidacion ? "▲" : "▼"}</span>
-            </div>
+            </button>
 
             {verLiquidacion && (
               <div style={{marginTop:"12px"}}>
                 <select
                   value={liqConductor}
                   onChange={e=>setLiqConductor(e.target.value)}
-                  style={{width:"100%",boxSizing:"border-box",padding:"11px 12px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:liqConductor?t.colors.textPrimary:t.colors.textTertiary,fontSize:t.fonts.sizeSm,outline:"none",marginBottom:"10px"}}
+                  style={{width:"100%",boxSizing:"border-box",padding:"11px 12px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:liqConductor?t.colors.textPrimary:t.colors.textTertiary,fontSize:t.fonts.sizeSm,marginBottom:"10px"}}
                 >
                   <option value="">Seleccionar conductor...</option>
                   {[...new Set([...conductores.map(c=>c.nombre), ...viajes.map(v=>v.condNom).filter(Boolean)])].map((nom,i)=>(
@@ -153,12 +171,12 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
                   <div>
                     <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
                     <input type="date" value={liqDesde} onChange={e=>setLiqDesde(e.target.value)}
-                      style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
+                      style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm}}/>
                   </div>
                   <div>
                     <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
                     <input type="date" value={liqHasta} onChange={e=>setLiqHasta(e.target.value)}
-                      style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
+                      style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm}}/>
                   </div>
                 </div>
 
@@ -360,7 +378,7 @@ const styles = {
   campo:       { display: "flex", flexDirection: "column", gap: "5px", marginBottom: "10px" },
   fila2:       { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" },
   label:       { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightSemibold, color: t.colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.05em" },
-  input:       { padding: "11px 12px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeSm, background: t.colors.bgPrimary, color: t.colors.textPrimary, outline: "none", width: "100%", boxSizing: "border-box" },
+  input:       { padding: "11px 12px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeSm, background: t.colors.bgPrimary, color: t.colors.textPrimary, width: "100%", boxSizing: "border-box" },
   btnAgregar:  { width: "100%", padding: "13px", background: t.colors.green, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, cursor: "pointer", marginBottom: "10px" },
   btnGuardar:  { flex: 1, padding: "12px", background: t.colors.blue, color: "#fff", border: "none", borderRadius: t.radius.sm, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" },
   btnCancelar: { padding: "12px 16px", background: "none", border: `1px solid ${t.colors.border}`, borderRadius: t.radius.sm, cursor: "pointer", color: t.colors.textSecondary, fontSize: t.fonts.sizeSm },

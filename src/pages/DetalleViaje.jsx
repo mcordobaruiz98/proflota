@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Trash2, Edit3, Save, X, Check, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send, Repeat, Camera, Paperclip, Calendar, Truck, FileText, Building2, User } from "lucide-react";
@@ -443,7 +447,12 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
 
       {/* HEADER */}
       <div style={styles.header}>
-        <button style={styles.btnVolver} onClick={()=>navigate(-1)}>
+        <button
+          type="button"
+          aria-label="Volver"
+          style={styles.btnVolver}
+          onClick={()=>navigate(-1)}
+        >
           <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
           <span>Volver</span>
         </button>
@@ -490,7 +499,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       {editando && (
         <div style={styles.contenido}>
           <div style={styles.card}>
-            <p style={styles.cardTituloEdit}>Editar datos del viaje</p>
+            <h1 style={styles.cardTituloEdit}>Editar datos del viaje</h1>
 
             <div style={styles.campo}>
               <label style={styles.label}>Fecha</label>
@@ -679,12 +688,19 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
 
             {/* Flete de retorno */}
             <div style={{marginBottom:"12px"}}>
-              <div style={{display:"flex",alignItems:"center",gap:"10px",cursor:"pointer",marginBottom:retornoE?"10px":"0"}} onClick={()=>setRetornoE(!retornoE)}>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={retornoE}
+                aria-label="Flete de retorno"
+                style={{display:"flex",alignItems:"center",gap:"10px",cursor:"pointer",marginBottom:retornoE?"10px":"0",background:"none",border:"none",padding:0,font:"inherit"}}
+                onClick={()=>setRetornoE(!retornoE)}
+              >
                 <div style={{width:"36px",height:"20px",borderRadius:"10px",background:retornoE?t.colors.blue:t.colors.border,position:"relative",transition:"background 0.2s",flexShrink:0}}>
                   <div style={{width:"16px",height:"16px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:retornoE?"18px":"2px",transition:"left 0.2s",boxShadow:"0 1px 2px rgba(0,0,0,0.3)"}} />
                 </div>
                 <span style={{fontSize:t.fonts.sizeSm,color:t.colors.textPrimary}}>Flete de retorno</span>
-              </div>
+              </button>
               {retornoE && (
                 <div style={styles.campo}>
                   <label style={styles.label}>Valor flete retorno ($)</label>
@@ -719,7 +735,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
         <>
           {/* HERO */}
           <div style={styles.hero}>
-            <p style={styles.heroRuta}>{viaje.ruta||"Sin ruta"}</p>
+            <h1 style={styles.heroRuta}>{viaje.ruta||"Sin ruta"}</h1>
             {viaje.tieneRetorno && viaje.rutaRet && (
               <p style={{fontSize:t.fonts.sizeSm,color:t.colors.blueText,margin:"4px 0 0",fontWeight:t.fonts.weightSemibold}}>↩ {viaje.rutaRet}</p>
             )}
@@ -1198,7 +1214,7 @@ const styles = {
   campo:           { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"10px" },
   fila2:           { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },
   label:           { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
-  input:           { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
+  input:           { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, width:"100%", boxSizing:"border-box" },
 };
 
 export default DetalleViaje;

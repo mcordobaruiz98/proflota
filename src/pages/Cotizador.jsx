@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Zap, TrendingUp, TrendingDown, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
@@ -372,7 +376,7 @@ const styles = {
   introBox:   { display:"flex", alignItems:"center", gap:"10px", padding:"12px", background:t.colors.bgSection, borderRadius:t.radius.md, marginBottom:"18px" },
   subSeccion: { fontSize:"11px", fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", margin:"20px 0 4px", paddingBottom:"6px", borderBottom:`1px solid ${t.colors.borderLight}` },
   label:      { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, display:"block", margin:"12px 0 5px" },
-  input:      { width:"100%", boxSizing:"border-box", padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, background:t.colors.bgPrimary, color:t.colors.textPrimary, fontSize:t.fonts.sizeSm, outline:"none" },
+  input:      { width:"100%", boxSizing:"border-box", padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, background:t.colors.bgPrimary, color:t.colors.textPrimary, fontSize:t.fonts.sizeSm },
   grid2:      { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },
   toggleBtn:  { flex:1, padding:"8px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, background:"transparent", color:t.colors.textSecondary, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, cursor:"pointer" },
   toggleActivo:{ background:t.colors.blue, color:"#fff", borderColor:t.colors.blue },

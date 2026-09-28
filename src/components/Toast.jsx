@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useEffect, useState } from "react";
 import { theme as t } from "../styles/theme";
 
@@ -21,26 +25,31 @@ function Toast({ mensaje, tipo = "exito", onCerrar }) {
   const c = colores[tipo] || colores.exito;
 
   return (
-    <div style={{
-      position:     "fixed",
-      top:          "20px",
-      left:         "50%",
-      transform:    "translateX(-50%)",
-      zIndex:       9999,
-      background:   c.bg,
-      border:       `1.5px solid ${c.border}`,
-      borderRadius: t.radius.lg,
-      padding:      "14px 20px",
-      boxShadow:    "0 4px 20px rgba(0,0,0,0.12)",
-      display:      "flex",
-      alignItems:   "center",
-      gap:          "10px",
-      minWidth:     "260px",
-      maxWidth:     "360px",
-      opacity:      visible ? 1 : 0,
-      transition:   "opacity 0.3s ease",
-    }}>
-      <span style={{fontSize:"18px"}}>
+    <div
+      role={tipo === "error" ? "alert" : "status"}
+      aria-live={tipo === "error" ? "assertive" : "polite"}
+      aria-atomic="true"
+      style={{
+        position:     "fixed",
+        top:          "20px",
+        left:         "50%",
+        transform:    "translateX(-50%)",
+        zIndex:       9999,
+        background:   c.bg,
+        border:       `1.5px solid ${c.border}`,
+        borderRadius: t.radius.lg,
+        padding:      "14px 20px",
+        boxShadow:    "0 4px 20px rgba(0,0,0,0.12)",
+        display:      "flex",
+        alignItems:   "center",
+        gap:          "10px",
+        minWidth:     "260px",
+        maxWidth:     "360px",
+        opacity:      visible ? 1 : 0,
+        transition:   "opacity 0.3s ease",
+      }}
+    >
+      <span style={{fontSize:"18px"}} aria-hidden="true">
         {tipo === "exito" ? "✅" : tipo === "error" ? "❌" : "ℹ️"}
       </span>
       <p style={{
@@ -53,6 +62,8 @@ function Toast({ mensaje, tipo = "exito", onCerrar }) {
         {mensaje}
       </p>
       <button
+        type="button"
+        aria-label="Cerrar notificación"
         onClick={() => { setVisible(false); setTimeout(onCerrar, 300); }}
         style={{background:"none", border:"none", cursor:"pointer", fontSize:"16px", color:c.color, padding:0}}
       >

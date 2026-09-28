@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Search, Trash2, Save, Handshake } from "lucide-react";
@@ -192,7 +196,7 @@ function Empresas({ empresas = [], onAgregar, onEliminar, mostrarToast }) {
     </button>
   </div>
 ) : (
-  <button style={styles.btnEliminar} onClick={() => setEmpresaAEliminar(emp)}>
+  <button type="button" aria-label={`Eliminar empresa ${emp.razonSocial}`} style={styles.btnEliminar} onClick={() => setEmpresaAEliminar(emp)}>
     <Trash2 size={16} color={t.colors.red} strokeWidth={1.8} />
   </button>
 )}
@@ -211,7 +215,7 @@ const styles = {
   btnVolver:         { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
   btnAgregar:        { display:"flex", alignItems:"center", gap:"6px", padding:"10px 16px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer" },
   buscadorWrap:      { display:"flex", alignItems:"center", gap:"10px", margin:"12px 16px 8px", background:t.colors.bgCard, border:`1.5px solid ${t.colors.border}`, borderRadius:t.radius.md, padding:"11px 14px", boxShadow:t.shadows.card },
-  buscadorInput:     { flex:1, border:"none", outline:"none", fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, background:"transparent" },
+  buscadorInput:     { flex:1, border:"none", fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, background:"transparent" },
   vacio:             { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"48px 24px", textAlign:"center", margin:"8px 16px", boxShadow:t.shadows.card },
   vacioIconoWrap:    { width:"72px", height:"72px", background:t.colors.blueSoft, borderRadius:t.radius.xl, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 16px" },
   vacioTexto:        { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 6px" },
@@ -231,7 +235,7 @@ const styles = {
   campo:             { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"12px" },
   fila2:             { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },
   label:             { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
-  input:             { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
+  input:             { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, width:"100%", boxSizing:"border-box" },
   error:             { fontSize:t.fonts.sizeXs, color:t.colors.red, margin:"3px 0 0", fontWeight:t.fonts.weightMedium },
   btnGuardar:        { width:"100%", padding:"15px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", marginTop:"8px" },
 };

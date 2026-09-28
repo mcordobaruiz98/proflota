@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Target, Edit3, Save, X } from "lucide-react";
@@ -165,7 +169,7 @@ const styles = {
   fila3:          { display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"10px", marginBottom:"4px" },
   campo:          { display:"flex", flexDirection:"column", gap:"5px" },
   label:          { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
-  input:          { padding:"10px 10px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", width:"100%", boxSizing:"border-box" },
+  input:          { padding:"10px 10px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, width:"100%", boxSizing:"border-box" },
   btnGuardar:     { flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:"6px", padding:"10px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, cursor:"pointer" },
   btnCancelar:    { flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:"6px", padding:"10px", background:"none", color:t.colors.textSecondary, border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, cursor:"pointer" },
   cardTop:        { display:"flex", justifyContent:"space-between", alignItems:"center" },

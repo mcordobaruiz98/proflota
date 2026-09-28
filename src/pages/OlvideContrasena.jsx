@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState }    from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Mail, Send } from "lucide-react";
@@ -105,7 +109,7 @@ const styles = {
   card:           { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"20px", margin:"0 16px 16px", boxShadow:t.shadows.card },
   campo:          { display:"flex", flexDirection:"column", gap:"6px", marginBottom:"14px" },
   label:          { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
-  input:          { width:"100%", padding:"13px 14px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeMd, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", boxSizing:"border-box" },
+  input:          { width:"100%", padding:"13px 14px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeMd, background:t.colors.bgPrimary, color:t.colors.textPrimary, boxSizing:"border-box" },
   errorBox:       { background:t.colors.redSoft, border:`1.5px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, padding:"11px 14px", fontSize:t.fonts.sizeSm, color:t.colors.red, marginBottom:"16px", textAlign:"center", fontWeight:t.fonts.weightMedium },
   btnEnviar:      { width:"100%", padding:"14px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px" },
   loginLink:      { textAlign:"center", fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, padding:"0 20px" },

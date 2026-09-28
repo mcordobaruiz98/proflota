@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
@@ -72,7 +76,7 @@ function Login() {
       {/* CARD */}
       <form style={styles.card} onSubmit={e=>{e.preventDefault();handleLogin();}}>
 
-        <h2 style={styles.cardTitulo}>Iniciar sesión</h2>
+        <h1 style={styles.cardTitulo}>Iniciar sesión</h1>
 
         <div style={styles.campo}>
           <label style={styles.label}>Correo electrónico</label>
@@ -90,6 +94,7 @@ function Login() {
           <div style={styles.labelFila}>
             <label style={styles.label}>Contraseña</label>
             <button
+              type="button"
               style={styles.btnOlvide}
               onClick={() => navigate("/olvide-contrasena")}
             >
@@ -105,7 +110,12 @@ function Login() {
               style={{ ...styles.input, paddingRight: "44px" }}
               autoComplete="current-password"
             />
-            <button type="button" style={styles.btnOjo} onClick={() => setVerPass(!verPass)}>
+            <button
+              type="button"
+              aria-label={verPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+              style={styles.btnOjo}
+              onClick={() => setVerPass(!verPass)}
+            >
               {verPass ? <EyeOff size={18} color={t.colors.textTertiary}/> : <Eye size={18} color={t.colors.textTertiary}/>}
             </button>
           </div>
@@ -141,17 +151,25 @@ function Login() {
             onChange={e=>setCodigoBeta(e.target.value.trim().toUpperCase())}
             style={{...styles.input,textAlign:"center",marginBottom:"10px",letterSpacing:"2px",fontWeight:"bold"}}
           />
-          <div style={{display:"flex",gap:"10px",alignItems:"flex-start",marginBottom:"12px",cursor:"pointer"}} onClick={()=>setAceptaTerminos(!aceptaTerminos)}>
-            <div style={{
-              width:"18px",height:"18px",borderRadius:"4px",flexShrink:0,marginTop:"1px",
-              border:`2px solid ${aceptaTerminos ? t.colors.green : t.colors.border}`,
-              background: aceptaTerminos ? t.colors.green : "transparent",
-              display:"flex",alignItems:"center",justifyContent:"center",
-            }}>
+          <div style={{display:"flex",gap:"10px",alignItems:"flex-start",marginBottom:"12px"}}>
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked={aceptaTerminos}
+              aria-label="Aceptar términos y condiciones"
+              onClick={()=>setAceptaTerminos(!aceptaTerminos)}
+              style={{
+                width:"18px",height:"18px",borderRadius:"4px",flexShrink:0,marginTop:"1px",
+                border:`2px solid ${aceptaTerminos ? t.colors.green : t.colors.border}`,
+                background: aceptaTerminos ? t.colors.green : "transparent",
+                display:"flex",alignItems:"center",justifyContent:"center",
+                padding:0,cursor:"pointer",
+              }}
+            >
               {aceptaTerminos && <span style={{color:"#fff",fontSize:"11px",fontWeight:900,lineHeight:1}}>✓</span>}
-            </div>
+            </button>
             <p style={{fontSize:"11px",color:t.colors.textSecondary,margin:0,lineHeight:1.5}}>
-              Acepto los <span style={{color:t.colors.blueText,textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Términos</span> y autorizo el tratamiento de mis datos según la <span style={{color:t.colors.blueText,textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Política de Privacidad</span>.
+              Acepto los <button type="button" style={{color:t.colors.blueText,textDecoration:"underline",background:"none",border:"none",padding:0,fontSize:"inherit",cursor:"pointer"}} onClick={()=>navigate("/acerca")}>Términos</button> y autorizo el tratamiento de mis datos según la <button type="button" style={{color:t.colors.blueText,textDecoration:"underline",background:"none",border:"none",padding:0,fontSize:"inherit",cursor:"pointer"}} onClick={()=>navigate("/acerca")}>Política de Privacidad</button>.
             </p>
           </div>
         </div>
@@ -200,7 +218,7 @@ const styles = {
   labelFila:      { display: "flex", justifyContent: "space-between", alignItems: "center" },
   label:          { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightSemibold, color: t.colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.05em" },
   inputWrap:      { position: "relative" },
-  input:          { width: "100%", padding: "13px 14px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeMd, background: t.colors.bgPrimary, color: t.colors.textPrimary, outline: "none", boxSizing: "border-box", transition: "border-color 0.15s" },
+  input:          { width: "100%", padding: "13px 14px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeMd, background: t.colors.bgPrimary, color: t.colors.textPrimary, boxSizing: "border-box", transition: "border-color 0.15s" },
   btnOjo:         { position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "4px", display: "flex", alignItems: "center" },
   btnOlvide:      { background: "none", border: "none", fontSize: t.fonts.sizeXs, color: t.colors.blueText, cursor: "pointer", padding: 0, fontWeight: t.fonts.weightSemibold },
   errorBox:       { background: t.colors.redSoft, border: `1.5px solid ${t.colors.redBorder}`, borderRadius: t.radius.sm, padding: "11px 14px", fontSize: t.fonts.sizeSm, color: t.colors.redText, marginBottom: "16px", textAlign: "center", fontWeight: t.fonts.weightMedium },

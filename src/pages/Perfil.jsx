@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, User, Lock, Save, Users, Settings, HelpCircle, Info, LogOut, ChevronUp, ChevronRight, Eye, EyeOff } from "lucide-react";
@@ -89,7 +93,11 @@ function Perfil({ mostrarToast }) {
         {/* MI FLOTA */}
         <p style={styles.seccionTitulo}>Mi flota</p>
         <div style={styles.card}>
-          <div style={styles.filaMenu} onClick={()=>navigate("/conductores")}>
+          <button
+            type="button"
+            style={{...styles.filaMenu, width: "100%", background: "none", border: "none", textAlign: "left", font: "inherit", cursor: "pointer"}}
+            onClick={()=>navigate("/conductores")}
+          >
             <div style={styles.filaIzq}>
               <div style={{...styles.iconoBox, background:t.colors.blueSoft}}>
                 <Users size={16} color={t.colors.blueText} strokeWidth={2}/>
@@ -100,7 +108,7 @@ function Perfil({ mostrarToast }) {
               </div>
             </div>
             <ChevronRight size={17} color={t.colors.textTertiary}/>
-          </div>
+          </button>
         </div>
 
         {/* MI CUENTA */}
@@ -108,7 +116,12 @@ function Perfil({ mostrarToast }) {
         <div style={styles.card}>
 
           {/* Editar nombre — colapsable */}
-          <div style={{...styles.filaMenu, borderBottom: (!esGoogle || editNombre) ? `1px solid ${t.colors.borderLight}` : "none"}} onClick={()=>setEditNombre(!editNombre)}>
+          <button
+            type="button"
+            aria-expanded={editNombre}
+            style={{...styles.filaMenu, width: "100%", background: "none", border: "none", textAlign: "left", font: "inherit", cursor: "pointer", borderBottom: (!esGoogle || editNombre) ? `1px solid ${t.colors.borderLight}` : "none"}}
+            onClick={()=>setEditNombre(!editNombre)}
+          >
             <div style={styles.filaIzq}>
               <div style={{...styles.iconoBox, background:t.colors.blueSoft}}>
                 <User size={16} color={t.colors.blueText} strokeWidth={2}/>
@@ -116,7 +129,7 @@ function Perfil({ mostrarToast }) {
               <p style={styles.filaLabel}>Editar nombre</p>
             </div>
             {editNombre ? <ChevronUp size={17} color={t.colors.textTertiary}/> : <ChevronRight size={17} color={t.colors.textTertiary}/>}
-          </div>
+          </button>
           {editNombre && (
             <div style={{padding:"12px 4px 14px", borderBottom: !esGoogle ? `1px solid ${t.colors.borderLight}` : "none"}}>
               <input
@@ -127,6 +140,7 @@ function Perfil({ mostrarToast }) {
                 style={styles.input}
               />
               <button
+                type="button"
                 style={{...styles.btnAccion, opacity:guardandoNom?0.75:1}}
                 onClick={guardarNombre}
                 disabled={guardandoNom}
@@ -140,7 +154,12 @@ function Perfil({ mostrarToast }) {
           {/* Cambiar contraseña — colapsable, solo cuentas de correo */}
           {!esGoogle && (
             <>
-              <div style={styles.filaMenu} onClick={()=>setEditContrasena(!editContrasena)}>
+              <button
+                type="button"
+                aria-expanded={editContrasena}
+                style={{...styles.filaMenu, width: "100%", background: "none", border: "none", textAlign: "left", font: "inherit", cursor: "pointer"}}
+                onClick={()=>setEditContrasena(!editContrasena)}
+              >
                 <div style={styles.filaIzq}>
                   <div style={{...styles.iconoBox, background:t.colors.blueSoft}}>
                     <Lock size={16} color={t.colors.blueText} strokeWidth={2}/>
@@ -148,7 +167,7 @@ function Perfil({ mostrarToast }) {
                   <p style={styles.filaLabel}>Cambiar contraseña</p>
                 </div>
                 {editContrasena ? <ChevronUp size={17} color={t.colors.textTertiary}/> : <ChevronRight size={17} color={t.colors.textTertiary}/>}
-              </div>
+              </button>
               {editContrasena && (
                 <div style={{padding:"12px 4px 14px"}}>
                   <div style={{position:"relative"}}>
@@ -159,7 +178,12 @@ function Perfil({ mostrarToast }) {
                       onChange={e=>setContActual(e.target.value)}
                       style={styles.input}
                     />
-                    <button style={styles.btnOjo} onClick={()=>setVerActual(!verActual)}>
+                    <button
+                      type="button"
+                      aria-label={verActual ? "Ocultar contraseña actual" : "Mostrar contraseña actual"}
+                      style={styles.btnOjo}
+                      onClick={()=>setVerActual(!verActual)}
+                    >
                       {verActual ? <EyeOff size={16} color={t.colors.textTertiary}/> : <Eye size={16} color={t.colors.textTertiary}/>}
                     </button>
                   </div>
@@ -171,7 +195,12 @@ function Perfil({ mostrarToast }) {
                       onChange={e=>setContNueva(e.target.value)}
                       style={styles.input}
                     />
-                    <button style={styles.btnOjo} onClick={()=>setVerNueva(!verNueva)}>
+                    <button
+                      type="button"
+                      aria-label={verNueva ? "Ocultar nueva contraseña" : "Mostrar nueva contraseña"}
+                      style={styles.btnOjo}
+                      onClick={()=>setVerNueva(!verNueva)}
+                    >
                       {verNueva ? <EyeOff size={16} color={t.colors.textTertiary}/> : <Eye size={16} color={t.colors.textTertiary}/>}
                     </button>
                   </div>
@@ -273,7 +302,7 @@ const styles = {
   iconoBox:       { width:"34px", height:"34px", borderRadius:"9px", background:t.colors.bgSection, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 },
   filaLabel:      { fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold, color:t.colors.textPrimary, margin:0 },
   filaSub:        { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"2px 0 0" },
-  input:          { width:"100%", boxSizing:"border-box", padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, outline:"none", marginBottom:"8px" },
+  input:          { width:"100%", boxSizing:"border-box", padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, marginBottom:"8px" },
   btnOjo:         { position:"absolute", right:"10px", top:"9px", background:"none", border:"none", cursor:"pointer", padding:"2px", display:"flex", alignItems:"center" },
   btnAccion:      { width:"100%", padding:"11px", background:`linear-gradient(135deg, ${t.colors.green}, ${t.colors.greenDeep || "#12A150"})`, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"6px", boxShadow:t.shadows.md },
   btnCerrarSesion:{ width:"100%", padding:"13px", background:"none", color:t.colors.redText, border:`1.5px solid ${t.colors.redBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", marginTop:"14px" },

@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Clock, AlertCircle, Search, ChevronUp, ChevronDown, FileText, Calendar } from "lucide-react";
@@ -177,12 +181,12 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
               <div>
                 <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
                 <input type="date" value={rangoDesde} onChange={e=>{setRangoDesde(e.target.value);setPeriodo("rango");}}
-                  style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
+                  style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm}}/>
               </div>
               <div>
                 <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
                 <input type="date" value={rangoHasta} onChange={e=>{setRangoHasta(e.target.value);setPeriodo("rango");}}
-                  style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,outline:"none"}}/>
+                  style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm}}/>
               </div>
             </div>
           </div>
@@ -254,7 +258,11 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
                     borderBottom: i === arr.length - 1 ? "none" : `1px solid ${t.colors.borderLight}`,
                   }}
                 >
-                  <div style={{ flex: 1, minWidth: 0, cursor: "pointer" }} onClick={() => navigate(`/viaje/${v.firestoreId}`)}>
+                  <button
+                    type="button"
+                    style={{ flex: 1, minWidth: 0, cursor: "pointer", background: "none", border: "none", padding: 0, textAlign: "left", font: "inherit" }}
+                    onClick={() => navigate(`/viaje/${v.firestoreId}`)}
+                  >
                     <p style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightSemibold, color: t.colors.textPrimary, margin: 0 }}>
                       {v.ruta || "Sin ruta"}
                     </p>
@@ -266,7 +274,7 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
                             ` · Vence en ${dias} días`
                       }
                     </p>
-                  </div>
+                  </button>
 
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "10px" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
@@ -325,7 +333,7 @@ const styles = {
   titulo:    { fontSize: "18px", fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: 0 },
   contenido: { padding: "12px 16px 16px" },
   card:      { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "16px", marginBottom: "10px", border: `1px solid ${t.colors.borderLight}`, boxShadow: t.shadows.card },
-  input:     { width: "100%", padding: "11px 12px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeSm, background: t.colors.bgPrimary, color: t.colors.textPrimary, outline: "none", boxSizing: "border-box" },
+  input:     { width: "100%", padding: "11px 12px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeSm, background: t.colors.bgPrimary, color: t.colors.textPrimary, boxSizing: "border-box" },
   chips:     { display: "flex", gap: "6px", marginBottom: "12px", overflowX: "auto" },
   chip:      { padding: "7px 14px", borderRadius: t.radius.full, border: `1.5px solid ${t.colors.border}`, background: "none", color: t.colors.textSecondary, fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightSemibold, cursor: "pointer", whiteSpace: "nowrap", display: "flex", alignItems: "center" },
   chipActivo: { background: t.colors.blueSoft, borderColor: t.colors.blue, color: t.colors.blueText },

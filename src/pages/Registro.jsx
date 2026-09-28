@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
@@ -118,7 +122,12 @@ function Registro() {
                 style={{ ...styles.input, paddingRight: "44px" }}
                 autoComplete="new-password"
               />
-              <button type="button" style={styles.btnOjo} onClick={() => setVerPass(!verPass)}>
+              <button
+                type="button"
+                aria-label={verPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+                style={styles.btnOjo}
+                onClick={() => setVerPass(!verPass)}
+              >
                 {verPass ? <EyeOff size={18} color={t.colors.textTertiary}/> : <Eye size={18} color={t.colors.textTertiary}/>}
               </button>
             </div>
@@ -136,7 +145,12 @@ function Registro() {
                 style={{ ...styles.input, paddingRight: "44px" }}
                 autoComplete="new-password"
               />
-              <button type="button" style={styles.btnOjo} onClick={() => setVerConf(!verConf)}>
+              <button
+                type="button"
+                aria-label={verConf ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"}
+                style={styles.btnOjo}
+                onClick={() => setVerConf(!verConf)}
+              >
                 {verConf ? <EyeOff size={18} color={t.colors.textTertiary}/> : <Eye size={18} color={t.colors.textTertiary}/>}
               </button>
             </div>
@@ -159,20 +173,28 @@ function Registro() {
         </form>
 
         {/* ACEPTACIÓN DE TÉRMINOS — Ley 1581/2012 */}
-        <div style={{display:"flex",gap:"10px",alignItems:"flex-start",margin:"4px 0 12px",cursor:"pointer"}} onClick={()=>{setAceptaTerminos(!aceptaTerminos); setErrores({...errores, terminos:null});}}>
-          <div style={{
-            width:"20px",height:"20px",borderRadius:"5px",flexShrink:0,marginTop:"1px",
-            border:`2px solid ${aceptaTerminos ? t.colors.green : (errores.terminos ? t.colors.red : t.colors.border)}`,
-            background: aceptaTerminos ? t.colors.green : "transparent",
-            display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",
-          }}>
+        <div style={{display:"flex",gap:"10px",alignItems:"flex-start",margin:"4px 0 12px"}}>
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={aceptaTerminos}
+            aria-label="Aceptar términos y condiciones"
+            onClick={()=>{setAceptaTerminos(!aceptaTerminos); setErrores({...errores, terminos:null});}}
+            style={{
+              width:"20px",height:"20px",borderRadius:"5px",flexShrink:0,marginTop:"1px",
+              border:`2px solid ${aceptaTerminos ? t.colors.green : (errores.terminos ? t.colors.red : t.colors.border)}`,
+              background: aceptaTerminos ? t.colors.green : "transparent",
+              display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",
+              padding:0,cursor:"pointer",
+            }}
+          >
             {aceptaTerminos && <span style={{color:"#fff",fontSize:"13px",fontWeight:900,lineHeight:1}}>✓</span>}
-          </div>
+          </button>
           <p style={{fontSize:"12px",color:t.colors.textSecondary,margin:0,lineHeight:1.5}}>
             Acepto los{" "}
-            <span style={{color:t.colors.blueText,fontWeight:600,textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Términos y Condiciones</span>
+            <button type="button" style={{color:t.colors.blueText,fontWeight:600,textDecoration:"underline",background:"none",border:"none",padding:0,fontSize:"inherit",cursor:"pointer"}} onClick={()=>navigate("/acerca")}>Términos y Condiciones</button>
             {" "}y autorizo el tratamiento de mis datos personales conforme a la{" "}
-            <span style={{color:t.colors.blueText,fontWeight:600,textDecoration:"underline"}} onClick={(e)=>{e.stopPropagation(); navigate("/acerca");}}>Política de Privacidad</span>
+            <button type="button" style={{color:t.colors.blueText,fontWeight:600,textDecoration:"underline",background:"none",border:"none",padding:0,fontSize:"inherit",cursor:"pointer"}} onClick={()=>navigate("/acerca")}>Política de Privacidad</button>
             {" "}(Ley 1581 de 2012).
           </p>
         </div>
@@ -210,7 +232,7 @@ const styles = {
   campo:        { display: "flex", flexDirection: "column", gap: "6px", marginBottom: "14px" },
   label:        { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightSemibold, color: t.colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.05em" },
   inputWrap:    { position: "relative" },
-  input:        { width: "100%", padding: "13px 14px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeMd, background: t.colors.bgPrimary, color: t.colors.textPrimary, outline: "none", boxSizing: "border-box" },
+  input:        { width: "100%", padding: "13px 14px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeMd, background: t.colors.bgPrimary, color: t.colors.textPrimary, boxSizing: "border-box" },
   btnOjo:       { position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "4px", display: "flex", alignItems: "center" },
   error:        { fontSize: t.fonts.sizeXs, color: t.colors.redText, margin: "3px 0 0", fontWeight: t.fonts.weightMedium },
   errorBox:     { background: t.colors.redSoft, border: `1.5px solid ${t.colors.redBorder}`, borderRadius: t.radius.sm, padding: "11px 14px", fontSize: t.fonts.sizeSm, color: t.colors.redText, marginBottom: "16px", textAlign: "center", fontWeight: t.fonts.weightMedium },

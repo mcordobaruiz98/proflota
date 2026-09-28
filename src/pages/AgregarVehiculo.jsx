@@ -1,4 +1,8 @@
-import { useState } from "react";
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Camera } from "lucide-react";
 import { theme as t } from "../styles/theme";
@@ -7,6 +11,7 @@ import { useAuth } from "../hooks/useAuth";
 
 
 function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
+  const guardandoRef = useRef(false);
   const navigate = useNavigate();
   const { usuario } = useAuth();
 
@@ -37,21 +42,30 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
   };
 
   const guardarVehiculo = async () => {
+    if (guardandoRef.current || guardando) return;
     if (vehiculos && vehiculos.length >= 50) { setErrores({general:"Máximo 50 vehículos por cuenta"}); return; }
     const e = validar();
     if (Object.keys(e).length > 0) { setErrores(e); return; }
+    guardandoRef.current = true;
     setGuardando(true);
-    await onGuardar({
-      tipoVehiculo, tipoRemolque,
-      placa:         placa.trim().toUpperCase(),
-      placaRemolque: placaRemolque.trim().toUpperCase(),
-      marca, modelo,
-      conductor: conductorAsignado,
-      propietario:   propietario.trim(),
-      tenedor:       tenedor.trim(),
-      fotoUrl,
-    });
-    navigate("/vehiculos");
+    try {
+      await onGuardar({
+        tipoVehiculo, tipoRemolque,
+        placa:         placa.trim().toUpperCase(),
+        placaRemolque: placaRemolque.trim().toUpperCase(),
+        marca, modelo,
+        conductor: conductorAsignado,
+        propietario:   propietario.trim(),
+        tenedor:       tenedor.trim(),
+        fotoUrl,
+      });
+      navigate("/vehiculos");
+    } catch (err) {
+      setErrores({ general: "Error al guardar el vehículo. Intente nuevamente." });
+    } finally {
+      guardandoRef.current = false;
+      setGuardando(false);
+    }
   };
 
   return (
@@ -59,7 +73,12 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
 
       {/* HEADER */}
       <div style={styles.header}>
-        <button style={styles.btnVolver} onClick={() => navigate(-1)}>
+        <button
+          type="button"
+          aria-label="Volver a lista de vehículos"
+          style={styles.btnVolver}
+          onClick={() => navigate(-1)}
+        >
           <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
           <span>Vehículos</span>
         </button>
@@ -342,7 +361,7 @@ const styles = {
   campo:        { display: "flex", flexDirection: "column", gap: "5px", marginBottom: "12px" },
   fila2:        { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" },
   label:        { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightSemibold, color: t.colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.05em" },
-  input:        { padding: "11px 12px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeSm, background: t.colors.bgPrimary, color: t.colors.textPrimary, outline: "none", width: "100%", boxSizing: "border-box" },
+  input:        { padding: "11px 12px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeSm, background: t.colors.bgPrimary, color: t.colors.textPrimary, width: "100%", boxSizing: "border-box" },
   error:        { fontSize: t.fonts.sizeXs, color: t.colors.red, margin: "3px 0 0", fontWeight: t.fonts.weightMedium },
   btnGuardar:   { width: "100%", padding: "15px", background: `linear-gradient(135deg, ${t.colors.green} 0%, ${t.colors.greenDeep || "#12A150"} 100%)`, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBold, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginTop: "8px" },
 };
