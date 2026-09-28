@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, User, Mail, Bell, Volume2, MessageCircle, MapPin, Phone, Landmark, Trash2, AlertTriangle, Check } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { httpsCallable } from "firebase/functions";
+import { db, functions } from "../firebase";
 import { theme as t } from "../styles/theme";
 import FirmaCanvas from "../components/FirmaCanvas";
 
@@ -13,7 +14,7 @@ function Configuracion({mostrarToast}) {
   const [confirmaEliminar, setConfirmaEliminar] = useState(false);
   const [textoConfirm, setTextoConfirm] = useState("");
   const [eliminando, setEliminando] = useState(false);
-  const [codigoTelegram, setCodigoTelegram] = useState(null);
+  const [vinculoData, setVinculoData] = useState(null);
   const [generandoCodigo, setGenerandoCodigo] = useState(false);
   const [perfilFact, setPerfilFact] = useState({
     nombreCompleto: "", tipoDoc: "CC", numeroDoc: "",
@@ -105,17 +106,16 @@ function Configuracion({mostrarToast}) {
     }
   };
 
-  const generarCodigoTelegram = async () => {
+  const generarTokenTelegram = async () => {
     setGenerandoCodigo(true);
     try {
-      const codigo = Math.random().toString(36).slice(2, 8).toUpperCase();
-      await setDoc(doc(db, "telegram_vinculos", codigo), {
-        uid: usuario.uid,
-        creadoEn: new Date().toISOString(),
-      });
-      setCodigoTelegram(codigo);
+      const fn = httpsCallable(functions, "generarTokenVinculacionTelegram");
+      const res = await fn();
+      setVinculoData(res.data);
+      mostrarToast("Enlace de vinculación generado con éxito", "exito");
     } catch (err) {
-      mostrarToast("Error generando código", "error");
+      console.error("Error generando token de Telegram:", err);
+      mostrarToast("Error generando enlace de vinculación", "error");
     } finally {
       setGenerandoCodigo(false);
     }
@@ -238,32 +238,57 @@ function Configuracion({mostrarToast}) {
           El bot conoce sus vehículos y rutas, y le calcula la ganancia al instante.
         </p>
 
-        {!codigoTelegram ? (
+        {!vinculoData ? (
           <button
             style={{width:"100%", padding:"12px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer"}}
-            onClick={generarCodigoTelegram}
+            onClick={generarTokenTelegram}
             disabled={generandoCodigo}
           >
-            {generandoCodigo ? "Generando..." : "Generar código de vinculación"}
+            {generandoCodigo ? "Generando enlace seguro..." : "Generar enlace de vinculación"}
           </button>
         ) : (
           <div>
-            <div style={{textAlign:"center", padding:"14px", background:t.colors.bgSection, borderRadius:t.radius.md, marginBottom:"10px"}}>
-              <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 4px"}}>Su código:</p>
-              <p style={{fontSize:"26px", fontWeight:t.fonts.weightBlack, color:t.colors.green, letterSpacing:"4px", margin:0, ...t.numeric}}>{codigoTelegram}</p>
+            <div style={{textAlign:"center", padding:"16px", background:t.colors.bgSection, borderRadius:t.radius.md, marginBottom:"12px", border:`1px solid ${t.colors.borderLight}`}}>
+              <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 10px"}}>
+                Conecte su cuenta en Telegram con 1 solo clic:
+              </p>
+              <a
+                href={vinculoData.linkTelegram}
+                target="_blank" rel="noreferrer"
+                style={{
+                  display:"inline-flex", alignItems:"center", justifyContent:"center", gap:"8px",
+                  width:"100%", padding:"13px", background:t.colors.blue, color:"#fff",
+                  borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold,
+                  textDecoration:"none", boxSizing:"border-box"
+                }}
+              >
+                <MessageCircle size={18} /> Abrir Telegram y Vincular
+              </a>
+              <p style={{fontSize:"11px", color:t.colors.textTertiary, margin:"8px 0 0"}}>
+                ⏱️ Este enlace es personal y expira en 15 minutos por seguridad.
+              </p>
             </div>
-            <ol style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, paddingLeft:"18px", margin:"0 0 10px", lineHeight:1.7}}>
-              <li>Abra Telegram y busque <b style={{color:t.colors.textPrimary}}>@Naviraflota_bot</b></li>
-              <li>Escríbale: <b style={{color:t.colors.textPrimary}}>/vincular {codigoTelegram}</b></li>
-              <li>Listo — escriba /nuevo para su primer viaje</li>
-            </ol>
-            <a
-              href="https://t.me/Naviraflota_bot"
-              target="_blank" rel="noreferrer"
-              style={{display:"block", textAlign:"center", padding:"11px", background:t.colors.greenSoft, border:`1.5px solid ${t.colors.greenBorder}`, borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, color:t.colors.green, textDecoration:"none"}}
-            >
-              Abrir el bot en Telegram
-            </a>
+
+            <div style={{padding:"12px", background:t.colors.bgSurface, borderRadius:t.radius.md, border:`1px dashed ${t.colors.border}`}}>
+              <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"0 0 6px"}}>
+                ¿Prefiere escribir el comando manualmente en el bot?
+              </p>
+              <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
+                <code style={{flex:1, fontSize:"11px", padding:"6px 8px", background:t.colors.bgSection, borderRadius:t.radius.sm, color:t.colors.textPrimary, overflowX:"auto", whiteSpace:"nowrap"}}>
+                  /vincular {vinculoData.token}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`/vincular ${vinculoData.token}`);
+                    mostrarToast("Comando copiado al portapapeles", "exito");
+                  }}
+                  style={{padding:"6px 10px", background:t.colors.borderLight, border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, cursor:"pointer", color:t.colors.textPrimary}}
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
