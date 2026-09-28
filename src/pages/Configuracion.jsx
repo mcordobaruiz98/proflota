@@ -6,7 +6,6 @@ import { useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, User, Mail, Bell, Volume2, MessageCircle, MapPin, Phone, Landmark, Trash2, AlertTriangle, Check } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-import { subirPeajes } from "../scripts/subirPeajes";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { theme as t } from "../styles/theme";

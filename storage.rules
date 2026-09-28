@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    // BE-08: Validación de tipos MIME permitidos (imágenes y PDFs de soporte)
+    function esTipoPermitido() {
+      return request.resource.contentType.matches('image/jpeg') ||
+             request.resource.contentType.matches('image/png') ||
+             request.resource.contentType.matches('image/webp') ||
+             request.resource.contentType.matches('application/pdf');
+    }
+
+    // BE-08: Validación estricta de tamaño máximo (10 MiB)
+    function esTamanoPermitido() {
+      return request.resource.size <= 10 * 1024 * 1024;
+    }
+
+    // Aislamiento de almacenamiento por usuario (firmas, documentos, comprobantes)
+    match /usuarios/{uid}/{allPaths=**} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && esTipoPermitido() && esTamanoPermitido();
+      allow delete: if isOwner(uid);
+    }
+
+    // Regla fail-closed por defecto para cualquier otra ruta no autorizada
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

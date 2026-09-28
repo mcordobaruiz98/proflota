@@ -1,0 +1,164 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Funciones auxiliares de autenticación y propiedad ──
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    // ── [BE-03] Validadores de esquema y longitud para Create y Update ──
+    function esStringValido(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    function esStringOpcional(data, campo, maxLen) {
+      return !(campo in data) || data[campo] == null || (data[campo] is string && data[campo].size() <= maxLen);
+    }
+
+    function esNumeroOpcional(data, campo, minVal) {
+      return !(campo in data) || data[campo] == null || (data[campo] is number && data[campo] >= minVal);
+    }
+
+    function validarVehiculo(data) {
+      return esStringValido(data.placa, 3, 12) &&
+             esNumeroOpcional(data, 'kmOdometro', 0) &&
+             esStringOpcional(data, 'tipo', 40) &&
+             esStringOpcional(data, 'marca', 50) &&
+             esStringOpcional(data, 'modelo', 20) &&
+             data.keys().size() <= 40;
+    }
+
+    function validarViaje(data) {
+      return esStringOpcional(data, 'placa', 12) &&
+             esNumeroOpcional(data, 'kmT', 0) &&
+             esStringOpcional(data, 'origen', 100) &&
+             esStringOpcional(data, 'destino', 100) &&
+             esStringOpcional(data, 'fecha', 30) &&
+             data.keys().size() <= 60;
+    }
+
+    function validarCuentaCobro(data) {
+      return esStringOpcional(data, 'cliente', 120) &&
+             esNumeroOpcional(data, 'total', 0) &&
+             esStringOpcional(data, 'estado', 20) &&
+             data.keys().size() <= 40;
+    }
+
+    function validarMantenimiento(data) {
+      return esStringOpcional(data, 'placa', 12) &&
+             esNumeroOpcional(data, 'km', 0) &&
+             esStringOpcional(data, 'tipo', 50) &&
+             data.keys().size() <= 40;
+    }
+
+    function validarGasto(data) {
+      return esStringOpcional(data, 'concepto', 150) &&
+             esNumeroOpcional(data, 'monto', 0) &&
+             data.keys().size() <= 30;
+    }
+
+    function validarEntidadGeneral(data) {
+      return esStringOpcional(data, 'nombre', 120) &&
+             data.keys().size() <= 30;
+    }
+
+    // ── 1. Datos privados de cada usuario (flota, viajes, finanzas) ──
+    match /usuarios/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && request.resource.data.keys().size() <= 30;
+      allow delete: if isOwner(uid);
+
+      // Subcolecciones con validación simétrica en create y update (BE-03)
+      match /vehiculos/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validarVehiculo(request.resource.data);
+      }
+
+      match /viajes/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validarViaje(request.resource.data);
+      }
+
+      match /cuentas_cobro/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validarCuentaCobro(request.resource.data);
+      }
+
+      match /mantenimiento/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validarMantenimiento(request.resource.data);
+      }
+
+      match /gastos_vehiculo/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validarGasto(request.resource.data);
+      }
+
+      match /gastos_fijos/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validarGasto(request.resource.data);
+      }
+
+      match /conductores/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validarEntidadGeneral(request.resource.data);
+      }
+
+      match /empresas/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validarEntidadGeneral(request.resource.data);
+      }
+
+      match /rutas/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validarEntidadGeneral(request.resource.data);
+      }
+
+      // Resto de subcolecciones y configuraciones del usuario
+      match /{subcol=**} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // ── 2. Catálogo público de Peajes Nacionales ──
+    match /peajes/{peajeId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Solo actualizable por scripts administrativos o Cloud Functions
+    }
+
+    // ── 3. [BE-04] Códigos de Invitación Beta ──
+    // Permite get puntual (getDoc) para validar código de registro, pero prohíbe list y write
+    match /codigos_beta/{codigoId} {
+      allow get: if true;
+      allow list: if false;
+      allow write: if false;
+    }
+
+    // ── 4. Vinculación de cuentas con Telegram Bot ──
+    match /telegram_vinculos/{codigo} {
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow get: if true;
+      allow list, update, delete: if false;
+    }
+
+    // ── 5. Sesiones e Idempotencia del Bot (Exclusivas de Cloud Functions / Admin SDK) ──
+    match /telegram_sesiones/{chatId} {
+      allow read, write: if false;
+    }
+
+    match /telegram_updates/{updateId} {
+      allow read, write: if false;
+    }
+
+    // ── 6. Regla por defecto Fail-Closed para cualquier colección no declarada ──
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

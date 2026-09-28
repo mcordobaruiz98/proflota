@@ -2,6 +2,7 @@ import { initializeApp }             from "firebase/app";
 import { getStorage }                from "firebase/storage";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
+import { getFunctions }              from "firebase/functions";
 
 const firebaseConfig = {
   apiKey:            "AIzaSyBhiMiU9l3axu4jZe2Frik2eqIpL7CcNik",
@@ -20,3 +21,4 @@ export const googleProvider = new GoogleAuthProvider();
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
 });
+export const functions = getFunctions(app, "us-central1");

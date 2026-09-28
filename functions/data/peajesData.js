@@ -1,6 +1,7 @@
-import { httpsCallable } from "firebase/functions";
-import { functions } from "../firebase";
-
+/**
+ * Catálogo maestro de peajes de Colombia (INVÍAS y Concesiones ANI)
+ * 166 peajes con categorías vehiculares I a VII.
+ */
 const PEAJES_CO = [
   {c:"PE001",n:"ABURRA",d:"ANTIOQUIA",t:{I:27300,II:31700,III:31700,IV:31700,V:71500,VI:91600,VII:108200}},
   {c:"PE002",n:"ACAPULCO",d:"CALDAS",t:{I:17600,II:21500,III:21500,IV:21500,V:51700,VI:64700,VII:74700}},
@@ -170,18 +171,6 @@ const PEAJES_CO = [
   {c:"PE166",n:"INTERCORT (CERREJON)",d:"LA GUAJIRA",t:{I:0,II:0,III:0,IV:0,V:0,VI:0,VII:108400}},
 ];
 
-/**
- * BE-07 / CR-06 / FE-07: Ingesta delegada a Cloud Function
- * El cliente no escribe directamente en Firestore (colección peajes protegida con allow write: if false;).
- */
-export async function subirPeajes() {
-  try {
-    const ingestar = httpsCallable(functions, "ingestarPeajes");
-    const res = await ingestar();
-    console.log("[subirPeajes] Sincronización exitosa desde Cloud Function:", res.data);
-    return true;
-  } catch(err) {
-    console.error("Error al invocar ingesta de peajes en Cloud Function:", err);
-    return false;
-  }
-}
+module.exports = {
+  PEAJES_CO,
+};

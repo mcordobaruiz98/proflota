@@ -10,7 +10,7 @@ import { theme as t } from "../../styles/theme";
 const VISCOSIDADES = ["15W-40","20W-50","10W-40","5W-30","5W-40","15W-50","Otra"];
 const MARCAS_ACEITE = ["Mobil","Shell Rimula","Castrol","Chevron Delo","Valvoline","Kendall","Total","Otra"];
 
-function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
+function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo, onRegistrarMantenimientoConVehiculo }) {
   const navigate = useNavigate();
   const { id }   = useParams();
 
@@ -49,23 +49,25 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
     const nuevo = { id:Date.now(), marca, referencia, viscosidad, galones:Number(galones)||0, km:Number(kmCambio), fecha, taller, nitTaller, costo:Number(costo)||0, nota };
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
-    onEditarVehiculo(vehiculo.firestoreId, { aceiteHistorial: nuevos }).catch(()=>{});
+    const datosMant = {
+      vehiculoId: vehiculo.firestoreId,
+      placa: vehiculo.placa || "",
+      tipo: "Aceite",
+      descripcion: `Cambio de aceite ${marca} ${viscosidad}${referencia ? ` · ${referencia}` : ""}`,
+      fecha,
+      km: Number(kmCambio),
+      costo: Number(costo) || 0,
+      taller: taller || "",
+      nitTaller: nitTaller || "",
+      nota: nota || "",
+      refId: nuevo.id, // vínculo con el registro del módulo
+    };
 
-    // Registrar también en el historial general de mantenimiento (opción A)
-    if (onAgregar) {
-      onAgregar({
-        vehiculoId: vehiculo.firestoreId,
-        placa: vehiculo.placa || "",
-        tipo: "Aceite",
-        descripcion: `Cambio de aceite ${marca} ${viscosidad}${referencia ? ` · ${referencia}` : ""}`,
-        fecha,
-        km: Number(kmCambio),
-        costo: Number(costo) || 0,
-        taller: taller || "",
-        nitTaller: nitTaller || "",
-        nota: nota || "",
-        refId: nuevo.id, // vínculo con el registro del módulo
-      }).catch(()=>{});
+    if (onRegistrarMantenimientoConVehiculo) {
+      onRegistrarMantenimientoConVehiculo(datosMant, { aceiteHistorial: nuevos }, vehiculo.firestoreId).catch(()=>{});
+    } else {
+      onEditarVehiculo(vehiculo.firestoreId, { aceiteHistorial: nuevos }).catch(()=>{});
+      if (onAgregar) onAgregar(datosMant).catch(()=>{});
     }
     setMarca(""); setReferencia(""); setGalones(""); setKmCambio(""); setTaller(""); setnitTaller(""); setCosto(""); setNota("");
     setMostrarForm(false);

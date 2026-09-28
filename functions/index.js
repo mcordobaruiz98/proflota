@@ -4,24 +4,41 @@
  * memoria de flota/rutas, retorno, gastos, descuentos y anticipo.
  */
 
-const { onRequest } = require("firebase-functions/v2/https");
+const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onDocumentWritten } = require("firebase-functions/v2/firestore");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
+const { PEAJES_CO } = require("./data/peajesData");
 const { initializeApp } = require("firebase-admin/app");
-const { getFirestore } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const { getAuth } = require("firebase-admin/auth");
 
 initializeApp();
 const db = getFirestore();
 
-const TOKEN = process.env.TELEGRAM_TOKEN;
-const API = () => `https://api.telegram.org/bot${TOKEN}`;
+const getTelegramToken = () => process.env.TELEGRAM_TOKEN;
+const getTelegramApiUrl = () => `https://api.telegram.org/bot${getTelegramToken()}`;
 
 // ── Utilidades ──────────────────────────────────────────────
 
 async function enviar(chatId, texto) {
-  await fetch(`${API()}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text: texto, parse_mode: "HTML" }),
-  });
+  const token = getTelegramToken();
+  if (!token) {
+    console.error("[botNavira] ERROR CRÍTICO: TELEGRAM_TOKEN no está montado ni configurado en las variables de entorno.");
+    return;
+  }
+  try {
+    const res = await fetch(`${getTelegramApiUrl()}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text: texto, parse_mode: "HTML" }),
+    });
+    if (!res.ok) {
+      const errorBody = await res.text().catch(() => "");
+      console.error(`[botNavira] Error devuelto por Telegram API (${res.status}): ${errorBody}`);
+    }
+  } catch (errNet) {
+    console.error("[botNavira] Excepción de red al enviar mensaje a Telegram:", errNet);
+  }
 }
 
 const fmt = (n) => "$" + Math.round(n || 0).toLocaleString("es-CO");
@@ -114,20 +131,46 @@ async function getSesion(chatId) {
   return snap.exists ? snap.data() : null;
 }
 async function setSesion(chatId, datos) {
-  await db.doc(`telegram_sesiones/${chatId}`).set(datos, { merge: true });
+  const expiraEn = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas de inactividad
+  await db.doc(`telegram_sesiones/${chatId}`).set({ ...datos, expiraEn, actualizadoEn: new Date() }, { merge: true });
 }
 async function resetViaje(chatId) {
-  await db.doc(`telegram_sesiones/${chatId}`).set({ paso: null, viaje: {} }, { merge: true });
+  const expiraEn = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas de inactividad
+  await db.doc(`telegram_sesiones/${chatId}`).set({ paso: null, viaje: {}, expiraEn, actualizadoEn: new Date() }, { merge: true });
 }
 
-// ── Memoria ─────────────────────────────────────────────────
+// ── Memoria Indexada por Claves Normalizadas (BE-27) ──────────
 
 async function buscarVehiculo(uid, placaTexto) {
-  const placa = placaTexto.trim().toUpperCase().replace(/[\s\-]/g, "");
-  const snap = await db.collection(`usuarios/${uid}/vehiculos`).get();
+  const placa = (placaTexto || "").trim().toUpperCase().replace(/[\s\-]/g, "");
+  if (!placa) return null;
+
+  // 1. Consulta directa indexada por placaNorm (1 sola lectura de Firestore)
+  const snapNorm = await db.collection(`usuarios/${uid}/vehiculos`)
+    .where("placaNorm", "==", placa)
+    .limit(1)
+    .get();
+  if (!snapNorm.empty) {
+    const d = snapNorm.docs[0];
+    return { firestoreId: d.id, ...d.data() };
+  }
+
+  // 2. Consulta indexada por placa exacta
+  const snapExact = await db.collection(`usuarios/${uid}/vehiculos`)
+    .where("placa", "==", placa)
+    .limit(1)
+    .get();
+  if (!snapExact.empty) {
+    const d = snapExact.docs[0];
+    return { firestoreId: d.id, ...d.data() };
+  }
+
+  // 3. Fallback acotado a 30 registros para documentos legacy sin clave normalizada
+  const snap = await db.collection(`usuarios/${uid}/vehiculos`).limit(30).get();
   for (const d of snap.docs) {
     const v = d.data();
     if ((v.placa || "").toUpperCase().replace(/[\s\-]/g, "") === placa) {
+      d.ref.update({ placaNorm: placa }).catch(() => {});
       return { firestoreId: d.id, ...v };
     }
   }
@@ -135,39 +178,93 @@ async function buscarVehiculo(uid, placaTexto) {
 }
 
 async function buscarMemoriaRuta(uid, rutaTexto) {
-  const norm = rutaTexto.trim().toLowerCase();
-  const rutasSnap = await db.collection(`usuarios/${uid}/rutas`).get();
-  for (const d of rutasSnap.docs) {
-    const r = d.data();
-    if ((r.nombre || r.ruta || "").trim().toLowerCase() === norm) return { tipo: "frecuente", ...r };
-  }
-  const viajesSnap = await db.collection(`usuarios/${uid}/viajes`).orderBy("fecha", "desc").limit(200).get();
+  const norm = (rutaTexto || "").trim().toLowerCase();
+  if (!norm) return null;
+
+  // 1. Consulta indexada en rutas frecuentes (rutaNorm o nombre) con limit(1)
+  const snapRutaNorm = await db.collection(`usuarios/${uid}/rutas`)
+    .where("rutaNorm", "==", norm)
+    .limit(1)
+    .get();
+  if (!snapRutaNorm.empty) return { tipo: "frecuente", ...snapRutaNorm.docs[0].data() };
+
+  const snapRutaNom = await db.collection(`usuarios/${uid}/rutas`)
+    .where("nombre", "==", rutaTexto.trim())
+    .limit(1)
+    .get();
+  if (!snapRutaNom.empty) return { tipo: "frecuente", ...snapRutaNom.docs[0].data() };
+
+  // 2. Consulta indexada en historial de viajes por rutaNorm ordenada por fecha desc
+  const viajesSnapNorm = await db.collection(`usuarios/${uid}/viajes`)
+    .where("rutaNorm", "==", norm)
+    .orderBy("fecha", "desc")
+    .limit(1)
+    .get();
+  if (!viajesSnapNorm.empty) return { tipo: "historial", ...viajesSnapNorm.docs[0].data() };
+
+  const viajesSnapExact = await db.collection(`usuarios/${uid}/viajes`)
+    .where("ruta", "==", rutaTexto.trim())
+    .orderBy("fecha", "desc")
+    .limit(1)
+    .get();
+  if (!viajesSnapExact.empty) return { tipo: "historial", ...viajesSnapExact.docs[0].data() };
+
+  // 3. Fallback acotado a los últimos 15 viajes (en vez de 200 en memoria)
+  const viajesSnap = await db.collection(`usuarios/${uid}/viajes`).orderBy("fecha", "desc").limit(15).get();
   for (const d of viajesSnap.docs) {
     const v = d.data();
-    if ((v.ruta || "").trim().toLowerCase() === norm) return { tipo: "historial", ...v };
+    if ((v.ruta || "").trim().toLowerCase() === norm) {
+      d.ref.update({ rutaNorm: norm }).catch(() => {});
+      return { tipo: "historial", ...v };
+    }
   }
   return null;
 }
 
-// Busca el NIT de una empresa en el directorio. Devuelve {nit, existe}.
+// Busca el NIT de una empresa en el directorio con consulta indexada
 async function buscarEmpresa(uid, nombreEmp) {
   const norm = (nombreEmp || "").trim().toLowerCase();
   if (!norm) return { nit: "", existe: false };
-  const snap = await db.collection(`usuarios/${uid}/empresas`).get();
+
+  // 1. Consulta directa indexada por razonSocialNorm
+  const snapNorm = await db.collection(`usuarios/${uid}/empresas`)
+    .where("razonSocialNorm", "==", norm)
+    .limit(1)
+    .get();
+  if (!snapNorm.empty) {
+    const e = snapNorm.docs[0].data();
+    return { nit: e.nit || "", existe: true };
+  }
+
+  // 2. Consulta indexada por razonSocial exacta
+  const snapExact = await db.collection(`usuarios/${uid}/empresas`)
+    .where("razonSocial", "==", nombreEmp.trim())
+    .limit(1)
+    .get();
+  if (!snapExact.empty) {
+    const e = snapExact.docs[0].data();
+    return { nit: e.nit || "", existe: true };
+  }
+
+  // 3. Fallback acotado a 30 registros
+  const snap = await db.collection(`usuarios/${uid}/empresas`).limit(30).get();
   for (const d of snap.docs) {
     const e = d.data();
     if ((e.razonSocial || e.nombre || "").trim().toLowerCase() === norm) {
+      d.ref.update({ razonSocialNorm: norm }).catch(() => {});
       return { nit: e.nit || "", existe: true };
     }
   }
   return { nit: "", existe: false };
 }
 
-// Registra una empresa nueva en el directorio invisible (con NIT)
+// Registra una empresa nueva en el directorio con clave normalizada
 async function registrarEmpresa(uid, nombre, nit) {
   if (!nombre.trim() || !nit.trim()) return;
+  const norm = nombre.trim().toLowerCase();
   await db.collection(`usuarios/${uid}/empresas`).add({
     razonSocial: nombre.trim(),
+    razonSocialNorm: norm,
     nit: nit.trim(),
     tipo: "cliente",
     ciudad: "", contacto: "", telefono: "", correo: "",
@@ -815,7 +912,9 @@ async function procesarMensaje(chatId, texto) {
       remesa: vj.remesa || "",
       pesoBascula: vj.pesoBascula || 0,
       placa: vj.placa,
+      placaNorm: (vj.placa || "").trim().toUpperCase().replace(/[\s\-]/g, ""),
       ruta: vj.ruta,
+      rutaNorm: (vj.ruta || "").trim().toLowerCase(),
       emp: vj.emp || "",
       nitEmpresa: vj.nitEmpresa || "",
       condNom: vj.condNom || "",
@@ -896,15 +995,51 @@ async function procesarMensaje(chatId, texto) {
 
 // ── Webhook ─────────────────────────────────────────────────
 
-exports.botNavira = onRequest({ region: "us-central1", cors: true }, async (req, res) => {
+exports.botNavira = onRequest(
+  {
+    region: "us-central1",
+    cors: false, // BE-06: Deshabilitar CORS para webhook directo de Telegram
+    maxInstances: 10,
+    memory: "256MiB",
+    timeoutSeconds: 30,
+    secrets: ["TELEGRAM_SECRET", "TELEGRAM_TOKEN"], // BE-05: Montar secretos de Cloud Secret Manager
+  },
+  async (req, res) => {
   try {
-    // Seguridad: solo aceptar peticiones reales de Telegram (secret token)
+    // BE-06: 1. Filtrado de método HTTP estricto (solo POST)
+    if (req.method !== "POST") {
+      return res.status(405).send("Method Not Allowed");
+    }
+
+    // BE-06: 2. Seguridad Fail-Closed: Solo aceptar peticiones con secret token verificado
+    const expectedSecret = process.env.TELEGRAM_SECRET;
     const secretRecibido = req.get("X-Telegram-Bot-Api-Secret-Token");
-    if (process.env.TELEGRAM_SECRET && secretRecibido !== process.env.TELEGRAM_SECRET) {
-      console.warn("Petición rechazada: secret token inválido");
+
+    if (!expectedSecret || !secretRecibido || secretRecibido !== expectedSecret) {
+      console.warn("[botNavira] Petición rechazada (fail-closed): secret token ausente, no configurado o inválido.");
       return res.status(403).send("Forbidden");
     }
     const update = req.body;
+
+    // ── Idempotencia: evitar procesar dos veces el mismo update de Telegram ──
+    if (update && update.update_id) {
+      const updateRef = db.doc(`telegram_updates/${update.update_id}`);
+      try {
+        const expiraEn = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 horas (ventana máxima de reintentos)
+        await updateRef.create({
+          procesadoEn: new Date().toISOString(),
+          chatId: update.message?.chat?.id || null,
+          expiraEn,
+        });
+      } catch (errIdem) {
+        if (errIdem.code === 6 || errIdem.message?.includes("ALREADY_EXISTS")) {
+          console.warn(`[Idempotencia] Update ${update.update_id} ya procesado. Ignorando duplicado.`);
+          return res.status(200).send("OK");
+        }
+        console.error("Error al registrar update_id:", errIdem);
+      }
+    }
+
     if (update && update.message && update.message.text) {
       await procesarMensaje(update.message.chat.id, update.message.text);
     }
@@ -913,3 +1048,210 @@ exports.botNavira = onRequest({ region: "us-central1", cors: true }, async (req,
   }
   res.status(200).send("OK");
 });
+
+// ── Trigger: Actualización centralizada y atómica del odómetro (CR-17) ──
+exports.actualizarOdometroViaje = onDocumentWritten(
+  {
+    document: "usuarios/{uid}/viajes/{viajeId}",
+    region: "us-central1",
+    maxInstances: 10,
+  },
+  async (event) => {
+    const { uid, viajeId } = event.params;
+    const beforeData = event.data.before ? event.data.before.data() : null;
+    const afterData = event.data.after ? event.data.after.data() : null;
+
+    const placa = (afterData?.placa || beforeData?.placa || "").trim().toUpperCase().replace(/[\s\-]/g, "");
+    if (!placa) return;
+
+    let deltaKm = 0;
+    if (!beforeData && afterData) {
+      // 1. Viaje creado: sumar kmT
+      deltaKm = Number(afterData.kmT) || 0;
+    } else if (beforeData && !afterData) {
+      // 2. Viaje eliminado: restar kmT
+      deltaKm = -(Number(beforeData.kmT) || 0);
+    } else if (beforeData && afterData) {
+      // 3. Viaje editado: diferencia
+      const kmNuevo = Number(afterData.kmT) || 0;
+      const kmAnterior = Number(beforeData.kmT) || 0;
+      deltaKm = kmNuevo - kmAnterior;
+    }
+
+    if (deltaKm === 0) return;
+
+    // Buscar vehículo por ID directo o por placa normalizada
+    const vehId = afterData?.vehiculoId || beforeData?.vehiculoId;
+    let vehRef = null;
+
+    if (vehId) {
+      vehRef = db.doc(`usuarios/${uid}/vehiculos/${vehId}`);
+    } else {
+      const snap = await db.collection(`usuarios/${uid}/vehiculos`).get();
+      for (const d of snap.docs) {
+        if ((d.data().placa || "").trim().toUpperCase().replace(/[\s\-]/g, "") === placa) {
+          vehRef = d.ref;
+          break;
+        }
+      }
+    }
+
+    if (vehRef) {
+      try {
+        await vehRef.update({
+          kmOdometro: FieldValue.increment(deltaKm),
+          actualizadoEn: FieldValue.serverTimestamp(),
+        });
+        console.log(`[Odometro] Vehículo actualizado para viaje ${viajeId}: delta ${deltaKm} km`);
+      } catch (err) {
+        console.error(`Error actualizando odómetro para viaje ${viajeId}:`, err);
+      }
+    }
+  }
+);
+
+// ── [BE-01] Alta Segura de Cuenta y Verificación Centralizada de Código Beta ──
+exports.validarAltaUsuario = onCall(
+  {
+    region: "us-central1",
+    cors: true,
+    maxInstances: 10,
+    memory: "256MiB",
+    timeoutSeconds: 30,
+  },
+  async (request) => {
+    // 1. Validar autenticación
+    if (!request.auth || !request.auth.uid) {
+      throw new HttpsError("unauthenticated", "Debe iniciar sesión para validar su cuenta.");
+    }
+
+    const { uid, token } = request.auth;
+    const { codigoBeta, aceptoTerminos, nombre } = request.data || {};
+
+    // 2. Validar aceptación de términos
+    if (!aceptoTerminos) {
+      await getAuth().deleteUser(uid).catch(() => {});
+      throw new HttpsError("failed-precondition", "Es obligatorio aceptar los términos y condiciones.");
+    }
+
+    // 3. Validar código beta en Firestore vía Admin SDK
+    const snapBeta = await db.doc("codigos_beta/principal").get();
+    if (!snapBeta.exists) {
+      throw new HttpsError("internal", "Configuración de códigos beta no disponible.");
+    }
+
+    const codigoEsperado = snapBeta.data().codigo || "";
+    const codigoIngresado = (codigoBeta || "").trim().toUpperCase();
+
+    if (!codigoEsperado || codigoIngresado !== codigoEsperado.trim().toUpperCase()) {
+      // Eliminar de Auth para evitar bypass de usuario sin código
+      await getAuth().deleteUser(uid).catch(() => {});
+      throw new HttpsError("permission-denied", "El código de invitación beta es inválido.");
+    }
+
+    // 4. Asignar Custom Claim en Auth
+    await getAuth().setCustomUserClaims(uid, {
+      betaValido: true,
+    });
+
+    // 5. Crear / Actualizar perfil en Firestore (usuarios/{uid})
+    const userRef = db.doc(`usuarios/${uid}`);
+    await userRef.set(
+      {
+        nombre: nombre || token.name || "",
+        correo: token.email || "",
+        aceptoTerminos: true,
+        fechaAceptacion: FieldValue.serverTimestamp(),
+        versionTerminos: "1.0",
+        betaValido: true,
+        creadoEn: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    return {
+      status: "OK",
+      mensaje: "Cuenta validada exitosamente con código beta.",
+      betaValido: true,
+    };
+  }
+);
+
+// ── BE-07: Ingesta Programada y Segura de Peajes ─────────────────────────────
+
+async function sincronizarCatalogoPeajes(dbInstance = db) {
+  const batchSize = 400;
+  let actualizados = 0;
+
+  for (let i = 0; i < PEAJES_CO.length; i += batchSize) {
+    const chunk = PEAJES_CO.slice(i, i + batchSize);
+    const batch = dbInstance.batch();
+
+    for (const peaje of chunk) {
+      const docRef = dbInstance.collection("peajes").doc(peaje.c);
+      batch.set(
+        docRef,
+        {
+          ...peaje,
+          actualizadoEn: FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      actualizados++;
+    }
+
+    await batch.commit();
+  }
+
+  return {
+    total: PEAJES_CO.length,
+    actualizados,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+/**
+ * BE-07 / CR-06: Tarea programada mensual para sincronizar el catálogo de peajes
+ * Se ejecuta automáticamente el 1 de cada mes a las 3:00 AM (COT).
+ */
+exports.ingestarPeajesProgramada = onSchedule(
+  {
+    schedule: "0 3 1 * *",
+    timeZone: "America/Bogota",
+    memory: "256MiB",
+    timeoutSeconds: 120,
+  },
+  async (event) => {
+    console.log("[ingestarPeajesProgramada] Ejecutando sincronización automática de tarifas de peajes...");
+    const resultado = await sincronizarCatalogoPeajes();
+    console.log(`[ingestarPeajesProgramada] Éxito: ${resultado.actualizados} peajes actualizados.`);
+    return resultado;
+  }
+);
+
+/**
+ * BE-07: Endpoint Callable para ingesta o resincronización bajo demanda
+ * Requiere usuario autenticado. Reemplaza la escritura directa insegura del cliente.
+ */
+exports.ingestarPeajes = onCall(
+  {
+    cors: true,
+    memory: "256MiB",
+    timeoutSeconds: 120,
+  },
+  async (request) => {
+    if (!request.auth || !request.auth.uid) {
+      throw new HttpsError("unauthenticated", "Debe iniciar sesión para ejecutar la sincronización de peajes.");
+    }
+
+    console.log(`[ingestarPeajes] Ingesta bajo demanda solicitada por UID: ${request.auth.uid}`);
+    const resultado = await sincronizarCatalogoPeajes();
+    return {
+      status: "OK",
+      mensaje: `Catálogo de ${resultado.actualizados} peajes sincronizado correctamente vía Admin SDK.`,
+      ...resultado,
+    };
+  }
+);
+
+exports.sincronizarCatalogoPeajes = sincronizarCatalogoPeajes;

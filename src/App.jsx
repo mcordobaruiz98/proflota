@@ -50,7 +50,7 @@ function AppContenido() {
     agregarViaje, eliminarViaje, editarViaje,
     agregarEmpresa, eliminarEmpresa,
     agregarRuta, eliminarRuta,
-    agregarMantenimiento, eliminarMantenimiento,
+    agregarMantenimiento, eliminarMantenimiento, registrarMantenimientoConVehiculo,
     agregarConfigMant, eliminarConfigMant,
     agregarGasto, eliminarGasto, editarGasto,
     agregarGastoFijo, eliminarGastoFijo,
@@ -309,13 +309,13 @@ function AppContenido() {
         {/* ── MANTENIMIENTO ── */}
         <Route path="/vehiculo/:id/llantas" element={
           <RutaProtegida>
-            <Llantas vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} onAgregar={agregarMantenimiento} mostrarToast={mostrar} />
+            <Llantas vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} onAgregar={agregarMantenimiento} onRegistrarMantenimientoConVehiculo={registrarMantenimientoConVehiculo} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 
         <Route path="/vehiculo/:id/aceite" element={
           <RutaProtegida>
-            <Aceite vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} onAgregar={agregarMantenimiento} mostrarToast={mostrar} />
+            <Aceite vehiculos={vehiculos} onEditarVehiculo={editarVehiculo} onAgregar={agregarMantenimiento} onRegistrarMantenimientoConVehiculo={registrarMantenimientoConVehiculo} mostrarToast={mostrar} />
           </RutaProtegida>
         } />
 

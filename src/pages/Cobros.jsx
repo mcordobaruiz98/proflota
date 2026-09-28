@@ -144,8 +144,9 @@ function Cobros({ viajes = [], empresas = [], perfilFacturacion = {}, onGuardarC
         valorEnLetras: numeroALetras(totalSel),
         creadoEn: new Date().toISOString(),
       };
-      await onGuardarCuenta(cuenta);
-      mostrarToast(`✓ Cuenta de cobro N° ${String(numero).padStart(3, "0")} generada`, "exito");
+      const resultado = await onGuardarCuenta(cuenta);
+      const numeroAsignado = resultado?.numero || numero;
+      mostrarToast(`✓ Cuenta de cobro N° ${String(numeroAsignado).padStart(3, "0")} generada`, "exito");
       setModo("lista");
       setEmpresaSel(null);
       setViajesSel([]);

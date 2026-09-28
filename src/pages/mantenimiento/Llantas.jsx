@@ -159,7 +159,7 @@ function DiagramaLlantas({ total, llantas, onSelect, llantaActiva, tipoVehiculo 
   );
 }
 
-function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
+function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo, onRegistrarMantenimientoConVehiculo }) {
   const navigate = useNavigate();
   const { id }   = useParams();
 
@@ -241,20 +241,35 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo }) {
       [seleccionada]: { marca, ref, prof, km: kmMont, fecha: fechaMont, valor: Number(valor) || 0, estado, obs }
     };
     setLlantas(nuevas);
-    guardarLocal(nuevas);
-
-    // Registrar en el historial general si la llanta tiene valor (compra nueva)
-    if (onAgregar && Number(valor) > 0) {
-      onAgregar({
-        vehiculoId: vehiculo.firestoreId,
-        placa: vehiculo.placa || "",
-        tipo: "Llanta",
-        descripcion: `Llanta posición ${seleccionada}${marca ? ` · ${marca}` : ""}${ref ? ` ${ref}` : ""}`,
-        fecha: fechaMont || new Date().toISOString().slice(0,10),
-        km: Number(kmMont) || 0,
-        costo: Number(valor) || 0,
-        refId: seleccionada,
-      }).catch(()=>{});
+    if (Number(valor) > 0 && onRegistrarMantenimientoConVehiculo) {
+      onRegistrarMantenimientoConVehiculo(
+        {
+          vehiculoId: vehiculo.firestoreId,
+          placa: vehiculo.placa || "",
+          tipo: "Llanta",
+          descripcion: `Llanta posición ${seleccionada}${marca ? ` · ${marca}` : ""}${ref ? ` ${ref}` : ""}`,
+          fecha: fechaMont || new Date().toISOString().slice(0,10),
+          km: Number(kmMont) || 0,
+          costo: Number(valor) || 0,
+          refId: seleccionada,
+        },
+        { llantasData: nuevas },
+        vehiculo.firestoreId
+      ).catch(()=>{});
+    } else {
+      guardarLocal(nuevas);
+      if (onAgregar && Number(valor) > 0) {
+        onAgregar({
+          vehiculoId: vehiculo.firestoreId,
+          placa: vehiculo.placa || "",
+          tipo: "Llanta",
+          descripcion: `Llanta posición ${seleccionada}${marca ? ` · ${marca}` : ""}${ref ? ` ${ref}` : ""}`,
+          fecha: fechaMont || new Date().toISOString().slice(0,10),
+          km: Number(kmMont) || 0,
+          costo: Number(valor) || 0,
+          refId: seleccionada,
+        }).catch(()=>{});
+      }
     }
 
     setSeleccionada(null);

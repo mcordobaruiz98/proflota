@@ -13,10 +13,10 @@ import {
   reauthenticateWithCredential,
   deleteUser,
 } from "firebase/auth";
-import { auth, googleProvider, storage } from "../firebase";
-import { getDoc, doc, setDoc, getDocs, collection, deleteDoc } from "firebase/firestore";
+import { auth, googleProvider, storage, db, functions } from "../firebase";
+import { doc, setDoc, getDocs, collection, deleteDoc } from "firebase/firestore";
 import { ref, listAll, deleteObject } from "firebase/storage";
-import { db } from  "../firebase";
+import { httpsCallable } from "firebase/functions";
 
 export function useAuth() {
   const [usuario,   setUsuario]   = useState(null);
@@ -44,18 +44,20 @@ export function useAuth() {
     }, { merge: true });
   };
 
-  // Registro con correo y contraseña
+  // Registro con correo y contraseña (BE-01 y CR-01: validación centralizada en servidor)
   const registrar = async (nombre, correo, contrasena, codigo, aceptoTerminos) => {
-  if (!aceptoTerminos) {
-    throw { code: "auth/terminos-no-aceptados" };
-  }
-  const snap = await getDoc(doc(db, "codigos_beta", "principal"));
-  if (!snap.exists() || snap.data().codigo !== codigo.toUpperCase().trim()) {
-    throw { code: "auth/codigo-invalido" };
-  }
-  const cred = await createUserWithEmailAndPassword(auth, correo, contrasena);
-  await updateProfile(cred.user, { displayName: nombre });
-  await guardarAceptacion(cred.user);
+    if (!aceptoTerminos) {
+      throw { code: "auth/terminos-no-aceptados" };
+    }
+    const cred = await createUserWithEmailAndPassword(auth, correo, contrasena);
+    await updateProfile(cred.user, { displayName: nombre });
+    try {
+      const validarAlta = httpsCallable(functions, "validarAltaUsuario");
+      await validarAlta({ codigoBeta: codigo, aceptoTerminos: true, nombre });
+    } catch (errAlta) {
+      await signOut(auth).catch(() => {});
+      throw { code: "auth/codigo-invalido", message: errAlta.message || "Código beta inválido." };
+    }
   };
 
   // Login con correo y contraseña
@@ -66,22 +68,22 @@ export function useAuth() {
     return resultado.user;
   };
 
-  // Login con Google
+  // Login con Google (BE-01 y CR-01: validación centralizada en servidor)
   const loginGoogle = async (codigoBeta, aceptoTerminos) => {
     const resultado = await signInWithPopup(auth, googleProvider);
     const esNuevo = resultado._tokenResponse?.isNewUser || false;
     if (esNuevo) {
       if (!aceptoTerminos) {
-        await deleteUser(resultado.user);
+        await deleteUser(resultado.user).catch(() => {});
         throw { code: "auth/terminos-no-aceptados" };
       }
-      const snap = await getDoc(doc(db, "codigos_beta", "principal"));
-      if (!snap.exists() || snap.data().codigo !== (codigoBeta || "").toUpperCase().trim()) {
-        await deleteUser(resultado.user);
-        throw { code: "auth/codigo-invalido" };
+      try {
+        const validarAlta = httpsCallable(functions, "validarAltaUsuario");
+        await validarAlta({ codigoBeta, aceptoTerminos: true, nombre: resultado.user.displayName });
+      } catch (errAlta) {
+        await signOut(auth).catch(() => {});
+        throw { code: "auth/codigo-invalido", message: errAlta.message || "Código beta inválido." };
       }
-      await updateProfile(resultado.user, { displayName: resultado.user.displayName });
-      await guardarAceptacion(resultado.user);
     }
     return resultado.user;
   };
