@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Camera } from "lucide-react";
 import { theme as t } from "../styles/theme";
-import { useSubirArchivo } from "../hooks/useSubirArchivo";
+import { useSubirArchivo, sanearNombreArchivo } from "../hooks/useSubirArchivo";
 import { useAuth } from "../hooks/useAuth";
 
 
@@ -305,7 +305,8 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
         onChange={async (e) => {
           const archivo = e.target.files[0];
           if (!archivo) return;
-          const ruta = `usuarios/${usuario?.uid}/vehiculos/${Date.now()}_${archivo.name}`;
+          const nombreSaneado = sanearNombreArchivo(archivo.name);
+          const ruta = `usuarios/${usuario?.uid}/vehiculos/${Date.now()}_${nombreSaneado}`;
           subirArchivo(archivo, ruta, "foto", (url) => setFotoUrl(url));
         }}
       />
