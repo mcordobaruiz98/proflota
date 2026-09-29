@@ -6,8 +6,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Clock, AlertCircle, Search, ChevronUp, ChevronDown, FileText, Calendar } from "lucide-react";
 import { theme as t } from "../styles/theme";
+import { alPulsarEnterOEspacio } from "../utils/teclado";
 
-function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
+function Cartera({ viajes = [], onEditar, mostrarToast }) {
   const navigate = useNavigate();
   const [filtro, setFiltro] = useState("pendientes");
   const [busqueda, setBusqueda] = useState("");
@@ -90,7 +91,7 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
         fechaPago: new Date().toISOString().slice(0, 10),
       });
       mostrarToast("Viaje marcado como pagado", "exito");
-    } catch (err) {
+    } catch {
       mostrarToast("Error al actualizar", "error");
     }
   };
@@ -102,7 +103,7 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
         fechaPago: null,
       });
       mostrarToast("Viaje marcado como pendiente", "info");
-    } catch (err) {
+    } catch {
       mostrarToast("Error al actualizar", "error");
     }
   };
@@ -179,13 +180,13 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
           <div style={{background:t.colors.bgCard,borderRadius:t.radius.md,padding:"12px",marginBottom:"12px",border:`1px solid ${t.colors.border}`}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
               <div>
-                <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
-                <input type="date" value={rangoDesde} onChange={e=>{setRangoDesde(e.target.value);setPeriodo("rango");}}
+                <label htmlFor="a11y-Cartera-182" style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
+                <input id="a11y-Cartera-182" type="date" value={rangoDesde} onChange={e=>{setRangoDesde(e.target.value);setPeriodo("rango");}}
                   style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm}}/>
               </div>
               <div>
-                <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
-                <input type="date" value={rangoHasta} onChange={e=>{setRangoHasta(e.target.value);setPeriodo("rango");}}
+                <label htmlFor="a11y-Cartera-187" style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
+                <input id="a11y-Cartera-187" type="date" value={rangoHasta} onChange={e=>{setRangoHasta(e.target.value);setPeriodo("rango");}}
                   style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm}}/>
               </div>
             </div>
@@ -232,8 +233,9 @@ function Cartera({ viajes = [], vehiculos = [], onEditar, mostrarToast }) {
           const abierta = empAbiertas[empresa] !== false; // abierta por defecto
           return (
           <div key={empresa} style={styles.card}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
-              onClick={() => toggleEmp(empresa)}>
+            <div role="button" tabIndex={0} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
+              onClick={() => toggleEmp(empresa)}
+              onKeyDown={alPulsarEnterOEspacio(() => toggleEmp(empresa))}>
               <div>
                 <p style={{ fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: 0 }}>{empresa}</p>
                 <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, margin: "2px 0 0" }}>{data.viajes.length} viaje{data.viajes.length !== 1 ? "s" : ""}</p>

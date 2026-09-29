@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   collection, doc, onSnapshot, addDoc,
   updateDoc, deleteDoc, query, orderBy,
@@ -33,7 +33,11 @@ export function useFirestore(uid) {
   const rutaCuentas      = uid ? `usuarios/${uid}/cuentas_cobro`   : null;
 
   // ── RESET al cambiar de usuario (previene data leakage entre cuentas) ──
-  useEffect(() => {
+  // Se ajusta durante el render: React descarta el render y reintenta de forma
+  // sincrona, por lo que los datos de la cuenta anterior nunca llegan a pintarse.
+  const [uidActivo, setUidActivo] = useState(uid);
+  if (uid !== uidActivo) {
+    setUidActivo(uid);
     setVehiculos([]);
     setViajes([]);
     setEmpresas([]);
@@ -46,7 +50,7 @@ export function useFirestore(uid) {
     setPeajes([]);
     setCargando(true);
     setCuentasCobro([]);
-  }, [uid]);
+  }
 
   useEffect(() => {
     if (!rutaVehiculos) return;
@@ -154,7 +158,7 @@ export function useFirestore(uid) {
   // ── CRUD ──
 
   const agregarVehiculo = async (datos) => {
-    const placaNorm = (datos.placa || "").trim().toUpperCase().replace(/[\s\-]/g, "");
+    const placaNorm = (datos.placa || "").trim().toUpperCase().replace(/[\s-]/g, "");
     await addDoc(collection(db, rutaVehiculos), { ...datos, placaNorm, creadoEn: new Date().toISOString() });
   };
   const eliminarVehiculo = async (firestoreId) => {
@@ -163,13 +167,13 @@ export function useFirestore(uid) {
   const editarVehiculo = async (firestoreId, datos) => {
     const datosLimpios = JSON.parse(JSON.stringify(datos));
     if (datos.placa) {
-      datosLimpios.placaNorm = datos.placa.trim().toUpperCase().replace(/[\s\-]/g, "");
+      datosLimpios.placaNorm = datos.placa.trim().toUpperCase().replace(/[\s-]/g, "");
     }
     await updateDoc(doc(db, rutaVehiculos, firestoreId), datosLimpios);
   };
 
   const agregarViaje = async (datos) => {
-    const placaNorm = (datos.placa || "").trim().toUpperCase().replace(/[\s\-]/g, "");
+    const placaNorm = (datos.placa || "").trim().toUpperCase().replace(/[\s-]/g, "");
     const rutaNorm = (datos.ruta || "").trim().toLowerCase();
     await addDoc(collection(db, rutaViajes), { ...datos, placaNorm, rutaNorm, creadoEn: new Date().toISOString() });
   };
@@ -179,7 +183,7 @@ export function useFirestore(uid) {
   const editarViaje = async (firestoreId, datos) => {
     const datosLimpios = JSON.parse(JSON.stringify(datos));
     if (datos.placa) {
-      datosLimpios.placaNorm = datos.placa.trim().toUpperCase().replace(/[\s\-]/g, "");
+      datosLimpios.placaNorm = datos.placa.trim().toUpperCase().replace(/[\s-]/g, "");
     }
     if (datos.ruta) {
       datosLimpios.rutaNorm = datos.ruta.trim().toLowerCase();
@@ -195,19 +199,22 @@ export function useFirestore(uid) {
     await deleteDoc(doc(db, rutaEmpresas, firestoreId));
   };
 
-  let guardandoRuta = false;
+  const guardandoRutaRef = useRef(false);
   const agregarRuta = async (datos) => {
-    if (guardandoRuta) return;
-    guardandoRuta = true;
-    if (!uid) throw new Error("Sin uid");
-    const datosLimpios = JSON.parse(JSON.stringify(datos));
-    const rutaNorm = (datos.nombre || datos.ruta || "").trim().toLowerCase();
-    await addDoc(collection(db, `usuarios/${uid}/rutas`), {
-      ...datosLimpios,
-      rutaNorm,
-      creadoEn: new Date().toISOString(),
-    });
-    guardandoRuta = false;
+    if (guardandoRutaRef.current) return;
+    guardandoRutaRef.current = true;
+    try {
+      if (!uid) throw new Error("Sin uid");
+      const datosLimpios = JSON.parse(JSON.stringify(datos));
+      const rutaNorm = (datos.nombre || datos.ruta || "").trim().toLowerCase();
+      await addDoc(collection(db, `usuarios/${uid}/rutas`), {
+        ...datosLimpios,
+        rutaNorm,
+        creadoEn: new Date().toISOString(),
+      });
+    } finally {
+      guardandoRutaRef.current = false;
+    }
   };
   const eliminarRuta = async (firestoreId) => {
     await deleteDoc(doc(db, rutaRutas, firestoreId));

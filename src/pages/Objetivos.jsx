@@ -3,21 +3,35 @@
  * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
  */
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Target, Edit3, Save, X } from "lucide-react";
+import { Edit3, Save, X } from "lucide-react";
 import { theme as t } from "../styles/theme";
+import { useUid } from "../lib/useUid";
+import { leer, escribir } from "../lib/userStorage";
 
 function Objetivos({ viajes = [] }) {
-  const navigate = useNavigate();
 
+  // FE-17: las metas se guardan en el espacio del uid. Antes usaban claves
+  // globales, así que al cambiar de cuenta en el mismo navegador el usuario
+  // veía (y pisaba) las metas de la cuenta anterior.
+  const uid = useUid();
   const claves = { diaria:"meta_diaria", semanal:"meta_semanal", mensual:"meta_mensual_global" };
-  const [metas, setMetas] = useState(() => ({
-    diaria:  Number(localStorage.getItem(claves.diaria)) ||0,
-    semanal: Number(localStorage.getItem(claves.semanal))||0,
-    mensual: Number(localStorage.getItem(claves.mensual))||0,
-  }));
+  const leerMetas = () => ({
+    diaria:  Number(leer(uid, claves.diaria, 0))  || 0,
+    semanal: Number(leer(uid, claves.semanal, 0)) || 0,
+    mensual: Number(leer(uid, claves.mensual, 0)) || 0,
+  });
+  const [metas, setMetas] = useState(leerMetas);
   const [editando, setEditando] = useState(false);
   const [metaTemp, setMetaTemp] = useState({diaria:"",semanal:"",mensual:""});
+
+  // El uid llega asíncrono. Recargamos durante el render (patrón documentado
+  // por React para estado que depende de una prop) en vez de en un efecto, para
+  // no pintar un frame con las metas de la cuenta anterior.
+  const [uidCargado, setUidCargado] = useState(uid);
+  if (uid !== uidCargado) {
+    setUidCargado(uid);
+    setMetas(leerMetas());
+  }
 
   const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
 
@@ -51,10 +65,9 @@ function Objetivos({ viajes = [] }) {
   const guardar = () => {
     const nuevas = {diaria:Number(metaTemp.diaria)||0, semanal:Number(metaTemp.semanal)||0, mensual:Number(metaTemp.mensual)||0};
     setMetas(nuevas);
-    localStorage.setItem(claves.diaria,  nuevas.diaria);
-    localStorage.setItem(claves.semanal, nuevas.semanal);
-    localStorage.setItem(claves.mensual, nuevas.mensual);
-    setEditando(false);
+    escribir(uid, claves.diaria,  nuevas.diaria);
+    escribir(uid, claves.semanal, nuevas.semanal);
+    escribir(uid, claves.mensual, nuevas.mensual);    setEditando(false);
   };
 
   const periodos = [

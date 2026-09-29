@@ -2,7 +2,7 @@
  * Hecho por JESUS COSSIO DEV
  * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
  */
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Save, Plus, X, ChevronDown, ChevronUp, MapPin, Lightbulb, AlertTriangle, Check } from "lucide-react";
 import { theme as t } from "../styles/theme";
@@ -82,6 +82,9 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [pctAnticipoFleteRet, setPctAnticipoFleteRet] = useState("60");
   const [montoAnticipoFleteRet, setMontoAnticipoFleteRet] = useState("");
   const [fleteRetorno,     setFleteRetorno]       = useState("");
+  const [prevValorViajeIda,    setPrevValorViajeIda]    = useState(valorViajeIda);
+  const [prevValorViajeRetorno,setPrevValorViajeRetorno] = useState(valorViajeRetorno);
+  const [prevPlaca,            setPrevPlaca]            = useState(placa);
   const [tonelajeRetorno,  setTonelajeRetorno]    = useState("");
   const [modoFleteRetorno, setModoFleteRetorno]   = useState("porTon");
   const [rutaRet,          setRutaRet]            = useState("");
@@ -201,20 +204,21 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const okDesc   = totalDesc > 0;
 
   // Lógica de anticipo para el viaje de Ida (depende de valorViajeIda para recalculado)
-  useEffect(() => {
+  if (valorViajeIda !== prevValorViajeIda) {
+    setPrevValorViajeIda(valorViajeIda);
     if (pctAnticipoFlete !== "" && valorViajeIda > 0) {
       const val = Math.round(valorViajeIda * (parseFloat(pctAnticipoFlete) / 100));
       setMontoAnticipoFlete(val ? String(val) : "");
     }
-  }, [valorViajeIda]);
+  }
 
-  // Lógica de anticipo para el viaje de Retorno (depende de valorViajeRetorno para recalculado)
-  useEffect(() => {
+  if (valorViajeRetorno !== prevValorViajeRetorno) {
+    setPrevValorViajeRetorno(valorViajeRetorno);
     if (pctAnticipoFleteRet !== "" && valorViajeRetorno > 0) {
       const val = Math.round(valorViajeRetorno * (parseFloat(pctAnticipoFleteRet) / 100));
       setMontoAnticipoFleteRet(val ? String(val) : "");
     }
-  }, [valorViajeRetorno]);
+  }
 
   const manejarMontoAnticipoChange = (valStr) => {
     let valNum = parseFloat(valStr) || 0;
@@ -524,7 +528,7 @@ const guardarRutaFrecuente = async () => {
     mostrarToast("Ruta guardada correctamente", "exito");
     setMostrarGuardar(false);
     setNombreRuta("");
-  } catch(err) {
+  } catch {
     mostrarToast("Error al guardar la ruta", "error");
   } finally {
     guardandoRutaRef.current = false;
@@ -533,12 +537,14 @@ const guardarRutaFrecuente = async () => {
 };
 
 // Pre-llenar rendimiento configurado en el vehículo al seleccionar placa
-  useEffect(() => {
-    const veh = vehiculos.find(v => v.placa === placa);
-    if (!veh) return;
-    if (veh.rendCargadoDef > 0 && !rendCargado) setRendCargado(String(veh.rendCargadoDef));
-    if (veh.rendVacioDef > 0 && !rendVacio) setRendVacio(String(veh.rendVacioDef));
-  }, [placa]);
+  const vehPlaca = vehiculos.find(v => v.placa === placa);
+  if (placa !== prevPlaca) {
+    setPrevPlaca(placa);
+    if (vehPlaca) {
+      if (vehPlaca.rendCargadoDef > 0 && !rendCargado) setRendCargado(String(vehPlaca.rendCargadoDef));
+      if (vehPlaca.rendVacioDef > 0 && !rendVacio) setRendVacio(String(vehPlaca.rendVacioDef));
+    }
+  }
 
   // Encabezado de sección con paso numerado (solo presentación)
   const SeccionHeader = ({ num, ok, label, abierta, onToggle }) => (
@@ -665,18 +671,18 @@ const guardarRutaFrecuente = async () => {
       <div style={styles.card}>
         <div style={styles.fila2}>
           <div style={styles.campo}>
-            <label style={styles.label}>Fecha de cargue</label>
-            <input type="date" value={fecha} onChange={e=>setFecha(e.target.value)} style={styles.input} />
+            <label htmlFor="a11y-Calculadora-668" style={styles.label}>Fecha de cargue</label>
+            <input id="a11y-Calculadora-668" type="date" value={fecha} onChange={e=>setFecha(e.target.value)} style={styles.input} />
           </div>
           <div style={styles.campo}>
-            <label style={styles.label}>Fecha de descargue</label>
-            <input type="date" value={fechaDescarga} onChange={e=>setFechaDescarga(e.target.value)} style={styles.input} />
+            <label htmlFor="a11y-Calculadora-672" style={styles.label}>Fecha de descargue</label>
+            <input id="a11y-Calculadora-672" type="date" value={fechaDescarga} onChange={e=>setFechaDescarga(e.target.value)} style={styles.input} />
           </div>
         </div>
         <div style={styles.fila2}>
           <div style={styles.campo}>
-            <label style={styles.label}>Placa vehículo</label>
-            <select value={placa} onChange={e=>setPlaca(e.target.value)}
+            <label htmlFor="a11y-Calculadora-678" style={styles.label}>Placa vehículo</label>
+            <select id="a11y-Calculadora-678" value={placa} onChange={e=>setPlaca(e.target.value)}
               style={{...styles.input, color: placa ? t.colors.textPrimary : t.colors.textTertiary}}>
               <option value="">Escoge tu vehículo...</option>
               {vehiculos.map(v=>(
@@ -685,8 +691,8 @@ const guardarRutaFrecuente = async () => {
             </select>
           </div>
           <div style={styles.campo}>
-  <label style={styles.label}>Tipo de carga</label>
-  <select value={tipoCarga} onChange={e=>setTipoCarga(e.target.value)} style={styles.input}>
+  <label htmlFor="a11y-Calculadora-688" style={styles.label}>Tipo de carga</label>
+  <select id="a11y-Calculadora-688" value={tipoCarga} onChange={e=>setTipoCarga(e.target.value)} style={styles.input}>
     <option value="">Seleccionar...</option>
     <option>Granel sólido</option>
     <option>Granel líquido</option>
@@ -703,14 +709,14 @@ const guardarRutaFrecuente = async () => {
 </div>
         </div>
         <div style={styles.campo}>
-          <label style={styles.label}>Ruta (Origen → Destino)</label>
-          <input type="text" placeholder="Barranquilla – Bogotá" value={ruta} onChange={e=>setRuta(e.target.value)} style={styles.input} />
+          <label htmlFor="a11y-Calculadora-706" style={styles.label}>Ruta (Origen → Destino)</label>
+          <input id="a11y-Calculadora-706" type="text" placeholder="Barranquilla – Bogotá" value={ruta} onChange={e=>setRuta(e.target.value)} style={styles.input} />
         </div>
         <div style={styles.fila2}>
           <div style={styles.campo}>
-  <label style={styles.label}>Producto</label>
+  <label htmlFor="a11y-Calculadora-711" style={styles.label}>Producto</label>
   {productosFrecuentes.length > 0 && (
-    <select
+    <select id="a11y-Calculadora-711"
       value={productosFrecuentes.includes(producto) ? producto : "__nuevo__"}
       onChange={e => {
         if (e.target.value === "__nuevo__") {
@@ -740,9 +746,9 @@ const guardarRutaFrecuente = async () => {
 </div>
 
    <div style={styles.campo}>
-  <label style={styles.label}>Empresa</label>
+  <label htmlFor="a11y-Calculadora-743" style={styles.label}>Empresa</label>
   {empresasFrecuentes.length > 0 && (
-    <select
+    <select id="a11y-Calculadora-743"
       value={empresasFrecuentes.includes(empresa) ? empresa : "__nueva__"}
       onChange={e => {
         if (e.target.value === "__nueva__") {
@@ -786,8 +792,8 @@ const guardarRutaFrecuente = async () => {
 
         </div>
         <div style={styles.campo}>
-  <label style={styles.label}>Conductor</label>
-  <select
+  <label htmlFor="a11y-Calculadora-789" style={styles.label}>Conductor</label>
+  <select id="a11y-Calculadora-789"
     value={conductor}
     onChange={e => setConductor(e.target.value)}
     style={{...styles.input, color: conductor ? t.colors.textPrimary : t.colors.textTertiary}}
@@ -803,8 +809,8 @@ const guardarRutaFrecuente = async () => {
 </div>
 
   <div style={styles.campo}>
-  <label style={styles.label}>Manifiesto</label>
-  <input type="text" placeholder="123456789" value={mani}
+  <label htmlFor="a11y-Calculadora-806" style={styles.label}>Manifiesto</label>
+  <input id="a11y-Calculadora-806" type="text" placeholder="123456789" value={mani}
     onChange={e=>setMani(e.target.value)} style={styles.input}/>
   {mani.trim() && viajes.some(v => v.mani && v.mani.trim().toLowerCase() === mani.trim().toLowerCase()) && (
     <p style={{fontSize:t.fonts.sizeXs,color:t.colors.amber,margin:"4px 0 0",display:"flex",alignItems:"center",gap:"5px"}}>
@@ -815,66 +821,66 @@ const guardarRutaFrecuente = async () => {
 
   <div style={styles.fila2}>
   <div style={styles.campo}>
-    <label style={styles.label}>N° Remesa</label>
-    <input type="text" placeholder="REM-001" value={remesa}
+    <label htmlFor="a11y-Calculadora-818" style={styles.label}>N° Remesa</label>
+    <input id="a11y-Calculadora-818" type="text" placeholder="REM-001" value={remesa}
       onChange={e=>setRemesa(e.target.value)} style={styles.input}/>
   </div>
   <div style={styles.campo}>
-    <label style={styles.label}>Peso báscula (ton)</label>
-    <input type="number" placeholder="34.5" value={pesoBascula}
+    <label htmlFor="a11y-Calculadora-823" style={styles.label}>Peso báscula (ton)</label>
+    <input id="a11y-Calculadora-823" type="number" placeholder="34.5" value={pesoBascula}
       onChange={e=>setPesoBascula(e.target.value)} style={styles.input}/>
   </div>
 </div>
 
 <div style={styles.fila2}>
   <div style={styles.campo}>
-    <label style={styles.label}>Lugar de cargue</label>
-    <input type="text" placeholder="Bodega X, Km 5" value={lugarCargue}
+    <label htmlFor="a11y-Calculadora-831" style={styles.label}>Lugar de cargue</label>
+    <input id="a11y-Calculadora-831" type="text" placeholder="Bodega X, Km 5" value={lugarCargue}
       onChange={e=>setLugarCargue(e.target.value)} style={styles.input}/>
   </div>
   <div style={styles.campo}>
-    <label style={styles.label}>Lugar de descargue</label>
-    <input type="text" placeholder="Puerto Y" value={lugarDescargue}
+    <label htmlFor="a11y-Calculadora-836" style={styles.label}>Lugar de descargue</label>
+    <input id="a11y-Calculadora-836" type="text" placeholder="Puerto Y" value={lugarDescargue}
       onChange={e=>setLugarDescargue(e.target.value)} style={styles.input}/>
   </div>
 </div>
 
 <div style={styles.campo}>
-  <label style={styles.label}>Observaciones</label>
-  <input type="text" placeholder="Novedades del viaje..." value={observaciones}
+  <label htmlFor="a11y-Calculadora-843" style={styles.label}>Observaciones</label>
+  <input id="a11y-Calculadora-843" type="text" placeholder="Novedades del viaje..." value={observaciones}
     onChange={e=>setObservaciones(e.target.value)} style={styles.input}/>
 </div>
         {!tieneRetorno ? (
         <div style={styles.fila2}>
           <div style={styles.campo}>
-            <label style={styles.label}>Km cargado</label>
-            <input type="number" placeholder="300" value={kmCargado} onChange={e=>setKmCargado(e.target.value)} style={styles.input} />
+            <label htmlFor="a11y-Calculadora-850" style={styles.label}>Km cargado</label>
+            <input id="a11y-Calculadora-850" type="number" placeholder="300" value={kmCargado} onChange={e=>setKmCargado(e.target.value)} style={styles.input} />
           </div>
           <div style={styles.campo}>
-            <label style={styles.label}>Km vacío</label>
-            <input type="number" placeholder="100" value={kmVacio} onChange={e=>setKmVacio(e.target.value)} style={styles.input} />
+            <label htmlFor="a11y-Calculadora-854" style={styles.label}>Km vacío</label>
+            <input id="a11y-Calculadora-854" type="number" placeholder="100" value={kmVacio} onChange={e=>setKmVacio(e.target.value)} style={styles.input} />
           </div>
         </div>
         ) : (
         <div>
           <div style={styles.fila2}>
             <div style={styles.campo}>
-              <label style={styles.label}>Km cargado ida</label>
-              <input type="number" placeholder="450" value={kmCargado} onChange={e=>setKmCargado(e.target.value)} style={styles.input} />
+              <label htmlFor="a11y-Calculadora-862" style={styles.label}>Km cargado ida</label>
+              <input id="a11y-Calculadora-862" type="number" placeholder="450" value={kmCargado} onChange={e=>setKmCargado(e.target.value)} style={styles.input} />
             </div>
             <div style={styles.campo}>
-              <label style={styles.label}>Km vacío ida</label>
-              <input type="number" placeholder="120" value={kmVacio} onChange={e=>setKmVacio(e.target.value)} style={styles.input} />
+              <label htmlFor="a11y-Calculadora-866" style={styles.label}>Km vacío ida</label>
+              <input id="a11y-Calculadora-866" type="number" placeholder="120" value={kmVacio} onChange={e=>setKmVacio(e.target.value)} style={styles.input} />
             </div>
           </div>
           <div style={styles.fila2}>
             <div style={styles.campo}>
-              <label style={styles.label}>Km cargado retorno</label>
-              <input type="number" placeholder="380" value={kmCargadoRet} onChange={e=>setKmCargadoRet(e.target.value)} style={styles.input} />
+              <label htmlFor="a11y-Calculadora-872" style={styles.label}>Km cargado retorno</label>
+              <input id="a11y-Calculadora-872" type="number" placeholder="380" value={kmCargadoRet} onChange={e=>setKmCargadoRet(e.target.value)} style={styles.input} />
             </div>
             <div style={styles.campo}>
-              <label style={styles.label}>Km vacío retorno</label>
-              <input type="number" placeholder="60" value={kmVacioRet} onChange={e=>setKmVacioRet(e.target.value)} style={styles.input} />
+              <label htmlFor="a11y-Calculadora-876" style={styles.label}>Km vacío retorno</label>
+              <input id="a11y-Calculadora-876" type="number" placeholder="60" value={kmVacioRet} onChange={e=>setKmVacioRet(e.target.value)} style={styles.input} />
             </div>
           </div>
           <div style={{display:"flex",justifyContent:"space-between",padding:"6px 0",marginBottom:"10px",fontSize:t.fonts.sizeXs,color:t.colors.textTertiary}}>
@@ -887,8 +893,8 @@ const guardarRutaFrecuente = async () => {
 
         {/* MODO DE FLETE */}
 <div style={styles.campo}>
-  <label style={styles.label}>Modo de pago del flete</label>
-  <select
+  <label htmlFor="a11y-Calculadora-890" style={styles.label}>Modo de pago del flete</label>
+  <select id="a11y-Calculadora-890"
     value={modoFlete}
     onChange={e => setModoFlete(e.target.value)}
     style={styles.input}
@@ -900,8 +906,8 @@ const guardarRutaFrecuente = async () => {
 
 <div style={styles.fila2}>
   <div style={styles.campo}>
-    <label style={styles.label}>Toneladas</label>
-    <input
+    <label htmlFor="a11y-Calculadora-903" style={styles.label}>Toneladas</label>
+    <input id="a11y-Calculadora-903"
       type="number"
       placeholder="33.5"
       step="0.01"
@@ -912,8 +918,8 @@ const guardarRutaFrecuente = async () => {
   </div>
   {modoFlete === "porTon" ? (
     <div style={styles.campo}>
-      <label style={styles.label}>Flete ($/ton)</label>
-      <input
+      <label htmlFor="a11y-Calculadora-915" style={styles.label}>Flete ($/ton)</label>
+      <input id="a11y-Calculadora-915"
         type="number"
         placeholder="80000"
         value={fleteTon}
@@ -923,8 +929,8 @@ const guardarRutaFrecuente = async () => {
     </div>
   ) : (
     <div style={styles.campo}>
-      <label style={styles.label}>Valor del viaje ($)</label>
-      <input
+      <label htmlFor="a11y-Calculadora-926" style={styles.label}>Valor del viaje ($)</label>
+      <input id="a11y-Calculadora-926"
         type="number"
         placeholder="2500000"
         value={fleteTon}
@@ -944,7 +950,7 @@ const guardarRutaFrecuente = async () => {
                 <div>
                   <p style={{fontSize:t.fonts.sizeXs,color:t.colors.amber,fontWeight:t.fonts.weightBold,margin:0}}>¿Seguro que es $/ton?</p>
                   <p style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,margin:"2px 0 0"}}>
-                    El flete por tonelada normalmente es entre $40.000 y $300.000/ton. Si el valor es el total del viaje, cambie a modo "Fijo ($/Viaje)".
+                    El flete por tonelada normalmente es entre $40.000 y $300.000/ton. Si el valor es el total del viaje, cambie a modo &quot;Fijo ($/Viaje)&quot;.
                   </p>
                 </div>
               </div>
@@ -1009,8 +1015,8 @@ const guardarRutaFrecuente = async () => {
               {tieneRetorno && <p style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700, margin: "0 0 6px" }}>1. TRAYECTO DE IDA</p>}
               <div style={styles.fila2}>
                 <div style={styles.campo}>
-                  <label style={styles.label}>Anticipo Ida (%)</label>
-                  <input
+                  <label htmlFor="a11y-Calculadora-1012" style={styles.label}>Anticipo Ida (%)</label>
+                  <input id="a11y-Calculadora-1012"
                     type="number"
                     placeholder="60"
                     value={pctAnticipoFlete}
@@ -1019,8 +1025,8 @@ const guardarRutaFrecuente = async () => {
                   />
                 </div>
                 <div style={styles.campo}>
-                  <label style={styles.label}>Valor Anticipo Ida ($)</label>
-                  <input
+                  <label htmlFor="a11y-Calculadora-1022" style={styles.label}>Valor Anticipo Ida ($)</label>
+                  <input id="a11y-Calculadora-1022"
                     type="number"
                     placeholder="Monto recibido"
                     value={montoAnticipoFlete}
@@ -1043,8 +1049,8 @@ const guardarRutaFrecuente = async () => {
                 <p style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700, margin: "0 0 6px" }}>2. TRAYECTO DE RETORNO</p>
                 <div style={styles.fila2}>
                   <div style={styles.campo}>
-                    <label style={styles.label}>Anticipo Retorno (%)</label>
-                    <input
+                    <label htmlFor="a11y-Calculadora-1046" style={styles.label}>Anticipo Retorno (%)</label>
+                    <input id="a11y-Calculadora-1046"
                       type="number"
                       placeholder="60"
                       value={pctAnticipoFleteRet}
@@ -1053,8 +1059,8 @@ const guardarRutaFrecuente = async () => {
                     />
                   </div>
                   <div style={styles.campo}>
-                    <label style={styles.label}>Valor Anticipo Retorno ($)</label>
-                    <input
+                    <label htmlFor="a11y-Calculadora-1056" style={styles.label}>Valor Anticipo Retorno ($)</label>
+                    <input id="a11y-Calculadora-1056"
                       type="number"
                       placeholder="Monto recibido"
                       value={montoAnticipoFleteRet}
@@ -1114,39 +1120,39 @@ const guardarRutaFrecuente = async () => {
         <div style={{marginTop:"12px", padding:"12px", background:t.colors.bgSection, borderRadius:t.radius.md}}>
 
         <div style={styles.campo}>
-          <label style={styles.label}>Ruta retorno (Origen → Destino)</label>
-          <input type="text" placeholder="Cali – Barranquilla" value={rutaRet}
+          <label htmlFor="a11y-Calculadora-1117" style={styles.label}>Ruta retorno (Origen → Destino)</label>
+          <input id="a11y-Calculadora-1117" type="text" placeholder="Cali – Barranquilla" value={rutaRet}
             onChange={e=>setRutaRet(e.target.value)} style={styles.input} />
         </div>
 
         <div style={styles.fila2}>
           <div style={styles.campo}>
-            <label style={styles.label}>Fecha cargue retorno</label>
-            <input type="date" value={fechaCargueRet} onChange={e=>setFechaCargueRet(e.target.value)} style={styles.input} />
+            <label htmlFor="a11y-Calculadora-1124" style={styles.label}>Fecha cargue retorno</label>
+            <input id="a11y-Calculadora-1124" type="date" value={fechaCargueRet} onChange={e=>setFechaCargueRet(e.target.value)} style={styles.input} />
           </div>
           <div style={styles.campo}>
-            <label style={styles.label}>Fecha descargue retorno</label>
-            <input type="date" value={fechaDescargueRet} onChange={e=>setFechaDescargueRet(e.target.value)} style={styles.input} />
+            <label htmlFor="a11y-Calculadora-1128" style={styles.label}>Fecha descargue retorno</label>
+            <input id="a11y-Calculadora-1128" type="date" value={fechaDescargueRet} onChange={e=>setFechaDescargueRet(e.target.value)} style={styles.input} />
           </div>
         </div>
 
         <div style={styles.fila2}>
           <div style={styles.campo}>
-            <label style={styles.label}>Lugar de cargue</label>
-            <input type="text" placeholder="Bodega, puerto..." value={lugarCargueRet}
+            <label htmlFor="a11y-Calculadora-1135" style={styles.label}>Lugar de cargue</label>
+            <input id="a11y-Calculadora-1135" type="text" placeholder="Bodega, puerto..." value={lugarCargueRet}
               onChange={e=>setLugarCargueRet(e.target.value)} style={styles.input} />
           </div>
           <div style={styles.campo}>
-            <label style={styles.label}>Lugar de descargue</label>
-            <input type="text" placeholder="Planta, bodega..." value={lugarDescargueRet}
+            <label htmlFor="a11y-Calculadora-1140" style={styles.label}>Lugar de descargue</label>
+            <input id="a11y-Calculadora-1140" type="text" placeholder="Planta, bodega..." value={lugarDescargueRet}
               onChange={e=>setLugarDescargueRet(e.target.value)} style={styles.input} />
           </div>
         </div>
 
         <div style={styles.fila2}>
           <div style={styles.campo}>
-            <label style={styles.label}>Tipo de carga</label>
-            <select value={tipoCargaRet} onChange={e=>setTipoCargaRet(e.target.value)} style={styles.input}>
+            <label htmlFor="a11y-Calculadora-1148" style={styles.label}>Tipo de carga</label>
+            <select id="a11y-Calculadora-1148" value={tipoCargaRet} onChange={e=>setTipoCargaRet(e.target.value)} style={styles.input}>
               <option value="">Seleccionar...</option>
               <option>Granel sólido</option>
               <option>Granel líquido</option>
@@ -1162,17 +1168,17 @@ const guardarRutaFrecuente = async () => {
             </select>
           </div>
           <div style={styles.campo}>
-            <label style={styles.label}>Producto</label>
-            <input type="text" placeholder="Carbón, arroz..." value={productoRet}
+            <label htmlFor="a11y-Calculadora-1165" style={styles.label}>Producto</label>
+            <input id="a11y-Calculadora-1165" type="text" placeholder="Carbón, arroz..." value={productoRet}
               onChange={e=>setProductoRet(e.target.value)} style={styles.input} />
           </div>
         </div>
 
 
           <div style={styles.campo}>
-            <label style={styles.label}>Empresa</label>
+            <label htmlFor="a11y-Calculadora-1173" style={styles.label}>Empresa</label>
             {empresasFrecuentes.length > 0 && (
-              <select
+              <select id="a11y-Calculadora-1173"
                 value={empresasFrecuentes.includes(empresaRet) ? empresaRet : "__nueva__"}
                 onChange={e => {
                   if (e.target.value === "__nueva__") {
@@ -1207,8 +1213,8 @@ const guardarRutaFrecuente = async () => {
 
         <div style={styles.fila2}>
           <div style={styles.campo}>
-            <label style={styles.label}>Manifiesto</label>
-            <input type="text" placeholder="MAN-001" value={maniRet}
+            <label htmlFor="a11y-Calculadora-1210" style={styles.label}>Manifiesto</label>
+            <input id="a11y-Calculadora-1210" type="text" placeholder="MAN-001" value={maniRet}
               onChange={e=>setManiRet(e.target.value)} style={styles.input} />
               {maniRet.trim() && viajes.some(v => (v.mani && v.mani.trim().toLowerCase() === maniRet.trim().toLowerCase()) || (v.maniRet && v.maniRet.trim().toLowerCase() === maniRet.trim().toLowerCase())) && (
                <p style={{fontSize:t.fonts.sizeXs,color:t.colors.amber,margin:"4px 0 0",display:"flex",alignItems:"center",gap:"5px"}}>
@@ -1218,21 +1224,21 @@ const guardarRutaFrecuente = async () => {
           </div>
 
         <div style={styles.campo}>
-            <label style={styles.label}>N° Remesa</label>
-            <input type="text" placeholder="REM-001" value={remesaRet}
+            <label htmlFor="a11y-Calculadora-1221" style={styles.label}>N° Remesa</label>
+            <input id="a11y-Calculadora-1221" type="text" placeholder="REM-001" value={remesaRet}
               onChange={e=>setRemesaRet(e.target.value)} style={styles.input} />
           </div>
         </div>
 
         <div style={styles.campo}>
-          <label style={styles.label}>Peso báscula (ton)</label>
-          <input type="number" placeholder="34.5" value={pesoBasRet}
+          <label htmlFor="a11y-Calculadora-1228" style={styles.label}>Peso báscula (ton)</label>
+          <input id="a11y-Calculadora-1228" type="number" placeholder="34.5" value={pesoBasRet}
             onChange={e=>setPesoBasRet(e.target.value)} style={styles.input} />
         </div>
 
         <div style={styles.campo}>
-        <label style={styles.label}>Modo de pago retorno</label>
-        <select
+        <label htmlFor="a11y-Calculadora-1234" style={styles.label}>Modo de pago retorno</label>
+        <select id="a11y-Calculadora-1234"
           value={modoFleteRetorno}
           onChange={e=>setModoFleteRetorno(e.target.value)}
           style={styles.input}
@@ -1243,20 +1249,20 @@ const guardarRutaFrecuente = async () => {
         </div>
           <div style={styles.fila2}>
           <div style={styles.campo}>
-          <label style={styles.label}>Toneladas retorno</label>
-          <input type="number" placeholder="30" step="0.01" value={tonelajeRetorno}
+          <label htmlFor="a11y-Calculadora-1246" style={styles.label}>Toneladas retorno</label>
+          <input id="a11y-Calculadora-1246" type="number" placeholder="30" step="0.01" value={tonelajeRetorno}
             onChange={e=>setTonelajeRetorno(e.target.value)} style={styles.input} />
         </div>
         {modoFleteRetorno === "porTon" ? (
           <div style={styles.campo}>
-            <label style={styles.label}>Flete retorno ($/ton)</label>
-            <input type="number" placeholder="60000" value={fleteRetorno}
+            <label htmlFor="a11y-Calculadora-1252" style={styles.label}>Flete retorno ($/ton)</label>
+            <input id="a11y-Calculadora-1252" type="number" placeholder="60000" value={fleteRetorno}
               onChange={e=>setFleteRetorno(e.target.value)} style={styles.input} />
           </div>
         ) : (
           <div style={styles.campo}>
-            <label style={styles.label}>Valor retorno ($)</label>
-            <input type="number" placeholder="1500000" value={fleteRetorno}
+            <label htmlFor="a11y-Calculadora-1258" style={styles.label}>Valor retorno ($)</label>
+            <input id="a11y-Calculadora-1258" type="number" placeholder="1500000" value={fleteRetorno}
               onChange={e=>setFleteRetorno(e.target.value)} style={styles.input} />
           </div>
         )}
@@ -1278,8 +1284,8 @@ const guardarRutaFrecuente = async () => {
       {secComb && (<div style={{padding:"0 20px"}}>
       <div style={styles.card}>
         <div style={styles.campo}>
-          <label style={styles.label}>Modo de cálculo</label>
-          <select value={modoComb} onChange={e=>setModoComb(e.target.value)} style={styles.input}>
+          <label htmlFor="a11y-Calculadora-1281" style={styles.label}>Modo de cálculo</label>
+          <select id="a11y-Calculadora-1281" value={modoComb} onChange={e=>setModoComb(e.target.value)} style={styles.input}>
             <option value="auto">Rendimiento (Km/Gal)</option>
             <option value="manual">Consumo total (Gal/viaje)</option>
           </select>
@@ -1287,28 +1293,28 @@ const guardarRutaFrecuente = async () => {
         {modoComb === "auto" ? (
           <div style={styles.fila2}>
             <div style={styles.campo}>
-              <label style={styles.label}>Cargado (Km/Gal)</label>
-              <input type="number" placeholder="7" step="0.1" value={rendCargado} onChange={e=>setRendCargado(e.target.value)} style={styles.input} />
+              <label htmlFor="a11y-Calculadora-1290" style={styles.label}>Cargado (Km/Gal)</label>
+              <input id="a11y-Calculadora-1290" type="number" placeholder="7" step="0.1" value={rendCargado} onChange={e=>setRendCargado(e.target.value)} style={styles.input} />
             </div>
             <div style={styles.campo}>
-              <label style={styles.label}>Vacío (Km/Gal)</label>
-              <input type="number" placeholder="11" step="0.1" value={rendVacio} onChange={e=>setRendVacio(e.target.value)} style={styles.input} />
+              <label htmlFor="a11y-Calculadora-1294" style={styles.label}>Vacío (Km/Gal)</label>
+              <input id="a11y-Calculadora-1294" type="number" placeholder="11" step="0.1" value={rendVacio} onChange={e=>setRendVacio(e.target.value)} style={styles.input} />
             </div>
           </div>
         ) : (
           <div style={styles.campo}>
-            <label style={styles.label}>Total galones</label>
-            <input type="number" placeholder="120" value={galManual} onChange={e=>setGalManual(e.target.value)} style={styles.input} />
+            <label htmlFor="a11y-Calculadora-1300" style={styles.label}>Total galones</label>
+            <input id="a11y-Calculadora-1300" type="number" placeholder="120" value={galManual} onChange={e=>setGalManual(e.target.value)} style={styles.input} />
           </div>
         )}
         <div style={styles.fila2}>
           <div style={styles.campo}>
-            <label style={styles.label}>Precio ACPM ($/gal)</label>
-            <input type="number" placeholder="10500" value={precioAcpm} onChange={e=>setPrecioAcpm(e.target.value)} style={styles.input} />
+            <label htmlFor="a11y-Calculadora-1306" style={styles.label}>Precio ACPM ($/gal)</label>
+            <input id="a11y-Calculadora-1306" type="number" placeholder="10500" value={precioAcpm} onChange={e=>setPrecioAcpm(e.target.value)} style={styles.input} />
           </div>
           <div style={styles.campo}>
-            <label style={styles.label}>Precio Adblue ($/lt)</label>
-            <input type="number" placeholder="3500" value={precioAdblue} onChange={e=>setPrecioAdblue(e.target.value)} style={styles.input} />
+            <label htmlFor="a11y-Calculadora-1310" style={styles.label}>Precio Adblue ($/lt)</label>
+            <input id="a11y-Calculadora-1310" type="number" placeholder="3500" value={precioAdblue} onChange={e=>setPrecioAdblue(e.target.value)} style={styles.input} />
           </div>
         </div>
         {galTotal > 0 && (
@@ -1334,8 +1340,8 @@ const guardarRutaFrecuente = async () => {
       {secPeajes && (<div style={{padding:"0 20px"}}>
       <div style={styles.card}>
         <div style={styles.campo}>
-          <label style={styles.label}>Categoría del vehículo</label>
-          <select value={categoria} onChange={e=>setCategoria(e.target.value)} style={styles.input}>
+          <label htmlFor="a11y-Calculadora-1337" style={styles.label}>Categoría del vehículo</label>
+          <select id="a11y-Calculadora-1337" value={categoria} onChange={e=>setCategoria(e.target.value)} style={styles.input}>
             <option value="I">Automoviles, Camperos, Camionetas (Cat I)</option>
             <option value="II">Buses y Busetas (Cat II)</option>
             <option value="III">Camiones 2 ejes pequeño(Cat III)</option>
@@ -1403,8 +1409,8 @@ const guardarRutaFrecuente = async () => {
       {secCostos && (<div style={{padding:"0 20px"}}>
       <div style={styles.card}>
         <div style={styles.campo}>
-  <label style={styles.label}>Modo de pago conductor</label>
-  <select
+  <label htmlFor="a11y-Calculadora-1406" style={styles.label}>Modo de pago conductor</label>
+  <select id="a11y-Calculadora-1406"
     value={modoConductor}
     onChange={e => {
       setModoConductor(e.target.value);
@@ -1421,27 +1427,27 @@ const guardarRutaFrecuente = async () => {
   <div style={styles.campo}>
     {modoConductor === "porcentaje" ? (
       <>
-        <label style={styles.label}>% Conductor</label>
-        <input type="number" placeholder="10" value={porcCond}
+        <label htmlFor="a11y-Calculadora-1424" style={styles.label}>% Conductor</label>
+        <input id="a11y-Calculadora-1424" type="number" placeholder="10" value={porcCond}
           onChange={e=>setPorcCond(e.target.value)} style={styles.input} />
       </>
     ) : (
       <>
-        <label style={styles.label}>Valor conductor ($)</label>
-        <input type="number" placeholder="200000" value={porcCond}
+        <label htmlFor="a11y-Calculadora-1430" style={styles.label}>Valor conductor ($)</label>
+        <input id="a11y-Calculadora-1430" type="number" placeholder="200000" value={porcCond}
           onChange={e=>setPorcCond(e.target.value)} style={styles.input} />
       </>
     )}
   </div>
   <div style={styles.campo}>
-    <label style={styles.label}>Carpado/Descarpado</label>
-    <input type="number" placeholder="20000" value={carpado}
+    <label htmlFor="a11y-Calculadora-1437" style={styles.label}>Carpado/Descarpado</label>
+    <input id="a11y-Calculadora-1437" type="number" placeholder="20000" value={carpado}
       onChange={e=>setCarpado(e.target.value)} style={styles.input} />
   </div>
 </div>
         <div style={styles.campo}>
-          <label style={styles.label}>Gastos de viaje</label>
-          <input type="number" placeholder="30000" value={gastosViaje} onChange={e=>setGastosViaje(e.target.value)} style={styles.input} />
+          <label htmlFor="a11y-Calculadora-1443" style={styles.label}>Gastos de viaje</label>
+          <input id="a11y-Calculadora-1443" type="number" placeholder="30000" value={gastosViaje} onChange={e=>setGastosViaje(e.target.value)} style={styles.input} />
         </div>
 
         {extras.map((e,i)=>(
@@ -1553,16 +1559,16 @@ const guardarRutaFrecuente = async () => {
     {descOtro && (
       <div style={styles.fila2}>
         <div style={styles.campo}>
-          <label style={styles.label}>Nombre</label>
-          <input
+          <label htmlFor="a11y-Calculadora-1556" style={styles.label}>Nombre</label>
+          <input id="a11y-Calculadora-1556"
             type="text" placeholder="Ej: Pronto pago"
             value={nombreOtro} onChange={e=>setNombreOtro(e.target.value)}
             style={styles.input}
           />
         </div>
         <div style={styles.campo}>
-          <label style={styles.label}>Porcentaje (%)</label>
-          <input
+          <label htmlFor="a11y-Calculadora-1564" style={styles.label}>Porcentaje (%)</label>
+          <input id="a11y-Calculadora-1564"
             type="number" placeholder="0" value={pctOtro} min="0" max="100" step="0.1"
             onChange={e=>setPctOtro(parseFloat(e.target.value)||0)}
             style={styles.input}
@@ -1682,8 +1688,8 @@ const guardarRutaFrecuente = async () => {
           ) : (
             <div>
               <div style={styles.campo}>
-                <label style={styles.label}>Nombre de la ruta</label>
-                <input type="text" placeholder="Ej: Barranquilla - Bogotá" value={nombreRuta} onChange={e=>setNombreRuta(e.target.value)} style={styles.input} />
+                <label htmlFor="a11y-Calculadora-1685" style={styles.label}>Nombre de la ruta</label>
+                <input id="a11y-Calculadora-1685" type="text" placeholder="Ej: Barranquilla - Bogotá" value={nombreRuta} onChange={e=>setNombreRuta(e.target.value)} style={styles.input} />
               </div>
               <div style={{display:"flex", gap:"8px"}}>
                 <button style={{flex:1, padding:"10px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer", opacity:guardandoRuta?0.75:1}} onClick={guardarRutaFrecuente} disabled={guardandoRuta}>

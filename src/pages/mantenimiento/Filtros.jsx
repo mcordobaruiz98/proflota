@@ -2,9 +2,9 @@
  * Hecho por JESUS COSSIO DEV
  * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
  */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Trash2, Droplets, Wind, Fuel, Filter, Thermometer, Droplet } from "lucide-react";
+import { ArrowLeft, Trash2, Droplets, Wind, Fuel, Filter, Thermometer, Droplet } from "lucide-react";
 import { theme as t } from "../../styles/theme";
 
 const TIPOS_FILTRO = [
@@ -25,9 +25,7 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
   const [historial, setHistorial] = useState(vehiculo?.filtrosHistorial || []);
 
   // Sincronizar cuando carga/cambia en Firestore (evita borrado al refrescar)
-  useEffect(() => {
-    if (vehiculo?.filtrosHistorial) setHistorial(vehiculo.filtrosHistorial);
-  }, [vehiculo?.filtrosHistorial]);
+  if (vehiculo?.filtrosHistorial) setHistorial(vehiculo.filtrosHistorial);
 
   const [tipoFiltro,  setTipoFiltro]  = useState("aceite");
   const [marca,       setMarca]       = useState("");
@@ -46,6 +44,7 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
   const guardar = () => {
     if (!kmCambio) { mostrarToast("Ingresa el km del cambio","error"); return; }
     setGuardando(true);
+    // eslint-disable-next-line react-hooks/purity -- guardar solo se invoca desde onClick; Date.now() acuña el id del registro al pulsar, nunca durante render.
     const nuevo = { id:Date.now(), tipo:tipoFiltro, marca, referencia, km:Number(kmCambio), fecha, taller, costo:Number(costo)||0, nota };
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
@@ -146,61 +145,61 @@ function Filtros({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
             <p style={styles.cardTitulo}>Nuevo cambio de filtro</p>
 
             <div style={styles.campo}>
-              <label style={styles.label}>Tipo de filtro</label>
-              <select value={tipoFiltro} onChange={e=>setTipoFiltro(e.target.value)} style={styles.input}>
+              <label htmlFor="a11y-Filtros-149" style={styles.label}>Tipo de filtro</label>
+              <select id="a11y-Filtros-149" value={tipoFiltro} onChange={e=>setTipoFiltro(e.target.value)} style={styles.input}>
                 {TIPOS_FILTRO.map(tf=><option key={tf.id} value={tf.id}>{tf.label}</option>)}
               </select>
             </div>
 
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Marca</label>
-                <input type="text" placeholder="Fleetguard, Mann..." value={marca}
+                <label htmlFor="a11y-Filtros-157" style={styles.label}>Marca</label>
+                <input id="a11y-Filtros-157" type="text" placeholder="Fleetguard, Mann..." value={marca}
                   onChange={e=>setMarca(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Referencia</label>
-                <input type="text" placeholder="LF3349" value={referencia}
+                <label htmlFor="a11y-Filtros-162" style={styles.label}>Referencia</label>
+                <input id="a11y-Filtros-162" type="text" placeholder="LF3349" value={referencia}
                   onChange={e=>setReferencia(e.target.value)} style={styles.input}/>
               </div>
             </div>
 
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Km al cambiar</label>
-                <input type="number" placeholder="145000" value={kmCambio}
+                <label htmlFor="a11y-Filtros-170" style={styles.label}>Km al cambiar</label>
+                <input id="a11y-Filtros-170" type="number" placeholder="145000" value={kmCambio}
                   onChange={e=>setKmCambio(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Fecha</label>
-                <input type="date" value={fecha}
+                <label htmlFor="a11y-Filtros-175" style={styles.label}>Fecha</label>
+                <input id="a11y-Filtros-175" type="date" value={fecha}
                   onChange={e=>setFecha(e.target.value)} style={styles.input}/>
               </div>
             </div>
 
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Taller</label>
-                <input type="text" placeholder="Nombre del taller" value={taller}
+                <label htmlFor="a11y-Filtros-183" style={styles.label}>Taller</label>
+                <input id="a11y-Filtros-183" type="text" placeholder="Nombre del taller" value={taller}
                   onChange={e=>setTaller(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Nit Taller</label>
-                <input type="number" placeholder="111.222.333.-4" value={nitTaller}
+                <label htmlFor="a11y-Filtros-188" style={styles.label}>Nit Taller</label>
+                <input id="a11y-Filtros-188" type="number" placeholder="111.222.333.-4" value={nitTaller}
                   onChange={e=>setnitTaller(e.target.value)} style={styles.input}/>
               </div>
             </div>
 
             <div style={styles.campo}>
-              <label  style={styles.label}>Costo ($)</label>
-              <input type="number" placeholder="40000" value={costo}
+              <label htmlFor="a11y-Filtros-195"  style={styles.label}>Costo ($)</label>
+              <input id="a11y-Filtros-195" type="number" placeholder="40000" value={costo}
               onChange={e=>setCosto(e.target.value)} style={styles.input}/>
               </div>
 
 
             <div style={styles.campo}>
-              <label style={styles.label}>Nota</label>
-              <input type="text" placeholder="Observaciones" value={nota}
+              <label htmlFor="a11y-Filtros-202" style={styles.label}>Nota</label>
+              <input id="a11y-Filtros-202" type="text" placeholder="Observaciones" value={nota}
                 onChange={e=>setNota(e.target.value)} style={styles.input}/>
             </div>
 

@@ -25,7 +25,7 @@ function Placa({ valor, size = "md" }) {
 }
 import { Truck, Plus, Search, Trash2 } from "lucide-react";
 import { theme as t } from "../styles/theme";
-import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
+import { SkeletonCard } from "../components/Skeleton";
 
 function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}) {
   const navigate = useNavigate();
@@ -43,7 +43,6 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}
     mostrarToast("Vehiculo eliminado","info");
   };
 
-  const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CO");
 
   const [vehiculoAEliminar, setVehiculoAEliminar] = useState(null);
 
@@ -105,7 +104,7 @@ function Vehiculos({ vehiculos, onEliminar, viajes = [], mostrarToast, cargando}
       {vehiculos.length > 0 && vehiculosFiltrados.length === 0 && (
         <div style={styles.sinResultados}>
           <p style={{ color: t.colors.textSecondary, fontSize: t.fonts.sizeSm }}>
-            No se encontró ningún vehículo con "{busqueda}"
+            No se encontró ningún vehículo con &quot;{busqueda}&quot;
           </p>
         </div>
       )}

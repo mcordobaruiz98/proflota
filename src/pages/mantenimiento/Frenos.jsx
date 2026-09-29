@@ -2,10 +2,11 @@
  * Hecho por JESUS COSSIO DEV
  * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
  */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Trash2, ChevronRight, ChevronUp } from "lucide-react";
 import { theme as t } from "../../styles/theme";
+import { alPulsarEnterOEspacio } from "../../utils/teclado";
 
 const EJES_POR_VEHICULO = {
   "TURBO SENCILLO":  ["Eje delantero","Eje trasero"],
@@ -162,12 +163,8 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
   const [historial,   setHistorial]   = useState(vehiculo?.frenosHistorial || []);
 
   // Sincronizar cuando los datos cargan/cambian en Firestore (evita borrado al refrescar)
-  useEffect(() => {
-    if (vehiculo?.frenosData) setEstadoEjes(vehiculo.frenosData);
-  }, [vehiculo?.frenosData]);
-  useEffect(() => {
-    if (vehiculo?.frenosHistorial) setHistorial(vehiculo.frenosHistorial);
-  }, [vehiculo?.frenosHistorial]);
+  if (vehiculo?.frenosData) setEstadoEjes(vehiculo.frenosData);
+  if (vehiculo?.frenosHistorial) setHistorial(vehiculo.frenosHistorial);
   const [ejeEdit,     setEjeEdit]     = useState(null);
   const [estadoSel,   setEstadoSel]   = useState("bueno");
   const [grosor,      setGrosor]      = useState("");
@@ -207,6 +204,7 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
   const guardarReparacion = () => {
     if (!kmReg) { mostrarToast("Ingresa el km","error"); return; }
     setGuardando(true);
+    // eslint-disable-next-line react-hooks/purity -- guardarReparacion solo se invoca desde onClick; Date.now() acuña el id del registro al pulsar, nunca durante render.
     const nuevo = { id:Date.now(), eje:ejeReg, km:Number(kmReg), fecha:fechaReg, taller:tallerReg, costo:Number(costoReg)||0 };
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
@@ -281,8 +279,11 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
             return (
               <div key={eje}>
                 <div
+                  role="button"
+                  tabIndex={0}
                   style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:i===arr.length-1&&ejeEdit!==eje?"none":`1px solid ${t.colors.borderLight}`,cursor:"pointer"}}
                   onClick={()=>ejeEdit===eje?setEjeEdit(null):abrirEje(eje)}
+                  onKeyDown={alPulsarEnterOEspacio(()=>ejeEdit===eje?setEjeEdit(null):abrirEje(eje))}
                 >
                   <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
                     <div style={{width:"10px",height:"10px",borderRadius:"2px",background:d.estado?color:t.colors.textTertiary,flexShrink:0}}/>
@@ -302,7 +303,7 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
                 {ejeEdit===eje&&(
                   <div style={{padding:"12px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}>
                     <div style={styles.campo}>
-                      <label style={styles.label}>Estado</label>
+                      <div style={styles.label}>Estado</div>
                       <div style={{display:"flex",flexWrap:"wrap",gap:"6px"}}>
                         {ESTADOS.map(es=>(
                           <button key={es.value}
@@ -314,25 +315,25 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
                     </div>
                     <div style={styles.fila2}>
                       <div style={styles.campo}>
-                        <label style={styles.label}>Grosor (mm)</label>
-                        <input type="text" placeholder="12mm" value={grosor}
+                        <label htmlFor="a11y-Frenos-317" style={styles.label}>Grosor (mm)</label>
+                        <input id="a11y-Frenos-317" type="text" placeholder="12mm" value={grosor}
                           onChange={e=>setGrosor(e.target.value)} style={styles.input}/>
                       </div>
                       <div style={styles.campo}>
-                        <label style={styles.label}>Tipo</label>
-                        <input type="text" placeholder="Pastilla, banda..." value={tipo}
+                        <label htmlFor="a11y-Frenos-322" style={styles.label}>Tipo</label>
+                        <input id="a11y-Frenos-322" type="text" placeholder="Pastilla, banda..." value={tipo}
                           onChange={e=>setTipo(e.target.value)} style={styles.input}/>
                       </div>
                     </div>
                     <div style={styles.fila2}>
                       <div style={styles.campo}>
-                        <label style={styles.label}>Fecha</label>
-                        <input type="date" value={fechaFreno}
+                        <label htmlFor="a11y-Frenos-329" style={styles.label}>Fecha</label>
+                        <input id="a11y-Frenos-329" type="date" value={fechaFreno}
                           onChange={e=>setFechaFreno(e.target.value)} style={styles.input}/>
                       </div>
                       <div style={styles.campo}>
-                        <label style={styles.label}>Nota</label>
-                        <input type="text" placeholder="Observaciones" value={nota}
+                        <label htmlFor="a11y-Frenos-334" style={styles.label}>Nota</label>
+                        <input id="a11y-Frenos-334" type="text" placeholder="Observaciones" value={nota}
                           onChange={e=>setNota(e.target.value)} style={styles.input}/>
                       </div>
                     </div>
@@ -361,32 +362,32 @@ function Frenos({ vehiculos, mostrarToast, onEditarVehiculo, onAgregar }) {
           <div style={styles.card}>
             <p style={styles.cardTitulo}>Nueva reparación</p>
             <div style={styles.campo}>
-              <label style={styles.label}>Posición</label>
-              <select value={ejeReg} onChange={e=>setEjeReg(e.target.value)} style={styles.input}>
+              <label htmlFor="a11y-Frenos-364" style={styles.label}>Posición</label>
+              <select id="a11y-Frenos-364" value={ejeReg} onChange={e=>setEjeReg(e.target.value)} style={styles.input}>
                 {ejes.map(e=><option key={e} value={e}>{e}</option>)}
               </select>
             </div>
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Km</label>
-                <input type="number" placeholder="150000" value={kmReg}
+                <label htmlFor="a11y-Frenos-371" style={styles.label}>Km</label>
+                <input id="a11y-Frenos-371" type="number" placeholder="150000" value={kmReg}
                   onChange={e=>setKmReg(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Fecha</label>
-                <input type="date" value={fechaReg}
+                <label htmlFor="a11y-Frenos-376" style={styles.label}>Fecha</label>
+                <input id="a11y-Frenos-376" type="date" value={fechaReg}
                   onChange={e=>setFechaReg(e.target.value)} style={styles.input}/>
               </div>
             </div>
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Taller</label>
-                <input type="text" placeholder="Nombre taller" value={tallerReg}
+                <label htmlFor="a11y-Frenos-383" style={styles.label}>Taller</label>
+                <input id="a11y-Frenos-383" type="text" placeholder="Nombre taller" value={tallerReg}
                   onChange={e=>setTallerReg(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Costo ($)</label>
-                <input type="number" placeholder="350000" value={costoReg}
+                <label htmlFor="a11y-Frenos-388" style={styles.label}>Costo ($)</label>
+                <input id="a11y-Frenos-388" type="number" placeholder="350000" value={costoReg}
                   onChange={e=>setCostoReg(e.target.value)} style={styles.input}/>
               </div>
             </div>

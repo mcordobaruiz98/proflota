@@ -2,16 +2,21 @@
  * Hecho por JESUS COSSIO DEV
  * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { theme as t } from "../styles/theme";
 
 function Toast({ mensaje, tipo = "exito", onCerrar }) {
   const [visible, setVisible] = useState(true);
+  // Ref para leer el callback vigente sin reiniciar el temporizador en cada render
+  const onCerrarRef = useRef(onCerrar);
+  useEffect(() => {
+    onCerrarRef.current = onCerrar;
+  }, [onCerrar]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setVisible(false);
-      setTimeout(onCerrar, 300);
+      setTimeout(() => onCerrarRef.current(), 300);
     }, 3000);
     return () => clearTimeout(timer);
   }, []);

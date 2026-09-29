@@ -10,6 +10,9 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { theme as t } from "../styles/theme";
 import FirmaCanvas from "../components/FirmaCanvas";
+import { useUid } from "../lib/useUid";
+import { leer, escribir, borrarEspacioUsuario } from "../lib/userStorage";
+import { purgarCacheFirestore } from "../lib/purgarCache";
 
 function Configuracion({mostrarToast}) {
   const navigate = useNavigate();
@@ -24,7 +27,7 @@ function Configuracion({mostrarToast}) {
     direccion: "", ciudad: "", telefono: "", correo: "",
     banco: "", tipoCuenta: "Ahorros", numeroCuenta: "", titularCuenta: "",
   });
-  const [guardandoPerfil, setGuardandoPerfil] = useState(false);
+  const [, setGuardandoPerfil] = useState(false);
   const [guardandoFirma, setGuardandoFirma] = useState(false);
 
   const manejarEliminarCuenta = async () => {
@@ -36,7 +39,14 @@ function Configuracion({mostrarToast}) {
     try {
       await eliminarCuenta();
     } catch (err) {
-      if (err.code === "auth/requires-recent-login") {
+      // La baja la hace el servidor, así que el "vuelve a iniciar sesión" llega
+      // como functions/failed-precondition desde la callable. El código de
+      // cliente auth/requires-recent-login se conserva por si el SDK de Firebase
+      // lo emite antes de llegar al servidor.
+      const pideReautenticacion =
+        err.code === "functions/failed-precondition" ||
+        err.code === "auth/requires-recent-login";
+      if (pideReautenticacion) {
         mostrarToast("Por seguridad, cierra sesión, vuelve a entrar y repite la eliminación", "error");
       } else {
         mostrarToast("Error al eliminar la cuenta. Contáctanos por soporte", "error");
@@ -45,23 +55,35 @@ function Configuracion({mostrarToast}) {
     }
   };
 
-  const [notificaciones, setNotificaciones] = useState(() =>
-    localStorage.getItem("cfg_notif") !== "false"
-  );
-  const [sonido, setSonido] = useState(() =>
-    localStorage.getItem("cfg_sonido") !== "false"
-  );
+  // FE-17: las preferencias viven en el espacio de localStorage del uid, no en
+  // claves globales. Con dos cuentas en el mismo navegador, la clave global
+  // hacía que la segunda heredara y pisara los ajustes de la primera.
+  const uid = useUid();
+
+  const [notificaciones, setNotificaciones] = useState(() => leer(uid, "cfg_notif", true) !== false);
+  const [sonido, setSonido] = useState(() => leer(uid, "cfg_sonido", true) !== false);
+
+  // El uid llega asíncrono; cuando ya lo sabemos releemos las preferencias de
+  // esa cuenta para no mostrar los valores por defecto de la anterior. Se hace
+  // durante el render (patrón documentado por React) y no en un efecto, para no
+  // pintar un frame con los ajustes de la cuenta anterior.
+  const [uidCargado, setUidCargado] = useState(uid);
+  if (uid !== uidCargado) {
+    setUidCargado(uid);
+    setNotificaciones(leer(uid, "cfg_notif", true) !== false);
+    setSonido(leer(uid, "cfg_sonido", true) !== false);
+  }
 
   const toggleNotif = () => {
     const nuevo = !notificaciones;
     setNotificaciones(nuevo);
-    localStorage.setItem("cfg_notif", nuevo);
+    escribir(uid, "cfg_notif", nuevo);
   };
 
   const toggleSonido = () => {
     const nuevo = !sonido;
     setSonido(nuevo);
-    localStorage.setItem("cfg_sonido", nuevo);
+    escribir(uid, "cfg_sonido", nuevo);
   };
 
   const opciones = [
@@ -104,7 +126,7 @@ function Configuracion({mostrarToast}) {
         diaLiquidacion: valor === "" ? null : Number(valor),
       }, { merge: true });
       mostrarToast("Día de liquidación guardado", "exito");
-    } catch(err) {
+    } catch {
       mostrarToast("Error al guardar", "error");
     }
   };
@@ -118,7 +140,7 @@ function Configuracion({mostrarToast}) {
         creadoEn: new Date().toISOString(),
       });
       setCodigoTelegram(codigo);
-    } catch (err) {
+    } catch {
       mostrarToast("Error generando código", "error");
     } finally {
       setGenerandoCodigo(false);
@@ -136,7 +158,7 @@ function Configuracion({mostrarToast}) {
       await setDoc(doc(db, "usuarios", usuario.uid), {
         perfilFacturacion: nuevo,
       }, { merge: true });
-    } catch(err) {
+    } catch {
       mostrarToast("Error al guardar", "error");
     } finally {
       setGuardandoPerfil(false);
@@ -152,7 +174,7 @@ function Configuracion({mostrarToast}) {
         perfilFacturacion: nuevo,
       }, { merge: true });
       mostrarToast("Firma guardada", "exito");
-    } catch (err) {
+    } catch {
       mostrarToast("Error al guardar la firma", "error");
     } finally {
       setGuardandoFirma(false);
@@ -265,6 +287,9 @@ function Configuracion({mostrarToast}) {
               <li>Escríbale: <b style={{color:t.colors.textPrimary}}>/vincular {codigoTelegram}</b></li>
               <li>Listo — escriba /nuevo para su primer viaje</li>
             </ol>
+            <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 10px", lineHeight:1.5}}>
+              ¿Ya lo había vinculado desde otro chat? Escríbale <b style={{color:t.colors.textPrimary}}>/desvincular</b> al bot para liberar ese chat antes de usar este código.
+            </p>
             <a
               href="https://t.me/Naviraflota_bot"
               target="_blank" rel="noreferrer"
@@ -302,8 +327,8 @@ function Configuracion({mostrarToast}) {
         <p style={styles.subSeccion}><User size={12} color={t.colors.textTertiary} strokeWidth={2}/> Identificación</p>
 
         <div style={{marginBottom:"12px"}}>
-          <label style={styles.label}>Nombre completo *</label>
-          <input type="text" placeholder="Mario Córdoba Ruiz"
+          <label htmlFor="a11y-Configuracion-330" style={styles.label}>Nombre completo *</label>
+          <input id="a11y-Configuracion-330" type="text" placeholder="Mario Córdoba Ruiz"
             value={perfilFact.nombreCompleto}
             onChange={(e)=>setPerfilFact({...perfilFact, nombreCompleto: e.target.value})}
             onBlur={(e)=>guardarPerfilFact("nombreCompleto", e.target.value)}
@@ -312,8 +337,8 @@ function Configuracion({mostrarToast}) {
 
         <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"12px"}}>
           <div>
-            <label style={styles.label}>Tipo doc.</label>
-            <select
+            <label htmlFor="a11y-Configuracion-340" style={styles.label}>Tipo doc.</label>
+            <select id="a11y-Configuracion-340"
               value={perfilFact.tipoDoc}
               onChange={(e)=>guardarPerfilFact("tipoDoc", e.target.value)}
               style={styles.inputPerfil}
@@ -329,8 +354,8 @@ function Configuracion({mostrarToast}) {
             </select>
           </div>
           <div>
-            <label style={styles.label}>Número *</label>
-            <input type="text" placeholder="1234567890"
+            <label htmlFor="a11y-Configuracion-357" style={styles.label}>Número *</label>
+            <input id="a11y-Configuracion-357" type="text" placeholder="1234567890"
               value={perfilFact.numeroDoc}
               onChange={(e)=>setPerfilFact({...perfilFact, numeroDoc: e.target.value})}
               onBlur={(e)=>guardarPerfilFact("numeroDoc", e.target.value)}
@@ -341,8 +366,8 @@ function Configuracion({mostrarToast}) {
         <p style={styles.subSeccion}><MapPin size={12} color={t.colors.textTertiary} strokeWidth={2}/> Ubicación</p>
 
         <div style={{marginBottom:"12px"}}>
-          <label style={styles.label}>Dirección</label>
-          <input type="text" placeholder="Cra 45 #10-20"
+          <label htmlFor="a11y-Configuracion-369" style={styles.label}>Dirección</label>
+          <input id="a11y-Configuracion-369" type="text" placeholder="Cra 45 #10-20"
             value={perfilFact.direccion}
             onChange={(e)=>setPerfilFact({...perfilFact, direccion: e.target.value})}
             onBlur={(e)=>guardarPerfilFact("direccion", e.target.value)}
@@ -350,8 +375,8 @@ function Configuracion({mostrarToast}) {
         </div>
 
         <div style={{marginBottom:"12px"}}>
-          <label style={styles.label}>Ciudad *</label>
-          <input type="text" placeholder="Barranquilla"
+          <label htmlFor="a11y-Configuracion-378" style={styles.label}>Ciudad *</label>
+          <input id="a11y-Configuracion-378" type="text" placeholder="Barranquilla"
             value={perfilFact.ciudad}
             onChange={(e)=>setPerfilFact({...perfilFact, ciudad: e.target.value})}
             onBlur={(e)=>guardarPerfilFact("ciudad", e.target.value)}
@@ -362,16 +387,16 @@ function Configuracion({mostrarToast}) {
 
         <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px", marginBottom:"12px"}}>
           <div>
-            <label style={styles.label}>Teléfono *</label>
-            <input type="tel" placeholder="3005551234"
+            <label htmlFor="a11y-Configuracion-390" style={styles.label}>Teléfono *</label>
+            <input id="a11y-Configuracion-390" type="tel" placeholder="3005551234"
               value={perfilFact.telefono}
               onChange={(e)=>setPerfilFact({...perfilFact, telefono: e.target.value})}
               onBlur={(e)=>guardarPerfilFact("telefono", e.target.value)}
               style={styles.inputPerfil}/>
           </div>
           <div>
-            <label style={styles.label}>Correo</label>
-            <input type="email" placeholder="correo@ejemplo.com"
+            <label htmlFor="a11y-Configuracion-398" style={styles.label}>Correo</label>
+            <input id="a11y-Configuracion-398" type="email" placeholder="correo@ejemplo.com"
               value={perfilFact.correo}
               onChange={(e)=>setPerfilFact({...perfilFact, correo: e.target.value})}
               onBlur={(e)=>guardarPerfilFact("correo", e.target.value)}
@@ -382,8 +407,8 @@ function Configuracion({mostrarToast}) {
         <p style={styles.subSeccion}><Landmark size={12} color={t.colors.textTertiary} strokeWidth={2}/> Cuenta bancaria</p>
 
         <div style={{marginBottom:"12px"}}>
-          <label style={styles.label}>Banco</label>
-          <input type="text" placeholder="Bancolombia, Davivienda, Nequi..."
+          <label htmlFor="a11y-Configuracion-410" style={styles.label}>Banco</label>
+          <input id="a11y-Configuracion-410" type="text" placeholder="Bancolombia, Davivienda, Nequi..."
             value={perfilFact.banco}
             onChange={(e)=>setPerfilFact({...perfilFact, banco: e.target.value})}
             onBlur={(e)=>guardarPerfilFact("banco", e.target.value)}
@@ -392,8 +417,8 @@ function Configuracion({mostrarToast}) {
 
         <div style={{display:"grid", gridTemplateColumns:"1fr 2fr", gap:"10px", marginBottom:"12px"}}>
           <div>
-            <label style={styles.label}>Tipo</label>
-            <select
+            <label htmlFor="a11y-Configuracion-420" style={styles.label}>Tipo</label>
+            <select id="a11y-Configuracion-420"
               value={perfilFact.tipoCuenta}
               onChange={(e)=>guardarPerfilFact("tipoCuenta", e.target.value)}
               style={styles.inputPerfil}
@@ -403,8 +428,8 @@ function Configuracion({mostrarToast}) {
             </select>
           </div>
           <div>
-            <label style={styles.label}>Número de cuenta</label>
-            <input type="text" placeholder="12345678901"
+            <label htmlFor="a11y-Configuracion-431" style={styles.label}>Número de cuenta</label>
+            <input id="a11y-Configuracion-431" type="text" placeholder="12345678901"
               value={perfilFact.numeroCuenta}
               onChange={(e)=>setPerfilFact({...perfilFact, numeroCuenta: e.target.value})}
               onBlur={(e)=>guardarPerfilFact("numeroCuenta", e.target.value)}
@@ -413,8 +438,8 @@ function Configuracion({mostrarToast}) {
         </div>
 
         <div style={{marginBottom:"6px"}}>
-          <label style={styles.label}>Titular de la cuenta</label>
-          <input type="text" placeholder="Nombre del titular"
+          <label htmlFor="a11y-Configuracion-441" style={styles.label}>Titular de la cuenta</label>
+          <input id="a11y-Configuracion-441" type="text" placeholder="Nombre del titular"
             value={perfilFact.titularCuenta}
             onChange={(e)=>setPerfilFact({...perfilFact, titularCuenta: e.target.value})}
             onBlur={(e)=>guardarPerfilFact("titularCuenta", e.target.value)}
@@ -461,9 +486,14 @@ function Configuracion({mostrarToast}) {
       <div style={styles.seccion}>
         <button
           style={{ ...styles.filaBtn, borderBottom: "none" }}
-          onClick={() => {
+          onClick={async () => {
             if (window.confirm("¿Estás seguro? Esto no se puede deshacer.")) {
-              localStorage.clear();
+              // FE-17 + FE-16: se purga lo de esta cuenta y la caché de Firestore.
+              // Antes era localStorage.clear(), que además de no tocar la caché
+              // persistente de Firestore borraba el espacio de otras cuentas
+              // abiertas en el mismo navegador.
+              if (uid) borrarEspacioUsuario(uid);
+              await purgarCacheFirestore();
               window.location.reload();
             }
           }}

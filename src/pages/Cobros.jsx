@@ -4,7 +4,7 @@
  */
 import { useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, FileText, Check, Eye, Share2, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Check, Eye, Trash2 } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import EstadoVacio from "../components/EstadoVacio";
 
@@ -105,7 +105,6 @@ function Cobros({ viajes = [], empresas = [], perfilFacturacion = {}, onGuardarC
   ];
 
   // Fecha formateada
-  const fechaHoy = `${perfilFacturacion?.ciudad || "Colombia"}, ${hoy.getDate()} de ${mesActual} de ${anio}`;
 
   // Consecutivo
   const ultimoNum = cuentasCobro.reduce((max, c) => Math.max(max, c.numero || 0), 0);
@@ -501,7 +500,7 @@ ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${p.banco} - $
                       try {
                         await onEditarCuenta(c.firestoreId, { estado: "pagada", fechaPago: new Date().toISOString().slice(0,10) });
                         mostrarToast("Cuenta marcada como pagada", "exito");
-                      } catch(err) { mostrarToast("Error", "error"); }
+                      } catch { mostrarToast("Error", "error"); }
                     }}
                   >
                     <Check size={14} strokeWidth={2} /> Pagada
@@ -516,7 +515,7 @@ ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${p.banco} - $
                     try {
                       await onEliminarCuenta(c.firestoreId);
                       mostrarToast("Cuenta eliminada", "info");
-                    } catch(err) { mostrarToast("Error al eliminar", "error"); }
+                    } catch { mostrarToast("Error al eliminar", "error"); }
                   }}
                 >
                   <Trash2 size={14} strokeWidth={2} />

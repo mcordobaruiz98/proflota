@@ -2,13 +2,14 @@
  * Hecho por JESUS COSSIO DEV
  * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
  */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { ArrowLeft, Truck, Info, Route, TrendingUp, Clock, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, ChevronRight, Wrench, Camera, Edit2, Save, X, Check, Paperclip, CircleDot, Droplets, Filter, Disc, ClipboardList, Fuel } from "lucide-react";
+import { ArrowLeft, Truck, Info, Route, TrendingUp, FileText, Upload, Trash2, Eye, ChevronDown, ChevronUp, ChevronRight, Wrench, Camera, Edit2, Save, X, Check, Paperclip, CircleDot, Droplets, Filter, Disc, ClipboardList, Fuel } from "lucide-react";
 import { useSubirArchivo, sanearNombreArchivo } from "../hooks/useSubirArchivo";
 import { useAuth } from "../hooks/useAuth";
 import { theme as t } from "../styles/theme";
 import   EstadoVacio  from "../components/EstadoVacio";
+import { alPulsarEnterOEspacio } from "../utils/teclado";
 
 
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -80,17 +81,15 @@ const seccionesHV = [
   },
 ];
 
-function DetalleVehiculo({ vehiculos, viajes = [], conductores = [], mantenimientos = [], configMant = [], gastosVehiculo = [], gastosFijos = [], onAgregarMant, onEliminarMant, onAgregarConfig, onEliminarConfig, onEditarVehiculo, onAgregarGasto, onEditarGasto, onEliminarGasto, onAgregarGastoFijo, onEliminarGastoFijo, mostrarToast }) {
+function DetalleVehiculo({ vehiculos, viajes = [], conductores = [], mantenimientos = [], configMant = [], gastosVehiculo = [], gastosFijos = [], onAgregarConfig, onEliminarConfig, onEditarVehiculo, onAgregarGasto, onEditarGasto, onEliminarGasto, onAgregarGastoFijo, onEliminarGastoFijo, mostrarToast }) {
   const navigate  = useNavigate();
   const { id }    = useParams();
   const location  = useLocation();
   const vehiculo  = vehiculos.find(v => String(v.firestoreId) === String(id));
   const [tabActivo, setTabActivo] = useState(location.state?.tab || "info");
   const [filtro,    setFiltro]    = useState("todos");
-  const [verRangoV,   setVerRangoV]   = useState(false);
-  const [rangoDesdeV, setRangoDesdeV] = useState("");
-  const [rangoHastaV, setRangoHastaV] = useState("");
-  const [busquedaH, setBusquedaH] = useState("");
+  const [rangoDesdeV] = useState("");
+  const [rangoHastaV] = useState("");
   const hoy = new Date();
 
   // Parseo de fechas YYYY-MM-DD como fecha LOCAL (evita el corrimiento UTC de -1 día)
@@ -105,12 +104,10 @@ function DetalleVehiculo({ vehiculos, viajes = [], conductores = [], mantenimien
   const [hvCargado, setHvCargado] = useState(false);
 
   // Sincronizar hvData cuando el vehículo carga de Firestore
-  useEffect(() => {
-    if (vehiculo?.hvData && !hvCargado) {
-      setHvData(vehiculo.hvData);
-      setHvCargado(true);
-    }
-  }, [vehiculo?.hvData]);
+  if (vehiculo?.hvData && !hvCargado) {
+    setHvData(vehiculo.hvData);
+    setHvCargado(true);
+  }
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({propietario:true,tenedor:false,vehiculo:false,conductor:false});
 
   const { subirArchivo, eliminarArchivo, progreso: progresoArchivo, subiendo } = useSubirArchivo();
@@ -152,18 +149,14 @@ function DetalleVehiculo({ vehiculos, viajes = [], conductores = [], mantenimien
 
   const [kmOdometro,    setKmOdometro]    = useState(vehiculo?.kmOdometro || 0);
 
-  useEffect(() => {
-    if (vehiculo?.kmOdometro && !kmOdometro) {
-      setKmOdometro(vehiculo.kmOdometro);
-    }
-  }, [vehiculo?.kmOdometro]);
+  if (vehiculo?.kmOdometro && !kmOdometro) {
+    setKmOdometro(vehiculo.kmOdometro);
+  }
   const [editandoKm,    setEditandoKm]    = useState(false);
   const [kmTemp,        setKmTemp]        = useState("");
   const [tipoMant,      setTipoMant]      = useState("Cambio de aceite");
   const [kmMant,        setKmMant]        = useState("");
   const [costoMant,     setCostoMant]     = useState("");
-  const [fechaMant,     setFechaMant]     = useState(new Date().toISOString().slice(0,10));
-  const [notaMant,      setNotaMant]      = useState("");
   const [guardandoMant, setGuardandoMant] = useState(false);
 
   const guardarKm = () => {
@@ -174,28 +167,6 @@ function DetalleVehiculo({ vehiculos, viajes = [], conductores = [], mantenimien
   setKmTemp("");
 };
 
-const guardarMantenimiento = async () => {
-  if (!kmMant) { mostrarToast("Ingresa el km al realizar el mantenimiento", "error"); return; }
-  setGuardandoMant(true);
-  try {
-    await onAgregarMant({
-      vehiculoId: id,
-      placa: vehiculo.placa,
-      tipo: tipoMant,
-      km: Number(kmMant),
-      costo: Number(costoMant)||0,
-      fecha: fechaMant,
-      nota: notaMant.trim(),
-    });
-    mostrarToast("Mantenimiento registrado", "exito");
-    setKmMant(""); setCostoMant(""); setNotaMant("");
-  } catch(err) {
-    mostrarToast("Error al guardar", "error");
-  } finally {
-    setGuardandoMant(false);
-  }
-};
-
 const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
 
   const kmActual = viajes
@@ -203,7 +174,6 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
   .reduce((max, v) => Math.max(max, v.kmT || 0), 0);
 
   const fmt  = (n) => "$" + Math.round(n).toLocaleString("es-CO");
-  const fnD  = (n,d) => (Math.round(n*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
 
   if (!vehiculo) {
     return (
@@ -224,7 +194,6 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
 
   const viajesVehiculo = viajes.filter(v => v.placa === vehiculo.placa);
   const totalViajes    = viajesVehiculo.length;
-  const gananciaNeta   = viajesVehiculo.reduce((s,v)=>s+(v.neta||0),0);
 
   // Tab Viajes
   const hoyFiltro = new Date();
@@ -290,6 +259,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     const archivo = e.target.files[0];
     if (!validarArchivoLocal(archivo)) return;
     const nombreSaneado = sanearNombreArchivo(archivo.name);
+    // eslint-disable-next-line react-hooks/purity -- manejarArchivo solo se invoca desde onChange del input de archivo; Date.now() corre al elegir el archivo, nunca durante render.
     const ruta = `usuarios/${usuario?.uid}/vehiculos/${id}/${docId}_${Date.now()}`;
     subirArchivo(archivo, ruta, docId, (url) => {
       actualizarHV(docId, {estado:"cargado", url, ruta, nombre:nombreSaneado});
@@ -345,7 +315,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
       });
       mostrarToast("Vehículo actualizado","exito");
       setEditando(false);
-    } catch(err) {
+    } catch {
       mostrarToast("Error al guardar","error");
     } finally {
       setGuardandoEdit(false);
@@ -356,12 +326,13 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     const archivo = e.target.files[0];
     if (!validarArchivoLocal(archivo)) return;
     const nombreSaneado = sanearNombreArchivo(archivo.name);
+    // eslint-disable-next-line react-hooks/purity -- cambiarFotoVehiculo solo se invoca desde onChange del input de archivo; Date.now() corre al elegir la foto, nunca durante render.
     const ruta = `usuarios/${usuario?.uid}/vehiculos/${Date.now()}_${nombreSaneado}`;
     subirArchivo(archivo, ruta, "fotoVehiculo", async (url) => {
       try {
         await onEditarVehiculo(vehiculo.firestoreId, { fotoUrl: url });
         mostrarToast("Foto actualizada","exito");
-      } catch(err) {
+      } catch {
         mostrarToast("Error al cambiar foto","error");
       }
     });
@@ -446,7 +417,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   onClick={async()=>{
                     const idx = estados.indexOf(estado);
                     const siguiente = estados[(idx+1) % estados.length];
-                    try { await onEditarVehiculo(vehiculo.firestoreId, { estado: siguiente }); } catch(err){}
+                    try { await onEditarVehiculo(vehiculo.firestoreId, { estado: siguiente }); } catch{/* edicion optimista: el estado local ya cambio y onEditarVehiculo gestiona el error */}
                   }}
                 >
                   <div style={{width:"40px",height:"40px",borderRadius:t.radius.sm,background:e.color+"22",display:"flex",alignItems:"center",justifyContent:"center",border:`1.5px solid ${e.color}`}}>
@@ -467,7 +438,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
           <select
             value={vehiculo.conductorAsignado || ""}
             onChange={async(e)=>{
-              try { await onEditarVehiculo(vehiculo.firestoreId, { conductorAsignado: e.target.value }); } catch(err){}
+              try { await onEditarVehiculo(vehiculo.firestoreId, { conductorAsignado: e.target.value }); } catch{/* edicion optimista: el select ya muestra el valor y onEditarVehiculo gestiona el error */}
             }}
             style={{flex:1,padding:"6px 10px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}}
           >
@@ -546,8 +517,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
             ) : (
               <div>
                 <div style={styles.campo}>
-                  <label style={styles.label}>Tipo de vehículo *</label>
-                  <select value={editData.tipoVehiculo} onChange={e=>setEditData({...editData,tipoVehiculo:e.target.value})}
+                  <label htmlFor="a11y-DetalleVehiculo-549" style={styles.label}>Tipo de vehículo *</label>
+                  <select id="a11y-DetalleVehiculo-549" value={editData.tipoVehiculo} onChange={e=>setEditData({...editData,tipoVehiculo:e.target.value})}
                     style={{...styles.input, color:editData.tipoVehiculo?t.colors.textPrimary:t.colors.textTertiary}}>
                     <option value="">Seleccionar...</option>
                     {["CUATRO MANOS","DOBLETROQUE","PATINETA 2S2","PATINETA 2S3","SENCILLO","TRACTOMULA 3S2","TRACTOMULA 3S3","TURBO","TURBO SENCILLO","VOLQUETA","OTRO"].map(o=>(
@@ -556,8 +527,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                   </select>
                 </div>
                 <div style={styles.campo}>
-                  <label style={styles.label}>Tipo de remolque</label>
-                  <select value={editData.tipoRemolque} onChange={e=>setEditData({...editData,tipoRemolque:e.target.value})}
+                  <label htmlFor="a11y-DetalleVehiculo-559" style={styles.label}>Tipo de remolque</label>
+                  <select id="a11y-DetalleVehiculo-559" value={editData.tipoRemolque} onChange={e=>setEditData({...editData,tipoRemolque:e.target.value})}
                     style={{...styles.input, color:editData.tipoRemolque?t.colors.textPrimary:t.colors.textTertiary}}>
                     <option value="">Sin remolque</option>
                     {["BOTELLERO","CAMA BAJA","CISTERNA","CONTENEDOR","CARROCERIA","FURGON","FURGON REFRIGERADO","NIÑERA","PLANCHA","PORTA CONTENEDORES","VOLCO AUTODESCARGABLE","OTRO"].map(o=>(
@@ -567,20 +538,20 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
                   <div style={styles.campo}>
-                    <label style={styles.label}>Placa vehículo *</label>
-                    <input type="text" value={editData.placa} maxLength={6}
+                    <label htmlFor="a11y-DetalleVehiculo-570" style={styles.label}>Placa vehículo *</label>
+                    <input id="a11y-DetalleVehiculo-570" type="text" value={editData.placa} maxLength={6}
                       onChange={e=>setEditData({...editData,placa:e.target.value.toUpperCase()})} style={styles.input} />
                   </div>
                   <div style={styles.campo}>
-                    <label style={styles.label}>Placa remolque</label>
-                    <input type="text" value={editData.placaRemolque}
+                    <label htmlFor="a11y-DetalleVehiculo-575" style={styles.label}>Placa remolque</label>
+                    <input id="a11y-DetalleVehiculo-575" type="text" value={editData.placaRemolque}
                       onChange={e=>setEditData({...editData,placaRemolque:e.target.value.toUpperCase()})} style={styles.input} />
                   </div>
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
                   <div style={styles.campo}>
-                    <label style={styles.label}>Marca</label>
-                    <select value={editData.marca} onChange={e=>setEditData({...editData,marca:e.target.value})}
+                    <label htmlFor="a11y-DetalleVehiculo-582" style={styles.label}>Marca</label>
+                    <select id="a11y-DetalleVehiculo-582" value={editData.marca} onChange={e=>setEditData({...editData,marca:e.target.value})}
                       style={{...styles.input, color:editData.marca?t.colors.textPrimary:t.colors.textTertiary}}>
                       <option value="">Seleccionar...</option>
                       {["AUTOCAR","ASTRA","BERLIET","BARREIROS","BElAZ","BYD","C.C.C","CATERPILLAR","CARIBE","CHANGAN","CHANGFENG","CITROEN","CHERY","CHEVROLET","CMC","DAEWOO","DAF","DAIHATSU","DFSK","DONGFENG","FAW","FORD","FOTON","FOTON AUMAN","FIAT","FREIGHTLINER","FUTONG","FWD","GMC","HINO","HITACHI","HYUNDAI","INTERNATIONAL","ISUZU","IVECO","JAC","JMC","KAMAZ","KENWORTH","KIA","KING LONG","KOMATSU","KRAZ","LIUGONG","MACK","MAN","MARCOPOLO","MASSEY FERGUSON","MAZDA","MERCEDES BENZ","MITSUBISHI","MG","NISSAN","PEGASSO","PEUGEOT","PETERBILT","RAM","RENAULT","SCANIA","SHACMAN","SINOTRUK","SITRACK","VOLKSWAGEN","VOLVO","WESTERN STAR","YUTONG","OTRO"].map(o=>(
@@ -589,19 +560,19 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                     </select>
                   </div>
                   <div style={styles.campo}>
-                    <label style={styles.label}>Modelo (año)</label>
-                    <input type="number" value={editData.modelo} min="1970" max="2100"
+                    <label htmlFor="a11y-DetalleVehiculo-592" style={styles.label}>Modelo (año)</label>
+                    <input id="a11y-DetalleVehiculo-592" type="number" value={editData.modelo} min="1970" max="2100"
                       onChange={e=>setEditData({...editData,modelo:e.target.value})} style={styles.input} />
                   </div>
                 </div>
                 <div style={styles.campo}>
-                  <label style={styles.label}>Propietario *</label>
-                  <input type="text" value={editData.propietario}
+                  <label htmlFor="a11y-DetalleVehiculo-598" style={styles.label}>Propietario *</label>
+                  <input id="a11y-DetalleVehiculo-598" type="text" value={editData.propietario}
                     onChange={e=>setEditData({...editData,propietario:e.target.value})} style={styles.input} />
                 </div>
                 <div style={styles.campo}>
-                  <label style={styles.label}>Tenedor</label>
-                  <input type="text" value={editData.tenedor}
+                  <label htmlFor="a11y-DetalleVehiculo-603" style={styles.label}>Tenedor</label>
+                  <input id="a11y-DetalleVehiculo-603" type="text" value={editData.tenedor}
                     onChange={e=>setEditData({...editData,tenedor:e.target.value})} style={styles.input} />
                 </div>
                 {/* ADBLUE — toggle + porcentaje */}
@@ -620,8 +591,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 </button>
                 {editData.usaAdblue && (
                   <div style={styles.campo}>
-                    <label style={styles.label}>Consumo Adblue (%)</label>
-                    <input type="number" placeholder="18.9" step="0.1"
+                    <label htmlFor="a11y-DetalleVehiculo-623" style={styles.label}>Consumo Adblue (%)</label>
+                    <input id="a11y-DetalleVehiculo-623" type="number" placeholder="18.9" step="0.1"
                       value={editData.adblueRatio ? (editData.adblueRatio * 100).toFixed(1) : ""}
                       onChange={e=>setEditData({...editData, adblueRatio: Number(e.target.value)/100 || 0})}
                       style={styles.input} />
@@ -632,15 +603,15 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                 {/* RENDIMIENTO POR DEFECTO */}
                 <div style={styles.fila2}>
                   <div style={styles.campo}>
-                    <label style={styles.label}>Rend. cargado (km/gal)</label>
-                    <input type="number" placeholder="7" step="0.1"
+                    <label htmlFor="a11y-DetalleVehiculo-635" style={styles.label}>Rend. cargado (km/gal)</label>
+                    <input id="a11y-DetalleVehiculo-635" type="number" placeholder="7" step="0.1"
                       value={editData.rendCargadoDef}
                       onChange={e=>setEditData({...editData, rendCargadoDef: e.target.value})}
                       style={styles.input} />
                   </div>
                   <div style={styles.campo}>
-                    <label style={styles.label}>Rend. vacío (km/gal)</label>
-                    <input type="number" placeholder="11" step="0.1"
+                    <label htmlFor="a11y-DetalleVehiculo-642" style={styles.label}>Rend. vacío (km/gal)</label>
+                    <input id="a11y-DetalleVehiculo-642" type="number" placeholder="11" step="0.1"
                       value={editData.rendVacioDef}
                       onChange={e=>setEditData({...editData, rendVacioDef: e.target.value})}
                       style={styles.input} />
@@ -868,8 +839,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                     {verFormGF && (
                       <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"12px"}}>
                         <div style={styles.campo}>
-                          <label style={styles.label}>Nombre del gasto</label>
-                          <select value={gfNombre} onChange={e=>setGfNombre(e.target.value)} style={styles.input}>
+                          <label htmlFor="a11y-DetalleVehiculo-871" style={styles.label}>Nombre del gasto</label>
+                          <select id="a11y-DetalleVehiculo-871" value={gfNombre} onChange={e=>setGfNombre(e.target.value)} style={styles.input}>
                             <option value="">Seleccionar o escribir...</option>
                             {["Cuota del camión","Seguro","Parqueadero","GPS / Rastreo","SOAT","Tecnomecánica","Impuestos","Lavadas","Administración"].map(o=>(
                               <option key={o} value={o}>{o}</option>
@@ -879,20 +850,20 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                         </div>
                         {gfNombre === "__otro__" && (
                           <div style={styles.campo}>
-                            <label style={styles.label}>Nombre personalizado</label>
-                            <input type="text" placeholder="Ej: Peaje fijo mensual" value={gfCustom}
+                            <label htmlFor="a11y-DetalleVehiculo-882" style={styles.label}>Nombre personalizado</label>
+                            <input id="a11y-DetalleVehiculo-882" type="text" placeholder="Ej: Peaje fijo mensual" value={gfCustom}
                               onChange={e=>setGfCustom(e.target.value)} style={styles.input} />
                           </div>
                         )}
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
                           <div style={styles.campo}>
-                            <label style={styles.label}>Monto ($)</label>
-                            <input type="number" placeholder="2500000" value={gfMonto}
+                            <label htmlFor="a11y-DetalleVehiculo-889" style={styles.label}>Monto ($)</label>
+                            <input id="a11y-DetalleVehiculo-889" type="number" placeholder="2500000" value={gfMonto}
                               onChange={e=>setGfMonto(e.target.value)} style={styles.input} />
                           </div>
                           <div style={styles.campo}>
-                            <label style={styles.label}>Periodicidad</label>
-                            <select value={gfPeriodo} onChange={e=>setGfPeriodo(e.target.value)} style={styles.input}>
+                            <label htmlFor="a11y-DetalleVehiculo-894" style={styles.label}>Periodicidad</label>
+                            <select id="a11y-DetalleVehiculo-894" value={gfPeriodo} onChange={e=>setGfPeriodo(e.target.value)} style={styles.input}>
                               <option value="mensual">Mensual</option>
                               <option value="anual">Anual (÷12)</option>
                             </select>
@@ -917,7 +888,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                               mostrarToast("Gasto fijo registrado","exito");
                               setGfNombre(""); setGfCustom(""); setGfMonto(""); setGfPeriodo("mensual");
                               setVerFormGF(false);
-                            } catch(err) {
+                            } catch {
                               mostrarToast("Error al guardar","error");
                             } finally {
                               setGuardandoGF(false);
@@ -956,7 +927,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                                 try {
                                   await onEliminarGastoFijo(g.firestoreId);
                                   mostrarToast("Gasto fijo eliminado","exito");
-                                } catch(err) {
+                                } catch {
                                   mostrarToast("Error al eliminar","error");
                                 }
                               }}
@@ -1001,39 +972,39 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                     {verFormGasto && (
                       <div style={{background:t.colors.bgSection,borderRadius:t.radius.sm,padding:"12px",marginBottom:"12px"}}>
                         <div style={styles.campo}>
-                          <label style={styles.label}>Descripción</label>
-                          <input type="text" placeholder="Ej: Reparación, repuesto, lavada..."
+                          <label htmlFor="a11y-DetalleVehiculo-1004" style={styles.label}>Descripción</label>
+                          <input id="a11y-DetalleVehiculo-1004" type="text" placeholder="Ej: Reparación, repuesto, lavada..."
                             value={gastoDesc} onChange={e=>setGastoDesc(e.target.value)} style={styles.input} />
                         </div>
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
                           <div style={styles.campo}>
-                            <label style={styles.label}>Monto ($)</label>
-                            <input type="number" placeholder="500000"
+                            <label htmlFor="a11y-DetalleVehiculo-1010" style={styles.label}>Monto ($)</label>
+                            <input id="a11y-DetalleVehiculo-1010" type="number" placeholder="500000"
                               value={gastoMonto} onChange={e=>setGastoMonto(e.target.value)} style={styles.input} />
                           </div>
                           <div style={styles.campo}>
-                            <label style={styles.label}>Fecha</label>
-                            <input type="date" value={gastoFecha}
+                            <label htmlFor="a11y-DetalleVehiculo-1015" style={styles.label}>Fecha</label>
+                            <input id="a11y-DetalleVehiculo-1015" type="date" value={gastoFecha}
                               onChange={e=>setGastoFecha(e.target.value)} style={styles.input} />
                           </div>
                         </div>
                         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
                           <div style={styles.campo}>
-                            <label style={styles.label}>Taller / Proveedor</label>
-                            <input type="text" placeholder="Nombre del taller" list="talleres-frecuentes"
+                            <label htmlFor="a11y-DetalleVehiculo-1022" style={styles.label}>Taller / Proveedor</label>
+                            <input id="a11y-DetalleVehiculo-1022" type="text" placeholder="Nombre del taller" list="talleres-frecuentes"
                               value={gastoTaller} onChange={e=>seleccionarTaller(e.target.value)} style={styles.input} />
                             <datalist id="talleres-frecuentes">
                               {talleresFrecuentes.map(t => <option key={t.nombre} value={t.nombre} />)}
                             </datalist>
                           </div>
                           <div style={styles.campo}>
-                            <label style={styles.label}>NIT</label>
-                            <input type="text" placeholder="900.123.456-7"
+                            <label htmlFor="a11y-DetalleVehiculo-1030" style={styles.label}>NIT</label>
+                            <input id="a11y-DetalleVehiculo-1030" type="text" placeholder="900.123.456-7"
                               value={gastoNit} onChange={e=>setGastoNit(e.target.value)} style={styles.input} />
                           </div>
                         </div>
                         <div style={styles.campo}>
-                          <label style={styles.label}>Adjuntar factura (opcional)</label>
+                          <div style={styles.label}>Adjuntar factura (opcional)</div>
                           <label style={{display:"flex",alignItems:"center",gap:"8px",padding:"10px 12px",borderRadius:t.radius.sm,border:`1.5px dashed ${t.colors.border}`,cursor:"pointer",fontSize:t.fonts.sizeXs,color:t.colors.blueText,fontWeight:t.fonts.weightSemibold}}>
                             <Upload size={14} color={t.colors.blueText} />
                             {subiendo?.gastoFactura ? `Subiendo... ${progresoArchivo?.gastoFactura || 0}%` : "Seleccionar archivo"}
@@ -1087,7 +1058,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                               setGastoDesc(""); setGastoMonto(""); setGastoFecha(new Date().toISOString().slice(0,10));
                               setGastoTaller(""); setGastoNit(""); setGastoEditId(null);
                               setVerFormGasto(false);
-                            } catch(err) {
+                            } catch {
                               mostrarToast("Error al guardar","error");
                             } finally {
                               setGuardandoGasto(false);
@@ -1143,7 +1114,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                               try {
                                 await onEliminarGasto(g.firestoreId);
                                 mostrarToast("Gasto eliminado","exito");
-                              } catch(err) {
+                              } catch {
                                 mostrarToast("Error al eliminar","error");
                               }
                             }}
@@ -1187,8 +1158,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
         </div>
       ) : (
         <div>
-          <input type="number" value={kmTemp} onChange={e=>setKmTemp(e.target.value)}
-            placeholder="Km actual" style={{...styles.input, marginBottom:"8px"}} autoFocus />
+          {/* eslint-disable-next-line jsx-a11y/no-autofocus -- editor inline que el usuario acaba de abrir con "Actualizar": el foco debe caer aqui para poder escribir de inmediato, tambien con teclado. */}
+          <input type="number" value={kmTemp} onChange={e=>setKmTemp(e.target.value)} placeholder="Km actual" style={{...styles.input, marginBottom:"8px"}} autoFocus />
           <div style={{display:"flex", gap:"8px"}}>
             <button style={{flex:1, padding:"10px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.sm, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer"}}
               onClick={guardarKm}>Guardar</button>
@@ -1241,7 +1212,7 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
                       try {
                         await onEliminarConfig(item.firestoreId);
                         mostrarToast("Alerta eliminada","exito");
-                      } catch(err) {
+                      } catch {
                         mostrarToast("Error al eliminar","error");
                       }
                     }}
@@ -1263,19 +1234,19 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     <div style={styles.card}>
       <p style={styles.cardTitulo}>Agregar ítem de mantenimiento</p>
       <div style={styles.campo}>
-        <label style={styles.label}>Nombre del servicio</label>
-        <input type="text" placeholder="Ej: Cambio de aceite, Filtro de aire..."
+        <label htmlFor="a11y-DetalleVehiculo-1266" style={styles.label}>Nombre del servicio</label>
+        <input id="a11y-DetalleVehiculo-1266" type="text" placeholder="Ej: Cambio de aceite, Filtro de aire..."
           value={tipoMant} onChange={e=>setTipoMant(e.target.value)} style={styles.input}/>
       </div>
       <div style={styles.fila2}>
         <div style={styles.campo}>
-          <label style={styles.label}>Cada cuántos km</label>
-          <input type="number" placeholder="15000" value={kmMant}
+          <label htmlFor="a11y-DetalleVehiculo-1272" style={styles.label}>Cada cuántos km</label>
+          <input id="a11y-DetalleVehiculo-1272" type="number" placeholder="15000" value={kmMant}
             onChange={e=>setKmMant(e.target.value)} style={styles.input}/>
         </div>
         <div style={styles.campo}>
-          <label style={styles.label}>Alertar antes de (km)</label>
-          <input type="number" placeholder="2000" value={costoMant}
+          <label htmlFor="a11y-DetalleVehiculo-1277" style={styles.label}>Alertar antes de (km)</label>
+          <input id="a11y-DetalleVehiculo-1277" type="number" placeholder="2000" value={costoMant}
             onChange={e=>setCostoMant(e.target.value)} style={styles.input}/>
         </div>
       </div>
@@ -1319,8 +1290,11 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
       ].map((item,i,arr)=>(
         <div
           key={item.ruta}
+          role="button"
+          tabIndex={0}
           style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 0", borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`, cursor:"pointer"}}
           onClick={()=>navigate(item.ruta)}
+          onKeyDown={alPulsarEnterOEspacio(()=>navigate(item.ruta))}
         >
           <div style={{display:"flex", alignItems:"center", gap:"12px"}}>
             <div style={{width:"36px",height:"36px",borderRadius:t.radius.sm,background:t.colors.bgSection,display:"flex",alignItems:"center",justifyContent:"center"}}>

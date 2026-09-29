@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Variables de entorno: las claves reales nunca entran al repositorio.
+# Las plantillas sí se versionan, para no tentarse a relajar la regla.
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

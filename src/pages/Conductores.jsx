@@ -51,7 +51,7 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
   const liqNeto       = liqPagoViajes - liqAnticipos + liqGastosRep;
 
   const fFecha = (iso) => {
-    const [y, m, d] = iso.split("-");
+    const [, m, d] = iso.split("-");
     return `${d}/${m}`;
   };
 
@@ -116,7 +116,7 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
         mostrarToast("Conductor registrado", "exito");
       }
       limpiar();
-    } catch (err) {
+    } catch {
       mostrarToast("Error al guardar", "error");
     } finally {
       guardandoRef.current = false;
@@ -169,13 +169,13 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
 
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}}>
                   <div>
-                    <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
-                    <input type="date" value={liqDesde} onChange={e=>setLiqDesde(e.target.value)}
+                    <label htmlFor="a11y-Conductores-172" style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
+                    <input id="a11y-Conductores-172" type="date" value={liqDesde} onChange={e=>setLiqDesde(e.target.value)}
                       style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm}}/>
                   </div>
                   <div>
-                    <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
-                    <input type="date" value={liqHasta} onChange={e=>setLiqHasta(e.target.value)}
+                    <label htmlFor="a11y-Conductores-177" style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
+                    <input id="a11y-Conductores-177" type="date" value={liqHasta} onChange={e=>setLiqHasta(e.target.value)}
                       style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm}}/>
                   </div>
                 </div>
@@ -240,31 +240,31 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
           <div style={styles.card}>
             <p style={styles.cardTitulo}>{editId ? "Editar conductor" : "Nuevo conductor"}</p>
             <div style={styles.campo}>
-              <label style={styles.label}>Nombre completo</label>
-              <input type="text" placeholder="Juan Pérez González" value={nombre}
+              <label htmlFor="a11y-Conductores-243" style={styles.label}>Nombre completo</label>
+              <input id="a11y-Conductores-243" type="text" placeholder="Juan Pérez González" value={nombre}
                 onChange={e => setNombre(e.target.value)} style={styles.input} />
             </div>
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Cédula</label>
-                <input type="text" placeholder="1.023.456.789" value={cedula}
+                <label htmlFor="a11y-Conductores-249" style={styles.label}>Cédula</label>
+                <input id="a11y-Conductores-249" type="text" placeholder="1.023.456.789" value={cedula}
                   onChange={e => setCedula(e.target.value)} style={styles.input} />
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Teléfono</label>
-                <input type="tel" placeholder="+57 300 000 0000" value={telefono}
+                <label htmlFor="a11y-Conductores-254" style={styles.label}>Teléfono</label>
+                <input id="a11y-Conductores-254" type="tel" placeholder="+57 300 000 0000" value={telefono}
                   onChange={e => setTelefono(e.target.value)} style={styles.input} />
               </div>
             </div>
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>N° Licencia</label>
-                <input type="text" placeholder="Número" value={licencia}
+                <label htmlFor="a11y-Conductores-261" style={styles.label}>N° Licencia</label>
+                <input id="a11y-Conductores-261" type="text" placeholder="Número" value={licencia}
                   onChange={e => setLicencia(e.target.value)} style={styles.input} />
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Categoría</label>
-                <select value={catLic} onChange={e => setCatLic(e.target.value)} style={styles.input}>
+                <label htmlFor="a11y-Conductores-266" style={styles.label}>Categoría</label>
+                <select id="a11y-Conductores-266" value={catLic} onChange={e => setCatLic(e.target.value)} style={styles.input}>
                   <option value="">Seleccionar</option>
                   <option value="C1">C1</option>
                   <option value="C2">C2</option>
@@ -273,19 +273,19 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
               </div>
             </div>
             <div style={styles.campo}>
-              <label style={styles.label}>Vencimiento licencia</label>
-              <input type="date" value={licVence}
+              <label htmlFor="a11y-Conductores-276" style={styles.label}>Vencimiento licencia</label>
+              <input id="a11y-Conductores-276" type="date" value={licVence}
                 onChange={e => setLicVence(e.target.value)} style={styles.input} />
             </div>
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>ARL</label>
-                <input type="text" placeholder="Sura, Positiva..." value={arl}
+                <label htmlFor="a11y-Conductores-282" style={styles.label}>ARL</label>
+                <input id="a11y-Conductores-282" type="text" placeholder="Sura, Positiva..." value={arl}
                   onChange={e => setArl(e.target.value)} style={styles.input} />
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>EPS</label>
-                <input type="text" placeholder="Salud Total..." value={eps}
+                <label htmlFor="a11y-Conductores-287" style={styles.label}>EPS</label>
+                <input id="a11y-Conductores-287" type="text" placeholder="Salud Total..." value={eps}
                   onChange={e => setEps(e.target.value)} style={styles.input} />
               </div>
             </div>

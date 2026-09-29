@@ -11,6 +11,7 @@ const { PEAJES_CO } = require("./data/peajesData");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getAuth } = require("firebase-admin/auth");
+const { getStorage } = require("firebase-admin/storage");
 
 initializeApp();
 const db = getFirestore();
@@ -56,9 +57,9 @@ function parsearFecha(texto) {
   if (t === "mañana" || t === "manana") return hoyLocal(1);
   let m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if (m) return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
-  m = t.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  m = t.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
   if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
-  m = t.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+  m = t.match(/^(\d{1,2})[/-](\d{1,2})$/);
   if (m) return `${new Date().getFullYear()}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
   return null;
 }
@@ -124,6 +125,35 @@ function parsearPeajesDetalle(texto) {
   return detalle.length > 0 ? detalle : null;
 }
 
+// BE-10: /desvincular. Borra la sesión de este chat y revoca el telegramChatId
+// del usuario, para que el bot no siga reconstruyendo datos de una vinculación
+// que el usuario ya no quiere. Se separa del manejo de mensajes para poder
+// probarla sin red.
+async function desvincularChat(chatId, dbInstance = db) {
+  const sesionSnap = await dbInstance.doc(`telegram_sesiones/${chatId}`).get();
+  const uid = sesionSnap.exists ? sesionSnap.data().uid || null : null;
+
+  // Se borra la sesión exista o no: si quedó un doc huérfano sin uid, también
+  // debe desaparecer para que el chat vuelva a estado limpio.
+  await dbInstance.doc(`telegram_sesiones/${chatId}`).delete().catch(() => {});
+
+  if (uid) {
+    // update() y no set(..., {merge:true}): un merge recrearía el documento si
+    // la cuenta ya se dio de baja, dejando un usuarios/{uid} vacío. Si ya no
+    // existe, no hay nada que revocar y el desvinculado sigue siendo válido.
+    try {
+      await dbInstance
+        .doc(`usuarios/${uid}`)
+        .update({ telegramChatId: FieldValue.delete() });
+    } catch (e) {
+      if (e.code !== 5) throw e;
+    }
+    console.log(`[botNavira] Chat ${chatId} desvinculado del uid ${uid}`);
+  }
+
+  return uid;
+}
+
 // ── Sesiones ────────────────────────────────────────────────
 
 async function getSesion(chatId) {
@@ -142,7 +172,7 @@ async function resetViaje(chatId) {
 // ── Memoria Indexada por Claves Normalizadas (BE-27) ──────────
 
 async function buscarVehiculo(uid, placaTexto) {
-  const placa = (placaTexto || "").trim().toUpperCase().replace(/[\s\-]/g, "");
+  const placa = (placaTexto || "").trim().toUpperCase().replace(/[\s-]/g, "");
   if (!placa) return null;
 
   // 1. Consulta directa indexada por placaNorm (1 sola lectura de Firestore)
@@ -169,7 +199,7 @@ async function buscarVehiculo(uid, placaTexto) {
   const snap = await db.collection(`usuarios/${uid}/vehiculos`).limit(30).get();
   for (const d of snap.docs) {
     const v = d.data();
-    if ((v.placa || "").toUpperCase().replace(/[\s\-]/g, "") === placa) {
+    if ((v.placa || "").toUpperCase().replace(/[\s-]/g, "") === placa) {
       d.ref.update({ placaNorm: placa }).catch(() => {});
       return { firestoreId: d.id, ...v };
     }
@@ -359,8 +389,24 @@ async function procesarMensaje(chatId, texto) {
   if (tLower === "/start") {
     return enviar(chatId,
       "🚛 <b>NAVIRA Bot</b>\n\nRegistre sus viajes por chat.\n\n" +
-      "/vincular CÓDIGO — conectar su cuenta\n/nuevo — registrar un viaje\n/cancelar — cancelar\n\n" +
+      "/vincular CÓDIGO — conectar su cuenta\n/desvincular — desconectar la cuenta\n" +
+      "/nuevo — registrar un viaje\n/cancelar — cancelar\n\n" +
       "💡 En cualquier pregunta puede responder <b>no</b> para saltarla."
+    );
+  }
+
+  // BE-10: /desvincular va ANTES del guardia de sesión, para que un usuario
+  // sin sesión pueda igual limpiar el estado que quedó de una vinculación
+  // anterior en este mismo chat.
+  if (tLower.startsWith("/desvincular")) {
+    const uid = await desvincularChat(chatId);
+    if (!uid) {
+      return enviar(chatId, "ℹ️ Este chat no tiene ninguna cuenta vinculada.");
+    }
+    return enviar(chatId,
+      "✅ <b>Cuenta desvinculada.</b>\n\n" +
+      "Este chat ya no tiene acceso a sus viajes.\n" +
+      "Vuelva a la app → Configuración → Vincular Telegram para generar un código nuevo."
     );
   }
 
@@ -378,7 +424,10 @@ async function procesarMensaje(chatId, texto) {
 
   const sesion = await getSesion(chatId);
   if (!sesion || !sesion.uid) {
-    return enviar(chatId, "Primero vincule su cuenta:\nNAVIRA → Configuración → Vincular Telegram\nLuego: /vincular SU_CÓDIGO");
+    return enviar(chatId,
+      "Primero vincule su cuenta:\nNAVIRA → Configuración → Vincular Telegram\nLuego: /vincular SU_CÓDIGO\n\n" +
+      "¿Ya la había vinculado desde este chat? Use /desvincular y vuelva a generar el código."
+    );
   }
   const uid = sesion.uid;
 
@@ -599,7 +648,7 @@ async function procesarMensaje(chatId, texto) {
 
     case P.PRODUCTO: {
       if (!esNo(t)) {
-        const partes = t.split(/[,;\/]/).map(s => s.trim());
+        const partes = t.split(/[,;/]/).map(s => s.trim());
         v.prod = partes[0] || "";
         v.tipoCarga = partes[1] || "";
       }
@@ -609,7 +658,7 @@ async function procesarMensaje(chatId, texto) {
 
     case P.LUGARES: {
       if (!esNo(t)) {
-        const partes = t.split(/[\/;]/).map(s => s.trim());
+        const partes = t.split(/[/;]/).map(s => s.trim());
         v.lugarCargue = partes[0] || "";
         v.lugarDescargue = partes[1] || "";
       }
@@ -912,7 +961,7 @@ async function procesarMensaje(chatId, texto) {
       remesa: vj.remesa || "",
       pesoBascula: vj.pesoBascula || 0,
       placa: vj.placa,
-      placaNorm: (vj.placa || "").trim().toUpperCase().replace(/[\s\-]/g, ""),
+      placaNorm: (vj.placa || "").trim().toUpperCase().replace(/[\s-]/g, ""),
       ruta: vj.ruta,
       rutaNorm: (vj.ruta || "").trim().toLowerCase(),
       emp: vj.emp || "",
@@ -1061,7 +1110,7 @@ exports.actualizarOdometroViaje = onDocumentWritten(
     const beforeData = event.data.before ? event.data.before.data() : null;
     const afterData = event.data.after ? event.data.after.data() : null;
 
-    const placa = (afterData?.placa || beforeData?.placa || "").trim().toUpperCase().replace(/[\s\-]/g, "");
+    const placa = (afterData?.placa || beforeData?.placa || "").trim().toUpperCase().replace(/[\s-]/g, "");
     if (!placa) return;
 
     let deltaKm = 0;
@@ -1089,7 +1138,7 @@ exports.actualizarOdometroViaje = onDocumentWritten(
     } else {
       const snap = await db.collection(`usuarios/${uid}/vehiculos`).get();
       for (const d of snap.docs) {
-        if ((d.data().placa || "").trim().toUpperCase().replace(/[\s\-]/g, "") === placa) {
+        if ((d.data().placa || "").trim().toUpperCase().replace(/[\s-]/g, "") === placa) {
           vehRef = d.ref;
           break;
         }
@@ -1254,4 +1303,220 @@ exports.ingestarPeajes = onCall(
   }
 );
 
-exports.sincronizarCatalogoPeajes = sincronizarCatalogoPeajes;
+/**
+ * BE-09 / BE-10 — Baja definitiva de cuenta (derecho de supresión, Ley 1581/2012)
+ *
+ * BE-09: borra en servidor con Admin SDK todo lo que le pertenece al usuario.
+ *   Lo hace el servidor y no el cliente a propósito: el cliente no puede
+ *   tocar telegram_sesiones (regla `allow write: if false`), y una lista
+ *   de colecciones en el front se queda corta en cuanto el esquema crece.
+ *   Descubrimos las subcolecciones con listCollections(), así que una
+ *   colección nueva se borra sin tocar código.
+ *
+ * BE-10: además borra las sesiones de Telegram del uid y revoca el
+ *   telegramChatId. Si no, la sesión del bot sobrevive a la baja y vuelve
+ *   a reconstruir datos de una cuenta que ya no existe.
+ */
+const SUBCOLECCIONES_IGNORADAS = new Set([]);
+
+async function borrarDocumentosEnLotes(dbInstance, refs) {
+  const LOTE = 400; // Firestore admite 500; 400 deja margen ante otros batch
+  let borrados = 0;
+  for (let i = 0; i < refs.length; i += LOTE) {
+    const lote = refs.slice(i, i + LOTE);
+    const batch = dbInstance.batch();
+    for (const ref of lote) batch.delete(ref);
+    await batch.commit();
+    borrados += lote.length;
+  }
+  return borrados;
+}
+
+async function borrarColeccion(dbInstance, collRef, antesDeBorrarDoc) {
+  let borrados = 0;
+  for (;;) {
+    const snap = await collRef.limit(400).get();
+    if (snap.empty) break;
+    const refs = snap.docs.map((d) => d.ref);
+    // Antes de borrar cada documento se vacían sus propias subcolecciones: si
+    // el documento desapareciera primero, quedarían inaccesibles.
+    if (antesDeBorrarDoc) {
+      for (const ref of refs) await antesDeBorrarDoc(ref);
+    }
+    await borrarDocumentosEnLotes(dbInstance, refs);
+    borrados += refs.length;
+  }
+  return borrados;
+}
+
+/**
+ * Vacía recursivamente todas las subcolecciones que cuelgan de un documento.
+ * Se usa para el usuario y para cada documento suyo, porque una subcolección
+ * puede tener las suyas: con listCollections() de un solo nivel, `viajes/v1`
+ * con `viajes/v1/paradas` dejaría las paradas huérfanas.
+ */
+async function purgarSubcolecciones(dbInstance, ref, detalle) {
+  for (const colRef of await ref.listCollections()) {
+    if (SUBCOLECCIONES_IGNORADAS.has(colRef.id)) continue;
+    const n = await borrarColeccion(dbInstance, colRef, (docRef) =>
+      purgarSubcolecciones(dbInstance, docRef, detalle)
+    );
+    detalle[colRef.id] = (detalle[colRef.id] || 0) + n;
+  }
+}
+
+async function borrarArbolDeUsuario(dbInstance, uid) {
+  const userRef = dbInstance.doc(`usuarios/${uid}`);
+  const detalle = {};
+
+  // La firma (firmaUrl) y los datos financieros cuelgan del doc raíz o de sus
+  // subcolecciones, así que borrar el árbol los cubre.
+  await purgarSubcolecciones(dbInstance, userRef, detalle);
+  await userRef.delete();
+  return detalle;
+}
+
+/**
+ * Borra todos los documentos de una colección que cumplen un filtro, en bucles
+ * de tamaño acotado.
+ *
+ * Una consulta sin `limit` puede devolver menos de lo que hay sin avisar: el
+ * backend corta la respuesta y las filas que no llegan jamás se borran, así que
+ * el usuario creería haberlo borrado todo dejando sesiones vivas. Como cada
+ * vuelta borra lo que leyó, el conjunto se encoge y el bucle termina.
+ */
+async function borrarDocumentosQueCumplen(dbInstance, coleccion, campo, valor) {
+  const LOTE = 400;
+  let borrados = 0;
+  for (;;) {
+    const snap = await dbInstance
+      .collection(coleccion)
+      .where(campo, "==", valor)
+      .limit(LOTE)
+      .get();
+    if (snap.empty) break;
+    const refs = snap.docs.map((d) => d.ref);
+    await borrarDocumentosEnLotes(dbInstance, refs);
+    borrados += refs.length;
+  }
+  return borrados;
+}
+
+async function borrarSesionesTelegram(dbInstance, uid) {
+  // Los códigos de vinculación pendientes también son datos del usuario.
+  const sesiones = await borrarDocumentosQueCumplen(
+    dbInstance,
+    "telegram_sesiones",
+    "uid",
+    uid
+  );
+  const vinculos = await borrarDocumentosQueCumplen(
+    dbInstance,
+    "telegram_vinculos",
+    "uid",
+    uid
+  );
+
+  return { sesiones, vinculos };
+}
+
+async function borrarStorageDeUsuario(uid) {
+  const bucket = getStorage().bucket();
+  const { apiResponse } = await bucket.deleteFiles({ prefix: `usuarios/${uid}/` });
+  return apiResponse || 0;
+}
+
+/**
+ * Orquesta la baja completa de un uid.
+ *
+ * Va separada del handler para poder probarla con dobles, y para dejar explícita
+ * la única regla que de verdad importa aquí: si el borrado de Storage falla, la
+ * cuenta de Auth NO debe borrarse. Si lo hiciera, el usuario perdería la única
+ * forma de reintentar y sus archivos quedarían huérfanos para siempre. Fallar es
+ * preferible, porque los datos sobrantes sí se pueden volver a borrar.
+ */
+async function bajaDefinitivaDeUsuario(dbInstance, uid, deps = {}) {
+  const borrarArchivos = deps.borrarArchivos || borrarStorageDeUsuario;
+  const borrarAuth = deps.borrarAuth || ((u) => getAuth().deleteUser(u));
+
+  // El chatId vive en usuarios/{uid}, así que hay que revocarlo ANTES de borrar
+  // el documento raíz: después ya no queda a quién revocárselo.
+  // `update` con FieldValue.delete() no crea el documento si no existiera, a
+  // diferencia de `set({...}, {merge:true})`, que dejaría un documento vacío
+  // justo después de una baja definitiva.
+  let telegramChatRevocado = false;
+  try {
+    await dbInstance
+      .doc(`usuarios/${uid}`)
+      .update({ telegramChatId: FieldValue.delete() });
+    telegramChatRevocado = true;
+  } catch (e) {
+    console.warn(
+      `[bajaDefinitiva] No se pudo revocar telegramChatId de ${uid}:`,
+      e.message
+    );
+  }
+
+  const firestore = await borrarArbolDeUsuario(dbInstance, uid);
+  const telegram = await borrarSesionesTelegram(dbInstance, uid);
+
+  // Si esto lanza, la función se propaga y la cuenta de Auth sobrevive para que
+  // el usuario pueda reintentar.
+  const archivos = await borrarArchivos(uid);
+
+  await borrarAuth(uid);
+
+  const totalDocs = Object.values(firestore).reduce((a, b) => a + b, 0);
+  console.log(
+    `[bajaDefinitiva] uid=${uid} docs=${totalDocs} telegram=${JSON.stringify(
+      telegram
+    )} archivos=${archivos} chatRevocado=${telegramChatRevocado}`
+  );
+
+  return {
+    status: "OK",
+    documentosEliminados: totalDocs,
+    porColeccion: firestore,
+    telegram,
+    archivosEliminados: archivos,
+    telegramChatRevocado,
+  };
+}
+
+exports.bajaDefinitiva = onCall(
+  {
+    region: "us-central1",
+    cors: true,
+    maxInstances: 4,
+    memory: "256MiB",
+    timeoutSeconds: 300,
+  },
+  async (request) => {
+    if (!request.auth || !request.auth.uid) {
+      throw new HttpsError("unauthenticated", "Debe iniciar sesión para eliminar la cuenta.");
+    }
+
+    const { uid } = request.auth;
+
+    // El cliente pide reautenticación antes de llamar; si el token es viejo,
+    // Firebase ya lo impidió en el deleteUser. Aquí exigimos que sea reciente
+    // para que un token robado de una sesión vieja no borre la cuenta.
+    const authTimeMs = (request.auth.token?.auth_time || 0) * 1000;
+    const antiguedadMin = (Date.now() - authTimeMs) / 60000;
+    if (!authTimeMs || antiguedadMin > 5) {
+      throw new HttpsError(
+        "failed-precondition",
+        "Por seguridad, vuelve a iniciar sesión y repite la eliminación."
+      );
+    }
+
+    return bajaDefinitivaDeUsuario(getFirestore(), uid);
+  }
+);
+
+exports.sincronizarCatalogoPeajes = sincronizarCatalogoPeajes;
+exports.calcular = calcular;
+exports.borrarArbolDeUsuario = borrarArbolDeUsuario;
+exports.borrarSesionesTelegram = borrarSesionesTelegram;
+exports.desvincularChat = desvincularChat;
+exports.bajaDefinitivaDeUsuario = bajaDefinitivaDeUsuario;

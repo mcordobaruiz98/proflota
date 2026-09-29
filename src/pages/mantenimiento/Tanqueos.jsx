@@ -65,6 +65,7 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
 
     setGuardando(true);
     const nuevo = {
+      // eslint-disable-next-line react-hooks/purity -- guardar solo se invoca desde onClick; Date.now() acuña el id del registro al pulsar, nunca durante render.
       id: Date.now(),
       fecha,
       estacion: estacion.trim(),
@@ -86,7 +87,7 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
       setEstacion(""); setGalones(""); setPrecioGal(""); setNota(""); setViajeAsociado("");
       setKmOdom(Number(kmOdom));
       setMostrarForm(false);
-    } catch(err) {
+    } catch {
       mostrarToast("Error al guardar","error");
     } finally {
       setGuardando(false);
@@ -98,7 +99,7 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
     try {
       await onEditarVehiculo(vehiculo.firestoreId, { tanqueosHistorial: nuevos });
       mostrarToast("Tanqueo eliminado","info");
-    } catch(err) {
+    } catch {
       mostrarToast("Error al eliminar","error");
     }
   };
@@ -177,25 +178,25 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
 
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Fecha</label>
-                <input type="date" value={fecha} onChange={e=>setFecha(e.target.value)} style={styles.input} />
+                <label htmlFor="a11y-Tanqueos-180" style={styles.label}>Fecha</label>
+                <input id="a11y-Tanqueos-180" type="date" value={fecha} onChange={e=>setFecha(e.target.value)} style={styles.input} />
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Km odómetro</label>
-                <input type="number" placeholder="155000" value={kmOdom}
+                <label htmlFor="a11y-Tanqueos-184" style={styles.label}>Km odómetro</label>
+                <input id="a11y-Tanqueos-184" type="number" placeholder="155000" value={kmOdom}
                   onChange={e=>setKmOdom(e.target.value)} style={styles.input} />
               </div>
             </div>
 
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Galones</label>
-                <input type="number" placeholder="120" value={galones}
+                <label htmlFor="a11y-Tanqueos-192" style={styles.label}>Galones</label>
+                <input id="a11y-Tanqueos-192" type="number" placeholder="120" value={galones}
                   onChange={e=>setGalones(e.target.value)} style={styles.input} />
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Precio/galón ($)</label>
-                <input type="number" placeholder="9850" value={precioGal}
+                <label htmlFor="a11y-Tanqueos-197" style={styles.label}>Precio/galón ($)</label>
+                <input id="a11y-Tanqueos-197" type="number" placeholder="9850" value={precioGal}
                   onChange={e=>setPrecioGal(e.target.value)} style={styles.input} />
               </div>
             </div>
@@ -210,14 +211,14 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
             )}
 
             <div style={styles.campo}>
-              <label style={styles.label}>Estación</label>
-              <input type="text" placeholder="Terpel Km 5, Biomax centro..." value={estacion}
+              <label htmlFor="a11y-Tanqueos-213" style={styles.label}>Estación</label>
+              <input id="a11y-Tanqueos-213" type="text" placeholder="Terpel Km 5, Biomax centro..." value={estacion}
                 onChange={e=>setEstacion(e.target.value)} style={styles.input} />
             </div>
 
             <div style={styles.campo}>
-              <label style={styles.label}>Asociar a viaje (opcional)</label>
-              <select
+              <label htmlFor="a11y-Tanqueos-219" style={styles.label}>Asociar a viaje (opcional)</label>
+              <select id="a11y-Tanqueos-219"
                 value={viajeAsociado}
                 onChange={e => setViajeAsociado(e.target.value)}
                 style={styles.input}
@@ -232,8 +233,8 @@ function Tanqueos({ vehiculos, viajes = [], onEditarVehiculo, mostrarToast }) {
             </div>
 
             <div style={styles.campo}>
-              <label style={styles.label}>Nota (opcional)</label>
-              <input type="text" placeholder="Observaciones" value={nota}
+              <label htmlFor="a11y-Tanqueos-235" style={styles.label}>Nota (opcional)</label>
+              <input id="a11y-Tanqueos-235" type="text" placeholder="Observaciones" value={nota}
                 onChange={e=>setNota(e.target.value)} style={styles.input} />
             </div>
 

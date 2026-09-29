@@ -43,7 +43,6 @@ test("BE-07: ingestarPeajes callable debe rechazar llamadas sin autenticación (
 
 test("BE-07: sincronizarCatalogoPeajes procesa por lotes deterministas e idempotentes con Admin SDK", async () => {
   const batches = [];
-  let currentBatchOps = [];
 
   const mockDb = {
     collection: (name) => {

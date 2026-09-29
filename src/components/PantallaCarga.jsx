@@ -2,7 +2,6 @@
 // Pantalla de carga NAVIRA — tractomula cuyo trailer se llena como barra de progreso
 // Uso: mostrar mientras cargando === true en App.jsx (reemplaza el spinner actual)
 
-import { theme as t } from "../styles/theme";
 
 function PantallaCarga() {
   return (
