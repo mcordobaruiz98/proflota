@@ -60,7 +60,7 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
         fotoUrl,
       });
       navigate("/vehiculos");
-    } catch (err) {
+    } catch {
       setErrores({ general: "Error al guardar el vehículo. Intente nuevamente." });
     } finally {
       guardandoRef.current = false;
@@ -90,8 +90,8 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
       <div style={styles.card}>
 
         <div style={styles.campo}>
-          <label style={styles.label}>Tipo de vehículo *</label>
-          <select
+          <label htmlFor="a11y-AgregarVehiculo-93" style={styles.label}>Tipo de vehículo *</label>
+          <select id="a11y-AgregarVehiculo-93"
             value={tipoVehiculo}
             onChange={(e) => { setTipoVehiculo(e.target.value); setErrores({ ...errores, tipoVehiculo: null }); }}
             style={{ ...styles.input, color: tipoVehiculo ? t.colors.textPrimary : t.colors.textTertiary }}
@@ -113,8 +113,8 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
         </div>
 
         <div style={styles.campo}>
-          <label style={styles.label}>Tipo de remolque</label>
-          <select
+          <label htmlFor="a11y-AgregarVehiculo-116" style={styles.label}>Tipo de remolque</label>
+          <select id="a11y-AgregarVehiculo-116"
             value={tipoRemolque}
             onChange={(e) => setTipoRemolque(e.target.value)}
             style={{ ...styles.input, color: tipoRemolque ? t.colors.textPrimary : t.colors.textTertiary }}
@@ -137,8 +137,8 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
 
         <div style={styles.fila2}>
           <div style={styles.campo}>
-            <label style={styles.label}>Placa vehículo *</label>
-            <input
+            <label htmlFor="a11y-AgregarVehiculo-140" style={styles.label}>Placa vehículo *</label>
+            <input id="a11y-AgregarVehiculo-140"
               type="text"
               placeholder="ABC123"
               value={placa}
@@ -149,8 +149,8 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
             {errores.placa && <p style={styles.error}>{errores.placa}</p>}
           </div>
           <div style={styles.campo}>
-            <label style={styles.label}>Placa remolque</label>
-            <input
+            <label htmlFor="a11y-AgregarVehiculo-152" style={styles.label}>Placa remolque</label>
+            <input id="a11y-AgregarVehiculo-152"
               type="text"
               placeholder="S-00000"
               value={placaRemolque}
@@ -162,8 +162,8 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
 
         <div style={styles.fila2}>
           <div style={styles.campo}>
-            <label style={styles.label}>Marca</label>
-            <select
+            <label htmlFor="a11y-AgregarVehiculo-165" style={styles.label}>Marca</label>
+            <select id="a11y-AgregarVehiculo-165"
               value={marca}
               onChange={(e) => setMarca(e.target.value)}
               style={{ ...styles.input, color: marca ? t.colors.textPrimary : t.colors.textTertiary }}
@@ -239,8 +239,8 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
             </select>
           </div>
           <div style={styles.campo}>
-            <label style={styles.label}>Modelo (año)</label>
-            <input
+            <label htmlFor="a11y-AgregarVehiculo-242" style={styles.label}>Modelo (año)</label>
+            <input id="a11y-AgregarVehiculo-242"
               type="number"
               placeholder="2020"
               value={modelo}
@@ -253,8 +253,8 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
 
         <div style={styles.fila2}>
           <div style={{...styles.campo, gridColumn:"1 / -1"}}>
-            <label style={styles.label}>Conductor asignado</label>
-            <select
+            <label htmlFor="a11y-AgregarVehiculo-256" style={styles.label}>Conductor asignado</label>
+            <select id="a11y-AgregarVehiculo-256"
               value={conductorAsignado}
               onChange={(e) => setConductorAsignado(e.target.value)}
               style={{ ...styles.input, color: conductorAsignado ? t.colors.textPrimary : t.colors.textTertiary }}
@@ -280,8 +280,8 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
       <div style={styles.seccionLabel}>Propietario y tenedor</div>
       <div style={styles.card}>
         <div style={styles.campo}>
-          <label style={styles.label}>Propietario *</label>
-          <input
+          <label htmlFor="a11y-AgregarVehiculo-283" style={styles.label}>Propietario *</label>
+          <input id="a11y-AgregarVehiculo-283"
             type="text"
             placeholder="Nombre completo"
             value={propietario}
@@ -291,8 +291,8 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
           {errores.propietario && <p style={styles.error}>{errores.propietario}</p>}
         </div>
         <div style={styles.campo}>
-          <label style={styles.label}>Tenedor (si aplica)</label>
-          <input
+          <label htmlFor="a11y-AgregarVehiculo-294" style={styles.label}>Tenedor (si aplica)</label>
+          <input id="a11y-AgregarVehiculo-294"
             type="text"
             placeholder="Nombre completo"
             value={tenedor}
@@ -303,7 +303,7 @@ function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
       </div>
 
       <div style={styles.campo}>
-  <label style={styles.label}>Foto del vehículo</label>
+  <div style={styles.label}>Foto del vehículo</div>
   {fotoUrl ? (
     <div style={{position:"relative"}}>
       <img src={fotoUrl} alt="Vehículo" style={{width:"100%", height:"180px", objectFit:"cover", borderRadius:t.radius.md}}/>

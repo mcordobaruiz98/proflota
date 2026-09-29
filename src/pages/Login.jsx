@@ -79,8 +79,8 @@ function Login() {
         <h1 style={styles.cardTitulo}>Iniciar sesión</h1>
 
         <div style={styles.campo}>
-          <label style={styles.label}>Correo electrónico</label>
-          <input
+          <label htmlFor="a11y-Login-82" style={styles.label}>Correo electrónico</label>
+          <input id="a11y-Login-82"
             type="email"
             placeholder="correo@ejemplo.com"
             value={correo}
@@ -92,7 +92,7 @@ function Login() {
 
         <div style={styles.campo}>
           <div style={styles.labelFila}>
-            <label style={styles.label}>Contraseña</label>
+            <label htmlFor="a11y-Login-95" style={styles.label}>Contraseña</label>
             <button
               type="button"
               style={styles.btnOlvide}
@@ -102,7 +102,7 @@ function Login() {
             </button>
           </div>
           <div style={styles.inputWrap}>
-            <input
+            <input id="a11y-Login-95"
               type={verPass ? "text" : "password"}
               placeholder="Mínimo 6 caracteres"
               value={contrasena}

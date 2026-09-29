@@ -5,7 +5,6 @@ import {
   signInWithPopup,
   signOut,
   onAuthStateChanged,
-  GoogleAuthProvider,
   updateProfile,
   updatePassword,
   sendPasswordResetEmail,
@@ -13,10 +12,10 @@ import {
   reauthenticateWithCredential,
   deleteUser,
 } from "firebase/auth";
-import { auth, googleProvider, storage, db, functions } from "../firebase";
-import { doc, setDoc, getDocs, collection, deleteDoc } from "firebase/firestore";
-import { ref, listAll, deleteObject } from "firebase/storage";
+import { auth, googleProvider, functions } from "../firebase";
 import { httpsCallable } from "firebase/functions";
+import { purgarCacheFirestore } from "../lib/purgarCache";
+import { borrarEspacioUsuario } from "../lib/userStorage";
 
 export function useAuth() {
   const [usuario,   setUsuario]   = useState(null);
@@ -30,19 +29,6 @@ export function useAuth() {
     });
     return () => unsub();
   }, []);
-
-  // Versión actual de los términos — subirla cuando cambien los documentos
-  const VERSION_TERMINOS = "1.0";
-
-  // Guarda la evidencia de aceptación de términos (Ley 1581/2012: previa, expresa e informada)
-  const guardarAceptacion = async (user) => {
-    await setDoc(doc(db, "usuarios", user.uid), {
-      aceptoTerminos: true,
-      fechaAceptacion: new Date().toISOString(),
-      versionTerminos: VERSION_TERMINOS,
-      correo: user.email || "",
-    }, { merge: true });
-  };
 
   // Registro con correo y contraseña (BE-01 y CR-01: validación centralizada en servidor)
   const registrar = async (nombre, correo, contrasena, codigo, aceptoTerminos) => {
@@ -89,39 +75,46 @@ export function useAuth() {
   };
 
   // Cerrar sesión
+  // BE-16: además de cerrar sesión, se purga la caché de Firestore. Firestore
+  // está configurado con persistencia, así que los documentos leídos quedan en
+  // IndexedDB y el siguiente usuario de ese navegador podría leerlos.
+  //
+  // OJO: aquí NO se borra el espacio de localStorage del usuario. Sus metas y
+  // preferencias son suyas; borrarlas en cada salida dejaría la app sin
+  // memoria al volver a entrar, que es justo lo contrario de lo que.namespacear
+  // por uid pretende. Ese espacio solo se borra al dar de baja la cuenta
+  // (eliminarCuenta) o cuando el usuario lo pide explícitamente desde
+  // Configuración.
   const cerrarSesion = async () => {
     await signOut(auth);
+    await purgarCacheFirestore();
   };
 
   // Eliminar cuenta y todos los datos (derecho de supresión — Ley 1581/2012)
+  //
+  // BE-09: la baja la hace el servidor con Admin SDK. La versión anterior
+  // borraba desde el cliente una lista fija de colecciones, y esa lista ya
+  // estaba desactualizada (no incluía cuentas_cobro), además de no poder
+  // tocar telegram_sesiones ni discoverir colecciones nuevas.
   const eliminarCuenta = async () => {
     const user = auth.currentUser;
     if (!user) throw { code: "auth/no-user" };
     const uid = user.uid;
 
-    // 1. Borrar todas las subcolecciones del usuario en Firestore
-    const colecciones = ["vehiculos","viajes","empresas","rutas","mantenimiento","config_mant","gastos_vehiculo","gastos_fijos","conductores"];
-    for (const col of colecciones) {
-      const snap = await getDocs(collection(db, "usuarios", uid, col));
-      await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
-    }
-    // 2. Borrar el documento raíz del usuario
-    await deleteDoc(doc(db, "usuarios", uid)).catch(() => {});
-    // 3. Borrar archivos de Storage del usuario (mejor esfuerzo)
-    try {
-      const carpeta = ref(storage, `usuarios/${uid}`);
-      const listado = await listAll(carpeta);
-      const borrarRecursivo = async (res) => {
-        await Promise.all(res.items.map(item => deleteObject(item).catch(() => {})));
-        for (const sub of res.prefixes) {
-          const subRes = await listAll(sub);
-          await borrarRecursivo(subRes);
-        }
-      };
-      await borrarRecursivo(listado);
-    } catch (e) { /* archivos legacy fuera de la carpeta del usuario quedan huérfanos */ }
-    // 4. Borrar la cuenta de autenticación
-    await deleteUser(user); // puede lanzar auth/requires-recent-login
+    const baja = httpsCallable(functions, "bajaDefinitiva");
+    const { data } = await baja({});
+
+    // FE-17: quitar lo que quedó en el navegador de esta cuenta.
+    borrarEspacioUsuario(uid);
+    // FE-16: la caché de Firestore puede contener documentos ya borrados en
+    // el servidor, así que se purga igual.
+    await purgarCacheFirestore();
+
+    console.log(
+      `[eliminarCuenta] Baja de ${uid}: ${data?.documentosEliminados ?? 0} documentos, ` +
+      `${data?.archivosEliminados ?? 0} archivos`
+    );
+    return data;
   };
 
   // Recuperar contraseña

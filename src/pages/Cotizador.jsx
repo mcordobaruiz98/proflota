@@ -210,25 +210,25 @@ function Cotizador({ vehiculos = [], rutas = [], mostrarToast }) {
         )}
 
         {/* Vehículo */}
-        <label style={styles.label}>Vehículo (opcional)</label>
-        <select value={placa} onChange={e => cargarVehiculo(e.target.value)} style={styles.input}>
+        <label htmlFor="a11y-Cotizador-213" style={styles.label}>Vehículo (opcional)</label>
+        <select id="a11y-Cotizador-213" value={placa} onChange={e => cargarVehiculo(e.target.value)} style={styles.input}>
           <option value="">Sin vehículo específico</option>
           {vehiculos.map(v => <option key={v.placa} value={v.placa}>{v.placa}</option>)}
         </select>
 
         {/* Flete */}
-        <label style={styles.label}>Flete que le ofrecen *</label>
+        <label htmlFor="a11y-Cotizador-220" style={styles.label}>Flete que le ofrecen *</label>
         <div style={{display:"flex", gap:"8px", marginBottom:"6px"}}>
           <button onClick={()=>setModoFlete("porTon")} style={{...styles.toggleBtn, ...(modoFlete==="porTon"?styles.toggleActivo:{})}}>Por tonelada</button>
           <button onClick={()=>setModoFlete("total")} style={{...styles.toggleBtn, ...(modoFlete==="total"?styles.toggleActivo:{})}}>Total</button>
         </div>
-        <input type="text" inputMode="decimal" placeholder={modoFlete==="porTon"?"141000":"4794000"} value={fleteOfrecido}
+        <input id="a11y-Cotizador-220" type="text" inputMode="decimal" placeholder={modoFlete==="porTon"?"141000":"4794000"} value={fleteOfrecido}
           onChange={e => setFleteOfrecido(e.target.value)} style={styles.input} />
 
         {modoFlete === "porTon" && (
           <>
-            <label style={styles.label}>Toneladas *</label>
-            <input type="text" inputMode="decimal" placeholder="34" value={toneladas}
+            <label htmlFor="a11y-Cotizador-230" style={styles.label}>Toneladas *</label>
+            <input id="a11y-Cotizador-230" type="text" inputMode="decimal" placeholder="34" value={toneladas}
               onChange={e => setToneladas(e.target.value)} style={styles.input} />
           </>
         )}
@@ -237,13 +237,13 @@ function Cotizador({ vehiculos = [], rutas = [], mostrarToast }) {
         <p style={styles.subSeccion}>🛣 Distancia</p>
         <div style={styles.grid2}>
           <div>
-            <label style={styles.label}>Km cargado</label>
-            <input type="text" inputMode="numeric" placeholder="380" value={kmCargado}
+            <label htmlFor="a11y-Cotizador-240" style={styles.label}>Km cargado</label>
+            <input id="a11y-Cotizador-240" type="text" inputMode="numeric" placeholder="380" value={kmCargado}
               onChange={e => setKmCargado(e.target.value)} style={styles.input} />
           </div>
           <div>
-            <label style={styles.label}>Km vacío</label>
-            <input type="text" inputMode="numeric" placeholder="60" value={kmVacio}
+            <label htmlFor="a11y-Cotizador-245" style={styles.label}>Km vacío</label>
+            <input id="a11y-Cotizador-245" type="text" inputMode="numeric" placeholder="60" value={kmVacio}
               onChange={e => setKmVacio(e.target.value)} style={styles.input} />
           </div>
         </div>
@@ -252,36 +252,36 @@ function Cotizador({ vehiculos = [], rutas = [], mostrarToast }) {
         <p style={styles.subSeccion}>⛽ Combustible</p>
         <div style={styles.grid2}>
           <div>
-            <label style={styles.label}>Rend. cargado (km/gal)</label>
-            <input type="text" inputMode="decimal" placeholder="5.5" value={rendCargado}
+            <label htmlFor="a11y-Cotizador-255" style={styles.label}>Rend. cargado (km/gal)</label>
+            <input id="a11y-Cotizador-255" type="text" inputMode="decimal" placeholder="5.5" value={rendCargado}
               onChange={e => setRendCargado(e.target.value)} style={styles.input} />
           </div>
           <div>
-            <label style={styles.label}>Rend. vacío (km/gal)</label>
-            <input type="text" inputMode="decimal" placeholder="7.0" value={rendVacio}
+            <label htmlFor="a11y-Cotizador-260" style={styles.label}>Rend. vacío (km/gal)</label>
+            <input id="a11y-Cotizador-260" type="text" inputMode="decimal" placeholder="7.0" value={rendVacio}
               onChange={e => setRendVacio(e.target.value)} style={styles.input} />
           </div>
         </div>
-        <label style={styles.label}>Precio galón ACPM</label>
-        <input type="text" inputMode="numeric" placeholder="10800" value={precioAcpm}
+        <label htmlFor="a11y-Cotizador-265" style={styles.label}>Precio galón ACPM</label>
+        <input id="a11y-Cotizador-265" type="text" inputMode="numeric" placeholder="10800" value={precioAcpm}
           onChange={e => setPrecioAcpm(e.target.value)} style={styles.input} />
 
         {/* COSTOS */}
         <p style={styles.subSeccion}>💸 Costos</p>
-        <label style={styles.label}>Total peajes</label>
-        <input type="text" inputMode="numeric" placeholder="890000" value={peajes}
+        <label htmlFor="a11y-Cotizador-271" style={styles.label}>Total peajes</label>
+        <input id="a11y-Cotizador-271" type="text" inputMode="numeric" placeholder="890000" value={peajes}
           onChange={e => setPeajes(e.target.value)} style={styles.input} />
 
-        <label style={styles.label}>Pago del conductor</label>
+        <label htmlFor="a11y-Cotizador-275" style={styles.label}>Pago del conductor</label>
         <div style={{display:"flex", gap:"8px", marginBottom:"6px"}}>
           <button onClick={()=>setModoConductor("porcentaje")} style={{...styles.toggleBtn, ...(modoConductor==="porcentaje"?styles.toggleActivo:{})}}>Porcentaje</button>
           <button onClick={()=>setModoConductor("fijo")} style={{...styles.toggleBtn, ...(modoConductor==="fijo"?styles.toggleActivo:{})}}>Valor fijo</button>
         </div>
-        <input type="text" inputMode="decimal" placeholder={modoConductor==="porcentaje"?"10 (%)":"500000"} value={valorConductor}
+        <input id="a11y-Cotizador-275" type="text" inputMode="decimal" placeholder={modoConductor==="porcentaje"?"10 (%)":"500000"} value={valorConductor}
           onChange={e => setValorConductor(e.target.value)} style={styles.input} />
 
-        <label style={styles.label}>Otros gastos (carpado, viáticos...)</label>
-        <input type="text" inputMode="numeric" placeholder="200000" value={otrosGastos}
+        <label htmlFor="a11y-Cotizador-283" style={styles.label}>Otros gastos (carpado, viáticos...)</label>
+        <input id="a11y-Cotizador-283" type="text" inputMode="numeric" placeholder="200000" value={otrosGastos}
           onChange={e => setOtrosGastos(e.target.value)} style={styles.input} />
 
         {/* UTILIDAD DESEADA */}

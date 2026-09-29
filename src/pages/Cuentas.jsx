@@ -4,7 +4,7 @@
  */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, History, TrendingUp, TrendingDown, ChevronDown, ChevronUp, FileDown, Scale, Calendar, BarChart3 } from "lucide-react";
+import { TrendingUp, TrendingDown, ChevronDown, ChevronUp, FileDown, Scale, Calendar, BarChart3 } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
@@ -24,7 +24,6 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
   };
   const [mes,  setMes]  = useState(hoy.getMonth());
   const [anio, setAnio] = useState(hoy.getFullYear());
-  const [verViajesMes, setVerViajesMes] = useState(false);
   const [verRango,   setVerRango]   = useState(false);
   const [rangoDesde, setRangoDesde] = useState("");
   const [rangoHasta, setRangoHasta] = useState("");
@@ -51,7 +50,6 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
   const gastosMes    = viajesMes.reduce((s,v) => s+(v.total||0),  0);
   const netaMes      = viajesMes.reduce((s,v) => s+(v.neta||0),   0);
   const rentabilidad = ingresosMes > 0 ? ((netaMes/ingresosMes)*100).toFixed(1) : "0.0";
-  const margenColor  = Number(rentabilidad)>=40 ? t.colors.green : Number(rentabilidad)>=20 ? t.colors.amber : t.colors.red;
   const kmMes = viajesMes.reduce((s,v) => s+(v.kmT||0), 0);
 
   const acpmMes      = viajesMes.reduce((s,v) => s+(v.cAcpm||0),     0);
@@ -474,13 +472,13 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
               <div style={{marginTop:"12px"}}>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"10px"}}>
                   <div>
-                    <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
-                    <input type="date" value={rangoDesde} onChange={e=>setRangoDesde(e.target.value)}
+                    <label htmlFor="a11y-Cuentas-477" style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Desde</label>
+                    <input id="a11y-Cuentas-477" type="date" value={rangoDesde} onChange={e=>setRangoDesde(e.target.value)}
                       style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm}}/>
                   </div>
                   <div>
-                    <label style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
-                    <input type="date" value={rangoHasta} onChange={e=>setRangoHasta(e.target.value)}
+                    <label htmlFor="a11y-Cuentas-482" style={{fontSize:t.fonts.sizeXs,color:t.colors.textSecondary,display:"block",marginBottom:"4px"}}>Hasta</label>
+                    <input id="a11y-Cuentas-482" type="date" value={rangoHasta} onChange={e=>setRangoHasta(e.target.value)}
                       style={{width:"100%",boxSizing:"border-box",padding:"10px",borderRadius:t.radius.sm,border:`1.5px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm}}/>
                   </div>
                 </div>

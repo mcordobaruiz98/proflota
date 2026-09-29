@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, User, Lock, Save, Users, Settings, HelpCircle, Info, LogOut, ChevronUp, ChevronRight, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { theme as t } from "../styles/theme";
+import { alPulsarEnterOEspacio } from "../utils/teclado";
 
 function Perfil({ mostrarToast }) {
   const navigate  = useNavigate();
@@ -35,7 +36,7 @@ function Perfil({ mostrarToast }) {
       await cambiarNombre(nombre.trim());
       mostrarToast("Nombre actualizado","exito");
       setEditNombre(false);
-    } catch(err) {
+    } catch {
       mostrarToast("Error al actualizar nombre","error");
     } finally {
       setGuardandoNom(false);
@@ -235,8 +236,11 @@ function Perfil({ mostrarToast }) {
           ].map((item,i,arr)=>(
             <div
               key={item.ruta}
+              role="button"
+              tabIndex={0}
               style={{...styles.filaMenu, borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`}}
               onClick={()=>navigate(item.ruta)}
+              onKeyDown={alPulsarEnterOEspacio(()=>navigate(item.ruta))}
             >
               <div style={styles.filaIzq}>
                 <div style={styles.iconoBox}>

@@ -2,10 +2,11 @@
  * Hecho por JESUS COSSIO DEV
  * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
  */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
 import { theme as t } from "../../styles/theme";
+import { alPulsarEnterOEspacio } from "../../utils/teclado";
 
 const CONFIGS_VEHICULO = {
   "TURBO SENCILLO":    { total: 4,  label: "Turbo 4 llantas" },
@@ -171,18 +172,15 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo, onRegis
 
   const [llantas,   setLlantas]   = useState(vehiculo?.llantasData || {});
   const [seleccionada, setSeleccionada] = useState(null);
-  const [guardando,    setGuardando]    = useState(false);
 
   // Sincronizar cuando llantasData carga o cambia en Firestore.
   // Sin esto, si el componente monta antes de que el vehículo cargue,
   // el estado queda en {} y al guardar se borran las demás llantas.
   // Solo sincroniza cuando no hay panel de edición abierto, para no
   // pisar cambios mientras el usuario edita una llanta.
-  useEffect(() => {
-    if (vehiculo?.llantasData && seleccionada === null) {
-      setLlantas(vehiculo.llantasData);
-    }
-  }, [vehiculo?.llantasData, seleccionada]);
+  if (vehiculo?.llantasData && seleccionada === null) {
+    setLlantas(vehiculo.llantasData);
+  }
 
   const [marca,  setMarca]  = useState("");
   const [ref,    setRef]    = useState("");
@@ -335,42 +333,42 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo, onRegis
             </p>
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Marca</label>
-                <input type="text" placeholder="Michelin, Bridgestone..." value={marca}
+                <label htmlFor="a11y-Llantas-338" style={styles.label}>Marca</label>
+                <input id="a11y-Llantas-338" type="text" placeholder="Michelin, Bridgestone..." value={marca}
                   onChange={e=>setMarca(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Referencia</label>
-                <input type="text" placeholder="295/80 R22.5" value={ref}
+                <label htmlFor="a11y-Llantas-343" style={styles.label}>Referencia</label>
+                <input id="a11y-Llantas-343" type="text" placeholder="295/80 R22.5" value={ref}
                   onChange={e=>setRef(e.target.value)} style={styles.input}/>
               </div>
             </div>
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Profundidad (mm)</label>
-                <input type="text" placeholder="15mm" value={prof}
+                <label htmlFor="a11y-Llantas-350" style={styles.label}>Profundidad (mm)</label>
+                <input id="a11y-Llantas-350" type="text" placeholder="15mm" value={prof}
                   onChange={e=>setProf(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Km al montar</label>
-                <input type="number" placeholder="120000" value={kmMont}
+                <label htmlFor="a11y-Llantas-355" style={styles.label}>Km al montar</label>
+                <input id="a11y-Llantas-355" type="number" placeholder="120000" value={kmMont}
                   onChange={e=>setKmMont(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Fecha de montaje</label>
-                <input type="date" value={fechaMont}
+                <label htmlFor="a11y-Llantas-360" style={styles.label}>Fecha de montaje</label>
+                <input id="a11y-Llantas-360" type="date" value={fechaMont}
                   onChange={e=>setFechaMont(e.target.value)} style={styles.input}/>
               </div>
             </div>
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Valor llanta ($)</label>
-                <input type="number" placeholder="1200000" value={valor}
+                <label htmlFor="a11y-Llantas-367" style={styles.label}>Valor llanta ($)</label>
+                <input id="a11y-Llantas-367" type="number" placeholder="1200000" value={valor}
                   onChange={e=>setValor(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Estado</label>
-                <select value={estado} onChange={e=>setEstado(e.target.value)} style={styles.input}>
+                <label htmlFor="a11y-Llantas-372" style={styles.label}>Estado</label>
+                <select id="a11y-Llantas-372" value={estado} onChange={e=>setEstado(e.target.value)} style={styles.input}>
                   <option value="nueva">Nueva</option>
                   <option value="ok">Buena</option>
                   <option value="warn">Desgastada</option>
@@ -404,8 +402,8 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo, onRegis
               );
             })()}
             <div style={styles.campo}>
-              <label style={styles.label}>Observaciones</label>
-              <input type="text" placeholder="Reparada, pinchada, etc." value={obs}
+              <label htmlFor="a11y-Llantas-407" style={styles.label}>Observaciones</label>
+              <input id="a11y-Llantas-407" type="text" placeholder="Reparada, pinchada, etc." value={obs}
                 onChange={e=>setObs(e.target.value)} style={styles.input}/>
             </div>
             <div style={{display:"flex",gap:"8px"}}>
@@ -427,11 +425,11 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo, onRegis
             {/* Rotación de Llanta */}
             {!!llantas[seleccionada] && (
               <div style={{ marginTop: "16px", borderTop: `1px solid ${t.colors.border}22`, paddingTop: "14px" }}>
-                <label style={{ ...styles.label, marginBottom: "8px", display: "block", color: t.colors.blueText, fontWeight: 700 }}>
+                <label htmlFor="a11y-Llantas-430" style={{ ...styles.label, marginBottom: "8px", display: "block", color: t.colors.blueText, fontWeight: 700 }}>
                   Rotar esta llanta a otra posición
                 </label>
                 <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                  <select
+                  <select id="a11y-Llantas-430"
                     value={rotarDestino}
                     onChange={(e) => setRotarDestino(e.target.value)}
                     style={{ ...styles.input, flex: 1, margin: 0 }}
@@ -480,8 +478,11 @@ function Llantas({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo, onRegis
             const estadoLabel = d.estado==="nueva"?"Nueva":d.estado==="warn"?"Desgastada":d.estado==="bad"?"Cambiar":"Buena";
             return (
               <div key={n}
+                role="button"
+                tabIndex={0}
                 style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:i===arr.length-1?"none":`1px solid ${t.colors.borderLight}`,cursor:"pointer"}}
                 onClick={()=>abrirDetalle(n)}
+                onKeyDown={alPulsarEnterOEspacio(()=>abrirDetalle(n))}
               >
                 <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
                   <div style={{width:"10px",height:"10px",borderRadius:"50%",background:color,flexShrink:0}}/>

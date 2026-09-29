@@ -2,9 +2,9 @@
  * Hecho por JESUS COSSIO DEV
  * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
  */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Upload, Trash2, Droplet } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Droplet } from "lucide-react";
 import { theme as t } from "../../styles/theme";
 
 const VISCOSIDADES = ["15W-40","20W-50","10W-40","5W-30","5W-40","15W-50","Otra"];
@@ -21,11 +21,9 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo, onRegist
   // Sincronizar cuando aceiteHistorial carga o cambia en Firestore.
   // Evita que al refrescar (antes de que el vehículo cargue) el estado
   // quede vacío y borre el historial al guardar.
-  useEffect(() => {
-    if (vehiculo?.aceiteHistorial) {
-      setHistorial(vehiculo.aceiteHistorial);
-    }
-  }, [vehiculo?.aceiteHistorial]);
+  if (vehiculo?.aceiteHistorial) {
+    setHistorial(vehiculo.aceiteHistorial);
+  }
 
   const [marca,       setMarca]       = useState("");
   const [referencia,  setReferencia]  = useState("");
@@ -46,6 +44,7 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo, onRegist
     if (!marca.trim()) { mostrarToast("Ingresa la marca del aceite","error"); return; }
     if (!kmCambio)     { mostrarToast("Ingresa el km del cambio","error"); return; }
     setGuardando(true);
+    // eslint-disable-next-line react-hooks/purity -- guardar solo se invoca desde onClick; Date.now() acuña el id del registro al pulsar, nunca durante render.
     const nuevo = { id:Date.now(), marca, referencia, viscosidad, galones:Number(galones)||0, km:Number(kmCambio), fecha, taller, nitTaller, costo:Number(costo)||0, nota };
     const nuevos = [nuevo, ...historial];
     setHistorial(nuevos);
@@ -126,69 +125,69 @@ function Aceite({ vehiculos, onAgregar, mostrarToast, onEditarVehiculo, onRegist
 
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Marca</label>
-                <select value={marca} onChange={e=>setMarca(e.target.value)}
+                <label htmlFor="a11y-Aceite-129" style={styles.label}>Marca</label>
+                <select id="a11y-Aceite-129" value={marca} onChange={e=>setMarca(e.target.value)}
                   style={{...styles.input, color:marca?t.colors.textPrimary:t.colors.textTertiary}}>
                   <option value="">Seleccionar...</option>
                   {MARCAS_ACEITE.map(m=><option key={m} value={m}>{m}</option>)}
                 </select>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Referencia</label>
-                <input type="text" placeholder="Rimula R4X" value={referencia}
+                <label htmlFor="a11y-Aceite-137" style={styles.label}>Referencia</label>
+                <input id="a11y-Aceite-137" type="text" placeholder="Rimula R4X" value={referencia}
                   onChange={e=>setReferencia(e.target.value)} style={styles.input}/>
               </div>
             </div>
 
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Viscosidad</label>
-                <select value={viscosidad} onChange={e=>setViscosidad(e.target.value)} style={styles.input}>
+                <label htmlFor="a11y-Aceite-145" style={styles.label}>Viscosidad</label>
+                <select id="a11y-Aceite-145" value={viscosidad} onChange={e=>setViscosidad(e.target.value)} style={styles.input}>
                   {VISCOSIDADES.map(v=><option key={v} value={v}>{v}</option>)}
                 </select>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Galones</label>
-                <input type="number" placeholder="12" value={galones}
+                <label htmlFor="a11y-Aceite-151" style={styles.label}>Galones</label>
+                <input id="a11y-Aceite-151" type="number" placeholder="12" value={galones}
                   onChange={e=>setGalones(e.target.value)} style={styles.input}/>
               </div>
             </div>
 
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Km al cambiar</label>
-                <input type="number" placeholder="145000" value={kmCambio}
+                <label htmlFor="a11y-Aceite-159" style={styles.label}>Km al cambiar</label>
+                <input id="a11y-Aceite-159" type="number" placeholder="145000" value={kmCambio}
                   onChange={e=>setKmCambio(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Fecha</label>
-                <input type="date" value={fecha}
+                <label htmlFor="a11y-Aceite-164" style={styles.label}>Fecha</label>
+                <input id="a11y-Aceite-164" type="date" value={fecha}
                   onChange={e=>setFecha(e.target.value)} style={styles.input}/>
               </div>
             </div>
 
             <div style={styles.campo}>
-              <label style={styles.label}>Taller</label>
-              <input type="text" placeholder="Nombre del taller" value={taller}
+              <label htmlFor="a11y-Aceite-171" style={styles.label}>Taller</label>
+              <input id="a11y-Aceite-171" type="text" placeholder="Nombre del taller" value={taller}
                 onChange={e=>setTaller(e.target.value)} style={styles.input}/>
             </div>
 
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Nit taller</label>
-                <input type="number" placeholder="111.222.333-4" value={nitTaller}
+                <label htmlFor="a11y-Aceite-178" style={styles.label}>Nit taller</label>
+                <input id="a11y-Aceite-178" type="number" placeholder="111.222.333-4" value={nitTaller}
                   onChange={e=>setnitTaller(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Costo ($)</label>
-                <input type="number" placeholder="180000" value={costo}
+                <label htmlFor="a11y-Aceite-183" style={styles.label}>Costo ($)</label>
+                <input id="a11y-Aceite-183" type="number" placeholder="180000" value={costo}
                   onChange={e=>setCosto(e.target.value)} style={styles.input}/>
               </div>
             </div>
 
             <div style={styles.campo}>
-              <label style={styles.label}>Nota</label>
-              <input type="text" placeholder="Observaciones adicionales" value={nota}
+              <label htmlFor="a11y-Aceite-190" style={styles.label}>Nota</label>
+              <input id="a11y-Aceite-190" type="text" placeholder="Observaciones adicionales" value={nota}
                 onChange={e=>setNota(e.target.value)} style={styles.input}/>
             </div>
 

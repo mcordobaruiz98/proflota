@@ -5,10 +5,11 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth }     from "../hooks/useAuth";
 import { theme as t }  from "../styles/theme";
-import { Truck, TrendingUp, Calculator, Trophy, MapPin, Handshake, AlertCircle, Wrench} from "lucide-react";
+import { Truck, TrendingUp, Calculator, MapPin, Handshake, AlertCircle, Wrench } from "lucide-react";
 import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 import   EstadoVacio       from "../components/EstadoVacio";
 import   AlertasDocumentos from "../components/AlertasDocumentos";
+import { alPulsarEnterOEspacio } from "../utils/teclado";
 
 function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [], conductores = [], gastosFijos = [], cargando}) {
   const navigate = useNavigate();
@@ -382,6 +383,8 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
       {/* ALERTA CARTERA VENCIDA */}
       {vencidos.length > 0 && (
         <div
+          role="button"
+          tabIndex={0}
           style={{
             margin: "0 16px 10px",
             padding: "12px 16px",
@@ -394,6 +397,7 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
             cursor: "pointer",
           }}
           onClick={() => navigate("/cartera")}
+          onKeyDown={alPulsarEnterOEspacio(() => navigate("/cartera"))}
         >
           <AlertCircle size={20} color={t.colors.red} strokeWidth={2} />
           <div style={{ flex: 1 }}>

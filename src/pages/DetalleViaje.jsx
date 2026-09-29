@@ -2,16 +2,16 @@
  * Hecho por JESUS COSSIO DEV
  * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
  */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2, Edit3, Save, X, Check, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, AlertCircle, Send, Repeat, Camera, Paperclip, Calendar, Truck, FileText, Building2, User } from "lucide-react";
+import { ArrowLeft, Trash2, Edit3, Save, X, Check, Fuel, Route, Receipt, TrendingUp, Package, CheckCircle, Clock, Send, Repeat, Camera, Paperclip, Calendar, Truck, FileText, Building2, User } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { sanitizar } from "../utils/validar";
 import { useSubirArchivo } from "../hooks/useSubirArchivo";
 import { useAuth } from "../hooks/useAuth";
 
 function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEditarVehiculo, mostrarToast }) {
-  const { subirArchivo, eliminarArchivo, subiendo } = useSubirArchivo();
+  const { subirArchivo, eliminarArchivo } = useSubirArchivo();
   const { usuario } = useAuth();
 
   // Subir foto de manifiesto (ida o retorno) y amarrarla al viaje
@@ -43,11 +43,11 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
       : { manifiestoRetFotoUrl: null, manifiestoRetFotoRuta: null };
     try {
       if (rutaStorage) await eliminarArchivo(rutaStorage, ()=>{});
-    } catch(err) { /* archivo puede no existir, continuar */ }
+    } catch { /* archivo puede no existir, continuar */ }
     try {
       await onEditar(viaje.firestoreId, campos);
       mostrarToast("Manifiesto eliminado","exito");
-    } catch(err) {
+    } catch {
       mostrarToast("Error al eliminar","error");
     }
   };
@@ -102,6 +102,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
   const [montoAnticipoFleteE, setMontoAnticipoFleteE] = useState("");
   const [pctAnticipoFleteRetE, setPctAnticipoFleteRetE] = useState("60");
   const [montoAnticipoFleteRetE, setMontoAnticipoFleteRetE] = useState("");
+const [prevEditFleteIda, setPrevEditFleteIda] = useState(null);
+const [prevEditFleteRet, setPrevEditFleteRet] = useState(null);
 
   const fmt = (n) => "$" + Math.round(n||0).toLocaleString("es-CO");
   const fnD = (n,d) => (Math.round((n||0)*Math.pow(10,d))/Math.pow(10,d)).toLocaleString("es-CO",{maximumFractionDigits:d});
@@ -158,20 +160,21 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
   };
 
   // Sincronizar monto si cambia el valor del flete de ida original
-  useEffect(() => {
+  if (editFleteIda !== prevEditFleteIda) {
+    setPrevEditFleteIda(editFleteIda);
     if (pctAnticipoFleteE !== "" && editFleteIda > 0) {
       const val = Math.round(editFleteIda * (parseFloat(pctAnticipoFleteE) / 100));
       setMontoAnticipoFleteE(val ? String(val) : "");
     }
-  }, [editFleteIda]);
+  }
 
-  // Sincronizar monto si cambia el valor del flete de retorno original
-  useEffect(() => {
+  if (editFleteRet !== prevEditFleteRet) {
+    setPrevEditFleteRet(editFleteRet);
     if (pctAnticipoFleteRetE !== "" && editFleteRet > 0) {
       const val = Math.round(editFleteRet * (parseFloat(pctAnticipoFleteRetE) / 100));
       setMontoAnticipoFleteRetE(val ? String(val) : "");
     }
-  }, [editFleteRet]);
+  }
 
   const compartirWhatsApp = () => {
     if (!viaje) return;
@@ -387,7 +390,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
 
       mostrarToast("Viaje actualizado", "exito");
       setEditando(false);
-    } catch(err) {
+    } catch {
       mostrarToast("Error al guardar", "error");
     } finally {
       setGuardando(false);
@@ -502,84 +505,84 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
             <h1 style={styles.cardTituloEdit}>Editar datos del viaje</h1>
 
             <div style={styles.campo}>
-              <label style={styles.label}>Fecha</label>
-              <input type="date" value={fecha} onChange={e=>setFecha(e.target.value)} style={styles.input}/>
+              <label htmlFor="a11y-DetalleViaje-505" style={styles.label}>Fecha</label>
+              <input id="a11y-DetalleViaje-505" type="date" value={fecha} onChange={e=>setFecha(e.target.value)} style={styles.input}/>
             </div>
             <div style={styles.campo}>
-              <label style={styles.label}>Ruta</label>
-              <input type="text" placeholder="Origen – Destino" value={ruta} onChange={e=>setRuta(e.target.value)} style={styles.input}/>
+              <label htmlFor="a11y-DetalleViaje-509" style={styles.label}>Ruta</label>
+              <input id="a11y-DetalleViaje-509" type="text" placeholder="Origen – Destino" value={ruta} onChange={e=>setRuta(e.target.value)} style={styles.input}/>
             </div>
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Manifiesto</label>
-                <input type="text" value={mani} onChange={e=>setMani(e.target.value)} style={styles.input}/>
+                <label htmlFor="a11y-DetalleViaje-514" style={styles.label}>Manifiesto</label>
+                <input id="a11y-DetalleViaje-514" type="text" value={mani} onChange={e=>setMani(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Placa</label>
-                <input type="text" value={placa} onChange={e=>setPlaca(e.target.value)} style={styles.input}/>
-              </div>
-            </div>
-            <div style={styles.campo}>
-              <label style={styles.label}>Empresa</label>
-              <input type="text" value={emp} onChange={e=>setEmp(e.target.value)} style={styles.input}/>
-            </div>
-            <div style={styles.fila2}>
-              <div style={styles.campo}>
-                <label style={styles.label}>Tipo de carga</label>
-                <input type="text" value={tipoCarga} onChange={e=>setTipoCarga(e.target.value)} style={styles.input}/>
-              </div>
-              <div style={styles.campo}>
-                <label style={styles.label}>Producto</label>
-                <input type="text" value={prod} onChange={e=>setProd(e.target.value)} style={styles.input}/>
+                <label htmlFor="a11y-DetalleViaje-518" style={styles.label}>Placa</label>
+                <input id="a11y-DetalleViaje-518" type="text" value={placa} onChange={e=>setPlaca(e.target.value)} style={styles.input}/>
               </div>
             </div>
             <div style={styles.campo}>
-              <label style={styles.label}>Conductor</label>
-              <input type="text" value={condNom} onChange={e=>setCondNom(e.target.value)} style={styles.input}/>
+              <label htmlFor="a11y-DetalleViaje-523" style={styles.label}>Empresa</label>
+              <input id="a11y-DetalleViaje-523" type="text" value={emp} onChange={e=>setEmp(e.target.value)} style={styles.input}/>
             </div>
             <div style={styles.fila2}>
               <div style={styles.campo}>
-                <label style={styles.label}>Toneladas</label>
-                <input type="number" value={ton} onChange={e=>setTon(e.target.value)} step="0.01" style={styles.input}/>
+                <label htmlFor="a11y-DetalleViaje-528" style={styles.label}>Tipo de carga</label>
+                <input id="a11y-DetalleViaje-528" type="text" value={tipoCarga} onChange={e=>setTipoCarga(e.target.value)} style={styles.input}/>
               </div>
               <div style={styles.campo}>
-                <label style={styles.label}>Flete ($/ton o total)</label>
-                <input type="number" value={fleteTon} onChange={e=>setFleteTon(e.target.value)} style={styles.input}/>
-              </div>
-            </div>
-            <div style={styles.fila2}>
-              <div style={styles.campo}>
-                <label style={styles.label}>Km cargado</label>
-                <input type="number" value={kmCargado} onChange={e=>setKmCargado(e.target.value)} style={styles.input}/>
-              </div>
-              <div style={styles.campo}>
-                <label style={styles.label}>Km vacío</label>
-                <input type="number" value={kmVacio} onChange={e=>setKmVacio(e.target.value)} style={styles.input}/>
-              </div>
-            </div>
-            <div style={styles.fila2}>
-              <div style={styles.campo}>
-                <label style={styles.label}>N° Remesa</label>
-                <input type="text" value={remesaE} onChange={e=>setRemesaE(e.target.value)} style={styles.input}/>
-              </div>
-              <div style={styles.campo}>
-                <label style={styles.label}>Peso báscula (ton)</label>
-                <input type="number" value={pesoBasE} onChange={e=>setPesoBasE(e.target.value)} style={styles.input}/>
-              </div>
-            </div>
-            <div style={styles.fila2}>
-              <div style={styles.campo}>
-                <label style={styles.label}>Lugar de cargue</label>
-                <input type="text" value={lugarCE} onChange={e=>setLugarCE(e.target.value)} style={styles.input}/>
-              </div>
-              <div style={styles.campo}>
-                <label style={styles.label}>Lugar de descargue</label>
-                <input type="text" value={lugarDE} onChange={e=>setLugarDE(e.target.value)} style={styles.input}/>
+                <label htmlFor="a11y-DetalleViaje-532" style={styles.label}>Producto</label>
+                <input id="a11y-DetalleViaje-532" type="text" value={prod} onChange={e=>setProd(e.target.value)} style={styles.input}/>
               </div>
             </div>
             <div style={styles.campo}>
-              <label style={styles.label}>Observaciones</label>
-              <input type="text" value={obsE} onChange={e=>setObsE(e.target.value)} style={styles.input}/>
+              <label htmlFor="a11y-DetalleViaje-537" style={styles.label}>Conductor</label>
+              <input id="a11y-DetalleViaje-537" type="text" value={condNom} onChange={e=>setCondNom(e.target.value)} style={styles.input}/>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label htmlFor="a11y-DetalleViaje-542" style={styles.label}>Toneladas</label>
+                <input id="a11y-DetalleViaje-542" type="number" value={ton} onChange={e=>setTon(e.target.value)} step="0.01" style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label htmlFor="a11y-DetalleViaje-546" style={styles.label}>Flete ($/ton o total)</label>
+                <input id="a11y-DetalleViaje-546" type="number" value={fleteTon} onChange={e=>setFleteTon(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label htmlFor="a11y-DetalleViaje-552" style={styles.label}>Km cargado</label>
+                <input id="a11y-DetalleViaje-552" type="number" value={kmCargado} onChange={e=>setKmCargado(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label htmlFor="a11y-DetalleViaje-556" style={styles.label}>Km vacío</label>
+                <input id="a11y-DetalleViaje-556" type="number" value={kmVacio} onChange={e=>setKmVacio(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label htmlFor="a11y-DetalleViaje-562" style={styles.label}>N° Remesa</label>
+                <input id="a11y-DetalleViaje-562" type="text" value={remesaE} onChange={e=>setRemesaE(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label htmlFor="a11y-DetalleViaje-566" style={styles.label}>Peso báscula (ton)</label>
+                <input id="a11y-DetalleViaje-566" type="number" value={pesoBasE} onChange={e=>setPesoBasE(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.fila2}>
+              <div style={styles.campo}>
+                <label htmlFor="a11y-DetalleViaje-572" style={styles.label}>Lugar de cargue</label>
+                <input id="a11y-DetalleViaje-572" type="text" value={lugarCE} onChange={e=>setLugarCE(e.target.value)} style={styles.input}/>
+              </div>
+              <div style={styles.campo}>
+                <label htmlFor="a11y-DetalleViaje-576" style={styles.label}>Lugar de descargue</label>
+                <input id="a11y-DetalleViaje-576" type="text" value={lugarDE} onChange={e=>setLugarDE(e.target.value)} style={styles.input}/>
+              </div>
+            </div>
+            <div style={styles.campo}>
+              <label htmlFor="a11y-DetalleViaje-581" style={styles.label}>Observaciones</label>
+              <input id="a11y-DetalleViaje-581" type="text" value={obsE} onChange={e=>setObsE(e.target.value)} style={styles.input}/>
             </div>
 
             {/* Anticipo y Saldo del Flete (Empresa) */}
@@ -604,8 +607,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                   {retornoE && <p style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700, margin: "0 0 6px" }}>1. TRAYECTO DE IDA</p>}
                   <div style={styles.fila2}>
                     <div style={styles.campo}>
-                      <label style={styles.label}>Anticipo Ida (%)</label>
-                      <input
+                      <label htmlFor="a11y-DetalleViaje-607" style={styles.label}>Anticipo Ida (%)</label>
+                      <input id="a11y-DetalleViaje-607"
                         type="number"
                         placeholder="60"
                         value={pctAnticipoFleteE}
@@ -614,8 +617,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                       />
                     </div>
                     <div style={styles.campo}>
-                      <label style={styles.label}>Valor Anticipo Ida ($)</label>
-                      <input
+                      <label htmlFor="a11y-DetalleViaje-617" style={styles.label}>Valor Anticipo Ida ($)</label>
+                      <input id="a11y-DetalleViaje-617"
                         type="number"
                         placeholder="Monto recibido"
                         value={montoAnticipoFleteE}
@@ -638,8 +641,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                     <p style={{ fontSize: "11px", color: t.colors.textSecondary, fontWeight: 700, margin: "0 0 6px" }}>2. TRAYECTO DE RETORNO</p>
                     <div style={styles.fila2}>
                       <div style={styles.campo}>
-                        <label style={styles.label}>Anticipo Retorno (%)</label>
-                        <input
+                        <label htmlFor="a11y-DetalleViaje-641" style={styles.label}>Anticipo Retorno (%)</label>
+                        <input id="a11y-DetalleViaje-641"
                           type="number"
                           placeholder="60"
                           value={pctAnticipoFleteRetE}
@@ -648,8 +651,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                         />
                       </div>
                       <div style={styles.campo}>
-                        <label style={styles.label}>Valor Anticipo Retorno ($)</label>
-                        <input
+                        <label htmlFor="a11y-DetalleViaje-651" style={styles.label}>Valor Anticipo Retorno ($)</label>
+                        <input id="a11y-DetalleViaje-651"
                           type="number"
                           placeholder="Monto recibido"
                           value={montoAnticipoFleteRetE}
@@ -703,8 +706,8 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
               </button>
               {retornoE && (
                 <div style={styles.campo}>
-                  <label style={styles.label}>Valor flete retorno ($)</label>
-                  <input type="number" placeholder="2500000" value={fleteRetE}
+                  <label htmlFor="a11y-DetalleViaje-706" style={styles.label}>Valor flete retorno ($)</label>
+                  <input id="a11y-DetalleViaje-706" type="number" placeholder="2500000" value={fleteRetE}
                     onChange={e=>setFleteRetE(e.target.value)} style={styles.input}/>
                 </div>
               )}
@@ -1001,7 +1004,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                     placeholder="0"
                     onChange={async(e)=>{
                       const val = Number(e.target.value) || 0;
-                      try { await onEditar(viaje.firestoreId, { anticipoMonto: val }); } catch(err){}
+                      try { await onEditar(viaje.firestoreId, { anticipoMonto: val }); } catch{/* edicion optimista: el monto ya se ve y onEditar gestiona el error */}
                     }}
                     style={{width:"120px",padding:"4px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeSm,textAlign:"right"}}
                   />
@@ -1009,7 +1012,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
               </div>
 
               {/* Gastos del anticipo */}
-              {(viaje.anticipoGastos || []).map((g, i, arr) => (
+              {(viaje.anticipoGastos || []).map((g, i) => (
                 <div key={i} style={{...styles.fila, borderBottom:`1px solid ${t.colors.borderLight}`}}>
                   <span style={styles.filaLabel}>{g.descripcion}</span>
                   <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
@@ -1018,7 +1021,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                       style={{background:"none",border:"none",cursor:"pointer",padding:"2px"}}
                       onClick={async()=>{
                         const nuevos = (viaje.anticipoGastos||[]).filter((_,idx)=>idx!==i);
-                        try { await onEditar(viaje.firestoreId, { anticipoGastos: nuevos }); } catch(err){}
+                        try { await onEditar(viaje.firestoreId, { anticipoGastos: nuevos }); } catch{/* edicion optimista: los gastos ya se ven y onEditar gestiona el error */}
                       }}
                     >
                       <Trash2 size={12} color={t.colors.textTertiary} />
@@ -1055,7 +1058,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                         try {
                           await onEditar(viaje.firestoreId, { anticipoGastos: nuevos });
                           setAntDesc(""); setAntMonto(""); setVerFormAnticipo(false);
-                        } catch(err) { mostrarToast("Error","error"); }
+                        } catch { mostrarToast("Error","error"); }
                       }}
                     ><Check size={15} color="#fff" strokeWidth={3}/></button>
                     <button
@@ -1123,7 +1126,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                         fechaPago: nuevo==="pagado" ? new Date().toISOString().slice(0,10) : null,
                       });
                       mostrarToast(nuevo==="pagado"?"Viaje marcado como pagado":"Viaje marcado como pendiente","exito");
-                    } catch(err) {
+                    } catch {
                       mostrarToast("Error al actualizar","error");
                     }
                   }}
@@ -1141,7 +1144,7 @@ function DetalleViaje({ viajes = [], vehiculos = [], onEliminar, onEditar, onEdi
                   onChange={async(e)=>{
                     try {
                       await onEditar(viaje.firestoreId, { diasPago: Number(e.target.value) });
-                    } catch(err) {}
+                    } catch {/* edicion optimista: los dias ya se ven y onEditar gestiona el error */}
                   }}
                   style={{padding:"4px 8px",borderRadius:t.radius.sm,border:`1px solid ${t.colors.border}`,background:t.colors.bgPrimary,color:t.colors.textPrimary,fontSize:t.fonts.sizeXs}}
                 >

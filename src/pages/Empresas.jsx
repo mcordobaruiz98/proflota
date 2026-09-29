@@ -3,14 +3,12 @@
  * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
  */
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Search, Trash2, Save, Handshake } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
 const TIPOS = ["Transportadora","Generadora de carga","Operador logístico","Comercializadora","Otra"];
 
 function Empresas({ empresas = [], onAgregar, onEliminar, mostrarToast }) {
-  const navigate = useNavigate();
   const [vista,    setVista]    = useState("lista");
   const [busqueda, setBusqueda] = useState("");
   const [errores,  setErrores]  = useState({});
@@ -70,8 +68,8 @@ function Empresas({ empresas = [], onAgregar, onEliminar, mostrarToast }) {
         <div style={styles.seccionLabel}>Datos de la empresa</div>
         <div style={styles.card}>
           <div style={styles.campo}>
-            <label style={styles.label}>Tipo *</label>
-            <select value={tipo} onChange={e=>{setTipo(e.target.value);setErrores({...errores,tipo:null});}}
+            <label htmlFor="a11y-Empresas-73" style={styles.label}>Tipo *</label>
+            <select id="a11y-Empresas-73" value={tipo} onChange={e=>{setTipo(e.target.value);setErrores({...errores,tipo:null});}}
               style={{...styles.input,color:tipo?t.colors.textPrimary:t.colors.textTertiary}}>
               <option value="">Seleccionar...</option>
               {TIPOS.map(tp=><option key={tp} value={tp}>{tp}</option>)}
@@ -79,20 +77,20 @@ function Empresas({ empresas = [], onAgregar, onEliminar, mostrarToast }) {
             {errores.tipo&&<p style={styles.error}>{errores.tipo}</p>}
           </div>
           <div style={styles.campo}>
-            <label style={styles.label}>Razón social *</label>
-            <input type="text" placeholder="Nombre de la empresa" value={razonSocial}
+            <label htmlFor="a11y-Empresas-82" style={styles.label}>Razón social *</label>
+            <input id="a11y-Empresas-82" type="text" placeholder="Nombre de la empresa" value={razonSocial}
               onChange={e=>{setRazonSocial(e.target.value);setErrores({...errores,razonSocial:null});}}
               style={styles.input} />
             {errores.razonSocial&&<p style={styles.error}>{errores.razonSocial}</p>}
           </div>
           <div style={styles.fila2}>
             <div style={styles.campo}>
-              <label style={styles.label}>NIT</label>
-              <input type="text" placeholder="900.123.456-7" value={nit} onChange={e=>setNit(e.target.value)} style={styles.input} />
+              <label htmlFor="a11y-Empresas-90" style={styles.label}>NIT</label>
+              <input id="a11y-Empresas-90" type="text" placeholder="900.123.456-7" value={nit} onChange={e=>setNit(e.target.value)} style={styles.input} />
             </div>
             <div style={styles.campo}>
-              <label style={styles.label}>Ciudad</label>
-              <input type="text" placeholder="Barranquilla" value={ciudad} onChange={e=>setCiudad(e.target.value)} style={styles.input} />
+              <label htmlFor="a11y-Empresas-94" style={styles.label}>Ciudad</label>
+              <input id="a11y-Empresas-94" type="text" placeholder="Barranquilla" value={ciudad} onChange={e=>setCiudad(e.target.value)} style={styles.input} />
             </div>
           </div>
         </div>
@@ -100,16 +98,16 @@ function Empresas({ empresas = [], onAgregar, onEliminar, mostrarToast }) {
         <div style={styles.seccionLabel}>Contacto</div>
         <div style={styles.card}>
           <div style={styles.campo}>
-            <label style={styles.label}>Persona de contacto</label>
-            <input type="text" placeholder="Nombre completo" value={contacto} onChange={e=>setContacto(e.target.value)} style={styles.input} />
+            <label htmlFor="a11y-Empresas-103" style={styles.label}>Persona de contacto</label>
+            <input id="a11y-Empresas-103" type="text" placeholder="Nombre completo" value={contacto} onChange={e=>setContacto(e.target.value)} style={styles.input} />
           </div>
           <div style={styles.campo}>
-            <label style={styles.label}>Teléfono</label>
-            <input type="tel" placeholder="+57 300 000 0000" value={telefono} onChange={e=>setTelefono(e.target.value)} style={styles.input} />
+            <label htmlFor="a11y-Empresas-107" style={styles.label}>Teléfono</label>
+            <input id="a11y-Empresas-107" type="tel" placeholder="+57 300 000 0000" value={telefono} onChange={e=>setTelefono(e.target.value)} style={styles.input} />
           </div>
           <div style={styles.campo}>
-            <label style={styles.label}>Correo</label>
-            <input type="email" placeholder="correo@empresa.com" value={correo} onChange={e=>setCorreo(e.target.value)} style={styles.input} />
+            <label htmlFor="a11y-Empresas-111" style={styles.label}>Correo</label>
+            <input id="a11y-Empresas-111" type="email" placeholder="correo@empresa.com" value={correo} onChange={e=>setCorreo(e.target.value)} style={styles.input} />
           </div>
         </div>
 
@@ -158,7 +156,7 @@ function Empresas({ empresas = [], onAgregar, onEliminar, mostrarToast }) {
       {empresas.length>0&&filtradas.length===0&&(
         <div style={styles.vacio}>
           <p style={styles.vacioTexto}>Sin resultados</p>
-          <p style={styles.vacioSub}>No hay empresas con "{busqueda}"</p>
+            <p style={styles.vacioSub}>No hay empresas con &quot;{busqueda}&quot;</p>
         </div>
       )}
 

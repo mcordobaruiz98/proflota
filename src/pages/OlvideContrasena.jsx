@@ -78,10 +78,10 @@ function OlvideContrasena() {
 
       <div style={styles.card}>
         <div style={styles.campo}>
-          <label style={styles.label}>Correo electrónico</label>
-          <input type="email" placeholder="correo@ejemplo.com" value={correo}
+          <label htmlFor="a11y-OlvideContrasena-81" style={styles.label}>Correo electrónico</label>
+          <input id="a11y-OlvideContrasena-81" type="email" placeholder="correo@ejemplo.com" value={correo}
             onChange={e=>{setCorreo(e.target.value);setError("");}}
-            style={styles.input} autoFocus />
+            style={styles.input} />
         </div>
         {error&&<div style={styles.errorBox}>{error}</div>}
         <button style={{...styles.btnEnviar,opacity:cargando?0.75:1}} onClick={handleEnviar} disabled={cargando}>

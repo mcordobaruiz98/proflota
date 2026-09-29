@@ -86,8 +86,8 @@ function Registro() {
         <form onSubmit={e => e.preventDefault()} autoComplete="on">
 
           <div style={styles.campo}>
-            <label style={styles.label}>Nombre completo</label>
-            <input
+            <label htmlFor="a11y-Registro-89" style={styles.label}>Nombre completo</label>
+            <input id="a11y-Registro-89"
               type="text"
               placeholder="Juan Pérez"
               value={nombre}
@@ -99,8 +99,8 @@ function Registro() {
           </div>
 
           <div style={styles.campo}>
-            <label style={styles.label}>Correo electrónico</label>
-            <input
+            <label htmlFor="a11y-Registro-102" style={styles.label}>Correo electrónico</label>
+            <input id="a11y-Registro-102"
               type="email"
               placeholder="correo@ejemplo.com"
               value={correo}
@@ -112,9 +112,9 @@ function Registro() {
           </div>
 
           <div style={styles.campo}>
-            <label style={styles.label}>Contraseña</label>
+            <label htmlFor="a11y-Registro-115" style={styles.label}>Contraseña</label>
             <div style={styles.inputWrap}>
-              <input
+              <input id="a11y-Registro-115"
                 type={verPass ? "text" : "password"}
                 placeholder="Mínimo 6 caracteres"
                 value={contrasena}
@@ -135,9 +135,9 @@ function Registro() {
           </div>
 
           <div style={styles.campo}>
-            <label style={styles.label}>Confirmar contraseña</label>
+            <label htmlFor="a11y-Registro-138" style={styles.label}>Confirmar contraseña</label>
             <div style={styles.inputWrap}>
-              <input
+              <input id="a11y-Registro-138"
                 type={verConf ? "text" : "password"}
                 placeholder="Repite tu contraseña"
                 value={confirmar}
@@ -158,8 +158,8 @@ function Registro() {
           </div>
 
           <div style={styles.campo}>
-            <label style={styles.label}>Código de acceso beta</label>
-            <input
+            <label htmlFor="a11y-Registro-161" style={styles.label}>Código de acceso beta</label>
+            <input id="a11y-Registro-161"
               type="text"
               placeholder="Ingresa tu código de invitación"
               value={codigo}

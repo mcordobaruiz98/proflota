@@ -4,7 +4,7 @@ import { ArrowLeft, Truck, TrendingUp, Fuel, Route, DollarSign } from "lucide-re
 import { theme as t } from "../styles/theme";
 import EstadoVacio from "../components/EstadoVacio";
 
-function Comparativo({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo = [] }) {
+function Comparativo({ vehiculos = [], viajes = [] }) {
   const navigate = useNavigate();
   const [metrica, setMetrica] = useState("utilidad");
   const [periodo, setPeriodo] = useState("mes");

@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Search, ChevronDown, ChevronUp, ChevronRight, MapPin, Plus, Truck } from "lucide-react";
 import { theme as t } from "../styles/theme";
 import { SkeletonCard } from "../components/Skeleton";
+import { alPulsarEnterOEspacio } from "../utils/teclado";
 
 // VIAJES — Memoria de costos por ruta
 // Catálogo de consulta rápida: agrupa los viajes por ruta y muestra la
@@ -224,8 +225,11 @@ function Viajes({ viajes = [], cargando }) {
                   {g.viajes.slice(0, 5).map(v => (
                     <div
                       key={v.firestoreId}
+                      role="button"
+                      tabIndex={0}
                       style={{ display: "flex", justifyContent: "space-between", padding: "7px 4px", borderBottom: `1px solid ${t.colors.borderLight}`, cursor: "pointer", fontSize: t.fonts.sizeXs }}
                       onClick={() => navigate(`/viaje/${v.firestoreId}`)}
+                      onKeyDown={alPulsarEnterOEspacio(() => navigate(`/viaje/${v.firestoreId}`))}
                     >
                       <span style={{ color: t.colors.textSecondary }}>{fFecha(v.fecha)} · {v.placa || "—"}{v.emp ? ` · ${v.emp}` : ""}</span>
                       <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -247,7 +251,7 @@ function Viajes({ viajes = [], cargando }) {
         })}
 
         {grupos.length === 0 && viajes.length > 0 && (
-          <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, textAlign: "center", margin: "20px 0" }}>Sin resultados para "{busqueda}"</p>
+          <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, textAlign: "center", margin: "20px 0" }}>Sin resultados para &quot;{busqueda}&quot;</p>
         )}
 
       </div>
