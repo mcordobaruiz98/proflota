@@ -712,14 +712,21 @@ function Cotizador({ vehiculos = [], rutas = [], mostrarToast }) {
                       type="button"
                       onClick={() => navigate("/calculadora", {
                         state: {
+                          // Se envían los datos que el usuario capturó, no el total
+                          // derivado: así en la Calculadora siguen siendo editables.
+                          // Las claves usan el vocabulario de la Calculadora.
                           placa,
-                          flete: calculo.valorViaje,
+                          tonelaje: toneladas,
+                          fleteTon: fleteOfrecido,
+                          modoFlete,
+                          origen,
+                          destino,
                           kmCargado,
                           kmVacio,
-                          peajes,
                           rendCargado,
                           rendVacio,
-                          precioAcpm
+                          precioAcpm,
+                          peajesTotal: peajes
                         }
                       })}
                       style={{
@@ -790,6 +797,9 @@ function Cotizador({ vehiculos = [], rutas = [], mostrarToast }) {
   // ══════════════════════════════════════════════════════════════════════════
   return (
     <div style={styles.pantalla}>
+      <datalist id="ciudades-colombia-cotizador">
+        {CIUDADES_COLOMBIA.map(c => <option key={c} value={c} />)}
+      </datalist>
       <div style={styles.header}>
         <button style={styles.btnVolver} onClick={() => navigate(-1)}>
           <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />

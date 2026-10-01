@@ -131,7 +131,7 @@ export function WizardCampo({ label, obligatorio, ayuda, children, error }) {
   );
 }
 
-export function WizardInput({ value, onChange, placeholder, type = "text", maxLength, min, max, style, id, inputMode }) {
+export function WizardInput({ value, onChange, placeholder, type = "text", maxLength, min, max, style, id, inputMode, list }) {
   const baseStyle = {
     width: "100%",
     boxSizing: "border-box",
@@ -150,6 +150,7 @@ export function WizardInput({ value, onChange, placeholder, type = "text", maxLe
       id={id}
       type={type}
       inputMode={inputMode}
+      list={list}
       value={value ?? ""}
       onChange={onChange}
       placeholder={placeholder}

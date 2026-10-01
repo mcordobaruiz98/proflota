@@ -48,10 +48,27 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       return null;
     }
   });
-  const valBorrador = (campo, porDefecto) => {
+const valBorrador = (campo, porDefecto) => {
     const v = borrador?.[campo];
     return v === undefined || v === null || v === "" ? porDefecto : v;
   };
+
+  // Datos que llegan desde la Cotización rápida (Cotizador → "Crear viaje completo
+  // con estos datos"). Tienen prioridad sobre el borrador: el usuario pidió crear el
+  // viaje con esos datos, así que un borrador viejo no debe pisarlos.
+  const [precarga] = useState(() =>
+    location.state && typeof location.state === "object" ? location.state : null,
+  );
+  const valorInicial = (campo, porDefecto) => {
+    const v = precarga?.[campo];
+    if (v !== undefined && v !== null && v !== "") return v;
+    return valBorrador(campo, porDefecto);
+  };
+  const SEPARADOR_RUTA = " → ";
+  const componerRuta = (o, d) => (o && d ? `${o}${SEPARADOR_RUTA}${d}` : (o || d || ""));
+  // Rutas guardadas o en borrador con el separador antiguo ("-") se normalizan al
+  // actual, para que el resumen y la lista se vean igual sin editar los datos.
+  const normalizarRuta = (v) => String(v || "").replace(/\s+-\s+/g, SEPARADOR_RUTA).trim();
 
   const [fecha,            setFecha]              = useState(() => valBorrador("fecha", new Date().toISOString().slice(0,10)));
   const [fechaDescarga,    setFechaDescarga]      = useState("");
@@ -61,32 +78,38 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [lugarCargue,      setLugarCargue]        = useState("");
   const [lugarDescargue,   setLugarDescargue]     = useState("");
   const [observaciones,    setObservaciones]      = useState("");
-  const [placa,            setPlaca]              = useState(location.state?.placa || valBorrador("placa", ""));
+  const [placa,            setPlaca]              = useState(valorInicial("placa", ""));
   const [tipoCarga,        setTipoCarga]          = useState(valBorrador("tipoCarga", ""));
   const [producto,         setProducto]           = useState(valBorrador("producto", ""));
-  const [origen,           setOrigen]             = useState("");
-  const [destino,          setDestino]            = useState("");
-  const [ruta,             setRuta]               = useState(valBorrador("ruta", ""));
+  const [origen,           setOrigen]             = useState(valorInicial("origen", ""));
+  const [destino,          setDestino]            = useState(valorInicial("destino", ""));
+  // La ruta se compone desde origen/destino para que el resumen la muestre y el
+  // guardado no se bloquee cuando los datos vienen precargados (Cotizador) sin
+  // pasar por los manejadores de los campos. Mismo formato que los manejadores.
+  const [ruta,             setRuta]               = useState(() => {
+    const rutaPrecargada = componerRuta(valorInicial("origen", ""), valorInicial("destino", ""));
+    return rutaPrecargada || normalizarRuta(valBorrador("ruta", ""));
+  });
   const [empresa,          setEmpresa]            = useState(valBorrador("empresa", ""));
   const [nitEmpresa,       setNitEmpresa]         = useState(valBorrador("nitEmpresa", ""));
   const [conductor,        setConductor]          = useState(valBorrador("conductor", ""));
   const [listaProductos,   setListaProductos]     = useState(obtenerListaProductos);
   const [modoOtroProd,     setModoOtroProd]       = useState(false);
   const [otroProdTexto,    setOtroProdTexto]      = useState("");
-  const [kmCargado,        setKmCargado]          = useState(valBorrador("kmCargado", ""));
-  const [kmVacio,          setKmVacio]            = useState(valBorrador("kmVacio", ""));
+  const [kmCargado,        setKmCargado]          = useState(valorInicial("kmCargado", ""));
+  const [kmVacio,          setKmVacio]            = useState(valorInicial("kmVacio", ""));
   const [kmCargadoRet,     setKmCargadoRet]       = useState("");
   const [kmVacioRet,       setKmVacioRet]         = useState("");
-  const [tonelaje,         setTonelaje]           = useState(valBorrador("tonelaje", ""));
-  const [fleteTon,         setFleteTon]           = useState(valBorrador("fleteTon", ""));
+  const [tonelaje,         setTonelaje]           = useState(valorInicial("tonelaje", ""));
+  const [fleteTon,         setFleteTon]           = useState(valorInicial("fleteTon", ""));
   const [modoComb,         setModoComb]           = useState("auto");
-  const [rendCargado,      setRendCargado]        = useState(valBorrador("rendCargado", ""));
-  const [rendVacio,        setRendVacio]          = useState(valBorrador("rendVacio", ""));
+  const [rendCargado,      setRendCargado]        = useState(valorInicial("rendCargado", ""));
+  const [rendVacio,        setRendVacio]          = useState(valorInicial("rendVacio", ""));
   const [galManual,        setGalManual]          = useState("");
   const ultimoViaje = viajes.length > 0 ? viajes[0] : null;
   const [precioAcpm,       setPrecioAcpm]         = useState(() => {
-    const guardado = valBorrador("precioAcpm", null);
-    if (guardado !== null) return guardado;
+    const recibido = valorInicial("precioAcpm", null);
+    if (recibido !== null) return recibido;
     if (ultimoViaje && ultimoViaje.gTot > 0) return Math.round((ultimoViaje.cAcpm || 0) / ultimoViaje.gTot) || "";
     return "";
   });
@@ -99,7 +122,21 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [categoria,        setCategoria]          = useState(valBorrador("categoria", "VII"));
   const [busquedaP,        setBusquedaP]          = useState("");
   const [selP,             setSelP]               = useState("");
-  const [peajesRuta,       setPeajesRuta]         = useState([]);
+  const [peajesRuta,       setPeajesRuta]         = useState(() => {
+    // El cotizador maneja el peaje como un total en $, no como casetas del catálogo.
+    // Para no perder ese costo se traslada como un único peaje agregado, visible
+    // y editable en el desglose (igual que uno agregado a mano).
+    const total = parseFloat(precarga?.peajesTotal);
+    if (!total || total <= 0) return [];
+    return [{
+      c: "cotizador_peajes",
+      n: "Peajes (total cotizado)",
+      d: "Total de la cotización rápida",
+      iv: false,
+      t: { [categoria || "VII"]: total },
+      tarifa: total
+    }];
+  });
   const [porcCond,         setPorcCond]           = useState(valBorrador("porcCond", ""));
   const [carpado,          setCarpado]            = useState(valBorrador("carpado", ""));
   const [gastosViaje,      setGastosViaje]        = useState(valBorrador("gastosViaje", ""));
@@ -107,7 +144,10 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [nuevoNom,         setNuevoNom]           = useState("");
   const [nuevoVal,         setNuevoVal]           = useState("");
   const [guardando,        setGuardando]          = useState(false);
-  const [modoFlete,        setModoFlete]          = useState("porTon");
+  const [modoFlete,        setModoFlete]          = useState(() => {
+    const v = valorInicial("modoFlete", "porTon");
+    return ["porTon", "porKm", "total"].includes(v) ? v : "porTon";
+  });
   const [modoConductor,    setModoConductor]      = useState("porcentaje");
   const [descRetefuente,   setDescRetefuente]     = useState(false);
   const [pctRetefuente,    setPctRetefuente]      = useState(1);
@@ -340,7 +380,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
 
   const agregarPeajeManual = () => {
     if (!nombrePeajeManual.trim() || !n(tarifaPeajeManual)) {
-      if (mostrarToast) mostrarToast("Ingresa el nombre y la tarifa del peaje", "error");
+      if (mostrarToast) mostrarToast("Ingresa el nombre y la tarifa del pe  aje", "error");
       return;
     }
     const nuevoId = "manual_" + Date.now();
@@ -371,11 +411,11 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       // Guardar también como ruta frecuente si fue seleccionado
       if ((guardarComoFrecuente || guardarTambienFrecuente) && onGuardarRuta) {
         try {
-          const nomFinal = (nombreRutaFrecuente || "").trim() || (origen && destino ? `${origen} → ${destino}` : (nombreRuta || ruta).trim());
+          const nomFinal = (nombreRutaFrecuente || "").trim() || (origen && destino ? componerRuta(origen, destino) : (nombreRuta || ruta).trim());
           await onGuardarRuta({
             tipoCarga: sanitizar(tipoCarga),
             nombre: sanitizar(nomFinal),
-            ruta: sanitizar(origen && destino ? `${origen} → ${destino}` : (ruta || nomFinal)),
+            ruta: sanitizar(origen && destino ? componerRuta(origen, destino) : (ruta || nomFinal)),
             origen: sanitizar(origen),
             destino: sanitizar(destino),
             kmCargado: n(kmCargado),
@@ -558,7 +598,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const cargarRuta = (rutaGuardada) => {
     if (!rutaGuardada) return;
     setTipoCarga(rutaGuardada.tipoCarga || "");
-    setRuta(rutaGuardada.ruta || "");
+    setRuta(normalizarRuta(rutaGuardada.ruta));
 
     // Origen y Destino independientes
     if (rutaGuardada.origen && rutaGuardada.destino) {
@@ -634,7 +674,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
 
   const guardarRutaFrecuente = async (nombrePersonalizado = "") => {
     if (guardandoRutaRef.current || guardandoRuta) return;
-    const nombreFinal = (nombrePersonalizado || nombreRutaFrecuente || nombreRuta || (origen && destino ? `${origen} → ${destino}` : ruta)).trim();
+    const nombreFinal = (nombrePersonalizado || nombreRutaFrecuente || nombreRuta || (origen && destino ? componerRuta(origen, destino) : ruta)).trim();
     if (!nombreFinal) {
       if (mostrarToast) mostrarToast("Ingresa la ruta o un nombre para guardarla", "error");
       return;
@@ -645,7 +685,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     const datos = {
       tipoCarga: sanitizar(tipoCarga),
       nombre: sanitizar(nombreFinal),
-      ruta: sanitizar(origen && destino ? `${origen} → ${destino}` : (ruta || nombreFinal)),
+      ruta: sanitizar(origen && destino ? componerRuta(origen, destino) : (ruta || nombreFinal)),
       origen: sanitizar(origen),
       destino: sanitizar(destino),
       kmCargado: n(kmCargado),
@@ -826,14 +866,12 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
 
   const manejarOrigenChange = (val) => {
     setOrigen(val);
-    const nuevaRuta = val && destino ? `${val} → ${destino}` : (val || destino || "");
-    setRuta(nuevaRuta);
+    setRuta(componerRuta(val, destino));
   };
 
   const manejarDestinoChange = (val) => {
     setDestino(val);
-    const nuevaRuta = origen && val ? `${origen} → ${val}` : (origen || val || "");
-    setRuta(nuevaRuta);
+    setRuta(componerRuta(origen, val));
   };
 
   // ── MODO GUIADO: render completo con fondo claro (5 PASOS) ──────────────────
@@ -927,7 +965,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
                       >
                         <div>
                           <div style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary, #F8FAFC)" }}>
-                            🛣️ {r.nombre || r.ruta}
+                            🛣️ {r.nombre || normalizarRuta(r.ruta)}
                           </div>
                           <div style={{ fontSize: "11px", color: "var(--text-secondary, #94A3B8)", marginTop: "2px" }}>
                             {r.kmCargado ? `${r.kmCargado} km cargado` : ""}
@@ -1267,7 +1305,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
 
             {/* Buscador y selector de Peaje */}
             <div style={{ marginBottom: "16px" }}>
-              <p style={{ fontSize: "13.5px", fontWeight: 700, color: "#0F172A", margin: "0 0 6px" }}>
+              <p style={{ fontSize: "13.5px", fontWeight: 700, color: t.colors.textSecondary, margin: "0 0 6px" }}>
                 Agregar Peajes de la Ruta (Peaje por Peaje)
               </p>
 
@@ -1591,7 +1629,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
                     onChange={e => {
                       setGuardarComoFrecuente(e.target.checked);
                       if (e.target.checked && !nombreRutaFrecuente) {
-                        setNombreRutaFrecuente(origen && destino ? `${origen} → ${destino}` : (nombreRuta || ruta));
+                        setNombreRutaFrecuente(origen && destino ? componerRuta(origen, destino) : (nombreRuta || ruta));
                       }
                     }}
                     style={{ width: "18px", height: "18px", cursor: "pointer", accentColor: "#2563EB" }}
