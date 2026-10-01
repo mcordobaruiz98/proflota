@@ -7,10 +7,17 @@
 
 ---
 
-## Índice General de Tareas Resueltas (27 Tareas)
+## Índice General de Tareas Resueltas (34 Tareas)
 
 | ID | Bloque | Severidad | Área | Título de la Solución | Commit Git | Estado Notion |
 |:---:|:---:|:---:|:---:|---|:---:|:---:|
+| **CR-08** | Paralelo / Backlog | `P1 - Alta` | Cruces Front/Back | Migrar a token criptoseguro de vinculación por deep-link (`t.me/?start=token`) | `39179b7` | `Done` (Caliche) |
+| **CR-02** | Paralelo / Backlog | `P1 - Alta` | Cruces Front/Back | Migración integral de `telegram_vinculos` con soporte de enlace y compatibilidad legacy | `39179b7` | `Done` |
+| **BE-11** | Paralelo / Backlog | `P1 - Alta` | Back / Telegram | Token criptográfico UUID en vez de código transcribible de 6 caracteres | `39179b7` | `Done` |
+| **BE-12** | Paralelo / Backlog | `P1 - Alta` | Reglas / Seguridad | Caducidad y expiración estricta a 15 minutos con política de TTL nativo | `39179b7` | `Done` |
+| **BE-13** | Paralelo / Backlog | `P1 - Alta` | Back / Seguridad | Límite defensivo de un token activo por `uid` con purga automática previa | `39179b7` | `Done` |
+| **FE-48** | Bloque 9 | `P1 - Alta` | Front / Telegram | Interfaz de vinculación en un clic y comando copiable en `Configuracion.jsx` | `39179b7` | `Done` |
+| **CR-18** | Bloque 9 | `P1 - Alta` | Cruces / Auth | Flujo seguro de vinculación Telegram (Token Criptográfico + TTL + Single Use) | `39179b7` | `Done` |
 | **BE-02** | Paralelo / Backlog | `P0 - Bloqueante` | Reglas / Despliegue | Versionar `firestore.rules` y `storage.rules` vinculados en `firebase.json` | `d6a95bc` | `Done` |
 | **CR-05** | Paralelo / Backlog | `P0 - Bloqueante` | Cruces / Despliegue | Reglas de Firestore y Storage versionadas y desplegables sin intervención manual | `d6a95bc` | `Done` |
 | **BE-08** | Paralelo / Backlog | `P1 - Alta` | Storage / Seguridad | Reglas de Storage con validación estricta de `contentType` (MIME) y tamaño (10 MiB) | `d6a95bc` | `Done` |

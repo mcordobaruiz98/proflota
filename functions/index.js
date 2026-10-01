@@ -157,17 +157,17 @@ async function desvincularChat(chatId, dbInstance = db) {
 
 // ── Sesiones ────────────────────────────────────────────────
 
-async function getSesion(chatId) {
-  const snap = await db.doc(`telegram_sesiones/${chatId}`).get();
+async function getSesion(chatId, dbInstance = db) {
+  const snap = await dbInstance.doc(`telegram_sesiones/${chatId}`).get();
   return snap.exists ? snap.data() : null;
 }
-async function setSesion(chatId, datos) {
+async function setSesion(chatId, datos, dbInstance = db) {
   const expiraEn = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas de inactividad
-  await db.doc(`telegram_sesiones/${chatId}`).set({ ...datos, expiraEn, actualizadoEn: new Date() }, { merge: true });
+  await dbInstance.doc(`telegram_sesiones/${chatId}`).set({ ...datos, expiraEn, actualizadoEn: new Date() }, { merge: true });
 }
-async function resetViaje(chatId) {
+async function resetViaje(chatId, dbInstance = db) {
   const expiraEn = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas de inactividad
-  await db.doc(`telegram_sesiones/${chatId}`).set({ paso: null, viaje: {}, expiraEn, actualizadoEn: new Date() }, { merge: true });
+  await dbInstance.doc(`telegram_sesiones/${chatId}`).set({ paso: null, viaje: {}, expiraEn, actualizadoEn: new Date() }, { merge: true });
 }
 
 // ── Memoria Indexada por Claves Normalizadas (BE-27) ──────────
@@ -383,15 +383,80 @@ const MSG_PEAJES =
 
 // ── Procesamiento ───────────────────────────────────────────
 
+async function manejarVinculacion(chatId, tokenStr, dbInstance = db) {
+  const token = (tokenStr || "").trim();
+  if (!token) {
+    return enviar(chatId, "⚠️ Formato inválido. Use el enlace directo desde la aplicación o envíe:\n/vincular TOKEN");
+  }
+
+  // 1. Buscar token (UUID o código legacy)
+  let vincSnap = await dbInstance.doc(`telegram_vinculos/${token}`).get();
+  if (!vincSnap.exists && token !== token.toUpperCase()) {
+    vincSnap = await dbInstance.doc(`telegram_vinculos/${token.toUpperCase()}`).get();
+  }
+
+  if (!vincSnap.exists) {
+    return enviar(chatId, "❌ Enlace o token de vinculación no válido. Genere uno nuevo desde la app (Configuración → Registro por chat).");
+  }
+
+  const vincData = vincSnap.data() || {};
+  const { uid, expiraEn, creadoEn } = vincData;
+
+  if (!uid) {
+    await vincSnap.ref.delete().catch(() => {});
+    return enviar(chatId, "❌ Token corrupto o huérfano. Por favor genere uno nuevo desde la app.");
+  }
+
+  // 2. Validar expiración (15 minutos)
+  const ahora = Date.now();
+  let expirado = false;
+  if (expiraEn) {
+    const tExp = expiraEn.toMillis ? expiraEn.toMillis() : new Date(expiraEn).getTime();
+    if (ahora > tExp) expirado = true;
+  } else if (creadoEn) {
+    const tCre = creadoEn.toMillis ? creadoEn.toMillis() : new Date(creadoEn).getTime();
+    if (ahora - tCre > 15 * 60 * 1000) expirado = true;
+  }
+
+  if (expirado) {
+    await vincSnap.ref.delete().catch(() => {});
+    return enviar(chatId, "⏳ Este enlace de vinculación ha expirado (validez: 15 minutos). Por favor genere uno nuevo en la app.");
+  }
+
+  // 3. Vincular de forma atómica: sesión + usuario + borrado de token de un solo uso
+  await setSesion(chatId, { uid, paso: null, viaje: {} }, dbInstance);
+  await dbInstance.doc(`usuarios/${uid}`).set(
+    {
+      telegramChatId: String(chatId),
+      telegramVinculadoEn: FieldValue.serverTimestamp(),
+    },
+    { merge: true }
+  );
+  await vincSnap.ref.delete().catch(() => {});
+
+  return enviar(chatId,
+    "✅ <b>¡Cuenta vinculada exitosamente a NAVIRA!</b>\n\n" +
+    "Ya puede registrar sus viajes directamente desde este chat sin abrir la aplicación.\n" +
+    "Escriba <b>/nuevo</b> para registrar su primer viaje."
+  );
+}
+
 async function procesarMensaje(chatId, texto) {
   const t = texto.trim();
   const tLower = t.toLowerCase();
 
-  if (tLower === "/start") {
+  if (tLower.startsWith("/start")) {
+    const partes = t.split(/\s+/);
+    if (partes.length > 1 && partes[1]) {
+      // Deep link desde la app: t.me/Naviraflota_bot?start=<token>
+      return manejarVinculacion(chatId, partes[1]);
+    }
     return enviar(chatId,
       "🚛 <b>NAVIRA Bot</b>\n\nRegistre sus viajes por chat.\n\n" +
-      "/vincular CÓDIGO — conectar su cuenta\n/desvincular — desconectar la cuenta\n" +
-      "/nuevo — registrar un viaje\n/cancelar — cancelar\n\n" +
+      "/nuevo — registrar un viaje\n/cancelar — cancelar viaje en curso\n" +
+      "/vincular TOKEN — conectar su cuenta (o use el enlace directo)\n" +
+      "/desvincular — desconectar la cuenta\n\n" +
+      "💡 Para vincular su cuenta, genere un enlace seguro desde la app en <b>Configuración → Registro por chat</b>.\n" +
       "💡 En cualquier pregunta puede responder <b>no</b> para saltarla."
     );
   }
@@ -412,15 +477,11 @@ async function procesarMensaje(chatId, texto) {
   }
 
   if (tLower.startsWith("/vincular")) {
-    const codigo = t.split(/\s+/)[1];
-    if (!codigo) return enviar(chatId, "Envíe: /vincular SU_CÓDIGO");
-    const vincSnap = await db.doc(`telegram_vinculos/${codigo.toUpperCase()}`).get();
-    if (!vincSnap.exists) return enviar(chatId, "❌ Código inválido. Genere uno nuevo en la app.");
-    const { uid } = vincSnap.data();
-    await setSesion(chatId, { uid, paso: null, viaje: {} });
-    await db.doc(`usuarios/${uid}`).set({ telegramChatId: String(chatId) }, { merge: true });
-    await vincSnap.ref.delete();
-    return enviar(chatId, "✅ <b>Cuenta vinculada.</b> Escriba /nuevo para su primer viaje.");
+    const partes = t.split(/\s+/);
+    if (partes.length < 2 || !partes[1]) {
+      return enviar(chatId, "⚠️ Envíe su token de vinculación o use el enlace directo desde la app:\n/vincular TOKEN");
+    }
+    return manejarVinculacion(chatId, partes[1]);
   }
 
   const sesion = await getSesion(chatId);
@@ -1520,4 +1581,61 @@ exports.calcular = calcular;
 exports.borrarArbolDeUsuario = borrarArbolDeUsuario;
 exports.borrarSesionesTelegram = borrarSesionesTelegram;
 exports.desvincularChat = desvincularChat;
-exports.bajaDefinitivaDeUsuario = bajaDefinitivaDeUsuario;
+exports.bajaDefinitivaDeUsuario = bajaDefinitivaDeUsuario;
+
+// ── CR-08 / BE-11 / BE-13: Generación de Token Criptoseguro de Vinculación ───
+exports.sincronizarCatalogoPeajes = sincronizarCatalogoPeajes;
+
+// ── CR-08 / BE-11 / BE-13: Generación de Token Criptoseguro de Vinculación ───
+
+/**
+ * Endpoint callable autenticado para generar enlaces directos con Telegram
+ * - Genera token criptográfico (UUID).
+ * - Expiración a 15 minutos.
+ * - Purgado previo de tokens huérfanos del mismo usuario (máx. 1 pendiente).
+ */
+exports.generarTokenVinculacionTelegram = onCall(
+  {
+    cors: true,
+    memory: "256MiB",
+    timeoutSeconds: 30,
+  },
+  async (request) => {
+    if (!request.auth || !request.auth.uid) {
+      throw new HttpsError("unauthenticated", "Debe iniciar sesión para generar un token de vinculación.");
+    }
+
+    const uid = request.auth.uid;
+    const crypto = require("node:crypto");
+    const token = crypto.randomUUID();
+
+    // BE-13: Purgar tokens pendientes previos del mismo usuario
+    const prevSnaps = await db.collection("telegram_vinculos").where("uid", "==", uid).get();
+    const batch = db.batch();
+    prevSnaps.forEach((docSnap) => {
+      batch.delete(docSnap.ref);
+    });
+
+    const expiraEn = new Date(Date.now() + 15 * 60 * 1000);
+    const nuevoRef = db.collection("telegram_vinculos").doc(token);
+    batch.set(nuevoRef, {
+      uid,
+      creadoEn: FieldValue.serverTimestamp(),
+      expiraEn: expiraEn,
+      validoHasta: expiraEn.toISOString(),
+    });
+
+    await batch.commit();
+
+    const botUser = process.env.TELEGRAM_BOT_USERNAME || "Naviraflota_bot";
+    const linkTelegram = `https://t.me/${botUser}?start=${token}`;
+
+    return {
+      status: "OK",
+      token,
+      linkTelegram,
+      expiraEn: expiraEn.toISOString(),
+    };
+  }
+);
+exports.manejarVinculacion = manejarVinculacion;

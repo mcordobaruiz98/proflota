@@ -89,6 +89,12 @@
       "indexes": []
     },
     {
+      "collectionGroup": "telegram_vinculos",
+      "fieldPath": "expiraEn",
+      "ttl": true,
+      "indexes": []
+    },
+    {
       "collectionGroup": "telegram_updates",
       "fieldPath": "expiraEn",
       "ttl": true,

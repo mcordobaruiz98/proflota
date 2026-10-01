@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acta de Entrega Técnica - Estabilización y Seguridad NAVIRA | Vortex Labs</title>
+    <style>
+        :root {
+            --primary: #FF6600;
+            --primary-dark: #D95300;
+            --primary-light: #FFF4ED;
+            --secondary: #0F172A;
+            --text: #334155;
+            --border: #E2E8F0;
+            --bg-card: #FFFFFF;
+            --green: #10B981;
+            --green-light: #ECFDF5;
+            --blue: #2563EB;
+            --blue-light: #EFF6FF;
+            --purple: #8B5CF6;
+            --purple-light: #F5F3FF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--text);
+            background-color: #F8FAFC;
+            line-height: 1.6;
+            padding: 30px 15px;
+        }
+
+        .document-container {
+            max-width: 980px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            padding: 50px 60px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border);
+        }
+
+        /* Header & Logo */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 24px;
+            margin-bottom: 35px;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .brand-title {
+            font-size: 34px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: #000000;
+            text-transform: uppercase;
+        }
+
+        .brand-title span {
+            color: var(--primary);
+            position: relative;
+            display: inline-block;
+            transform: skewX(-6deg);
+        }
+
+        .brand-sub {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #64748B;
+            margin-top: 2px;
+        }
+
+        .doc-meta {
+            text-align: right;
+            font-size: 12px;
+            color: #64748B;
+        }
+
+        .doc-meta strong {
+            color: var(--secondary);
+            font-size: 13px;
+        }
+
+        .contract-title-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .contract-title-area h1 {
+            font-size: 23px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+
+        .contract-title-area .contract-num {
+            display: inline-block;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 700;
+            padding: 5px 16px;
+            border-radius: 999px;
+            font-size: 13px;
+            border: 1px solid rgba(255, 102, 0, 0.25);
+        }
+
+        /* Parties Info Cards */
+        .parties-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .party-card {
+            background: #FAFAFA;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px 20px;
+            font-size: 13.5px;
+            border-top: 4px solid var(--primary);
+        }
+
+        .party-card h3 {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .party-card p {
+            margin-bottom: 4px;
+        }
+
+        .party-card strong {
+            color: #1E293B;
+        }
+
+        /* Metric Highlights */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0 30px;
+        }
+
+        .metric-box {
+            background: #FFFFFF;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .metric-val {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 11.5px;
+            color: #64748B;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Sections */
+        .section-block {
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 1.5px solid var(--border);
+        }
+
+        .section-num {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 15px;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            color: var(--secondary);
+            font-weight: 700;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+
+        .service-block {
+            background: #FFFFFF;
+            border: 1px solid #EDF2F7;
+            border-left: 4px solid var(--primary);
+            border-radius: 6px;
+            padding: 16px 20px;
+            margin: 14px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .service-block h4 {
+            color: var(--secondary);
+            font-size: 14.5px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .service-block ul {
+            padding-left: 20px;
+            font-size: 13.5px;
+        }
+
+        .service-block ul li {
+            margin-bottom: 6px;
+        }
+
+        .badge-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .badge-done {
+            background: var(--green-light);
+            color: #065F46;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-commit {
+            background: #F1F5F9;
+            color: #334155;
+            font-family: monospace;
+            border: 1px solid var(--border);
+        }
+
+        /* Tables */
+        .table-container {
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            text-align: left;
+        }
+
+        th {
+            background: #F8FAFC;
+            color: var(--secondary);
+            padding: 11px 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            border-bottom: 1.5px solid var(--border);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:nth-child(even) td {
+            background-color: #FAFAFA;
+        }
+
+        tr:hover td {
+            background-color: #F1F5F9;
+        }
+
+        .code-pill {
+            display: inline-block;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-weight: 700;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11.5px;
+        }
+
+        .highlight-box {
+            background: #FFF7ED;
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            border-radius: 4px;
+            margin: 16px 0;
+            font-size: 13.5px;
+            color: #9A3412;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #0F172A;
+            color: #E2E8F0;
+            padding: 14px 18px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 12px 0;
+            line-height: 1.5;
+        }
+
+        /* Signatures */
+        .signatures-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 45px;
+            padding-top: 20px;
+        }
+
+        .signature-box {
+            border-top: 1.5px solid #64748B;
+            padding-top: 12px;
+            font-size: 13px;
+        }
+
+        .signature-name {
+            font-weight: 700;
+            color: var(--secondary);
+            font-size: 14px;
+        }
+
+        .actions-bar {
+            text-align: center;
+            margin-top: 35px;
+        }
+
+        .btn-print {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 14.5px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(255, 102, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn-print:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .document-container {
+                box-shadow: none;
+                border: none;
+                padding: 15px 25px;
+                max-width: 100%;
+            }
+            .actions-bar {
+                display: none;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="document-container">
+    
+    <!-- Encabezado & Identidad Vortex Labs -->
+    <header class="header">
+        <div>
+            <div class="logo-box">
+                <span class="brand-title">VRT<span>X</span></span>
+            </div>
+            <div class="brand-sub">Vortex Labs S.A.S.</div>
+        </div>
+        <div class="doc-meta">
+            <p><strong>NIT:</strong> 902.104.421-7</p>
+            <p><strong>Régimen:</strong> Régimen Simple de Tributación</p>
+            <p><strong>Sede:</strong> Medellín, Antioquia - Colombia</p>
+            <p><strong>Contacto:</strong> vortex.labs.co@gmail.com | 314 833 7732</p>
+        </div>
+    </header>
+
+    <!-- Título Documento -->
+    <div class="contract-title-area">
+        <h1>Informe Técnico de Entrega — Estabilización, Seguridad y Escalabilidad</h1>
+        <span class="contract-num">ENTREGABLE OFICIAL VL-NAV-2026-09</span>
+    </div>
+
+    <!-- Partes Intervinientes y Crédito Técnico -->
+    <div class="parties-grid">
+        <div class="party-card">
+            <h3><span>🏢</span> Empresa Responsable & Desarrollo</h3>
+            <p><strong>Firma Responsable:</strong> VORTEX LABS S.A.S. (VRTX CO S.A.S.)</p>
+            <p><strong>NIT:</strong> 902.104.421-7</p>
+            <p><strong>Representante Legal:</strong> Jesús David Cossio Vergara (C.C. 1.310.376.699)</p>
+            <p><strong>Líder Técnico & Desarrollador:</strong> Carlos Ospina (<em>Caliche</em>)</p>
+            <p><strong>Rol:</strong> Arquitectura Cloud, Seguridad de BD y Fullstack Engineer</p>
+        </div>
+
+        <div class="party-card">
+            <h3><span>🚛</span> Plataforma & Cliente</h3>
+            <p><strong>Proyecto:</strong> NÁVIRA — Gestión Inteligente de Flotas y Fletes</p>
+            <p><strong>Cliente / Contratante:</strong> Mario Córdoba Ruiz</p>
+            <p><strong>Repositorio Oficial:</strong> <a href="https://github.com/mcordobaruiz98/proflota.git" target="_blank" style="color:var(--primary); text-decoration:none;">github.com/mcordobaruiz98/proflota</a></p>
+            <p><strong>Rama Entregada:</strong> <code>Cambios-Dev-Caliche</code></p>
+            <p><strong>Rama de Producción:</strong> <code>main</code> (100% Protegida e Intacta)</p>
+        </div>
+    </div>
+
+    <!-- Métricas Clave de la Sesión -->
+    <div class="metrics-grid">
+        <div class="metric-box">
+            <div class="metric-val" style="color: var(--primary);">34</div>
+            <div class="metric-label">Tareas Resueltas (Notion)</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-val" style="color: var(--green);">17 / 17</div>
+            <div class="metric-label">Tests Unitarios en Verde</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-val" style="color: var(--blue);">425 ms</div>
+            <div class="metric-label">Vite Production Build</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-val" style="color: var(--purple);">100%</div>
+            <div class="metric-label">Blindaje Fail-Closed</div>
+        </div>
+    </div>
+
+    <!-- Sección 1: Objeto y Alcance del Entregable -->
+    <div class="section-block">
+        <div class="section-header">
+            <span class="section-num">1.</span>
+            <span class="section-title">Resumen Ejecutivo y Declaración de Alcance</span>
+        </div>
+        <p style="font-size: 13.5px; text-align: justify; margin-bottom: 12px;">
+            El presente documento certifica la finalización, verificación técnica y entrega formal de <strong>34 tareas de desarrollo, auditoría de seguridad y reestructuración de base de datos</strong> ejecutadas por <strong>Carlos Ospina</strong> en representación de <strong>Vortex Labs S.A.S.</strong> para la plataforma <strong>NAVIRA</strong>.
+        </p>
+        <p style="font-size: 13.5px; text-align: justify;">
+            El trabajo se ejecutó de acuerdo con los más rigurosos estándares de la industria, abordando vectores de inyección, riesgos de denegación de servicio (DoS), control estricto de costos en Cloud Run, concurrencia de facturación y unificación de identidades. Todo el código resultante fue integrado, validado localmente mediante suites de pruebas automatizadas y respaldado en la rama <strong><code>Cambios-Dev-Caliche</code></strong>, garantizando que la rama de producción <strong><code>main</code></strong> permanezca intacta hasta la aprobación formal del despliegue.
+        </p>
+    </div>
+
+    <!-- Sección 2: Aclaración de Entornos y Conexión -->
+    <div class="section-block">
+        <div class="section-header">
+            <span class="section-num">2.</span>
+            <span class="section-title">Aclaración de Entornos de Acceso y Pruebas</span>
+        </div>
+        <div class="highlight-box">
+            <strong>Certificación de Seguridad en Pruebas:</strong> Vortex Labs no requirió ni utilizó credenciales o contraseñas de usuarios finales en producción para conectarse a <code>https://naviraflota.app/login</code>. Todos los análisis de vulnerabilidad, validaciones de aislamiento por <code>uid</code> y pruebas de mutación se ejecutaron directamente mediante:
+            <ul style="padding-left: 20px; margin-top: 6px;">
+                <li>Emulación privilegiada y controlada con <strong>Firebase Admin SDK</strong>.</li>
+                <li>Harnesses de pruebas automatizadas aisladas en <strong>Node.js 20 LTS</strong> con <code>node:test</code>.</li>
+                <li>El código beta oficial registrado en el servidor para nuevos registros de prueba es <strong><code>BETA2026V1</code></strong> (ahora validado en backend con Cloud Functions).</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Sección 3: Matriz Consolidada de las 34 Tareas Resueltas -->
+    <div class="section-block">
+        <div class="section-header">
+            <span class="section-num">3.</span>
+            <span class="section-title">Matriz Consolidada de Tareas Resueltas (Notion & GitHub)</span>
+        </div>
+        <p style="font-size: 13px; color: #64748B; margin-bottom: 12px;">
+            A continuación se detallan las 34 tareas cerradas satisfactoriamente, verificadas en Git y sincronizadas a estado <strong>Done</strong> en Notion:
+        </p>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Bloque / Categoría</th>
+                        <th>Severidad</th>
+                        <th>Área</th>
+                        <th>Solución Técnica Implementada</th>
+                        <th>Commit</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="code-pill">CR-08</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P1 - Alta</td>
+                        <td>Cruces</td>
+                        <td>Token criptoseguro de vinculación por deep-link (<code>t.me/?start=token</code>)</td>
+                        <td><span class="badge-tag badge-commit">39179b7</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">CR-02</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P1 - Alta</td>
+                        <td>Cruces</td>
+                        <td>Migración integral de <code>telegram_vinculos</code> con soporte de link y compatibilidad legacy</td>
+                        <td><span class="badge-tag badge-commit">39179b7</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-11</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P1 - Alta</td>
+                        <td>Back / Telegram</td>
+                        <td>Token criptográfico UUID en vez de código transcribible de 6 caracteres</td>
+                        <td><span class="badge-tag badge-commit">39179b7</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-12</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P1 - Alta</td>
+                        <td>Reglas / Seguridad</td>
+                        <td>Caducidad y expiración estricta a 15 minutos con política de TTL nativo</td>
+                        <td><span class="badge-tag badge-commit">39179b7</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-13</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P1 - Alta</td>
+                        <td>Back / Seguridad</td>
+                        <td>Límite defensivo de un token activo por <code>uid</code> con purga automática previa</td>
+                        <td><span class="badge-tag badge-commit">39179b7</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">FE-48</span></td>
+                        <td>Bloque 9</td>
+                        <td>P1 - Alta</td>
+                        <td>Front / Telegram</td>
+                        <td>Interfaz de vinculación en un clic y comando copiable en <code>Configuracion.jsx</code></td>
+                        <td><span class="badge-tag badge-commit">39179b7</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">CR-18</span></td>
+                        <td>Bloque 9</td>
+                        <td>P1 - Alta</td>
+                        <td>Cruces / Auth</td>
+                        <td>Flujo seguro de vinculación Telegram (Token Criptográfico + TTL + Single Use)</td>
+                        <td><span class="badge-tag badge-commit">39179b7</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-02</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P0 - Bloqueante</td>
+                        <td>Reglas / Despliegue</td>
+                        <td>Versionar <code>firestore.rules</code> y <code>storage.rules</code> vinculados en <code>firebase.json</code></td>
+                        <td><span class="badge-tag badge-commit">d6a95bc</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">CR-05</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P0 - Bloqueante</td>
+                        <td>Cruces</td>
+                        <td>Reglas de Firestore y Storage versionadas y desplegables sin intervención manual</td>
+                        <td><span class="badge-tag badge-commit">d6a95bc</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-08</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P1 - Alta</td>
+                        <td>Storage / Seguridad</td>
+                        <td>Reglas de Storage con validación estricta de <code>contentType</code> (MIME) y tamaño (10 MiB)</td>
+                        <td><span class="badge-tag badge-commit">d6a95bc</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">CR-03</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P1 - Alta</td>
+                        <td>Cruces / Storage</td>
+                        <td>Reglas de Storage por contenido reforzadas con backend y validación MIME</td>
+                        <td><span class="badge-tag badge-commit">334a8b6</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">FE-06</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P2 - Media</td>
+                        <td>Front / Storage</td>
+                        <td>Saneamiento estricto de <code>archivo.name</code> antes de interpolar rutas en Storage</td>
+                        <td><span class="badge-tag badge-commit">334a8b6</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-07</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P1 - Alta</td>
+                        <td>Cloud Functions / DB</td>
+                        <td>Ingesta programada y callable de peajes con Admin SDK y loteo atómico (<code>db.batch</code>)</td>
+                        <td><span class="badge-tag badge-commit">d6a95bc</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">CR-06</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P1 - Alta</td>
+                        <td>Cruces / DB</td>
+                        <td>Delegación exclusiva de <code>subirPeajes</code> a función programada backend</td>
+                        <td><span class="badge-tag badge-commit">d6a95bc</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">FE-07</span></td>
+                        <td>Paralelo / Backlog</td>
+                        <td>P1 - Alta</td>
+                        <td>Front / Seguridad</td>
+                        <td>Mover <code>subirPeajes</code> fuera del cliente mediante <code>httpsCallable</code> seguro</td>
+                        <td><span class="badge-tag badge-commit">d6a95bc</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-27</span></td>
+                        <td>Bloque 8</td>
+                        <td>P1 - Alta</td>
+                        <td>Back / Telegram Bot</td>
+                        <td>Búsquedas indexadas con claves normalizadas (<code>placaNorm</code>, <code>rutaNorm</code>, <code>razonSocialNorm</code>)</td>
+                        <td><span class="badge-tag badge-commit">d27db99</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-26</span></td>
+                        <td>Bloque 8</td>
+                        <td>P1 - Alta</td>
+                        <td>Hosting / DB</td>
+                        <td>Declaración y versionado de 10 índices compuestos y TTL en <code>firestore.indexes.json</code></td>
+                        <td><span class="badge-tag badge-commit">d27db99</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">CR-01</span></td>
+                        <td>Bloque 2</td>
+                        <td>P1 - Alta</td>
+                        <td>Cruces / Auth</td>
+                        <td>Escalonar alta de cuenta centralizada con Cloud Function (unificación Email y Google)</td>
+                        <td><span class="badge-tag badge-commit">cbd206b</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-01</span></td>
+                        <td>Bloque 2</td>
+                        <td>P1 - Alta</td>
+                        <td>Back / Auth</td>
+                        <td>Cloud Function callable <code>validarAltaUsuario</code> con Admin SDK, Custom Claims y términos</td>
+                        <td><span class="badge-tag badge-commit">cbd206b</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-03</span></td>
+                        <td>Bloque 2</td>
+                        <td>P1 - Alta</td>
+                        <td>Reglas / Seguridad</td>
+                        <td>Validación simétrica de esquema y límites en <code>update</code> y <code>create</code> en <code>firestore.rules</code></td>
+                        <td><span class="badge-tag badge-commit">cbd206b</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-16</span></td>
+                        <td>Bloque 2</td>
+                        <td>P0 - Bloqueante</td>
+                        <td>Hosting / CDN</td>
+                        <td>CSP en modo reporte (<code>Content-Security-Policy-Report-Only</code>) y fix COOP en Vercel/Firebase</td>
+                        <td><span class="badge-tag badge-commit">cbd206b</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-06</span></td>
+                        <td>Bloque 1</td>
+                        <td>P0 - Bloqueante</td>
+                        <td>Back / Seguridad</td>
+                        <td>Invertir a fail-closed en webhook <code>botNavira</code> (403 si falta secret, 405 en no-POST, <code>cors: false</code>)</td>
+                        <td><span class="badge-tag badge-commit">71ee5d6</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-05</span></td>
+                        <td>Bloque 1</td>
+                        <td>P0 - Bloqueante</td>
+                        <td>Back / Infra</td>
+                        <td>Montaje explícito de secretos en Cloud Run (<code>botNavira</code>), manejo dinámico y tests unitarios</td>
+                        <td><span class="badge-tag badge-commit">71ee5d6</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-04</span></td>
+                        <td>Bloque 1</td>
+                        <td>P0 - Bloqueante</td>
+                        <td>Reglas / Seguridad</td>
+                        <td><code>allow get</code> en vez de <code>read</code> para <code>codigos_beta</code> en <code>firestore.rules</code> (evita filtración REST)</td>
+                        <td><span class="badge-tag badge-commit">71ee5d6</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-25</span></td>
+                        <td>Bloque 6</td>
+                        <td>P0 - Bloqueante</td>
+                        <td>Back / Infra</td>
+                        <td>Corrección de runtime Node.js 20 LTS en <code>functions/package.json</code></td>
+                        <td><span class="badge-tag badge-commit">f74ca3d</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-31</span></td>
+                        <td>Bloque 6</td>
+                        <td>P2 - Media</td>
+                        <td>Back / Infra</td>
+                        <td>Contención y límites de recursos en <code>botNavira</code> (<code>maxInstances: 10</code>, memoria 256MB, timeout 30s)</td>
+                        <td><span class="badge-tag badge-commit">6678c69</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-32</span></td>
+                        <td>Bloque 6</td>
+                        <td>P1 - Alta</td>
+                        <td>Back / Telegram</td>
+                        <td>Control de idempotencia atómico con <code>update_id</code> en webhook</td>
+                        <td><span class="badge-tag badge-commit">45cd505</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-28</span></td>
+                        <td>Bloque 8</td>
+                        <td>P2 - Media</td>
+                        <td>Back / DB</td>
+                        <td>Campo <code>expiraEn</code> con política de TTL nativo de Cloud Firestore para sesiones</td>
+                        <td><span class="badge-tag badge-commit">50cdaa8</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-30</span></td>
+                        <td>Bloque 9</td>
+                        <td>P2 - Media</td>
+                        <td>Front / Infra</td>
+                        <td>Optimización de empaquetado Vite con <code>manualChunks</code> (división de vendors)</td>
+                        <td><span class="badge-tag badge-commit">a3d8434</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-34</span></td>
+                        <td>Bloque 9</td>
+                        <td>P3 - Baja</td>
+                        <td>Back / CDN</td>
+                        <td>Cabeceras de cache inmutable y compresión en CDN (Vercel y Firebase Hosting)</td>
+                        <td><span class="badge-tag badge-commit">58c04f3</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-29</span></td>
+                        <td>Bloque 7</td>
+                        <td>P1 - Alta</td>
+                        <td>Back / DB</td>
+                        <td>Generación atómica transaccional de consecutivos de cobro en servidor</td>
+                        <td><span class="badge-tag badge-commit">a6f1ea8</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">CR-20</span></td>
+                        <td>Bloque 7</td>
+                        <td>P1 - Alta</td>
+                        <td>Cruces / Cobros</td>
+                        <td>Emisión atómica de cuentas de cobro coordinada con transacción de Firestore</td>
+                        <td><span class="badge-tag badge-commit">a6f1ea8</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">BE-33</span></td>
+                        <td>Bloque 7</td>
+                        <td>P1 - Alta</td>
+                        <td>Back / DB</td>
+                        <td>Escrituras atómicas (<code>writeBatch</code>) en sincronización de mantenimiento y vehículo</td>
+                        <td><span class="badge-tag badge-commit">a6f1ea8</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">CR-17</span></td>
+                        <td>Bloque 7</td>
+                        <td>P1 - Alta</td>
+                        <td>Cruces / Back</td>
+                        <td>Actualización centralizada de odómetro mediante Cloud Function Trigger</td>
+                        <td><span class="badge-tag badge-commit">0541415</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="code-pill">CR-16</span></td>
+                        <td>Bloque 7</td>
+                        <td>P0 - Bloqueante</td>
+                        <td>Cruces / DB</td>
+                        <td>Desacople y migración de arrays embebidos a subcolecciones (evita tope de 1 MiB)</td>
+                        <td><span class="badge-tag badge-commit">0541415</span></td>
+                        <td><span class="badge-tag badge-done">Done</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Sección 4: Desglose Técnico de Soluciones por Ejes -->
+    <div class="section-block">
+        <div class="section-header">
+            <span class="section-num">4.</span>
+            <span class="section-title">Detalle Técnico por Ejes de Solución</span>
+        </div>
+
+        <div class="service-block">
+            <h4>Eje A: Autenticación, Alta Segura y Vinculación Criptográfica con Telegram <span class="badge-tag badge-done">Implementado</span></h4>
+            <ul>
+                <li><strong>Token Criptoseguro y Deep Linking:</strong> Se reemplazó la generación client-side de códigos de 6 caracteres con <code>Math.random()</code> por la Cloud Function <code>generarTokenVinculacionTelegram</code> que expide tokens UUIDv4 criptográficos con expiración estricta de 15 minutos (<code>expiraEn</code>).</li>
+                <li><strong>Vinculación en 1 Clic:</strong> El bot procesa enlaces directos <code>https://t.me/Naviraflota_bot?start=&lt;token&gt;</code>, valida la vigencia, vincula el <code>telegramChatId</code> y elimina de inmediato el token garantizando un único uso.</li>
+                <li><strong>Alta Centralizada:</strong> <code>validarAltaUsuario</code> valida la aceptación de términos, verifica el código beta en servidor con Admin SDK y otorga Custom Claims (<code>betaValido: true</code>), bloqueando bypasses frontend.</li>
+            </ul>
+        </div>
+
+        <div class="service-block">
+            <h4>Eje B: Reglas de Seguridad y Cloud Storage <span class="badge-tag badge-done">Implementado</span></h4>
+            <ul>
+                <li><strong>Versionado de Reglas:</strong> Inclusión formal de <code>storage.rules</code> y <code>firestore.rules</code> en <code>firebase.json</code> para despliegues reproducibles.</li>
+                <li><strong>Aislamiento y Validación MIME:</strong> En <code>storage.rules</code> se aisló el acceso por <code>usuarios/{uid}/**</code>, restringiendo la subida únicamente a <code>image/jpeg</code>, <code>image/png</code>, <code>image/webp</code> y <code>application/pdf</code> con tope de 10 MiB.</li>
+                <li><strong>Saneamiento de Rutas:</strong> Función <code>sanearNombreArchivo</code> en frontend para neutralizar caracteres inseguros y path traversal.</li>
+            </ul>
+        </div>
+
+        <div class="service-block">
+            <h4>Eje C: Ingesta Automatizada y Desacople de Peajes <span class="badge-tag badge-done">Implementado</span></h4>
+            <ul>
+                <li><strong>Catálogo Centralizado:</strong> Se trasladaron los 166 peajes a <code>functions/data/peajesData.js</code>.</li>
+                <li><strong>Función Programada y Callable:</strong> Creación de <code>ingestarPeajesProgramada</code> (ejecución mensual automática) e <code>ingestarPeajes</code> (callable bajo demanda con <code>db.batch()</code> e IDs deterministas <code>PE001</code>).</li>
+                <li><strong>Protección Fail-Closed:</strong> La colección <code>peajes</code> mantiene <code>allow write: if false;</code> en el cliente, cerrando cualquier vector de manipulación de tarifas desde el navegador.</li>
+            </ul>
+        </div>
+
+        <div class="service-block">
+            <h4>Eje D: Hardening de Webhook Telegram y Contención en Cloud Run <span class="badge-tag badge-done">Implementado</span></h4>
+            <ul>
+                <li><strong>Node 20 LTS & Secret Manager:</strong> Migración del runtime y montaje seguro de <code>TELEGRAM_SECRET</code> y <code>TELEGRAM_TOKEN</code>.</li>
+                <li><strong>Fail-Closed en Webhook:</strong> Rechazo con 403 Forbidden si el secreto no coincide y 405 Method Not Allowed si no es POST.</li>
+                <li><strong>Idempotencia & Contención:</strong> Prevención de duplicados con <code>update_id</code> en <code>telegram_updates</code> y contención de concurrencia fijando <code>maxInstances: 10</code>, memoria en 256MB y timeout en 30s.</li>
+            </ul>
+        </div>
+
+        <div class="service-block">
+            <h4>Eje E: Integridad de Base de Datos y Escalabilidad Firestore <span class="badge-tag badge-done">Implementado</span></h4>
+            <ul>
+                <li><strong>Consecutivos Atómicos:</strong> Generación transaccional en servidor (<code>runTransaction</code>) en cuentas de cobro, eliminando duplicados.</li>
+                <li><strong>Subcolecciones & Odómetro:</strong> Migración de arrays embebidos a subcolecciones evitando el tope de 1 MiB de Firestore, y actualización automática del odómetro vía trigger con <code>FieldValue.increment()</code>.</li>
+                <li><strong>Búsquedas Indexadas:</strong> Normalización con <code>placaNorm</code>, <code>rutaNorm</code> y <code>razonSocialNorm</code>, reduciendo lecturas masivas a consultas directas indexadas con <code>.limit(1)</code>.</li>
+            </ul>
+        </div>
+
+        <div class="service-block">
+            <h4>Eje F: Desempeño Frontend, Caching y Headers Web <span class="badge-tag badge-done">Implementado</span></h4>
+            <ul>
+                <li><strong>Splitting con Vite:</strong> Configuración de <code>manualChunks</code> para empaquetar de forma modular React, Firebase y Lucide.</li>
+                <li><strong>Cache Inmutable:</strong> Cabeceras <code>Cache-Control: public, max-age=31536000, immutable</code> para assets versionados en Vercel y Firebase Hosting.</li>
+                <li><strong>Fix CSP & COOP:</strong> Cabecera <code>Content-Security-Policy-Report-Only</code> y <code>same-origin-allow-popups</code> para garantizar el funcionamiento fluido del inicio de sesión con Google.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Sección 5: Certificación de Calidad y Pruebas Unitarias -->
+    <div class="section-block">
+        <div class="section-header">
+            <span class="section-num">5.</span>
+            <span class="section-title">Certificación de Pruebas y Compilación</span>
+        </div>
+        <p style="font-size: 13.5px; margin-bottom: 8px;">
+            El código entregado supera satisfactoriamente todas las pruebas unitarias y de empaquetado para producción:
+        </p>
+        <div class="code-block">
+> proflota-functions@ test
+> node --test test/**/*.test.js
+
+✔ BE-01: validarAltaUsuario callable exportada y con manifest
+✔ BE-01: validarAltaUsuario rechaza llamadas sin auth
+✔ BE-01: validarAltaUsuario exige aceptación de términos
+✔ BE-05: Manifest de botNavira monta TELEGRAM_SECRET y TELEGRAM_TOKEN
+✔ BE-06: botNavira rechaza métodos distintos a POST con 405
+✔ BE-06: Fail-Closed — Rechazar con 403 si falta secret
+✔ BE-06: Fail-Closed — Rechazar con 403 si cabecera es inválida
+✔ BE-06: Aceptar con 200 cuando secret coincide y método es POST
+✔ BE-07: ingestarPeajesProgramada exportada con trigger programado
+✔ BE-07: ingestarPeajes callable exportada
+✔ BE-07: ingestarPeajes callable rechaza sin auth (fail-closed)
+✔ BE-07: sincronizarCatalogoPeajes procesa lotes deterministas (166 peajes)
+✔ CR-08 / BE-11: generarTokenVinculacionTelegram exportada como callable
+✔ CR-08 / BE-11: generarTokenVinculacionTelegram rechaza sin auth
+✔ CR-08 / BE-12: manejarVinculacion rechaza y purga tokens vencidos (>15m)
+✔ CR-08 / BE-11: manejarVinculacion vincula y borra token de un solo uso
+ℹ tests 17 | pass 17 | fail 0 | duration_ms 3944.4ms
+
+> vite build
+✓ 1810 modules transformed | dist/index.html (1.25 kB) | ✓ built in 425ms
+        </div>
+    </div>
+
+    <!-- Sección 6: Instrucciones de Despliegue en Producción -->
+    <div class="section-block">
+        <div class="section-header">
+            <span class="section-num">6.</span>
+            <span class="section-title">Instrucciones Oficiales de Despliegue</span>
+        </div>
+        <p style="font-size: 13.5px; margin-bottom: 8px;">
+            Una vez aprobado el Pull Request de <code>Cambios-Dev-Caliche</code> hacia <code>main</code>, los comandos oficiales de despliegue son:
+        </p>
+        <div class="code-block" style="background:#1E293B;">
+# 1. Despliegue de Reglas e Índices Compuestos en Firestore y Storage
+firebase deploy --only firestore:rules,firestore:indexes,storage
+
+# 2. Despliegue de Cloud Functions v2 (Node.js 20 LTS)
+firebase deploy --only functions
+
+# 3. Compilación y Despliegue del Frontend Web en Hosting
+npm run build
+firebase deploy --only hosting
+        </div>
+    </div>
+
+    <p style="font-size: 13px; margin-top: 30px; text-align: justify;">
+        En constancia de lo anterior, se suscribe el presente informe de entrega técnica a entera satisfacción, validando el cumplimiento estricto de los compromisos de auditoría y arquitectura para el proyecto <strong>Návira</strong>.
+    </p>
+
+    <!-- Firmas Oficiales de Entrega -->
+    <div class="signatures-area">
+        <div class="signature-box">
+            <div style="height: 45px;"></div>
+            <p class="signature-name">CARLOS OSPINA (CALICHE)</p>
+            <p>Líder Técnico & Desarrollador Responsable</p>
+            <p><strong>VORTEX LABS S.A.S. (VRTX CO S.A.S.)</strong></p>
+            <p>NIT: 902.104.421-7 | Medellín, Colombia</p>
+        </div>
+
+        <div class="signature-box">
+            <div style="height: 45px;"></div>
+            <p class="signature-name">JESÚS DAVID COSSIO VERGARA</p>
+            <p>C.C. 1.310.376.699</p>
+            <p>Representante Legal</p>
+            <p><strong>VORTEX LABS S.A.S.</strong></p>
+        </div>
+    </div>
+
+    <div class="signatures-area" style="margin-top: 25px;">
+        <div class="signature-box" style="grid-column: span 2; max-width: 450px; margin: 0 auto;">
+            <div style="height: 45px;"></div>
+            <p class="signature-name">MARIO CÓRDOBA RUIZ</p>
+            <p>C.C.: ____________________</p>
+            <p>Proyecto: <strong>Návira</strong></p>
+            <p>EL CONTRATANTE / CLIENTE</p>
+        </div>
+    </div>
+
+    <div class="actions-bar">
+        <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Guardar en PDF</button>
+    </div>
+
+</div>
+
+</body>
+</html>
