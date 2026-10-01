@@ -14,6 +14,7 @@ import { SkeletonCard, SkeletonKpi } from "../components/Skeleton";
 
 const MESES       = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 const MESES_CORTO = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+const TXT_APAGADO = "#6B7280";
 
 function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo = [], cargando }) {
   const navigate = useNavigate();
@@ -290,13 +291,13 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             <div style={styles.dosColumnas}>
               <div style={styles.metricaCard}>
                 <p style={styles.metricaLabel}>Km Recorridos</p>
-                <p style={{ ...styles.metricaVal, color: "#1F2937" }}>
+                <p style={{ ...styles.metricaVal, color: TXT_APAGADO }}>
                   {kmMes > 0 ? kmMes.toLocaleString("es-CO") + " km" : "0 km"}
                 </p>
               </div>
               <div style={styles.metricaCard}>
                 <p style={styles.metricaLabel}>Costo por Km</p>
-                <p style={{ ...styles.metricaVal, color: "#1F2937" }}>
+                <p style={{ ...styles.metricaVal, color: TXT_APAGADO }}>
                   {fmt(costoKm)}
                 </p>
               </div>
@@ -344,9 +345,9 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
                 return (
                   <div key={item.label} style={{ marginBottom: "16px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                      <span style={{ fontSize: "14px", fontWeight: "600", color: "#374151" }}>{item.label}</span>
-                      <span style={{ fontSize: "14px", fontWeight: "700", color: "#111827" }}>
-                        {fmt(item.valor)} <span style={{ color: "#6B7280", fontWeight: "normal" }}>({pct}%)</span>
+                      <span style={{ fontSize: "14px", fontWeight: "600", color: TXT_APAGADO }}>{item.label}</span>
+                      <span style={{ fontSize: "14px", fontWeight: "700", color: TXT_APAGADO }}>
+                        {fmt(item.valor)} <span style={{ color: TXT_APAGADO, fontWeight: "normal" }}>({pct}%)</span>
                       </span>
                     </div>
                     <div style={{ height: "8px", borderRadius: "4px", background: "#F3F4F6", overflow: "hidden" }}>
@@ -405,8 +406,8 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
                     <div key={v.placa} style={{ padding: "14px 0", borderBottom: i === gananciaPorVeh.length - 1 ? "none" : "1px solid #E5E7EB" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                         <div>
-                          <span style={{ fontSize: "16px", fontWeight: "800", color: "#111827" }}>{v.placa}</span>
-                          <span style={{ fontSize: "12px", color: "#6B7280", marginLeft: "8px" }}>{v.viajes} viaje{v.viajes !== 1 ? "s" : ""} · {v.km.toLocaleString("es-CO")} km</span>
+                          <span style={{ fontSize: "16px", fontWeight: "800", color: TXT_APAGADO }}>{v.placa}</span>
+                          <span style={{ fontSize: "12px", color: TXT_APAGADO, marginLeft: "8px" }}>{v.viajes} viaje{v.viajes !== 1 ? "s" : ""} · {v.km.toLocaleString("es-CO")} km</span>
                         </div>
                         <span style={{ fontSize: "16px", fontWeight: "800", color: col }}>
                           {v.neta >= 0 ? "+" : ""}{fmt(v.neta)}
