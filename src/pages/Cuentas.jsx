@@ -16,6 +16,8 @@ const MESES       = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Jul
 const MESES_CORTO = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 const TXT_APAGADO = "#6B7280";
 
+const esc = (t) => (t || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
 function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo = [], cargando }) {
   const navigate = useNavigate();
   const hoy = new Date();
@@ -81,6 +83,8 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
 
   const costoKm  = kmMes > 0 ? gastosMes / kmMes : 0;
 
+  const rendProm = kmMes / (acpmMes / 3.15 || 1);
+
   const gananciaPorVeh = vehiculos.map(veh => {
     const vt = viajesMes.filter(v => v.placa === veh.placa);
     return {
@@ -125,6 +129,14 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
             style={styles.btnAccion} 
             onClick={() => {
               const pendientesCobro = viajes.filter(v => v.estadoPago !== "pagado");
+              const totalPendCobro = pendientesCobro.reduce((s, v) => s + (v.vViaje || 0), 0);
+              const vencidosCobro = pendientesCobro.filter(v => {
+                const plazo = v.diasPago || 30;
+                const f = fechaLocal(v.fecha);
+                f.setDate(f.getDate() + plazo);
+                return new Date() > f;
+              });
+              const totalVencCobro = vencidosCobro.reduce((s, v) => s + (v.vViaje || 0), 0);
               const obtenerSaldoPendiente = (v) => (v.vViaje || 0) - (v.anticipoFleteMonto || 0) - (v.anticipoFleteMontoRet || 0);
               const viajesPorVeh = {};
               viajesMes.forEach(v => {
@@ -150,6 +162,7 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
               const totalAnticiposMes = anticiposIdaMes + anticiposRetMes;
 
               const w = window.open("", "_blank", "width=800,height=600");
+              if (!w) { alert("El navegador bloqueó la ventana del informe. Permite las ventanas emergentes para este sitio e inténtalo de nuevo."); return; }
               w.document.write(`<!DOCTYPE html><html><head><title>Informe ${MESES[mes]} ${anio} — NAVIRA</title>
               <style>
                 *{box-sizing:border-box;margin:0;padding:0}
@@ -165,6 +178,8 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
                 td{padding:6px 8px;border-bottom:1px solid #f3f4f6;font-size:12px}
                 td:last-child,th:last-child{text-align:right}
                 .total td{border-top:2px solid #1a1a1a;font-weight:700;font-size:13px;padding-top:8px}
+                .subtotal td{border-top:1px solid #ccc;font-weight:600;background:#f9fafb}
+                .page-break{page-break-before:always}
                 .resumen-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
                 .resumen-card{border:1px solid #e5e7eb;border-radius:8px;padding:14px;text-align:center}
                 .resumen-card .label{font-size:10px;text-transform:uppercase;color:#888;letter-spacing:0.5px;margin-bottom:4px}
@@ -182,6 +197,156 @@ function Cuentas({ vehiculos = [], viajes = [], gastosFijos = [], gastosVehiculo
                 <div class="resumen-card"><div class="label">Anticipos Recibidos</div><div class="valor azul">${fmt(totalAnticiposMes)}</div></div>
                 <div class="resumen-card"><div class="label">Utilidad real</div><div class="valor ${utilidadReal >= 0 ? "verde" : "rojo"}">${fmt(utilidadReal)}</div></div>
               </div>
+              <div class="resumen-grid" style="margin-top:12px">
+                <div class="resumen-card" style="padding:10px">
+                  <div class="label">Margen neto</div>
+                  <div style="font-size:15px;font-weight:800;color:${Number(rentabilidad) >= 40 ? "#16a34a" : Number(rentabilidad) >= 20 ? "#d97706" : "#dc2626"}">${rentabilidad}%</div>
+                </div>
+                <div class="resumen-card" style="padding:10px">
+                  <div class="label">Rendimiento prom.</div>
+                  <div style="font-size:15px;font-weight:800">${rendProm > 0 ? rendProm.toFixed(1) + " km/gal" : "—"}</div>
+                </div>
+              </div>
+
+              <table>
+                <tr style="background:#f0f9ff"><td style="font-weight:700">Ingresos por viajes</td><td style="font-weight:700;color:#1565FF">${fmt(ingresosMes)}</td></tr>
+                <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos operativos:</td></tr>
+                <tr><td style="padding-left:20px">Combustible (ACPM + Adblue)</td><td style="color:#dc2626">-${fmt(acpmMes + adblMes)}</td></tr>
+                <tr><td style="padding-left:20px">Peajes</td><td style="color:#dc2626">-${fmt(peajesMes)}</td></tr>
+                <tr><td style="padding-left:20px">Conductor</td><td style="color:#dc2626">-${fmt(conductorMes)}</td></tr>
+                ${otrosMes > 0 ? `<tr><td style="padding-left:20px">Otros gastos de viaje</td><td style="color:#dc2626">-${fmt(otrosMes)}</td></tr>` : ""}
+                ${descuentosMes > 0 ? `<tr><td style="padding-left:20px">Descuentos de ley</td><td style="color:#dc2626">-${fmt(descuentosMes)}</td></tr>` : ""}
+                <tr style="background:#f0fdf4"><td style="font-weight:600">= Ganancia neta de viajes</td><td style="font-weight:700;color:${netaMes >= 0 ? "#16a34a" : "#dc2626"}">${fmt(netaMes)}</td></tr>
+                ${totalPE > 0 ? `
+                <tr><td colspan="2" style="font-size:11px;color:#888;padding:8px 8px 4px;border:none">Menos gastos fijos mensuales:</td></tr>
+                <tr><td style="padding-left:20px">Gastos fijos (cuota, seguro, GPS...)</td><td style="color:#dc2626">-${fmt(totalPE)}</td></tr>` : ""}
+                ${totalGastosAdic > 0 ? `<tr><td style="padding-left:20px">Gastos adicionales (taller, repuestos...)</td><td style="color:#dc2626">-${fmt(totalGastosAdic)}</td></tr>` : ""}
+                ${totalPE > 0 || totalGastosAdic > 0 ? `<tr class="total" style="background:#f0fdf4"><td>= Utilidad real del período</td><td class="${utilidadReal >= 0 ? "verde" : "rojo"}">${fmt(utilidadReal)}</td></tr>` : ""}
+              </table>
+              <table>
+                <tr><td>Kilómetros recorridos</td><td>${kmMes.toLocaleString("es-CO")} km</td></tr>
+                <tr><td>Vehículos activos</td><td>${vehiculos.length}</td></tr>
+              </table>
+
+              <h2>Evolución — Últimos 6 meses</h2>
+              <div style="display:flex;align-items:flex-end;gap:10px;height:110px;padding:10px 4px 0">
+                ${ultimos6.map(m => {
+                  const alt = Math.round((Math.abs(m.neta) / maxGrafica) * 80);
+                  const col = m.neta < 0 ? "#dc2626" : m.activo ? "#1565FF" : "#22c55e";
+                  return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+                    <div style="font-size:9px;color:#666;font-weight:700;margin-bottom:3px">${m.neta !== 0 ? "$" + (Math.abs(m.neta) / 1000000).toFixed(1) + "M" : ""}</div>
+                    <div style="width:100%;max-width:44px;height:${Math.max(alt, 2)}px;background:${col};border-radius:3px 3px 0 0"></div>
+                    <div style="font-size:10px;color:#888;margin-top:4px;font-weight:${m.activo ? "800" : "400"}">${m.mes}</div>
+                  </div>`;
+                }).join("")}
+              </div>
+              <p style="font-size:10px;color:#999;margin:4px 0 0;text-align:center">Ganancia neta de viajes por mes · Mes actual en azul</p>
+
+              <h2>Distribución de gastos operativos</h2>
+              <table>
+                <tr><th>Concepto</th><th>Monto</th><th>% del total</th></tr>
+                ${[
+                  { l: "ACPM", v: acpmMes }, { l: "Adblue", v: adblMes }, { l: "Peajes", v: peajesMes },
+                  { l: "Conductor", v: conductorMes }, { l: "Otros gastos", v: otrosMes },
+                  ...(descuentosMes > 0 ? [{ l: "Descuentos de ley", v: descuentosMes }] : []),
+                ].filter(r => r.v > 0).map(r => `<tr><td>${r.l}</td><td>${fmt(r.v)}</td><td>${gastosMes > 0 ? (r.v / gastosMes * 100).toFixed(1) : 0}%</td></tr>`).join("")}
+                <tr class="total"><td>Total gastos operativos</td><td>${fmt(gastosMes)}</td><td>100%</td></tr>
+              </table>
+
+              <h2 class="page-break">Detalle por vehículo</h2>
+              ${Object.entries(viajesPorVeh).map(([placa, vjs]) => {
+                const subIngresos = vjs.reduce((s, v) => s + (v.vViaje || 0), 0);
+                const subGastos = vjs.reduce((s, v) => s + (v.total || 0), 0);
+                const subNeta = vjs.reduce((s, v) => s + (v.neta || 0), 0);
+                const subKm = vjs.reduce((s, v) => s + (v.kmT || 0), 0);
+                return `
+                  <p style="font-size:14px;font-weight:700;margin:15px 0 8px;color:#1a1a1a">${esc(placa)}</p>
+                  <table>
+                    <tr><th>Fecha</th><th>Manifiesto</th><th>Ruta</th><th>Empresa</th><th>Flete</th><th>Gastos</th><th>Neta</th></tr>
+                    ${vjs.map(v => `<tr>
+                      <td>${esc(v.fecha) || "—"}</td>
+                      <td>${esc(v.mani) || "—"}</td>
+                      <td>${esc(v.ruta) || "—"}</td>
+                      <td>${esc(v.emp) || "—"}</td>
+                      <td>${fmt(v.vViaje || 0)}</td>
+                      <td style="color:#dc2626">${fmt(v.total || 0)}</td>
+                      <td class="${(v.neta || 0) >= 0 ? "verde" : "rojo"}">${fmt(v.neta || 0)}</td>
+                    </tr>`).join("")}
+                    <tr class="subtotal">
+                      <td colspan="4"><strong>${vjs.length} viaje${vjs.length !== 1 ? "s" : ""} · ${subKm.toLocaleString("es-CO")} km</strong></td>
+                      <td>${fmt(subIngresos)}</td>
+                      <td style="color:#dc2626">${fmt(subGastos)}</td>
+                      <td class="${subNeta >= 0 ? "verde" : "rojo"}">${fmt(subNeta)}</td>
+                    </tr>
+                  </table>`;
+              }).join("")}
+
+              <h2>Ranking de vehículos</h2>
+              <table>
+                <tr><th>Placa</th><th>Viajes</th><th>Km</th><th>Ingresos</th><th>Gastos</th><th>Utilidad</th></tr>
+                ${gananciaPorVeh.map(v => `<tr>
+                  <td><strong>${esc(v.placa)}</strong></td>
+                  <td>${v.viajes}</td>
+                  <td>${v.km.toLocaleString("es-CO")}</td>
+                  <td>${fmt(v.ingresos || 0)}</td>
+                  <td style="color:#dc2626">${fmt(v.gastos || 0)}</td>
+                  <td class="${v.neta >= 0 ? "verde" : "rojo"}"><strong>${fmt(v.neta)}</strong></td>
+                </tr>`).join("")}
+              </table>
+
+              ${gastosAdicMes.length > 0 ? `
+              <h2>Gastos adicionales del mes</h2>
+              <table>
+                <tr><th>Fecha</th><th>Vehículo</th><th>Descripción</th><th>Taller</th><th>Monto</th></tr>
+                ${gastosAdicMes.map(g => `<tr>
+                  <td>${esc(g.fecha) || "—"}</td>
+                  <td>${esc(g.placa) || "—"}</td>
+                  <td>${esc(g.descripcion) || "—"}</td>
+                  <td>${esc(g.taller) || "—"}${g.nit ? " · NIT: " + esc(g.nit) : ""}</td>
+                  <td style="color:#dc2626">${fmt(g.monto)}</td>
+                </tr>`).join("")}
+                <tr class="total"><td colspan="4">Total gastos adicionales</td><td style="color:#dc2626">${fmt(totalGastosAdic)}</td></tr>
+              </table>` : ""}
+
+              <h2>Estado de cartera</h2>
+              <div class="resumen-grid" style="grid-template-columns:1fr 1fr">
+                <div class="resumen-card">
+                  <div class="label">Pendiente por cobrar</div>
+                  <div class="valor ambar">${fmt(totalPendCobro)}</div>
+                  <div style="font-size:11px;color:#888;margin-top:4px">${pendientesCobro.length} viaje${pendientesCobro.length !== 1 ? "s" : ""}</div>
+                </div>
+                <div class="resumen-card" style="border-color:#fca5a5">
+                  <div class="label">Vencido</div>
+                  <div class="valor rojo">${fmt(totalVencCobro)}</div>
+                  <div style="font-size:11px;color:#888;margin-top:4px">${vencidosCobro.length} viaje${vencidosCobro.length !== 1 ? "s" : ""}</div>
+                </div>
+              </div>
+              ${Object.keys(carteraPorEmp).length > 0 ? `
+              <table>
+                <tr><th>Empresa</th><th>Viajes</th><th>Pendiente</th><th>Vencido</th></tr>
+                ${Object.entries(carteraPorEmp).map(([emp, d]) => `<tr>
+                  <td>${esc(emp)}</td>
+                  <td>${d.viajes}</td>
+                  <td class="ambar">${fmt(d.monto)}</td>
+                  <td class="${d.vencido > 0 ? "rojo" : ""}">${d.vencido > 0 ? fmt(d.vencido) : "—"}</td>
+                </tr>`).join("")}
+              </table>` : "<p style='color:#888;font-size:12px'>No hay viajes pendientes de cobro.</p>"}
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:50px;page-break-inside:avoid">
+                <div style="text-align:center">
+                  <div style="border-top:1px solid #333;padding-top:6px;font-size:11px;color:#666">Elaborado por</div>
+                </div>
+                <div style="text-align:center">
+                  <div style="border-top:1px solid #333;padding-top:6px;font-size:11px;color:#666">Revisado por</div>
+                </div>
+              </div>
+
+              <div class="footer">
+                <strong>NAVIRA</strong> · Inteligencia y precisión en movimiento · naviraflota.app<br>
+                Informe generado el ${new Date().toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })} a las ${new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })} · Período: ${MESES[mes]} ${anio} · Todos los valores en COP<br>
+                Documento de uso interno · La información contenida es confidencial
+              </div>
+
               </body></html>`);
               w.document.close();
               setTimeout(() => w.print(), 500);
