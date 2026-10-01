@@ -14,12 +14,16 @@ function Toast({ mensaje, tipo = "exito", onCerrar }) {
   }, [onCerrar]);
 
   useEffect(() => {
+    let timerCerrar;
     const timer = setTimeout(() => {
       setVisible(false);
-      setTimeout(() => onCerrarRef.current(), 300);
+timerCerrar = setTimeout(() => onCerrarRef.current(), 300);
     }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      if (timerCerrar) clearTimeout(timerCerrar);
+    };
+  }, [onCerrar]);
 
   const colores = {
     exito: { bg: t.colors.greenSoft,  border: t.colors.greenBorder, color: t.colors.green },

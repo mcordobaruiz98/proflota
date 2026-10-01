@@ -1,10 +1,73 @@
-/* Hecho por JESUS COSSIO DEV - Estilos base y accesibilidad */
+/* Hecho por JESUS COSSIO DEV - Estilos base, variables de tema y accesibilidad */
+
+/* ── VARIABLES DE COLORIMETRÍA NAVIRA ── */
+:root, [data-theme="dark"] {
+  --bg-primary: #0A1A2F;
+  --bg-card: #0F2340;
+  --bg-section: #081527;
+  --text-primary: #F8FAFC;
+  --text-secondary: #ADC2DE;
+  --text-tertiary: #8FAECF;
+  --color-blue: #1565FF;
+  --color-blue-text: #60A5FA;
+  --color-blue-soft: #132847;
+  --color-blue-border: #2A4E82;
+  --color-blue-dark: #0A1A2F;
+  --color-green: #22C55E;
+  --color-green-deep: #12A150;
+  --color-green-soft: #0F2C20;
+  --color-green-border: #1E5138;
+  --color-red: #EF4444;
+  --color-red-text: #FF7B73;
+  --color-red-soft: #2C1517;
+  --color-red-border: #5A2A2C;
+  --color-amber: #F59E0B;
+  --color-amber-soft: #2A2012;
+  --color-amber-border: #5A431A;
+  --color-border: #213A5C;
+  --color-border-light: #193150;
+  --shadow-card: 0 10px 30px -18px rgba(0,0,0,0.55);
+  --shadow-md: 0 18px 40px -22px rgba(0,0,0,0.60);
+  --scrollbar-thumb: #1E3A5F;
+}
+
+[data-theme="light"] {
+  --bg-primary: #EEF4FF;
+  --bg-card: #FFFFFF;
+  --bg-section: #F1F5F9;
+  --text-primary: #0A1A2F;
+  --text-secondary: #334155;
+  --text-tertiary: #64748B;
+  --color-blue: #1565FF;
+  --color-blue-text: #1D4ED8;
+  --color-blue-soft: #EFF6FF;
+  --color-blue-border: #BFDBFE;
+  --color-blue-dark: #1E40AF;
+  --color-green: #16A34A;
+  --color-green-deep: #15803D;
+  --color-green-soft: #DCFCE7;
+  --color-green-border: #86EFAC;
+  --color-red: #DC2626;
+  --color-red-text: #B91C1C;
+  --color-red-soft: #FEE2E2;
+  --color-red-border: #FCA5A5;
+  --color-amber: #D97706;
+  --color-amber-soft: #FEF3C7;
+  --color-amber-border: #FCD34D;
+  --color-border: #CBD5E1;
+  --color-border-light: #E2E8F0;
+  --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 10px 25px -4px rgba(15, 23, 42, 0.12);
+  --scrollbar-thumb: #CBD5E1;
+}
+
 /* ── RESET BASE ── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 /* ── FUENTE ── */
@@ -17,8 +80,8 @@ html {
 /* ── VIEWPORT ── */
 html, body, #root {
   height: 100%;
-  background: #0A1A2F;
-  color: #FFFFFF;
+  background-color: var(--bg-primary, #0A1A2F);
+  color: var(--text-primary, #F8FAFC);
 }
 
 /* ── BODY ── */
@@ -27,9 +90,9 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* ── INPUTS — quitar zoom en iOS ── */
+/* ── INPUTS — tamaño base accesible y prevención de zoom iOS (FE-33) ── */
 input, select, textarea {
-  font-size: 16px !important;
+  font-size: 16px;
 }
 
 input, select, textarea, button {
@@ -55,7 +118,7 @@ select {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1E3A5F;
+  background: var(--scrollbar-thumb, #1E3A5F);
   border-radius: 4px;
 }
 
@@ -88,7 +151,7 @@ img {
 
 /* ── FOCO VISIBLE ACCESIBLE (WCAG 2.4.7) ── */
 :focus-visible {
-  outline: 2px solid #22C55E !important;
+  outline: 2px solid var(--color-green, #22C55E) !important;
   outline-offset: 2px;
 }
 
@@ -97,16 +160,16 @@ img {
   position: absolute;
   top: -120px;
   left: 16px;
-  background: #0A192F;
-  color: #22C55E;
-  border: 2px solid #22C55E;
-  padding: 8px 16px;
-  z-index: 99999;
-  border-radius: 6px;
-  text-decoration: none;
+  background: var(--bg-primary, #0A1A2F);
+  color: var(--color-green, #22C55E);
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1.5px solid var(--color-green, #22C55E);
+  font-size: 13px;
   font-weight: 700;
-  font-size: 14px;
-  transition: top 0.2s ease;
+  text-decoration: none;
+  z-index: 99999;
+  transition: top 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .skip-link:focus {
   top: 16px;

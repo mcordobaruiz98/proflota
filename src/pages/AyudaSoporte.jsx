@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
@@ -6,31 +10,35 @@ import { theme as t } from "../styles/theme";
 const FAQS = [
   {
     pregunta: "¿Cómo registro un viaje?",
-    respuesta: "Ve a la Calculadora desde el Home o la barra inferior. Llena los datos del viaje, combustible, peajes y costos. Al final toca 'Guardar viaje' para registrarlo.",
+    respuesta: "Ve a la Calculadora o al Cotizador. Ingresa ruta, flete, combustible, peajes y costos. Al final toca 'Guardar viaje' para registrarlo.",
   },
   {
-    pregunta: "¿Cómo agrego un vehículo?",
-    respuesta: "Ve a Vehículos y toca '+ Agregar'. Completa los datos del vehículo, propietario y tenedor. Toca 'Guardar vehículo'.",
+    pregunta: "¿Cómo agrego un vehículo a mi flota?",
+    respuesta: "Ve al módulo Vehículos y toca '+ Agregar vehículo'. Completa los datos del camión, propietario, tenedor y conductor asignado.",
   },
   {
-    pregunta: "¿Los datos se guardan en la nube?",
-    respuesta: "Sí. Todos tus datos se guardan en Firebase y están disponibles desde cualquier dispositivo con tu cuenta.",
+    pregunta: "¿Cómo gestiono las finanzas y balances?",
+    respuesta: "En la sección Cuentas puedes consultar el resumen consolidado de ingresos, gastos fijos y variables, balance neto, exportar reportes y ver el rendimiento por vehículo.",
   },
   {
     pregunta: "¿Cómo subo documentos a la Hoja de Vida?",
-    respuesta: "Entra al detalle de un vehículo → tab 'Hoja de Vida'. Toca '+ Subir' junto a cada documento y selecciona un PDF o imagen desde tu dispositivo.",
+    respuesta: "Entra al detalle de tu vehículo → pestaña 'Hoja de Vida'. Puedes adjuntar documentos, SOAT, tecnomecánica, fotos y tarjeta de propiedad.",
   },
   {
-    pregunta: "¿Cómo defino mis metas de ganancia?",
-    respuesta: "Ve a Objetivos desde el Home. Toca 'Editar metas' y define tu meta diaria, semanal y mensual. Las barras de progreso se actualizan automáticamente.",
+    pregunta: "¿Cómo controlo la cartera y cobros?",
+    respuesta: "En el módulo Cartera puedes consultar saldos pendientes agrupados por empresa, marcar viajes pagados y generar cuentas de cobro en PDF.",
   },
   {
-    pregunta: "¿Cómo funciona el cálculo de Adblue?",
-    respuesta: "El Adblue se calcula automáticamente como el 18.9% del consumo total de ACPM en galones, convertido a litros.",
+    pregunta: "¿Los datos se guardan en la nube?",
+    respuesta: "Sí. Todos tus datos se guardan en tiempo real en Firebase Firestore y Storage, protegidos y disponibles desde cualquier dispositivo.",
   },
   {
-    pregunta: "¿Puedo usar la app sin internet?",
-    respuesta: "Puedes navegar por la app sin internet pero los datos no se sincronizarán hasta que recuperes la conexión.",
+    pregunta: "¿Cómo funciona el cálculo de Adblue y ACPM?",
+    respuesta: "El Adblue se calcula automáticamente según el consumo estimado de ACPM y el factor configurado de litros por galón.",
+  },
+  {
+    pregunta: "¿Puedo usar la app sin conexión a internet?",
+    respuesta: "La aplicación detecta automáticamente si pierdes la conexión, permitiendo consultar información cargada y avisándote cuando se restablezca el servicio.",
   },
 ];
 

@@ -117,13 +117,13 @@ function Home({ vehiculos = [], viajes = [], configMant = [], mantenimientos = [
   licAlerta.sort((a,b) => a.dias - b.dias);
 
   const accesos = [
-  { label: "Vehículos",   Icono: Truck,       ruta: "/vehiculos",   iconColor: t.colors.green },
-  { label: "Cuentas",     Icono: TrendingUp,  ruta: "/cuentas",     iconColor: t.colors.green },
-  { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", iconColor: t.colors.green },
-  { label: "Cartera",     Icono: AlertCircle, ruta: "/cartera",     iconColor: vencidos.length > 0 ? t.colors.red : t.colors.green },
-  { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      iconColor: t.colors.green },
-  { label: "Mant.",       Icono: Wrench,      ruta: "/vehiculos",   iconColor: t.colors.green },
-];
+    { label: "Vehículos",   Icono: Truck,       ruta: "/vehiculos",   iconColor: t.colors.green },
+    { label: "Cuentas",     Icono: TrendingUp,  ruta: "/cuentas",     iconColor: t.colors.green },
+    { label: "Calculadora", Icono: Calculator,  ruta: "/calculadora", iconColor: t.colors.green },
+    { label: "Cartera",     Icono: AlertCircle, ruta: "/cartera",     iconColor: vencidos.length > 0 ? t.colors.red : t.colors.green },
+    { label: "Viajes",      Icono: MapPin,      ruta: "/viajes",      iconColor: t.colors.green },
+    { label: "Conductores", Icono: Handshake,   ruta: "/conductores", iconColor: t.colors.green },
+  ];
 
   if (cargando) return (
   <div style={styles.pantalla}>

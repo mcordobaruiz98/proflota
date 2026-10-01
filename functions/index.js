@@ -43,6 +43,7 @@ async function enviar(chatId, texto) {
 }
 
 const fmt = (n) => "$" + Math.round(n || 0).toLocaleString("es-CO");
+const esc = (t) => String(t || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const esNo = (t) => ["no", "-", "n", "ninguno", "nada"].includes(t.toLowerCase());
 
 function hoyLocal(offsetDias = 0) {
@@ -445,7 +446,7 @@ async function procesarMensaje(chatId, texto) {
       const lista = rutasMenu.map((r, i) => {
         const nom = r.nombre || r.ruta || "Sin nombre";
         const extra = [r.empresa || r.emp, r.producto || r.prod].filter(Boolean).join(", ");
-        return `<b>${i + 1}.</b> ${nom}${extra ? ` (${extra})` : ""}`;
+        return `<b>${i + 1}.</b> ${esc(nom)}${extra ? ` (${esc(extra)})` : ""}`;
       }).join("\n");
       return enviar(chatId,
         `🚛 <b>Nuevo viaje</b>\n\nSus rutas frecuentes:\n${lista}\n\n` +

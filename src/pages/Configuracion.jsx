@@ -2,26 +2,31 @@
  * Hecho por JESUS COSSIO DEV
  * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
  */
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Mail, Bell, Volume2, MessageCircle, MapPin, Phone, Landmark, Trash2, AlertTriangle, Check } from "lucide-react";
+import { ArrowLeft, User, Mail, Bell, Volume2, MessageCircle, Trash2, Check, Moon, Sun, MapPin, Phone, Landmark, AlertTriangle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../firebase";
 import { theme as t } from "../styles/theme";
 import FirmaCanvas from "../components/FirmaCanvas";
 import { useUid } from "../lib/useUid";
 import { leer, escribir, borrarEspacioUsuario } from "../lib/userStorage";
 import { purgarCacheFirestore } from "../lib/purgarCache";
+import { ConfirmarModal } from "../components/ConfirmarModal";
 
 function Configuracion({mostrarToast}) {
   const navigate = useNavigate();
   const { usuario, eliminarCuenta } = useAuth();
+  const { tema, cambiarTema } = useTheme();
   const [confirmaEliminar, setConfirmaEliminar] = useState(false);
   const [textoConfirm, setTextoConfirm] = useState("");
   const [eliminando, setEliminando] = useState(false);
   const [codigoTelegram, setCodigoTelegram] = useState(null);
   const [generandoCodigo, setGenerandoCodigo] = useState(false);
+  const [modalLimpiarCache, setModalLimpiarCache] = useState(false);
   const [perfilFact, setPerfilFact] = useState({
     nombreCompleto: "", tipoDoc: "CC", numeroDoc: "",
     direccion: "", ciudad: "", telefono: "", correo: "",
@@ -43,14 +48,16 @@ function Configuracion({mostrarToast}) {
       // como functions/failed-precondition desde la callable. El código de
       // cliente auth/requires-recent-login se conserva por si el SDK de Firebase
       // lo emite antes de llegar al servidor.
+      console.error(err);
       const pideReautenticacion =
-        err.code === "functions/failed-precondition" ||
-        err.code === "auth/requires-recent-login";
+        err.code === "auth/requires-recent-login" ||
+        err.code === "functions/failed-precondition";
       if (pideReautenticacion) {
         mostrarToast("Por seguridad, cierra sesión, vuelve a entrar y repite la eliminación", "error");
       } else {
         mostrarToast("Error al eliminar la cuenta. Contáctanos por soporte", "error");
       }
+    } finally {
       setEliminando(false);
     }
   };
@@ -165,16 +172,28 @@ function Configuracion({mostrarToast}) {
     }
   };
 
-    const guardarFirma = async (dataUrl) => {
+  const guardarFirma = async (dataUrl) => {
     setGuardandoFirma(true);
-    const nuevo = { ...perfilFact, firmaUrl: dataUrl };
-    setPerfilFact(nuevo);
     try {
+      let finalFirmaUrl = dataUrl;
+      try {
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const firmaRef = ref(storage, `usuarios/${usuario.uid}/firma_${Date.now()}.png`);
+        await uploadBytes(firmaRef, blob, { contentType: "image/png" });
+        finalFirmaUrl = await getDownloadURL(firmaRef);
+      } catch (storageErr) {
+        console.warn("Firma Storage upload fallback:", storageErr);
+      }
+
+      const nuevo = { ...perfilFact, firmaUrl: finalFirmaUrl };
+      setPerfilFact(nuevo);
       await setDoc(doc(db, "usuarios", usuario.uid), {
         perfilFacturacion: nuevo,
       }, { merge: true });
-      mostrarToast("Firma guardada", "exito");
-    } catch {
+      mostrarToast("Firma guardada correctamente", "exito");
+    } catch (err) {
+      console.error(err);
       mostrarToast("Error al guardar la firma", "error");
     } finally {
       setGuardandoFirma(false);
@@ -220,8 +239,49 @@ function Configuracion({mostrarToast}) {
       </div>
 
       {/* PREFERENCIAS */}
-      <div style={styles.seccionTitulo}>Preferencias</div>
+      <div style={styles.seccionTitulo}>Apariencia y Preferencias</div>
       <div style={styles.seccion}>
+        {/* TEMA OSCURO / CLARO */}
+        <div style={{ ...styles.fila, borderBottom: `1px solid ${t.colors.borderLight}` }}>
+          <div style={styles.filaIzq}>
+            <span style={styles.filaIcono}>
+              {tema === "dark" ? <Moon size={18} color={t.colors.blueText} strokeWidth={2}/> : <Sun size={18} color="#F59E0B" strokeWidth={2}/>}
+            </span>
+            <div>
+              <p style={styles.filaLabel}>Tema de la aplicación</p>
+              <p style={styles.filaSub}>{tema === "dark" ? "Modo Oscuro (Predeterminado)" : "Modo Claro"}</p>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: "6px", background: t.colors.bgInput, padding: "4px", borderRadius: "10px", border: `1px solid ${t.colors.borderLight}` }}>
+            <button
+              type="button"
+              onClick={() => cambiarTema("dark")}
+              style={{
+                display: "flex", alignItems: "center", gap: "5px", padding: "6px 10px",
+                borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "12px", fontWeight: 700,
+                background: tema === "dark" ? t.colors.blue : "transparent",
+                color: tema === "dark" ? "#FFFFFF" : t.colors.textSecondary,
+                transition: "all 0.2s"
+              }}
+            >
+              <Moon size={13} /> Oscuro
+            </button>
+            <button
+              type="button"
+              onClick={() => cambiarTema("light")}
+              style={{
+                display: "flex", alignItems: "center", gap: "5px", padding: "6px 10px",
+                borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "12px", fontWeight: 700,
+                background: tema === "light" ? t.colors.blue : "transparent",
+                color: tema === "light" ? "#FFFFFF" : t.colors.textSecondary,
+                transition: "all 0.2s"
+              }}
+            >
+              <Sun size={13} /> Claro
+            </button>
+          </div>
+        </div>
+
         {opciones.map((op, i, arr) => (
           <div
             key={op.label}
@@ -486,17 +546,7 @@ function Configuracion({mostrarToast}) {
       <div style={styles.seccion}>
         <button
           style={{ ...styles.filaBtn, borderBottom: "none" }}
-          onClick={async () => {
-            if (window.confirm("¿Estás seguro? Esto no se puede deshacer.")) {
-              // FE-17 + FE-16: se purga lo de esta cuenta y la caché de Firestore.
-              // Antes era localStorage.clear(), que además de no tocar la caché
-              // persistente de Firestore borraba el espacio de otras cuentas
-              // abiertas en el mismo navegador.
-              if (uid) borrarEspacioUsuario(uid);
-              await purgarCacheFirestore();
-              window.location.reload();
-            }
-          }}
+          onClick={() => setModalLimpiarCache(true)}
         >
           <div style={styles.filaIzq}>
             <span style={styles.filaIcono}><Trash2 size={18} color={t.colors.redText} strokeWidth={2}/></span>
@@ -559,6 +609,22 @@ function Configuracion({mostrarToast}) {
           </div>
         )}
       </div>
+
+      <ConfirmarModal
+        abierto={modalLimpiarCache}
+        titulo="¿Limpiar caché local?"
+        mensaje="Se eliminarán los datos temporales del dispositivo. Esta acción no se puede deshacer."
+        textoConfirmar="Sí, limpiar"
+        textoCancelar="Cancelar"
+        esPeligro={true}
+        onCancelar={() => setModalLimpiarCache(false)}
+        onConfirmar={async () => {
+          setModalLimpiarCache(false);
+          if (uid) borrarEspacioUsuario(uid);
+          try { await purgarCacheFirestore(); } catch { void 0; }
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }

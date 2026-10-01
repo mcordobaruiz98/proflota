@@ -18,6 +18,7 @@ function Viajes({ viajes = [], cargando }) {
   const navigate = useNavigate();
   const [busqueda, setBusqueda] = useState("");
   const [rutasAbiertas, setRutasAbiertas] = useState({});
+  const [limiteRutas, setLimiteRutas] = useState(15);
 
   const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
   const fFecha = (iso) => {
@@ -49,6 +50,8 @@ function Viajes({ viajes = [], cargando }) {
       return { ruta, viajes: ordenados, ultimo: ordenados[0] };
     })
     .sort((a, b) => (b.ultimo.fecha || "").localeCompare(a.ultimo.fecha || ""));
+
+  const gruposVisibles = grupos.slice(0, limiteRutas);
 
   if (cargando) {
     return (
@@ -117,7 +120,7 @@ function Viajes({ viajes = [], cargando }) {
         )}
 
         {/* RUTAS */}
-        {grupos.map(g => {
+        {gruposVisibles.map(g => {
           const abierta = rutasAbiertas[g.ruta] || false;
           const u = g.ultimo; // viaje más reciente de la ruta = referencia de costos
           const otrosGastos = (u.carp || 0) + (u.gv2 || 0) + (u.extras || 0);
@@ -249,6 +252,26 @@ function Viajes({ viajes = [], cargando }) {
             </div>
           );
         })}
+        {grupos.length > limiteRutas && (
+          <div style={{ textAlign: "center", margin: "16px 0" }}>
+            <button
+              type="button"
+              onClick={() => setLimiteRutas(prev => prev + 15)}
+              style={{
+                padding: "10px 20px",
+                background: "#EFF6FF",
+                border: "1.5px solid #BFDBFE",
+                borderRadius: "10px",
+                color: "#1E40AF",
+                fontSize: "13px",
+                fontWeight: "700",
+                cursor: "pointer",
+              }}
+            >
+              Mostrar más rutas (+15)
+            </button>
+          </div>
+        )}
 
         {grupos.length === 0 && viajes.length > 0 && (
           <p style={{ fontSize: t.fonts.sizeXs, color: t.colors.textTertiary, textAlign: "center", margin: "20px 0" }}>Sin resultados para &quot;{busqueda}&quot;</p>

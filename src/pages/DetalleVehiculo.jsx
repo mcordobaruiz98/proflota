@@ -8,8 +8,9 @@ import { ArrowLeft, Truck, Info, Route, TrendingUp, FileText, Upload, Trash2, Ey
 import { useSubirArchivo, sanearNombreArchivo } from "../hooks/useSubirArchivo";
 import { useAuth } from "../hooks/useAuth";
 import { theme as t } from "../styles/theme";
-import   EstadoVacio  from "../components/EstadoVacio";
+import EstadoVacio from "../components/EstadoVacio";
 import { alPulsarEnterOEspacio } from "../utils/teclado";
+import { ConfirmarModal } from "../components/ConfirmarModal";
 
 
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -108,14 +109,20 @@ function DetalleVehiculo({ vehiculos, viajes = [], conductores = [], mantenimien
     setHvData(vehiculo.hvData);
     setHvCargado(true);
   }
+
+  // Sincronizar tabActivo con location.state (FE-26)
+  if (location.state?.tab && location.state.tab !== tabActivo) {
+    setTabActivo(location.state.tab);
+  }
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({propietario:true,tenedor:false,vehiculo:false,conductor:false});
 
-  const { subirArchivo, eliminarArchivo, progreso: progresoArchivo, subiendo } = useSubirArchivo();
+  const { subirArchivo, eliminarArchivo, progreso: progresoArchivo, subiendo } = useSubirArchivo(mostrarToast);
   const { usuario } = useAuth();
 
   const [editando,      setEditando]      = useState(false);
   const [editData,      setEditData]      = useState({});
   const [guardandoEdit, setGuardandoEdit] = useState(false);
+  const [docAEliminar,  setDocAEliminar]  = useState(null);
 
   const [gastoDesc,     setGastoDesc]     = useState("");
   const [gastoMonto,    setGastoMonto]    = useState("");
@@ -160,12 +167,14 @@ function DetalleVehiculo({ vehiculos, viajes = [], conductores = [], mantenimien
   const [guardandoMant, setGuardandoMant] = useState(false);
 
   const guardarKm = () => {
-  const val = Number(kmTemp)||0;
-  setKmOdometro(val);
-  onEditarVehiculo(vehiculo.firestoreId, { kmOdometro: val }).catch(()=>{});
-  setEditandoKm(false);
-  setKmTemp("");
-};
+    const val = Number(kmTemp) || 0;
+    setKmOdometro(val);
+    onEditarVehiculo(vehiculo.firestoreId, { kmOdometro: val }).catch(() => {
+      mostrarToast("Error al actualizar odómetro", "error");
+    });
+    setEditandoKm(false);
+    setKmTemp("");
+  };
 
 const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
 
@@ -232,11 +241,12 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
     setMesActual(m); setAnioActual(a);
   };
 
-  // Hoja de vida
   const actualizarHV = (clave, valor) => {
-    const nuevo = {...hvData, [clave]:valor};
+    const nuevo = { ...hvData, [clave]: valor };
     setHvData(nuevo);
-    onEditarVehiculo(vehiculo.firestoreId, { hvData: nuevo }).catch(()=>{});
+    onEditarVehiculo(vehiculo.firestoreId, { hvData: nuevo }).catch(() => {
+      mostrarToast("Error al guardar en hoja de vida", "error");
+    });
   };
 
   const TIPOS_PERMITIDOS = ["image/jpeg","image/png","application/pdf"];
@@ -268,9 +278,8 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
 
   const manejarEliminar = (docId) => {
     const doc = hvData[docId];
-    if (!doc||!doc.ruta) { actualizarHV(docId,"pendiente"); return; }
-    if (!window.confirm("¿Eliminar este documento?")) return;
-    eliminarArchivo(doc.ruta, ()=>actualizarHV(docId,"pendiente"));
+    if (!doc || !doc.ruta) { actualizarHV(docId, "pendiente"); return; }
+    setDocAEliminar(docId);
   };
 
   const iniciarEdicion = () => {
@@ -1431,6 +1440,27 @@ const mantVehiculo = mantenimientos.filter(m => m.placa === vehiculo?.placa);
         )}
 
       </div>
+
+      <ConfirmarModal
+        abierto={Boolean(docAEliminar)}
+        titulo="¿Eliminar este documento?"
+        mensaje="El archivo cargado será eliminado de la hoja de vida del vehículo."
+        textoConfirmar="Sí, eliminar"
+        textoCancelar="Cancelar"
+        esPeligro={true}
+        onCancelar={() => setDocAEliminar(null)}
+        onConfirmar={() => {
+          if (!docAEliminar) return;
+          const id = docAEliminar;
+          const doc = hvData[id];
+          setDocAEliminar(null);
+          if (doc?.ruta) {
+            eliminarArchivo(doc.ruta, () => actualizarHV(id, "pendiente"));
+          } else {
+            actualizarHV(id, "pendiente");
+          }
+        }}
+      />
     </div>
   );
 }

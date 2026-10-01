@@ -1,242 +1,442 @@
 /**
  * Hecho por JESUS COSSIO DEV
- * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ * Directorio y Registro Guiado de Empresas / Clientes
+ * Optimizado para transportadores de 30 a 70 años con flujo Wizard claro.
  */
 import { useState } from "react";
-import { ArrowLeft, Plus, Search, Trash2, Save, Handshake } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowLeft, Plus, Search, Trash2, Building2, Mail,
+  MapPin, CheckCircle2, MessageSquare, Handshake
+} from "lucide-react";
 import { theme as t } from "../styles/theme";
+import ConfirmarModal from "../components/ConfirmarModal";
+import {
+  WizardPantalla,
+  WizardHeader,
+  WizardProgress,
+  WizardBanner,
+  WizardCampo,
+  WizardInput,
+  WizardOpciones,
+  WizardNav
+} from "../components/WizardForm";
 
-const TIPOS = ["Transportadora","Generadora de carga","Operador logístico","Comercializadora","Otra"];
+const TIPOS_EMPRESA = [
+  { valor: "Transportadora",       icono: "🚛", titulo: "Empresa Transportadora", desc: "Empresa de transporte habilitada" },
+  { valor: "Generadora de carga",  icono: "🏭", titulo: "Generadora de Carga",    desc: "Fábricas, plantas y productores" },
+  { valor: "Operador logístico",   icono: "📦", titulo: "Operador Logístico",     desc: "Coordinadores y agencias de carga" },
+  { valor: "Comercializadora",     icono: "🏪", titulo: "Comercializadora",       desc: "Distribuidores mayoristas y comercio" },
+  { valor: "Otra",                 icono: "🏢", titulo: "Otro tipo",              desc: "Cliente particular o intermediario" },
+];
 
 function Empresas({ empresas = [], onAgregar, onEliminar, mostrarToast }) {
-  const [vista,    setVista]    = useState("lista");
+  const navigate = useNavigate();
+  const [vista, setVista] = useState("lista"); // lista | agregar
+  const [pasoWizard, setPasoWizard] = useState(1); // 1: Tipo/Nombre, 2: NIT/Ciudad, 3: Contacto/Tel
   const [busqueda, setBusqueda] = useState("");
-  const [errores,  setErrores]  = useState({});
-  const [guardando,setGuardando]= useState(false);
+  const [guardando, setGuardando] = useState(false);
 
-  const [tipo,       setTipo]       = useState("");
-  const [razonSocial,setRazonSocial]= useState("");
-  const [nit,        setNit]        = useState("");
-  const [ciudad,     setCiudad]     = useState("");
-  const [contacto,   setContacto]   = useState("");
-  const [telefono,   setTelefono]   = useState("");
-  const [correo,     setCorreo]     = useState("");
+  // Campos
+  const [tipo,        setTipo]        = useState("Transportadora");
+  const [razonSocial, setRazonSocial] = useState("");
+  const [nit,         setNit]         = useState("");
+  const [ciudad,      setCiudad]      = useState("");
+  const [contacto,    setContacto]    = useState("");
+  const [telefono,    setTelefono]    = useState("");
+  const [correo,      setCorreo]      = useState("");
+
+  // Modal para eliminar
   const [empresaAEliminar, setEmpresaAEliminar] = useState(null);
 
   const limpiar = () => {
-    setTipo("");setRazonSocial("");setNit("");
-    setCiudad("");setContacto("");setTelefono("");
-    setCorreo("");setErrores({});
-  };
-
-  const validar = () => {
-    const e={};
-    if (!tipo)               e.tipo        = "Selecciona el tipo";
-    if (!razonSocial.trim()) e.razonSocial = "La razón social es obligatoria";
-    return e;
+    setTipo("Transportadora");
+    setRazonSocial("");
+    setNit("");
+    setCiudad("");
+    setContacto("");
+    setTelefono("");
+    setCorreo("");
+    setPasoWizard(1);
+    setVista("lista");
   };
 
   const guardar = async () => {
-    const e=validar();
-    if (Object.keys(e).length>0){setErrores(e);return;}
+    if (!razonSocial.trim()) {
+      if (mostrarToast) mostrarToast("Ingresa el nombre o razón social de la empresa", "error");
+      setPasoWizard(1);
+      return;
+    }
     setGuardando(true);
-    await onAgregar({tipo,razonSocial:razonSocial.trim(),nit:nit.trim(),ciudad:ciudad.trim(),contacto:contacto.trim(),telefono:telefono.trim(),correo:correo.trim()});
-    limpiar();setVista("lista");setGuardando(false);
+    try {
+      await onAgregar({
+        tipo,
+        razonSocial: razonSocial.trim(),
+        nit: nit.trim(),
+        ciudad: ciudad.trim(),
+        contacto: contacto.trim(),
+        telefono: telefono.trim(),
+        correo: correo.trim()
+      });
+      if (mostrarToast) mostrarToast("¡Excelente! Empresa registrada con éxito", "exito");
+      limpiar();
+    } catch {
+      if (mostrarToast) mostrarToast("Error al guardar empresa", "error");
+    } finally {
+      setGuardando(false);
+    }
   };
 
-  const eliminar = async (emp) => {
-    await onEliminar(emp.firestoreId);
-    mostrarToast("Empresa eliminada","info")
+  const ejecutarEliminar = async () => {
+    if (!empresaAEliminar) return;
+    const id = empresaAEliminar.firestoreId;
+    setEmpresaAEliminar(null);
+    try {
+      await onEliminar(id);
+      if (mostrarToast) mostrarToast("Empresa eliminada del directorio", "info");
+    } catch {
+      if (mostrarToast) mostrarToast("Error al eliminar empresa", "error");
+    }
   };
 
-  const filtradas = empresas.filter(e=>
-    e.razonSocial.toLowerCase().includes(busqueda.toLowerCase())||
-    (e.ciudad||"").toLowerCase().includes(busqueda.toLowerCase())
+  const filtradas = empresas.filter(e =>
+    (e.razonSocial || "").toLowerCase().includes(busqueda.toLowerCase()) ||
+    (e.ciudad || "").toLowerCase().includes(busqueda.toLowerCase()) ||
+    (e.nit || "").toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  if (vista==="agregar") {
+  const pasoValido = (() => {
+    if (pasoWizard === 1) return razonSocial.trim().length >= 2;
+    return true;
+  })();
+
+  const ETIQUETAS_WIZARD = [
+    "Tipo y razón social",
+    "NIT y ubicación",
+    "Contacto y teléfono"
+  ];
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // RENDER: ASISTENTE WIZARD GUIADO PARA AGREGAR EMPRESA
+  // ══════════════════════════════════════════════════════════════════════════
+  if (vista === "agregar") {
     return (
-      <div style={styles.pantalla}>
-        <div style={styles.header}>
-          <button style={styles.btnVolver} onClick={()=>{limpiar();setVista("lista");}}>
-            <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
-            <span>Empresas</span>
-          </button>
-          <h1 style={styles.titulo}>Agregar empresa</h1>
-        </div>
+      <WizardPantalla>
+        <WizardHeader
+          titulo="Nueva Empresa / Cliente"
+          onVolver={() => pasoWizard > 1 ? setPasoWizard(p => p - 1) : limpiar()}
+          labelVolver={pasoWizard > 1 ? "Atrás" : "Cancelar"}
+        />
 
-        <div style={styles.seccionLabel}>Datos de la empresa</div>
-        <div style={styles.card}>
-          <div style={styles.campo}>
-            <label htmlFor="a11y-Empresas-73" style={styles.label}>Tipo *</label>
-            <select id="a11y-Empresas-73" value={tipo} onChange={e=>{setTipo(e.target.value);setErrores({...errores,tipo:null});}}
-              style={{...styles.input,color:tipo?t.colors.textPrimary:t.colors.textTertiary}}>
-              <option value="">Seleccionar...</option>
-              {TIPOS.map(tp=><option key={tp} value={tp}>{tp}</option>)}
-            </select>
-            {errores.tipo&&<p style={styles.error}>{errores.tipo}</p>}
-          </div>
-          <div style={styles.campo}>
-            <label htmlFor="a11y-Empresas-82" style={styles.label}>Razón social *</label>
-            <input id="a11y-Empresas-82" type="text" placeholder="Nombre de la empresa" value={razonSocial}
-              onChange={e=>{setRazonSocial(e.target.value);setErrores({...errores,razonSocial:null});}}
-              style={styles.input} />
-            {errores.razonSocial&&<p style={styles.error}>{errores.razonSocial}</p>}
-          </div>
-          <div style={styles.fila2}>
-            <div style={styles.campo}>
-              <label htmlFor="a11y-Empresas-90" style={styles.label}>NIT</label>
-              <input id="a11y-Empresas-90" type="text" placeholder="900.123.456-7" value={nit} onChange={e=>setNit(e.target.value)} style={styles.input} />
+        <WizardProgress total={3} actual={pasoWizard} etiquetas={ETIQUETAS_WIZARD} />
+
+        {/* ── PASO 1: TIPO Y RAZÓN SOCIAL ── */}
+        {pasoWizard === 1 && (
+          <>
+            <WizardBanner
+              icono="🏢"
+              titulo="¿Cómo se llama la empresa?"
+              mensaje="Ingresa el nombre o razón social de la empresa que te contrata o genera los fletes."
+            />
+            <div style={stylesWz.cardWrapper}>
+              <WizardCampo label="Nombre o Razón Social" obligatorio ayuda="Ej: Coltanques, Bavaria, D1, Servientrega...">
+                <WizardInput
+                  type="text"
+                  placeholder="Nombre de la empresa"
+                  value={razonSocial}
+                  onChange={e => setRazonSocial(e.target.value)}
+                />
+              </WizardCampo>
+
+              <WizardCampo label="Tipo de Empresa" obligatorio>
+                <WizardOpciones
+                  opciones={TIPOS_EMPRESA}
+                  valor={tipo}
+                  onChange={setTipo}
+                />
+              </WizardCampo>
             </div>
-            <div style={styles.campo}>
-              <label htmlFor="a11y-Empresas-94" style={styles.label}>Ciudad</label>
-              <input id="a11y-Empresas-94" type="text" placeholder="Barranquilla" value={ciudad} onChange={e=>setCiudad(e.target.value)} style={styles.input} />
+          </>
+        )}
+
+        {/* ── PASO 2: NIT Y CIUDAD ── */}
+        {pasoWizard === 2 && (
+          <>
+            <WizardBanner
+              icono="📑"
+              titulo="Identificación y Ubicación"
+              mensaje="El NIT aparecerá automáticamente en las cuentas de cobro y manifiestos de carga."
+            />
+            <div style={stylesWz.cardWrapper}>
+              <WizardCampo label="NIT de la Empresa (opcional)" ayuda="Ej: 900.123.456-7">
+                <WizardInput
+                  type="text"
+                  placeholder="Número de NIT con dígito"
+                  value={nit}
+                  onChange={e => setNit(e.target.value)}
+                />
+              </WizardCampo>
+
+              <WizardCampo label="Ciudad o Municipio principal" ayuda="Ej: Bogotá, Medellín, Barranquilla, Cali, Buenaventura...">
+                <WizardInput
+                  type="text"
+                  placeholder="Ciudad sede"
+                  value={ciudad}
+                  onChange={e => setCiudad(e.target.value)}
+                />
+              </WizardCampo>
             </div>
-          </div>
-        </div>
+          </>
+        )}
 
-        <div style={styles.seccionLabel}>Contacto</div>
-        <div style={styles.card}>
-          <div style={styles.campo}>
-            <label htmlFor="a11y-Empresas-103" style={styles.label}>Persona de contacto</label>
-            <input id="a11y-Empresas-103" type="text" placeholder="Nombre completo" value={contacto} onChange={e=>setContacto(e.target.value)} style={styles.input} />
-          </div>
-          <div style={styles.campo}>
-            <label htmlFor="a11y-Empresas-107" style={styles.label}>Teléfono</label>
-            <input id="a11y-Empresas-107" type="tel" placeholder="+57 300 000 0000" value={telefono} onChange={e=>setTelefono(e.target.value)} style={styles.input} />
-          </div>
-          <div style={styles.campo}>
-            <label htmlFor="a11y-Empresas-111" style={styles.label}>Correo</label>
-            <input id="a11y-Empresas-111" type="email" placeholder="correo@empresa.com" value={correo} onChange={e=>setCorreo(e.target.value)} style={styles.input} />
-          </div>
-        </div>
+        {/* ── PASO 3: CONTACTO Y TELÉFONO ── */}
+        {pasoWizard === 3 && (
+          <>
+            <WizardBanner
+              icono="👤"
+              titulo="Contacto directo y teléfono"
+              mensaje="Guarda el despachador o la persona de facturación para llamarlo o escribirle en 1 toque."
+            />
+            <div style={stylesWz.cardWrapper}>
+              <WizardCampo label="Nombre del contacto (opcional)" ayuda="Ej: Ing. Carlos Pérez (Despachador)">
+                <WizardInput
+                  type="text"
+                  placeholder="Persona encargada"
+                  value={contacto}
+                  onChange={e => setContacto(e.target.value)}
+                />
+              </WizardCampo>
 
-        <div style={{padding:"0 16px"}}>
-          <button style={{...styles.btnGuardar,opacity:guardando?0.75:1}} onClick={guardar} disabled={guardando}>
-            <Save size={18} color="#fff" strokeWidth={2} />
-            {guardando?"Guardando...":"Guardar empresa"}
-          </button>
-        </div>
-      </div>
+              <WizardCampo label="Teléfono o WhatsApp" ayuda="Ej: +57 310 000 0000">
+                <WizardInput
+                  type="tel"
+                  placeholder="Número de celular o fijo"
+                  value={telefono}
+                  onChange={e => setTelefono(e.target.value)}
+                />
+              </WizardCampo>
+
+              <WizardCampo label="Correo electrónico (opcional)" ayuda="Para envío de facturas o soportes">
+                <WizardInput
+                  type="email"
+                  placeholder="facturacion@empresa.com"
+                  value={correo}
+                  onChange={e => setCorreo(e.target.value)}
+                />
+              </WizardCampo>
+
+              <div style={{ marginTop: "24px" }}>
+                <button
+                  type="button"
+                  onClick={guardar}
+                  disabled={guardando}
+                  style={{
+                    width: "100%", padding: "16px", borderRadius: "14px",
+                    background: "#10B981", color: "#FFFFFF", border: "none",
+                    fontSize: "17px", fontWeight: 800, cursor: "pointer",
+                    display: "flex", justifyContent: "center", alignItems: "center", gap: "8px",
+                    boxShadow: "0 4px 14px rgba(16,185,129,0.3)"
+                  }}
+                >
+                  <CheckCircle2 size={20} />
+                  {guardando ? "Guardando empresa..." : "Confirmar y Guardar Empresa"}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Navegación inferior */}
+        {pasoWizard < 3 && (
+          <WizardNav
+            pasoActual={pasoWizard}
+            totalPasos={3}
+            onAtras={() => setPasoWizard(p => p - 1)}
+            onSiguiente={() => setPasoWizard(p => p + 1)}
+            deshabilitarSiguiente={!pasoValido}
+            labelSiguiente="Siguiente →"
+          />
+        )}
+      </WizardPantalla>
     );
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // RENDER: LISTA DEL DIRECTORIO DE EMPRESAS
+  // ══════════════════════════════════════════════════════════════════════════
   return (
     <div style={styles.pantalla}>
       <div style={styles.header}>
-        <div>
-          <p style={styles.headerSub}>Directorio</p>
-          <h1 style={styles.titulo}>Empresas</h1>
-        </div>
-        <button style={styles.btnAgregar} onClick={()=>setVista("agregar")}>
-          <Plus size={16} color="#fff" strokeWidth={2.5} />
-          Agregar
+        <button
+          type="button"
+          aria-label="Volver"
+          style={styles.btnVolver}
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft size={18} color={t.colors.blue} strokeWidth={2.5} />
+          <span>Volver</span>
         </button>
+        <h1 style={styles.titulo}>Empresas y Clientes</h1>
       </div>
 
-      <div style={styles.buscadorWrap}>
-        <Search size={16} color={t.colors.textTertiary} style={{flexShrink:0}} />
-        <input type="text" placeholder="Buscar empresa o ciudad..." value={busqueda}
-          onChange={e=>setBusqueda(e.target.value)} style={styles.buscadorInput} />
-      </div>
+      <div style={styles.contenido}>
+        {/* Botón Principal Registrar Empresa */}
+        <button
+          type="button"
+          style={styles.btnAgregar}
+          onClick={() => {
+            limpiar();
+            setVista("agregar");
+          }}
+        >
+          <Plus size={20} />
+          <span>Registrar nueva empresa</span>
+        </button>
 
-      {empresas.length===0&&(
-        <div style={styles.vacio}>
-          <div style={styles.vacioIconoWrap}>
-            <Handshake size={40} color={t.colors.blue} strokeWidth={1.5} />
+        {/* Barra de Búsqueda */}
+        <div style={styles.buscadorWrap}>
+          <Search size={18} color={t.colors.textTertiary} style={{ flexShrink: 0 }} />
+          <input
+            type="text"
+            placeholder="Buscar por nombre, NIT o ciudad..."
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+            style={styles.buscadorInput}
+          />
+        </div>
+
+        {/* Estado Vacío */}
+        {empresas.length === 0 && (
+          <div style={styles.vacio}>
+            <Handshake size={48} color={t.colors.blue} strokeWidth={1.5} />
+            <p style={{ fontSize: "16px", fontWeight: 700, color: t.colors.textPrimary, margin: "12px 0 4px" }}>
+              Sin empresas registradas
+            </p>
+            <p style={{ fontSize: "13px", color: t.colors.textSecondary, margin: 0 }}>
+              Guarda tus clientes frecuentes para generar cuentas de cobro automáticas y vincular viajes.
+            </p>
           </div>
-          <p style={styles.vacioTexto}>Sin empresas registradas</p>
-          <p style={styles.vacioSub}>Registra las empresas con las que trabajas.</p>
-          <button style={styles.btnAgregarVacio} onClick={()=>setVista("agregar")}>
-            <Plus size={16} color="#fff" /> Agregar empresa
-          </button>
-        </div>
-      )}
+        )}
 
-      {empresas.length>0&&filtradas.length===0&&(
-        <div style={styles.vacio}>
-          <p style={styles.vacioTexto}>Sin resultados</p>
-            <p style={styles.vacioSub}>No hay empresas con &quot;{busqueda}&quot;</p>
-        </div>
-      )}
+        {empresas.length > 0 && filtradas.length === 0 && (
+          <div style={styles.vacio}>
+            <p style={{ fontSize: "15px", fontWeight: 700, color: t.colors.textSecondary, margin: 0 }}>
+              No se encontraron empresas con &ldquo;{busqueda}&rdquo;
+            </p>
+          </div>
+        )}
 
-      <div style={styles.lista}>
-        {filtradas.map(emp=>(
-          <div key={emp.firestoreId} style={styles.tarjeta}>
-            <div style={styles.tarjetaFranja} />
-            <div style={styles.tarjetaContenido}>
-              <div style={styles.tarjetaIconoWrap}>
-                <Handshake size={22} color={t.colors.blue} strokeWidth={1.8} />
-              </div>
-              <div style={{flex:1,minWidth:0}}>
-                <p style={styles.tarjetaNombre}>{emp.razonSocial}</p>
-                <p style={styles.tarjetaTipo}>{emp.tipo}{emp.ciudad?` · ${emp.ciudad}`:""}</p>
-                {emp.contacto&&(
-                  <p style={styles.tarjetaContacto}>
-                    {emp.contacto}{emp.telefono?` · ${emp.telefono}`:""}
+        {/* Lista de Tarjetas de Empresas */}
+        {filtradas.map(e => (
+          <div key={e.firestoreId} style={styles.cardEmpresa}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
+              <div style={{ display: "flex", gap: "12px", flex: 1, minWidth: 0 }}>
+                <div style={styles.avatar}>
+                  <Building2 size={24} color={t.colors.blue} strokeWidth={2} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: "17px", fontWeight: 800, color: t.colors.textPrimary, margin: 0 }}>
+                    {e.razonSocial}
                   </p>
+                  <span style={{
+                    fontSize: "11px", fontWeight: 700, color: "#1D4ED8",
+                    background: "#EFF6FF", padding: "2px 8px", borderRadius: "6px",
+                    display: "inline-block", marginTop: "3px"
+                  }}>
+                    {e.tipo || "Empresa"}
+                  </span>
+                  {e.nit && (
+                    <p style={{ fontSize: "13px", color: t.colors.textSecondary, margin: "4px 0 0" }}>
+                      NIT: {e.nit}
+                    </p>
+                  )}
+                  {e.ciudad && (
+                    <p style={{ fontSize: "13px", color: t.colors.textTertiary, margin: "2px 0 0", display: "flex", alignItems: "center", gap: "3px" }}>
+                      <MapPin size={12} /> {e.ciudad}
+                    </p>
+                  )}
+                  {e.contacto && (
+                    <p style={{ fontSize: "12px", color: t.colors.textTertiary, margin: "4px 0 0" }}>
+                      Contacto: {e.contacto}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Botón Eliminar */}
+              <button
+                type="button"
+                aria-label="Eliminar empresa"
+                style={styles.btnIcono}
+                onClick={() => setEmpresaAEliminar(e)}
+              >
+                <Trash2 size={16} color={t.colors.red} strokeWidth={2} />
+              </button>
+            </div>
+
+            {/* Acciones de Contacto */}
+            {(e.telefono || e.correo) && (
+              <div style={{ marginTop: "12px", borderTop: `1px solid ${t.colors.borderLight}`, paddingTop: "10px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {e.telefono && (
+                  <a
+                    href={`https://wa.me/${e.telefono.replace(/[^0-9]/g, "")}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={styles.btnContacto}
+                  >
+                    <MessageSquare size={15} color="#25D366" />
+                    <span>WhatsApp: {e.telefono}</span>
+                  </a>
+                )}
+                {e.correo && (
+                  <a
+                    href={`mailto:${e.correo}`}
+                    style={styles.btnContacto}
+                  >
+                    <Mail size={15} color={t.colors.blue} />
+                    <span>{e.correo}</span>
+                  </a>
                 )}
               </div>
-            </div>
-            {empresaAEliminar?.firestoreId === emp.firestoreId ? (
-  <div style={{display:"flex", flexDirection:"column", gap:"4px", padding:"8px"}}>
-    <button
-      style={{padding:"6px 10px", background:t.colors.redSoft, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.red, cursor:"pointer"}}
-      onClick={() => { eliminar(emp); setEmpresaAEliminar(null); }}
-    >
-      Confirmar
-    </button>
-    <button
-      style={{padding:"6px 10px", background:"none", border:`1px solid ${t.colors.border}`, borderRadius:t.radius.sm, fontSize:t.fonts.sizeXs, cursor:"pointer", color:t.colors.textSecondary}}
-      onClick={() => setEmpresaAEliminar(null)}
-    >
-      Cancelar
-    </button>
-  </div>
-) : (
-  <button type="button" aria-label={`Eliminar empresa ${emp.razonSocial}`} style={styles.btnEliminar} onClick={() => setEmpresaAEliminar(emp)}>
-    <Trash2 size={16} color={t.colors.red} strokeWidth={1.8} />
-  </button>
-)}
+            )}
           </div>
         ))}
       </div>
+
+      {/* Modal accesible de confirmación */}
+      <ConfirmarModal
+        visible={Boolean(empresaAEliminar)}
+        titulo="¿Eliminar empresa del directorio?"
+        mensaje={empresaAEliminar ? `¿Estás seguro de que deseas eliminar a ${empresaAEliminar.razonSocial}?` : ""}
+        textoBotonConfirmar="Eliminar empresa"
+        esPeligroso={true}
+        onCancelar={() => setEmpresaAEliminar(null)}
+        onConfirmar={ejecutarEliminar}
+      />
     </div>
   );
 }
 
+const stylesWz = {
+  cardWrapper: {
+    padding: "0 20px 20px",
+  }
+};
+
 const styles = {
-  pantalla:          { maxWidth:"430px", margin:"0 auto", minHeight:"100vh", background:t.colors.bgPrimary, paddingBottom:"20px" },
-  header:            { display:"flex", justifyContent:"space-between", alignItems:"flex-end", padding:"20px 20px 16px", background:t.colors.bgCard, borderBottom:`1px solid ${t.colors.borderLight}` },
-  headerSub:         { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"0 0 2px", fontWeight:t.fonts.weightMedium, textTransform:"uppercase", letterSpacing:"0.06em" },
-  titulo:            { fontSize:"22px", fontWeight:t.fonts.weightBlack, color:t.colors.textPrimary, margin:0, letterSpacing:"-0.3px" },
-  btnVolver:         { display:"flex", alignItems:"center", gap:"4px", background:"none", border:"none", color:t.colors.blue, cursor:"pointer", padding:0, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightSemibold },
-  btnAgregar:        { display:"flex", alignItems:"center", gap:"6px", padding:"10px 16px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer" },
-  buscadorWrap:      { display:"flex", alignItems:"center", gap:"10px", margin:"12px 16px 8px", background:t.colors.bgCard, border:`1.5px solid ${t.colors.border}`, borderRadius:t.radius.md, padding:"11px 14px", boxShadow:t.shadows.card },
-  buscadorInput:     { flex:1, border:"none", fontSize:t.fonts.sizeSm, color:t.colors.textPrimary, background:"transparent" },
-  vacio:             { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"48px 24px", textAlign:"center", margin:"8px 16px", boxShadow:t.shadows.card },
-  vacioIconoWrap:    { width:"72px", height:"72px", background:t.colors.blueSoft, borderRadius:t.radius.xl, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 16px" },
-  vacioTexto:        { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:"0 0 6px" },
-  vacioSub:          { fontSize:t.fonts.sizeSm, color:t.colors.textSecondary, margin:"0 0 20px" },
-  btnAgregarVacio:   { display:"inline-flex", alignItems:"center", gap:"6px", padding:"12px 24px", background:t.colors.blue, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeSm, fontWeight:t.fonts.weightBold, cursor:"pointer" },
-  lista:             { padding:"0 16px", display:"flex", flexDirection:"column", gap:"10px" },
-  tarjeta:           { background:t.colors.bgCard, borderRadius:t.radius.lg, display:"flex", alignItems:"center", overflow:"hidden", boxShadow:t.shadows.card },
-  tarjetaFranja:     { width:"4px", alignSelf:"stretch", background:t.colors.blue, flexShrink:0 },
-  tarjetaContenido:  { display:"flex", alignItems:"center", gap:"12px", flex:1, padding:"14px 12px" },
-  tarjetaIconoWrap:  { width:"42px", height:"42px", background:t.colors.blueSoft, borderRadius:t.radius.sm, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 },
-  tarjetaNombre:     { fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, color:t.colors.textPrimary, margin:0 },
-  tarjetaTipo:       { fontSize:t.fonts.sizeXs, color:t.colors.textSecondary, margin:"2px 0 0" },
-  tarjetaContacto:   { fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"3px 0 0" },
-  btnEliminar:       { padding:"14px", background:"none", border:"none", cursor:"pointer", borderLeft:`1px solid ${t.colors.borderLight}` },
-  seccionLabel:      { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightBold, color:t.colors.textTertiary, textTransform:"uppercase", letterSpacing:"0.08em", padding:"16px 20px 8px" },
-  card:              { background:t.colors.bgCard, borderRadius:t.radius.lg, padding:"16px", margin:"0 16px 4px", boxShadow:t.shadows.card },
-  campo:             { display:"flex", flexDirection:"column", gap:"5px", marginBottom:"12px" },
-  fila2:             { display:"grid", gridTemplateColumns:"1fr 1fr", gap:"10px" },
-  label:             { fontSize:t.fonts.sizeXs, fontWeight:t.fonts.weightSemibold, color:t.colors.textSecondary, textTransform:"uppercase", letterSpacing:"0.05em" },
-  input:             { padding:"11px 12px", borderRadius:t.radius.sm, border:`1.5px solid ${t.colors.border}`, fontSize:t.fonts.sizeSm, background:t.colors.bgPrimary, color:t.colors.textPrimary, width:"100%", boxSizing:"border-box" },
-  error:             { fontSize:t.fonts.sizeXs, color:t.colors.red, margin:"3px 0 0", fontWeight:t.fonts.weightMedium },
-  btnGuardar:        { width:"100%", padding:"15px", background:t.colors.green, color:"#fff", border:"none", borderRadius:t.radius.md, fontSize:t.fonts.sizeMd, fontWeight:t.fonts.weightBold, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:"8px", marginTop:"8px" },
+  pantalla:       { maxWidth: "430px", margin: "0 auto", minHeight: "100vh", background: t.colors.bgPrimary, paddingBottom: "30px" },
+  header:         { display: "flex", alignItems: "center", gap: "12px", padding: "16px 20px 12px", background: t.colors.bgCard, borderBottom: `1px solid ${t.colors.borderLight}` },
+  btnVolver:      { display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", color: t.colors.blue, cursor: "pointer", padding: 0, fontSize: "15px", fontWeight: 700 },
+  titulo:         { fontSize: "18px", fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: 0 },
+  contenido:      { padding: "16px" },
+  btnAgregar:     { width: "100%", padding: "16px", background: "#10B981", color: "#FFFFFF", border: "none", borderRadius: "14px", fontSize: "16px", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", boxShadow: "0 4px 14px rgba(16,185,129,0.3)", marginBottom: "16px" },
+  buscadorWrap:   { display: "flex", alignItems: "center", gap: "10px", padding: "12px 14px", background: t.colors.bgCard, borderRadius: "14px", border: `1.5px solid ${t.colors.border}`, marginBottom: "16px" },
+  buscadorInput:  { border: "none", background: "transparent", color: t.colors.textPrimary, fontSize: "15px", width: "100%", outline: "none" },
+  cardEmpresa:    { background: t.colors.bgCard, borderRadius: "16px", padding: "16px", marginBottom: "12px", boxShadow: t.shadows.card, border: `1px solid ${t.colors.borderLight}` },
+  avatar:         { width: "46px", height: "46px", borderRadius: "12px", background: t.colors.blueSoft, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  btnIcono:       { background: "none", border: `1px solid ${t.colors.borderLight}`, borderRadius: "10px", cursor: "pointer", padding: "8px", display: "flex", alignItems: "center", justifyContent: "center", minWidth: "36px", minHeight: "36px" },
+  btnContacto:    { display: "flex", alignItems: "center", gap: "6px", color: t.colors.textPrimary, textDecoration: "none", fontSize: "13px", fontWeight: 600, padding: "4px 8px", background: t.colors.bgSection, borderRadius: "8px" },
+  vacio:          { textAlign: "center", padding: "36px 20px", background: t.colors.bgCard, borderRadius: "16px", border: `1px dashed ${t.colors.borderLight}`, marginBottom: "16px" }
 };
 
 export default Empresas;
-

@@ -4,14 +4,16 @@
  */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Lock, Save, Users, Settings, HelpCircle, Info, LogOut, ChevronUp, ChevronRight, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, User, Lock, Save, Users, Settings, HelpCircle, Info, LogOut, ChevronUp, ChevronRight, Eye, EyeOff, Moon, Sun } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme";
 import { theme as t } from "../styles/theme";
 import { alPulsarEnterOEspacio } from "../utils/teclado";
 
 function Perfil({ mostrarToast }) {
   const navigate  = useNavigate();
   const { usuario, cerrarSesion, cambiarNombre, cambiarContrasena } = useAuth();
+  const { tema, cambiarTema } = useTheme();
 
   const [nombre,         setNombre]         = useState(usuario?.displayName || "");
   const [guardandoNom,   setGuardandoNom]   = useState(false);
@@ -224,6 +226,50 @@ function Perfil({ mostrarToast }) {
               )}
             </>
           )}
+        </div>
+
+        {/* APARIENCIA */}
+        <p style={styles.seccionTitulo}>Apariencia</p>
+        <div style={styles.card}>
+          <div style={{ ...styles.filaMenu, borderBottom: "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={styles.filaIzq}>
+              <div style={{ ...styles.iconoBox, background: tema === "dark" ? t.colors.blueSoft : "#FEF3C7" }}>
+                {tema === "dark" ? <Moon size={16} color={t.colors.blueText} strokeWidth={2}/> : <Sun size={16} color="#D97706" strokeWidth={2}/>}
+              </div>
+              <div>
+                <p style={styles.filaLabel}>Modo de pantalla</p>
+                <p style={styles.filaSub}>{tema === "dark" ? "Oscuro (Predeterminado)" : "Claro"}</p>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "6px", background: t.colors.bgInput, padding: "4px", borderRadius: "10px", border: `1px solid ${t.colors.borderLight}` }}>
+              <button
+                type="button"
+                onClick={() => cambiarTema("dark")}
+                style={{
+                  display: "flex", alignItems: "center", gap: "4px", padding: "6px 10px",
+                  borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "12px", fontWeight: 700,
+                  background: tema === "dark" ? t.colors.blue : "transparent",
+                  color: tema === "dark" ? "#FFFFFF" : t.colors.textSecondary,
+                  transition: "all 0.2s"
+                }}
+              >
+                <Moon size={12} /> Oscuro
+              </button>
+              <button
+                type="button"
+                onClick={() => cambiarTema("light")}
+                style={{
+                  display: "flex", alignItems: "center", gap: "4px", padding: "6px 10px",
+                  borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "12px", fontWeight: 700,
+                  background: tema === "light" ? t.colors.blue : "transparent",
+                  color: tema === "light" ? "#FFFFFF" : t.colors.textSecondary,
+                  transition: "all 0.2s"
+                }}
+              >
+                <Sun size={12} /> Claro
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* MÁS */}

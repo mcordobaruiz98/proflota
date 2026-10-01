@@ -1,3 +1,7 @@
+/**
+ * Hecho por JESUS COSSIO DEV
+ * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
@@ -46,23 +50,22 @@ function AcercaDe() {
           {abierto.terminos && (
             <div style={styles.cuerpo}>
               {[
-                {texto:"Estos Términos y Condiciones regulan el uso de la aplicación NAVIRA (en adelante \"la Aplicación\"), desarrollada y operada por T&T MCR, identificado con celula 1.017.255.866, con domicilio en Barranquilla, Colombia (en adelante \"NAVIRA\" o \"NOSOTROS\")"},
-                {texto:"Al registrarse al usar la Aplicación, usted (en adelante \"el Usuario\"), acepta estos terminos en su totalidad. Si no está de acuerdo, no haga uso de la Aplicación"},
-                {titulo:"1. Descripción del servicio", texto:"NAVIRA es una aplicación web progresiva (PWA) diseñada para la gestión administrativa de flotas de transporte de carga por carretera en Colombia. Sus funciones incluyen entre otras: * Cálculo de costos y rentabilidades de viajes. * Registros y seguimientos de vehículos. * Control de mantenimiento preventivo. * Gestión de cartera y cuentas por cobrar. * Generación de informes financieros."},
-                {texto:"La Aplicación es una herramienta de apoyo administrativo. NAVIRA no presta servicios de trasnporte, intermediación de carga, ni asesoria financiera, contable o legal."},
-                {titulo:"2. Registro y Cuentas", texto:"2.1. Para usar la Aplicación, el Usuario debe crear una cuenta proporcionando información verz y actualizada."},
+                {texto:"Estos Términos y Condiciones regulan el uso de la aplicación NAVIRA (en adelante \"la Aplicación\"), desarrollada y operada por T&T MCR, identificado con cédula 1.017.255.866, con domicilio en Barranquilla, Colombia (en adelante \"NAVIRA\" o \"NOSOTROS\")."},
+                {texto:"Al registrarse o usar la Aplicación, usted (en adelante \"el Usuario\"), acepta estos términos en su totalidad. Si no está de acuerdo, no haga uso de la Aplicación."},
+                {titulo:"1. Descripción del servicio", texto:"NAVIRA es una aplicación web progresiva (PWA) diseñada para la gestión administrativa de flotas de transporte de carga por carretera en Colombia. Sus funciones incluyen entre otras: * Cálculo de costos y rentabilidad de viajes. * Registro y seguimiento de vehículos. * Control de mantenimiento preventivo. * Gestión de cartera y cuentas por cobrar. * Generación de informes financieros."},
+                {texto:"La Aplicación es una herramienta de apoyo administrativo. NAVIRA no presta servicios de transporte, intermediación de carga, ni asesoría financiera, contable o legal."},
+                {titulo:"2. Registro y Cuentas", texto:"2.1. Para usar la Aplicación, el Usuario debe crear una cuenta proporcionando información veraz y actualizada."},
                 {texto:"2.2. El Usuario es responsable de mantener la confidencialidad de sus credenciales de acceso (correo electrónico y contraseña)."},
-                {texto:"2.3. Durante el período de prueba (Beta), el acceso requiere un código de invitación proporcionado por NAVIRA"},
+                {texto:"2.3. Durante el período de prueba (Beta), el acceso requiere un código de invitación proporcionado por NAVIRA."},
                 {texto:"2.4. El Usuario debe ser mayor de edad."},
                 {texto:"2.5. Cada cuenta es personal e intransferible."},
-                {titulo:"3. Uso aceptable", texto:"El usuario se compromete a:"},
+                {titulo:"3. Uso aceptable", texto:"El Usuario se compromete a:"},
                 {texto:"3.1. Utilizar la Aplicación únicamente para fines de gestión de transporte de carga."},
                 {texto:"3.2. No introducir información falsa, engañosa o que viole derechos de terceros."},
                 {texto:"3.3. No intentar acceder a datos de otros usuarios ni a sistemas internos de la Aplicación."},
                 {texto:"3.4. No copiar, modificar, distribuir ni realizar ingeniería inversa del software."},
                 {texto:"3.5. No utilizar la Aplicación para actividades ilegales o contrarias a la normativa colombiana de transporte."},
                 {titulo:"4. Datos y contenido del usuario", texto:"4.1. El Usuario es propietario de los datos que ingresa en la Aplicación (información de vehículos, viajes, conductores, empresas, gastos)."},
-                {texto:"4.1. El Usuario es propietario de los datos que ingresa en la Aplicación (información de vehículos, viajes, conductores, empresas, gastos)."},
                 {texto:"4.2. NAVIRA no accede, comparte ni comercializa los datos del Usuario con terceros, salvo lo dispuesto en la Política de Privacidad."},
                 {texto:"4.3. El Usuario es responsable de la veracidad y legalidad de la información que registra."},
                 {texto:"4.4. NAVIRA podrá utilizar datos agregados y anonimizados (sin identificar al Usuario) para mejorar el servicio y generar estadísticas del sector."},
@@ -72,8 +75,8 @@ function AcercaDe() {
                 {titulo:"6. Disponibilidad del servicio", texto:"6.1. NAVIRA se esfuerza por mantener la Aplicación disponible las 24 horas del día, los 7 días de la semana."},
                 {texto:"6.2. NAVIRA no garantiza la disponibilidad ininterrumpida del servicio. Podrán existir interrupciones por mantenimiento, actualizaciones o causas de fuerza mayor."},
                 {texto:"6.3. NAVIRA no será responsable por daños derivados de la indisponibilidad temporal del servicio."},
-                {titulo:"7. Versión BETA", texto:"7.1. La versión actual de la Aplicación es una versión Beta, lo que significa que está en fase de pruebas y puede contener errores."},
-                {texto:"7.2. El Usuario acepta que la funcionalidad, el diseño y las características pueden cambiar sin previo aviso."},
+                {titulo:"7. Versión Beta", texto:"7.1. La versión actual de la Aplicación es una versión Beta, lo que significa que está en fase de pruebas y puede contener errores."},
+                {texto:"7.2. El Usuario acepta que la funcionalidad, el diseño y las características pueden evolucionar durante esta fase."},
                 {texto:"7.3. NAVIRA agradece los reportes de errores y sugerencias de mejora por parte de los beta testers."},
                 {texto:"7.4. El acceso a la versión Beta es gratuito. Los planes y precios de la versión comercial se comunicarán oportunamente."},
                 {titulo:"8. Tarifas y pagos", texto:"8.1. Durante la fase Beta, el uso de NAVIRA es completamente gratuito."},
@@ -82,16 +85,16 @@ function AcercaDe() {
                 {titulo:"9. Propiedad intelectual", texto:"9.1. NAVIRA, su logotipo, diseño, código fuente, algoritmos y contenido son propiedad exclusiva de T&T MCR."},
                 {texto:"9.2. El uso de la Aplicación no otorga al Usuario ningún derecho de propiedad intelectual sobre la misma."},
                 {texto:"9.3. Queda prohibida la reproducción, distribución o modificación total o parcial de la Aplicación sin autorización expresa."},
-                {titulo:"10. Versión BETA", texto:"10.1. La Aplicación es una herramienta de apoyo administrativo. Los cálculos, estimaciones y datos proporcionados son orientativos y no constituyen asesoría financiera, contable ni legal."},
+                {titulo:"10. Limitación de responsabilidad", texto:"10.1. La Aplicación es una herramienta de apoyo administrativo. Los cálculos, estimaciones y datos proporcionados son orientativos y no constituyen asesoría financiera, contable ni legal."},
                 {texto:"10.2. NAVIRA no se hace responsable por decisiones tomadas por el Usuario con base en la información generada por la Aplicación."},
                 {texto:"10.3. NAVIRA no se hace responsable por la exactitud de las tarifas de peajes, precios de combustible u otros datos de referencia que puedan variar sin previo aviso por las entidades correspondientes."},
                 {texto:"10.4. La responsabilidad máxima de NAVIRA frente al Usuario, por cualquier concepto, estará limitada al valor de las suscripciones pagadas por el Usuario en los últimos 12 meses."},
                 {titulo:"11. Cancelación y terminación", texto:"11.1. El Usuario puede cancelar su cuenta en cualquier momento contactando a soporte."},
                 {texto:"11.2. NAVIRA se reserva el derecho de suspender o cancelar cuentas que violen estos Términos."},
                 {texto:"11.3. Al cancelar la cuenta, los datos del Usuario serán eliminados en un plazo de 30 días calendario, salvo obligaciones legales de retención."},
-                {titulo:"12. Cancelación y terminación", texto:"12.1. NAVIRA podrá modificar estos Términos en cualquier momento, notificando al Usuario a través de la Aplicación o por correo electrónico."},
+                {titulo:"12. Modificaciones de los Términos", texto:"12.1. NAVIRA podrá modificar estos Términos en cualquier momento, notificando al Usuario a través de la Aplicación o por correo electrónico."},
                 {texto:"12.2. El uso continuado de la Aplicación después de la notificación constituye aceptación de los nuevos Términos."},
-                {titulo:"13. Cancelación y terminación", texto:"13.1.Estos Términos se rigen por las leyes de la República de Colombia."},
+                {titulo:"13. Ley aplicable y jurisdicción", texto:"13.1. Estos Términos se rigen por las leyes de la República de Colombia."},
                 {texto:"13.2. Cualquier controversia será sometida a la jurisdicción de los jueces y tribunales de Barranquilla, Atlántico, Colombia."},
                 {titulo:"14. Canales de terceros", texto:"NAVIRA ofrece canales opcionales de registro de información a través de plataformas de mensajería de terceros, como Telegram. Al vincular su cuenta con dichos canales, el usuario reconoce que: (i) la transmisión de los mensajes se realiza a través de la infraestructura del tercero (Telegram FZ-LLC), sujeta a sus propios términos y políticas de privacidad; (ii) NAVIRA no controla la seguridad, disponibilidad ni el tratamiento de datos que dicho tercero realice sobre los mensajes en tránsito; (iii) la vinculación es voluntaria y puede revocarse en cualquier momento desde la aplicación o dejando de usar el canal."},
                 {titulo:"15. Responsabilidad sobre registros por chat", texto:"Los registros creados a través de canales de chat (como el bot de Telegram) tienen la misma validez y efecto dentro de la plataforma que los creados en la aplicación. El usuario es responsable de verificar el resumen presentado por el bot antes de confirmar el guardado. NAVIRA no se hace responsable por errores derivados de información digitada incorrectamente por el usuario en cualquier canal."},

@@ -1,370 +1,339 @@
 /**
  * Hecho por JESUS COSSIO DEV
- * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ * FE-41 / FE-44: Wizard guiado 4 sub-pasos, fondo claro, opciones en tarjetas,
+ *                targets táctiles ≥52px, tipografía grande para 30-70 años.
  */
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, Camera } from "lucide-react";
-import { theme as t } from "../styles/theme";
+import { Camera } from "lucide-react";
 import { useSubirArchivo, sanearNombreArchivo } from "../hooks/useSubirArchivo";
 import { useAuth } from "../hooks/useAuth";
+import {
+  WizardPantalla, WizardHeader, WizardProgress,
+  WizardBanner, WizardCampo, WizardInput, WizardSelect,
+  WizardOpciones, WizardCard, WizardNav, WizardStepDots,
+} from "../components/WizardForm";
 
+/* ── Opciones tipo tarjeta ──────────────────────────────────── */
+const TIPOS_VEHICULO = [
+  { value:"CUATRO MANOS",  label:"Cuatro Manos",  icono:"🚚" },
+  { value:"DOBLETROQUE",   label:"Dobletroque",   icono:"🚛" },
+  { value:"TRACTOMULA 3S3",label:"Tractomula 3S3",icono:"🚜" },
+  { value:"TRACTOMULA 3S2",label:"Tractomula 3S2",icono:"🚜" },
+  { value:"SENCILLO",      label:"Sencillo",      icono:"🚌" },
+  { value:"TURBO",         label:"Turbo",         icono:"🚐" },
+  { value:"PATINETA 2S2",  label:"Patineta 2S2",  icono:"🛻" },
+  { value:"PATINETA 2S3",  label:"Patineta 2S3",  icono:"🛻" },
+  { value:"VOLQUETA",      label:"Volqueta",      icono:"🏗️" },
+  { value:"TURBO SENCILLO",label:"Turbo Sencillo",icono:"🚐" },
+  { value:"OTRO",          label:"Otro",          icono:"🚛" },
+];
+
+const TIPOS_REMOLQUE = [
+  { value:"",                   label:"Sin remolque",    icono:"❌" },
+  { value:"CARROCERIA",         label:"Carrocería",      icono:"📦" },
+  { value:"FURGON",             label:"Furgón",          icono:"🗃️" },
+  { value:"FURGON REFRIGERADO", label:"Furgón frío",     icono:"🧊" },
+  { value:"CISTERNA",           label:"Cisterna",        icono:"🛢️" },
+  { value:"PLANCHA",            label:"Plancha",         icono:"⬛" },
+  { value:"CONTENEDOR",         label:"Contenedor",      icono:"🟫" },
+  { value:"CAMA BAJA",          label:"Cama baja",       icono:"⬇️" },
+  { value:"VOLCO AUTODESCARGABLE",label:"Volco",         icono:"🏗️" },
+  { value:"NIÑERA",             label:"Niñera",          icono:"🔗" },
+  { value:"OTRO",               label:"Otro",            icono:"🚛" },
+];
+
+const BANNERS = [
+  { icono:"🚛", titulo:"¿Qué tipo de camión es?",      mensaje:"Toca el tipo y el remolque que corresponde." },
+  { icono:"🔤", titulo:"¿Cuál es la placa?",            mensaje:"Necesitamos placa, marca y modelo del vehículo." },
+  { icono:"👤", titulo:"¿Quién es el propietario?",     mensaje:"El nombre del dueño del camión y el tenedor (si es diferente)." },
+  { icono:"📸", titulo:"¡Casi listo!",                  mensaje:"Agrega una foto del camión (opcional) y confirma." },
+];
+
+const ETIQUETAS = ["Tipo", "Placa y Modelo", "Propietario", "Foto y Confirmar"];
+const TOTAL_PASOS = 4;
 
 function AgregarVehiculo({ vehiculos, conductores = [], onGuardar }) {
-  const guardandoRef = useRef(false);
-  const navigate = useNavigate();
-  const { usuario } = useAuth();
+  const guardandoRef   = useRef(false);
+  const navigate       = useNavigate();
+  const { usuario }    = useAuth();
+  const { subirArchivo, progreso, subiendo } = useSubirArchivo();
 
-  const [tipoVehiculo,  setTipoVehiculo]  = useState("");
-  const [tipoRemolque,  setTipoRemolque]  = useState("");
-  const [placa,         setPlaca]         = useState("");
-  const [placaRemolque, setPlacaRemolque] = useState("");
-  const [marca,         setMarca]         = useState("");
-  const [modelo,        setModelo]        = useState("");
-  const [propietario,   setPropietario]   = useState("");
-  const [tenedor,       setTenedor]       = useState("");
-  const [errores,       setErrores]       = useState({});
-  const [guardando,     setGuardando]     = useState(false);
-  const {subirArchivo, progreso, subiendo} = useSubirArchivo();
-  const [fotoUrl,       setFotoUrl]       = useState("");
-  const [conductorAsignado, setConductorAsignado] = useState("");
+  const [subPaso,       setSubPaso]      = useState(1);
+  const [tipoVehiculo,  setTipoVehiculo] = useState("");
+  const [tipoRemolque,  setTipoRemolque] = useState("");
+  const [placa,         setPlaca]        = useState("");
+  const [placaRemolque, setPlacaRemolque]= useState("");
+  const [marca,         setMarca]        = useState("");
+  const [modelo,        setModelo]       = useState("");
+  const [propietario,   setPropietario]  = useState("");
+  const [tenedor,       setTenedor]      = useState("");
+  const [conductorAsignado,setConductorAsignado]=useState("");
+  const [fotoUrl,       setFotoUrl]      = useState("");
+  const [guardando,     setGuardando]    = useState(false);
+  const [errores,       setErrores]      = useState({});
 
+  const PLACA_VEHICULO_REGEX = /^[A-Z]{3}[0-9]{3}$/;
+  const PLACA_REMOLQUE_REGEX = /^([A-Z]{3}[0-9]{3}|[R-Z][0-9]{5}|[0-9]{6})$/;
 
-
-  const validar = () => {
+  /* Validación por sub-paso */
+  const validarPaso = () => {
     const e = {};
-    if (!tipoVehiculo)       e.tipoVehiculo = "Selecciona el tipo de vehículo";
-    if (!placa.trim())       e.placa        = "La placa es obligatoria";
-    if (!propietario.trim()) e.propietario  = "El propietario es obligatorio";
-    if (vehiculos.find((v) => v.placa.toLowerCase() === placa.trim().toLowerCase()))
-      e.placa = "Ya existe un vehículo con esa placa";
+    if (subPaso === 1) {
+      if (!tipoVehiculo) e.tipoVehiculo = "Elige el tipo de vehículo";
+    }
+    if (subPaso === 2) {
+      const placaLimpia = placa.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (!placaLimpia) {
+        e.placa = "La placa es obligatoria";
+      } else if (!PLACA_VEHICULO_REGEX.test(placaLimpia)) {
+        e.placa = "Formato inválido: la placa debe tener exactamente 3 letras y 3 números (Ej: ABC123)";
+      } else if (vehiculos.find(v => v.placa.toUpperCase().replace(/[^A-Z0-9]/g, "") === placaLimpia)) {
+        e.placa = "Ya existe un vehículo con esa placa en tu flota";
+      }
+
+      if (placaRemolque.trim()) {
+        const remolqueLimpio = placaRemolque.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+        if (!PLACA_REMOLQUE_REGEX.test(remolqueLimpio)) {
+          e.placaRemolque = "Formato inválido (Ej: R12345 o ABC123)";
+        }
+      }
+    }
+    if (subPaso === 3) {
+      if (!propietario.trim()) e.propietario = "El nombre del propietario es obligatorio";
+    }
     return e;
   };
 
-  const guardarVehiculo = async () => {
-    if (guardandoRef.current || guardando) return;
-    if (vehiculos && vehiculos.length >= 50) { setErrores({general:"Máximo 50 vehículos por cuenta"}); return; }
-    const e = validar();
+  const siguiente = () => {
+    const e = validarPaso();
     if (Object.keys(e).length > 0) { setErrores(e); return; }
+    setErrores({});
+    setSubPaso(s => Math.min(s + 1, TOTAL_PASOS));
+  };
+
+  const anterior = () => {
+    setErrores({});
+    setSubPaso(s => Math.max(s - 1, 1));
+  };
+
+  const guardar = async () => {
+    const e = validarPaso();
+    if (Object.keys(e).length > 0) { setErrores(e); return; }
+    if (guardandoRef.current || guardando) return;
+    if (vehiculos && vehiculos.length >= 50) {
+      setErrores({ general: "Máximo 50 vehículos por cuenta" }); return;
+    }
     guardandoRef.current = true;
     setGuardando(true);
     try {
       await onGuardar({
         tipoVehiculo, tipoRemolque,
-        placa:         placa.trim().toUpperCase(),
+        placa: placa.trim().toUpperCase(),
         placaRemolque: placaRemolque.trim().toUpperCase(),
         marca, modelo,
         conductor: conductorAsignado,
-        propietario:   propietario.trim(),
-        tenedor:       tenedor.trim(),
+        propietario: propietario.trim(),
+        tenedor: tenedor.trim(),
         fotoUrl,
       });
       navigate("/vehiculos");
     } catch {
-      setErrores({ general: "Error al guardar el vehículo. Intente nuevamente." });
+      setErrores({ general: "Error al guardar. Intenta de nuevo." });
     } finally {
       guardandoRef.current = false;
       setGuardando(false);
     }
   };
 
+  const banner = BANNERS[subPaso - 1];
+
   return (
-    <div style={styles.pantalla}>
+    <WizardPantalla>
+      <WizardHeader titulo="Agregar vehículo" onVolver={() => navigate(-1)} labelVolver="Vehículos" />
+      <WizardProgress total={TOTAL_PASOS} actual={subPaso} etiquetas={ETIQUETAS} />
+      <WizardBanner icono={banner.icono} titulo={banner.titulo} mensaje={banner.mensaje} />
 
-      {/* HEADER */}
-      <div style={styles.header}>
-        <button
-          type="button"
-          aria-label="Volver a lista de vehículos"
-          style={styles.btnVolver}
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft size={18} color={t.colors.blueText} strokeWidth={2.5} />
-          <span>Vehículos</span>
-        </button>
-        <h1 style={styles.titulo}>Agregar vehículo</h1>
-      </div>
+      {/* ── PASO 1: Tipo de vehículo y remolque ── */}
+      {subPaso === 1 && (
+        <WizardCard>
+          <WizardCampo label="Tipo de vehículo" obligatorio error={errores.tipoVehiculo}>
+            <WizardOpciones
+              opciones={TIPOS_VEHICULO}
+              valor={tipoVehiculo}
+              onChange={(v) => { setTipoVehiculo(v); setErrores({}); }}
+              columnas={3}
+            />
+          </WizardCampo>
+          <WizardCampo label="Tipo de remolque" ayuda="Si el camión no tiene remolque, deja 'Sin remolque'.">
+            <WizardOpciones
+              opciones={TIPOS_REMOLQUE}
+              valor={tipoRemolque}
+              onChange={setTipoRemolque}
+              columnas={3}
+            />
+          </WizardCampo>
+        </WizardCard>
+      )}
 
-      {/* SECCIÓN DATOS */}
-      <div style={styles.seccionLabel}>Datos del vehículo</div>
-      <div style={styles.card}>
-
-        <div style={styles.campo}>
-          <label htmlFor="a11y-AgregarVehiculo-93" style={styles.label}>Tipo de vehículo *</label>
-          <select id="a11y-AgregarVehiculo-93"
-            value={tipoVehiculo}
-            onChange={(e) => { setTipoVehiculo(e.target.value); setErrores({ ...errores, tipoVehiculo: null }); }}
-            style={{ ...styles.input, color: tipoVehiculo ? t.colors.textPrimary : t.colors.textTertiary }}
-          >
-            <option value="">Seleccionar...</option>
-            <option value="CUATRO MANOS">Cuatro manos</option>
-            <option value="DOBLETROQUE">Dobletroque</option>
-            <option value="PATINETA 2S2">Patineta 2S2</option>
-            <option value="PATINETA 2S3">Patineta 2S3</option>
-            <option value="SENCILLO">Sencillo</option>
-            <option value="TRACTOMULA 3S2">Tractomula 3S2</option>
-            <option value="TRACTOMULA 3S3">Tractomula 3S3</option>
-            <option value="TURBO">Turbo</option>
-            <option value="TURBO SENCILLO">Turbo sencillo</option>
-            <option value="VOLQUETA">Volqueta</option>
-            <option value="OTRO">Otro</option>
-          </select>
-          {errores.tipoVehiculo && <p style={styles.error}>{errores.tipoVehiculo}</p>}
-        </div>
-
-        <div style={styles.campo}>
-          <label htmlFor="a11y-AgregarVehiculo-116" style={styles.label}>Tipo de remolque</label>
-          <select id="a11y-AgregarVehiculo-116"
-            value={tipoRemolque}
-            onChange={(e) => setTipoRemolque(e.target.value)}
-            style={{ ...styles.input, color: tipoRemolque ? t.colors.textPrimary : t.colors.textTertiary }}
-          >
-            <option value="">Sin remolque</option>
-            <option value="BOTELLERO">Botellero</option>
-            <option value="CAMA BAJA">Cama baja</option>
-            <option value="CISTERNA">Cisterna</option>
-            <option value="CONTENEDOR">Contenedor</option>
-            <option value="CARROCERIA">Carrocería</option>
-            <option value="FURGON">Furgón</option>
-            <option value="FURGON REFRIGERADO">Furgón refrigerado</option>
-            <option value="NIÑERA">Niñera</option>
-            <option value="PLANCHA">Plancha</option>
-            <option value="PORTA CONTENEDORES">Porta contenedores</option>
-            <option value="VOLCO AUTODESCARGABLE">Volco autodescargable</option>
-            <option value="OTRO">Otro</option>
-          </select>
-        </div>
-
-        <div style={styles.fila2}>
-          <div style={styles.campo}>
-            <label htmlFor="a11y-AgregarVehiculo-140" style={styles.label}>Placa vehículo *</label>
-            <input id="a11y-AgregarVehiculo-140"
-              type="text"
-              placeholder="ABC123"
+      {/* ── PASO 2: Placa, marca y modelo ── */}
+      {subPaso === 2 && (
+        <WizardCard>
+          <WizardCampo label="Placa del vehículo" obligatorio error={errores.placa}>
+            <WizardInput
               value={placa}
-              onChange={(e) => { setPlaca(e.target.value.toUpperCase()); setErrores({ ...errores, placa: null }); }}
+              onChange={e => { setPlaca(e.target.value.toUpperCase()); setErrores({}); }}
+              placeholder="ABC123"
               maxLength={6}
-              style={styles.input}
             />
-            {errores.placa && <p style={styles.error}>{errores.placa}</p>}
-          </div>
-          <div style={styles.campo}>
-            <label htmlFor="a11y-AgregarVehiculo-152" style={styles.label}>Placa remolque</label>
-            <input id="a11y-AgregarVehiculo-152"
-              type="text"
-              placeholder="S-00000"
+          </WizardCampo>
+          <WizardCampo label="Placa del remolque" ayuda="Solo si tiene remolque">
+            <WizardInput
               value={placaRemolque}
-              onChange={(e) => setPlacaRemolque(e.target.value.toUpperCase())}
-              style={styles.input}
+              onChange={e => setPlacaRemolque(e.target.value.toUpperCase())}
+              placeholder="S-00000"
+              maxLength={7}
             />
-          </div>
-        </div>
-
-        <div style={styles.fila2}>
-          <div style={styles.campo}>
-            <label htmlFor="a11y-AgregarVehiculo-165" style={styles.label}>Marca</label>
-            <select id="a11y-AgregarVehiculo-165"
-              value={marca}
-              onChange={(e) => setMarca(e.target.value)}
-              style={{ ...styles.input, color: marca ? t.colors.textPrimary : t.colors.textTertiary }}
-            >
-              <option value="">Seleccionar...</option>
-              <option value="AUTOCAR">AUTOCAR</option>
-              <option value="ASTRA">ASTRA</option>
-              <option value="BERLIET">BERLIET</option>
-              <option value="BARREIROS">BARREIROS</option>
-              <option value="BElAZ">BElAZ</option>
-              <option value="BYD">BYD</option>
-              <option value="C.C.C">C.C.C</option>
-              <option value="CATERPILLAR">CATERPILLAR</option>
-              <option value="CARIBE">CARIBE</option>
-              <option value="CHANGAN">CHANGAN</option>
-              <option value="CHANGFENG">CHANGFENG</option>
-              <option value="CITROEN">CITROEN</option>
-              <option value="CHERY">CHERY</option>
-              <option value="CHEVROLET">CHEVROLET</option>
-              <option value="CMC">CMC</option>
-              <option value="DAEWOO">DAEWOO</option>
-              <option value="DAF">DAF</option>
-              <option value="DAIHATSU">DAIHATSU</option>
-              <option value="DFSK">DFSK</option>
-              <option value="DONGFENG">DONGFENG</option>
-              <option value="FAW">FAW</option>
-              <option value="FORD">FORD</option>
-              <option value="FOTON">FOTON</option>
-              <option value="FOTON AUMAN">AUMAN</option>
-              <option value="FIAT">FIAT</option>
-              <option value="FREIGHTLINER">FREIGHTLINER</option>
-              <option value="FUTONG">FUTONG</option>
-              <option value="FWD">FWD</option>
-              <option value="GMC">GMC</option>
-              <option value="HINO">HINO</option>
-              <option value="HITACHI">HITACHI</option>
-              <option value="HYUNDAI">HYUNDAI</option>
-              <option value="INTERNATIONAL">INTERNATIONAL</option>
-              <option value="ISUZU">ISUZU</option>
-              <option value="IVECO">IVECO</option>
-              <option value="JAC">JAC</option>
-              <option value="JMC">JMC</option>
-              <option value="KAMAZ">KAMAZ</option>
-              <option value="KENWORTH">KENWORTH</option>
-              <option value="KIA">KIA</option>
-              <option value="KING LONG">KING LONG</option>
-              <option value="KOMATSU">KOMATSU</option>
-              <option value="KRAZ">KRAZ</option>
-              <option value="LIUGONG">LIUGONG</option>
-              <option value="MACK">MACK</option>
-              <option value="MAN">MAN</option>
-              <option value="MARCOPOLO">MARCOPOLO</option>
-              <option value="MASSEY FERGUSON">MASSEY FERGUSON</option>
-              <option value="MAZDA">MAZDA</option>
-              <option value="MERCEDES BENZ">MERCEDES BENZ</option>
-              <option value="MITSUBISHI">MITSUBISHI</option>
-              <option value="MG">MG</option>
-              <option value="NISSAN">NISSAN</option>
-              <option value="PEGASSO">PEGASSO</option>
-              <option value="PEUGEOT">PEUGEOT</option>
-              <option value="PETERBILT">PETERBILT</option>
-              <option value="RAM">RAM</option>
-              <option value="RENAULT">RENAULT</option>
-              <option value="SCANIA">SCANIA</option>
-              <option value="SHACMAN">SHACMAN</option>
-              <option value="SINOTRUK">SINOTRUK</option>
-              <option value="SITRACK">SITRACK</option>
-              <option value="VOLKSWAGEN">VOLKSWAGEN</option>
-              <option value="VOLVO">VOLVO</option>
-              <option value="WESTERN STAR">WESTERN STAR</option>
-              <option value="YUTONG">YUTONG</option>
-              <option value="OTRO">OTRO</option>
-            </select>
-          </div>
-          <div style={styles.campo}>
-            <label htmlFor="a11y-AgregarVehiculo-242" style={styles.label}>Modelo (año)</label>
-            <input id="a11y-AgregarVehiculo-242"
+          </WizardCampo>
+          <WizardCampo label="Marca">
+            <WizardSelect value={marca} onChange={e => setMarca(e.target.value)}>
+              <option value="">Seleccionar marca...</option>
+              {["AUTOCAR","ASTRA","BYD","CATERPILLAR","CHEVROLET","DAEWOO","DONGFENG","FAW","FORD",
+                "FOTON","FOTON AUMAN","FREIGHTLINER","GMC","HINO","HYUNDAI","INTERNATIONAL","ISUZU",
+                "IVECO","JAC","KENWORTH","MACK","MAN","MERCEDES BENZ","MITSUBISHI","NISSAN",
+                "PETERBILT","RENAULT","SCANIA","SHACMAN","SINOTRUK","VOLKSWAGEN","VOLVO",
+                "WESTERN STAR","YUTONG","OTRO"].map(m=>(<option key={m} value={m}>{m}</option>))}
+            </WizardSelect>
+          </WizardCampo>
+          <WizardCampo label="Modelo (año)">
+            <WizardInput
               type="number"
-              placeholder="2020"
               value={modelo}
-              onChange={(e) => setModelo(e.target.value)}
+              onChange={e => setModelo(e.target.value)}
+              placeholder="2020"
               min="1970" max="2100"
-              style={styles.input}
             />
-          </div>
-        </div>
+          </WizardCampo>
+        </WizardCard>
+      )}
 
-        <div style={styles.fila2}>
-          <div style={{...styles.campo, gridColumn:"1 / -1"}}>
-            <label htmlFor="a11y-AgregarVehiculo-256" style={styles.label}>Conductor asignado</label>
-            <select id="a11y-AgregarVehiculo-256"
-              value={conductorAsignado}
-              onChange={(e) => setConductorAsignado(e.target.value)}
-              style={{ ...styles.input, color: conductorAsignado ? t.colors.textPrimary : t.colors.textTertiary }}
-            >
+      {/* ── PASO 3: Propietario, tenedor y conductor ── */}
+      {subPaso === 3 && (
+        <WizardCard>
+          <WizardCampo label="Nombre del propietario" obligatorio error={errores.propietario}>
+            <WizardInput
+              value={propietario}
+              onChange={e => { setPropietario(e.target.value); setErrores({}); }}
+              placeholder="Nombre completo"
+            />
+          </WizardCampo>
+          <WizardCampo label="Tenedor (si es diferente al propietario)" ayuda="El tenedor es quien tiene el vehículo a su cargo">
+            <WizardInput
+              value={tenedor}
+              onChange={e => setTenedor(e.target.value)}
+              placeholder="Nombre completo (opcional)"
+            />
+          </WizardCampo>
+          <WizardCampo label="Conductor asignado" ayuda="Puedes asignarlo después si no está disponible">
+            <WizardSelect value={conductorAsignado} onChange={e => setConductorAsignado(e.target.value)}>
               <option value="">Sin conductor asignado</option>
-              {conductores.map((c) => (
+              {conductores.map(c => (
                 <option key={c.firestoreId} value={c.nombre}>
                   {c.nombre}{c.catLic ? ` · Cat ${c.catLic}` : ""}
                 </option>
               ))}
-            </select>
-            {conductores.length === 0 && (
-              <p style={{fontSize:t.fonts.sizeXs, color:t.colors.textTertiary, margin:"4px 0 0"}}>
-                No tiene conductores registrados aún. Puede asignarlo después.
-              </p>
-            )}
+            </WizardSelect>
+          </WizardCampo>
+        </WizardCard>
+      )}
+
+      {/* ── PASO 4: Foto y confirmar ── */}
+      {subPaso === 4 && (
+        <WizardCard>
+          {/* Resumen */}
+          <div style={{
+            background:"#F0F4FF", borderRadius:"12px",
+            padding:"14px 16px", marginBottom:"20px",
+          }}>
+            <p style={{ fontSize:"13px",fontWeight:700,color:"#3B82F6",
+              textTransform:"uppercase",letterSpacing:"0.08em",margin:"0 0 8px" }}>
+              Resumen del vehículo
+            </p>
+            {[
+              ["Tipo",      tipoVehiculo || "—"],
+              ["Remolque",  tipoRemolque || "Sin remolque"],
+              ["Placa",     placa || "—"],
+              ["Marca",     marca || "—"],
+              ["Modelo",    modelo || "—"],
+              ["Propietario",propietario || "—"],
+            ].map(([k,v])=>(
+              <div key={k} style={{ display:"flex",justifyContent:"space-between",
+                paddingBottom:"5px",marginBottom:"5px",
+                borderBottom:"1px solid #E0E9FF" }}>
+                <span style={{ fontSize:"14px",color:"#6B7280",fontWeight:600 }}>{k}</span>
+                <span style={{ fontSize:"14px",color:"#111827",fontWeight:700 }}>{v}</span>
+              </div>
+            ))}
           </div>
-        </div>
 
-      </div>
+          {/* Foto */}
+          <WizardCampo label="Foto del vehículo" ayuda="Opcional · Toca para subir desde tu galería">
+            {fotoUrl ? (
+              <div style={{ position:"relative" }}>
+                <img src={fotoUrl} alt="Vehículo"
+                  style={{ width:"100%",height:"180px",objectFit:"cover",borderRadius:"12px" }}/>
+                <button
+                  style={{ position:"absolute",top:"8px",right:"8px",
+                    background:"rgba(255,255,255,0.9)",border:"1px solid #D1DCF0",
+                    borderRadius:"8px",padding:"6px 12px",cursor:"pointer",
+                    fontSize:"12px",color:"#EF4444",fontWeight:700 }}
+                  onClick={() => setFotoUrl("")}>Cambiar</button>
+              </div>
+            ) : (
+              <label style={{
+                display:"flex",flexDirection:"column",alignItems:"center",
+                justifyContent:"center",height:"130px",
+                background:"#F8FAFF",borderRadius:"12px",
+                border:"2px dashed #3B82F6",cursor:"pointer",gap:"10px",
+              }}>
+                <Camera size={32} color="#3B82F6" strokeWidth={1.5} />
+                <span style={{ fontSize:"15px",color:"#3B82F6",fontWeight:600 }}>
+                  {subiendo?.foto ? `Subiendo ${progreso?.foto||0}%...` : "Toca para subir foto"}
+                </span>
+                <input type="file" accept="image/*" style={{ display:"none" }}
+                  onChange={async e => {
+                    const archivo = e.target.files[0];
+                    if (!archivo) return;
+                    const nombreSaneado = sanearNombreArchivo(archivo.name);
+                    const ruta = `usuarios/${usuario?.uid}/vehiculos/${Date.now()}_${nombreSaneado}`;
+                    subirArchivo(archivo, ruta, "foto", url => setFotoUrl(url));
+                  }}
+                />
+              </label>
+            )}
+          </WizardCampo>
 
-      {/* SECCIÓN PROPIETARIO */}
-      <div style={styles.seccionLabel}>Propietario y tenedor</div>
-      <div style={styles.card}>
-        <div style={styles.campo}>
-          <label htmlFor="a11y-AgregarVehiculo-283" style={styles.label}>Propietario *</label>
-          <input id="a11y-AgregarVehiculo-283"
-            type="text"
-            placeholder="Nombre completo"
-            value={propietario}
-            onChange={(e) => { setPropietario(e.target.value); setErrores({ ...errores, propietario: null }); }}
-            style={styles.input}
-          />
-          {errores.propietario && <p style={styles.error}>{errores.propietario}</p>}
-        </div>
-        <div style={styles.campo}>
-          <label htmlFor="a11y-AgregarVehiculo-294" style={styles.label}>Tenedor (si aplica)</label>
-          <input id="a11y-AgregarVehiculo-294"
-            type="text"
-            placeholder="Nombre completo"
-            value={tenedor}
-            onChange={(e) => setTenedor(e.target.value)}
-            style={styles.input}
-          />
-        </div>
-      </div>
+          {errores.general && (
+            <p style={{ fontSize:"14px",color:"#EF4444",fontWeight:600,
+              textAlign:"center",margin:"8px 0" }}>
+              {errores.general}
+            </p>
+          )}
+        </WizardCard>
+      )}
 
-      <div style={styles.campo}>
-  <div style={styles.label}>Foto del vehículo</div>
-  {fotoUrl ? (
-    <div style={{position:"relative"}}>
-      <img src={fotoUrl} alt="Vehículo" style={{width:"100%", height:"180px", objectFit:"cover", borderRadius:t.radius.md}}/>
-      <button
-        style={{position:"absolute", top:"8px", right:"8px", background:t.colors.redSoft, border:`1px solid ${t.colors.redBorder}`, borderRadius:t.radius.sm, padding:"4px 8px", cursor:"pointer", fontSize:t.fonts.sizeXs, color:t.colors.red}}
-        onClick={()=>setFotoUrl("")}
-      >
-        Cambiar
-      </button>
-    </div>
-  ) : (
-    <label style={{display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"120px", background:t.colors.bgSection, borderRadius:t.radius.md, border:`2px dashed ${t.colors.border}`, cursor:"pointer", gap:"8px"}}>
-      <Camera size={28} color={t.colors.textTertiary} strokeWidth={1.5} />
-      <span style={{fontSize:t.fonts.sizeXs, color:t.colors.textSecondary}}>
-        {subiendo?.foto ? `Subiendo ${progreso?.foto || 0}%...` : "Toca para subir foto"}
-      </span>
-      <input type="file" accept="image/*" style={{display:"none"}}
-        onChange={async (e) => {
-          const archivo = e.target.files[0];
-          if (!archivo) return;
-          const nombreSaneado = sanearNombreArchivo(archivo.name);
-          const ruta = `usuarios/${usuario?.uid}/vehiculos/${Date.now()}_${nombreSaneado}`;
-          subirArchivo(archivo, ruta, "foto", (url) => setFotoUrl(url));
-        }}
+      <WizardStepDots total={TOTAL_PASOS} actual={subPaso} />
+      <WizardNav
+        subPaso={subPaso}
+        totalSubPasos={TOTAL_PASOS}
+        onAnterior={anterior}
+        onSiguiente={siguiente}
+        onGuardar={guardar}
+        guardando={guardando}
+        labelGuardar="Guardar vehículo"
       />
-    </label>
-  )}
-</div>
-
-      {/* BOTÓN GUARDAR */}
-      <div style={{ padding: "0 16px" }}>
-        {errores.general && (
-          <p style={{...styles.error, textAlign:"center", margin:"0 0 8px"}}>{errores.general}</p>
-        )}
-        <button
-          style={{ ...styles.btnGuardar, opacity: guardando ? 0.75 : 1 }}
-          onClick={guardarVehiculo}
-          disabled={guardando}
-        >
-          <Save size={18} color="#fff" strokeWidth={2} />
-          {guardando ? "Guardando..." : "Guardar vehículo"}
-        </button>
-      </div>
-
-    </div>
+    </WizardPantalla>
   );
 }
 
-const styles = {
-  pantalla:     { maxWidth: "430px", margin: "0 auto", minHeight: "100vh", background: t.colors.bgPrimary, paddingBottom: "30px" },
-  header:       { display: "flex", alignItems: "center", gap: "12px", padding: "16px 20px 12px", background: t.colors.bgCard, borderBottom: `1px solid ${t.colors.borderLight}` },
-  btnVolver:    { display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", color: t.colors.blueText, cursor: "pointer", padding: 0, fontSize: t.fonts.sizeSm, fontWeight: t.fonts.weightSemibold },
-  titulo:       { fontSize: "18px", fontWeight: t.fonts.weightBold, color: t.colors.textPrimary, margin: 0 },
-  seccionLabel: { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightBold, color: t.colors.textTertiary, textTransform: "uppercase", letterSpacing: "0.08em", padding: "16px 20px 8px" },
-  card:         { background: t.colors.bgCard, borderRadius: t.radius.lg, padding: "16px", margin: "0 16px 4px", border: `1px solid ${t.colors.borderLight}`, boxShadow: t.shadows.card },
-  campo:        { display: "flex", flexDirection: "column", gap: "5px", marginBottom: "12px" },
-  fila2:        { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" },
-  label:        { fontSize: t.fonts.sizeXs, fontWeight: t.fonts.weightSemibold, color: t.colors.textSecondary, textTransform: "uppercase", letterSpacing: "0.05em" },
-  input:        { padding: "11px 12px", borderRadius: t.radius.sm, border: `1.5px solid ${t.colors.border}`, fontSize: t.fonts.sizeSm, background: t.colors.bgPrimary, color: t.colors.textPrimary, width: "100%", boxSizing: "border-box" },
-  error:        { fontSize: t.fonts.sizeXs, color: t.colors.red, margin: "3px 0 0", fontWeight: t.fonts.weightMedium },
-  btnGuardar:   { width: "100%", padding: "15px", background: `linear-gradient(135deg, ${t.colors.green} 0%, ${t.colors.greenDeep || "#12A150"} 100%)`, color: "#fff", border: "none", borderRadius: t.radius.md, fontSize: t.fonts.sizeMd, fontWeight: t.fonts.weightBold, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginTop: "8px" },
-};
-
-export default AgregarVehiculo; 
+export default AgregarVehiculo;

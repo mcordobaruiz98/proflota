@@ -1,9 +1,14 @@
+// Hecho por JESUS COSSIO DEV
 /**
- * Hecho por JESUS COSSIO DEV
- * Optimizaciones de arquitectura, accesibilidad y experiencia de usuario
+ * Layout.jsx — Contenedor Principal con Indicador de Conexión, Barra Ergonómica y Breakpoints
+ * Implementa:
+ * - Indicador visual de conexión online/offline (FE-15)
+ * - Breakpoint responsivo y tokens de layout (FE-42, FE-37)
+ * - Navegación accesible con safe-areas
  */
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Truck, Calculator, TrendingUp } from "lucide-react";
+import { Home, Truck, Calculator, TrendingUp, WifiOff } from "lucide-react";
 import { theme as t } from "../styles/theme";
 
 function Layout({ children }) {
@@ -11,10 +16,25 @@ function Layout({ children }) {
   const location  = useLocation();
   const ruta      = location.pathname;
 
+  const [online, setOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+
+  useEffect(() => {
+    const handleOnline = () => setOnline(true);
+    const handleOffline = () => setOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
   const tabs = [
     { path: "/",            label: "Inicio",      Icono: Home       },
     { path: "/vehiculos",   label: "Vehículos",   Icono: Truck      },
-    { path: "/calculadora", label: "Calculadora", Icono: Calculator },
+    { path: "/viajes",      label: "Viajes",      Icono: Calculator },
     { path: "/cuentas",     label: "Cuentas",     Icono: TrendingUp },
   ];
 
@@ -23,6 +43,14 @@ function Layout({ children }) {
       <a href="#main-content" className="skip-link">
         Saltar al contenido principal
       </a>
+
+      {/* Indicador de conexión offline (FE-15) */}
+      {!online && (
+        <div style={styles.bannerOffline} role="status" aria-live="polite">
+          <WifiOff size={15} color="#FFFFFF" />
+          <span>Modo sin conexión — Los cambios se guardarán localmente</span>
+        </div>
+      )}
 
       <main id="main-content" style={styles.pantalla}>
         {children}
@@ -36,21 +64,22 @@ function Layout({ children }) {
               key={tab.path}
               style={styles.navBtn}
               onClick={() => navigate(tab.path)}
+              aria-label={tab.label}
             >
-              {/* Indicador de pestaña activa: línea de acento superior */}
+              {/* Indicador de pestaña activa */}
               <span style={{
                 ...styles.navIndicador,
-                background: activo ? t.colors.green : "transparent",
+                background: activo ? t.colors.blue : "transparent",
               }} />
               <tab.Icono
                 size={22}
-                color={activo ? t.colors.green : t.colors.textTertiary}
-                strokeWidth={activo ? 2.4 : 1.9}
+                color={activo ? t.colors.blueText : t.colors.textTertiary}
+                strokeWidth={activo ? 2.5 : 1.8}
               />
               <span style={{
                 ...styles.navLabel,
-                color:      activo ? t.colors.green : t.colors.textTertiary,
-                fontWeight: activo ? t.fonts.weightBold : t.fonts.weightMedium,
+                color: activo ? t.colors.blueText : t.colors.textTertiary,
+                fontWeight: activo ? "800" : "600",
               }}>
                 {tab.label}
               </span>
@@ -65,55 +94,71 @@ function Layout({ children }) {
 
 const styles = {
   contenedor: {
-    maxWidth:   "430px",
-    margin:     "0 auto",
-    minHeight:  "100vh",
-    position:   "relative",
+    maxWidth: "480px",
+    margin: "0 auto",
+    minHeight: "100vh",
+    position: "relative",
     background: t.colors.bgPrimary,
   },
+  bannerOffline: {
+    position: "sticky",
+    top: 0,
+    zIndex: 999,
+    background: t.colors.red,
+    color: "#FFFFFF",
+    padding: "8px 12px",
+    fontSize: "12px",
+    fontWeight: "700",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+    boxShadow: "0 2px 8px rgba(239,68,68,0.3)",
+  },
   pantalla: {
-    paddingBottom: "76px",
+    paddingBottom: "84px",
   },
   navbar: {
-    position:        "fixed",
-    bottom:          0,
-    left:            "50%",
-    transform:       "translateX(-50%)",
-    width:           "100%",
-    maxWidth:        "430px",
-    background:      "rgba(10,26,47,0.86)",
-    backdropFilter:  "blur(14px)",
-    WebkitBackdropFilter: "blur(14px)",
-    borderTop:       `1px solid ${t.colors.border}`,
-    display:         "flex",
-    zIndex:          100,
-    boxShadow:       "0 -8px 24px rgba(0,0,0,0.25)",
+    position: "fixed",
+    bottom: 0,
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: "100%",
+    maxWidth: "480px",
+    background: "rgba(15, 35, 64, 0.96)",
+    backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
+    borderTop: `1px solid ${t.colors.borderLight}`,
+    display: "flex",
+    zIndex: 100,
+    boxShadow: "0 -4px 16px rgba(0,0,0,0.35)",
+    paddingBottom: "env(safe-area-inset-bottom, 6px)",
   },
   navBtn: {
-    flex:            1,
-    display:         "flex",
-    flexDirection:   "column",
-    alignItems:      "center",
-    gap:             "5px",
-    padding:         "11px 4px 12px",
-    border:          "none",
-    background:      "transparent",
-    cursor:          "pointer",
-    position:        "relative",
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "4px",
+    padding: "10px 4px 10px",
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    position: "relative",
   },
   navIndicador: {
-    position:      "absolute",
-    top:           0,
-    width:         "26px",
-    height:        "3px",
-    borderRadius:  "0 0 3px 3px",
-    transition:    "background 0.2s",
+    position: "absolute",
+    top: 0,
+    width: "28px",
+    height: "3px",
+    borderRadius: "0 0 3px 3px",
+    transition: "background 0.2s ease",
   },
   navLabel: {
-    fontSize:      "9.5px",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    transition:    "color 0.2s",
+    fontSize: "11px",
+    textTransform: "capitalize",
+    letterSpacing: "0.02em",
+    transition: "color 0.2s ease",
   },
 };
 

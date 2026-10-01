@@ -1,6 +1,10 @@
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import { aplicarTema, obtenerTemaActual } from './styles/theme'
+
+// Inicializar tema predeterminado (Modo Oscuro)
+aplicarTema(obtenerTemaActual());
 
 createRoot(document.getElementById('root')).render(
   <App />

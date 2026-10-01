@@ -17,6 +17,7 @@ function Cartera({ viajes = [], onEditar, mostrarToast }) {
   const [rangoDesde, setRangoDesde] = useState("");
   const [rangoHasta, setRangoHasta] = useState("");
   const [empAbiertas, setEmpAbiertas] = useState({});
+  const [limiteEmp, setLimiteEmp] = useState(15);
 
   const fmt = (n) => "$" + Math.round(n || 0).toLocaleString("es-CO");
   const hoy = new Date();
@@ -229,7 +230,7 @@ function Cartera({ viajes = [], onEditar, mostrarToast }) {
         )}
 
         {/* VIAJES POR EMPRESA */}
-        {empresasOrdenadas.map(([empresa, data]) => {
+        {empresasOrdenadas.slice(0, limiteEmp).map(([empresa, data]) => {
           const abierta = empAbiertas[empresa] !== false; // abierta por defecto
           return (
           <div key={empresa} style={styles.card}>
@@ -322,6 +323,26 @@ function Cartera({ viajes = [], onEditar, mostrarToast }) {
           </div>
           );
         })}
+
+        {empresasOrdenadas.length > limiteEmp && (
+          <button
+            onClick={() => setLimiteEmp(prev => prev + 15)}
+            style={{
+              width: "100%",
+              padding: "12px",
+              marginTop: "8px",
+              borderRadius: t.radius.md,
+              background: t.colors.bgCard,
+              border: `1.5px solid ${t.colors.border}`,
+              color: t.colors.blueText,
+              fontSize: t.fonts.sizeSm,
+              fontWeight: t.fonts.weightBold,
+              cursor: "pointer",
+            }}
+          >
+            Mostrar más empresas (+15 de {empresasOrdenadas.length})
+          </button>
+        )}
 
       </div>
     </div>

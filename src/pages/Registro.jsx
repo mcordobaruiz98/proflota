@@ -86,8 +86,10 @@ function Registro() {
         <form onSubmit={e => e.preventDefault()} autoComplete="on">
 
           <div style={styles.campo}>
-            <label htmlFor="a11y-Registro-89" style={styles.label}>Nombre completo</label>
-            <input id="a11y-Registro-89"
+            <label htmlFor="reg-nombre" style={styles.label}>Nombre completo</label>
+            <input
+              id="reg-nombre"
+              name="nombre"
               type="text"
               placeholder="Juan Pérez"
               value={nombre}
@@ -99,8 +101,10 @@ function Registro() {
           </div>
 
           <div style={styles.campo}>
-            <label htmlFor="a11y-Registro-102" style={styles.label}>Correo electrónico</label>
-            <input id="a11y-Registro-102"
+            <label htmlFor="reg-correo" style={styles.label}>Correo electrónico</label>
+            <input
+              id="reg-correo"
+              name="email"
               type="email"
               placeholder="correo@ejemplo.com"
               value={correo}
@@ -112,9 +116,11 @@ function Registro() {
           </div>
 
           <div style={styles.campo}>
-            <label htmlFor="a11y-Registro-115" style={styles.label}>Contraseña</label>
+            <label htmlFor="reg-contrasena" style={styles.label}>Contraseña</label>
             <div style={styles.inputWrap}>
-              <input id="a11y-Registro-115"
+              <input
+                id="reg-contrasena"
+                name="new-password"
                 type={verPass ? "text" : "password"}
                 placeholder="Mínimo 6 caracteres"
                 value={contrasena}
@@ -135,9 +141,11 @@ function Registro() {
           </div>
 
           <div style={styles.campo}>
-            <label htmlFor="a11y-Registro-138" style={styles.label}>Confirmar contraseña</label>
+            <label htmlFor="reg-confirmar" style={styles.label}>Confirmar contraseña</label>
             <div style={styles.inputWrap}>
-              <input id="a11y-Registro-138"
+              <input
+                id="reg-confirmar"
+                name="confirm-password"
                 type={verConf ? "text" : "password"}
                 placeholder="Repite tu contraseña"
                 value={confirmar}
@@ -158,8 +166,10 @@ function Registro() {
           </div>
 
           <div style={styles.campo}>
-            <label htmlFor="a11y-Registro-161" style={styles.label}>Código de acceso beta</label>
-            <input id="a11y-Registro-161"
+            <label htmlFor="reg-codigo" style={styles.label}>Código de acceso beta</label>
+            <input
+              id="reg-codigo"
+              name="codigo"
               type="text"
               placeholder="Ingresa tu código de invitación"
               value={codigo}
