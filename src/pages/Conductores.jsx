@@ -803,11 +803,11 @@ function Conductores({ conductores = [], viajes = [], onAgregar, onEditar, onEli
 
       {/* Modal de confirmación para eliminar */}
       <ConfirmarModal
-        visible={modalEliminar.visible}
+        abierto={modalEliminar.visible}
         titulo="¿Eliminar conductor?"
         mensaje={`¿Estás seguro de que deseas eliminar a ${modalEliminar.nombre}? Esta acción no se puede deshacer.`}
-        textoBotonConfirmar="Eliminar conductor"
-        esPeligroso={true}
+        textoConfirmar="Eliminar conductor"
+        esPeligro={true}
         onConfirmar={ejecutarEliminar}
         onCancelar={() => setModalEliminar({ visible: false, id: null, nombre: "" })}
       />

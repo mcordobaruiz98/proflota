@@ -33,7 +33,27 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [fecha,            setFecha]              = useState(new Date().toISOString().slice(0,10));
+  // ── FE-08: Borrador guardado (leído una sola vez, antes de los estados) ───────
+  // Antes se restauraba con un useEffect que llamaba a 21 setState al montar.
+  // Eso provocaba un segundo render en cascada y eslint-plugin-react-hooks lo
+  // marcaba (set-state-in-effect). Se lee aquí de forma lazy y cada estado toma
+  // su valor inicial del borrador, así no hay flash de formulario vacío.
+  const [borrador] = useState(() => {
+    try {
+      const raw = localStorage.getItem(BORRADOR_KEY);
+      if (!raw) return null;
+      const b = JSON.parse(raw);
+      return b && typeof b === "object" ? b : null;
+    } catch {
+      return null;
+    }
+  });
+  const valBorrador = (campo, porDefecto) => {
+    const v = borrador?.[campo];
+    return v === undefined || v === null || v === "" ? porDefecto : v;
+  };
+
+  const [fecha,            setFecha]              = useState(() => valBorrador("fecha", new Date().toISOString().slice(0,10)));
   const [fechaDescarga,    setFechaDescarga]      = useState("");
   const [mani,             setMani]               = useState("");
   const [remesa,           setRemesa]             = useState("");
@@ -41,44 +61,48 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [lugarCargue,      setLugarCargue]        = useState("");
   const [lugarDescargue,   setLugarDescargue]     = useState("");
   const [observaciones,    setObservaciones]      = useState("");
-  const [placa,            setPlaca]              = useState(location.state?.placa || "");
-  const [tipoCarga,        setTipoCarga]          = useState("");
-  const [producto,         setProducto]           = useState("");
+  const [placa,            setPlaca]              = useState(location.state?.placa || valBorrador("placa", ""));
+  const [tipoCarga,        setTipoCarga]          = useState(valBorrador("tipoCarga", ""));
+  const [producto,         setProducto]           = useState(valBorrador("producto", ""));
   const [origen,           setOrigen]             = useState("");
   const [destino,          setDestino]            = useState("");
-  const [ruta,             setRuta]               = useState("");
-  const [empresa,          setEmpresa]            = useState("");
-  const [nitEmpresa,       setNitEmpresa]         = useState("");
-  const [conductor,        setConductor]          = useState("");
+  const [ruta,             setRuta]               = useState(valBorrador("ruta", ""));
+  const [empresa,          setEmpresa]            = useState(valBorrador("empresa", ""));
+  const [nitEmpresa,       setNitEmpresa]         = useState(valBorrador("nitEmpresa", ""));
+  const [conductor,        setConductor]          = useState(valBorrador("conductor", ""));
   const [listaProductos,   setListaProductos]     = useState(obtenerListaProductos);
   const [modoOtroProd,     setModoOtroProd]       = useState(false);
   const [otroProdTexto,    setOtroProdTexto]      = useState("");
-  const [kmCargado,        setKmCargado]          = useState("");
-  const [kmVacio,          setKmVacio]            = useState("");
+  const [kmCargado,        setKmCargado]          = useState(valBorrador("kmCargado", ""));
+  const [kmVacio,          setKmVacio]            = useState(valBorrador("kmVacio", ""));
   const [kmCargadoRet,     setKmCargadoRet]       = useState("");
   const [kmVacioRet,       setKmVacioRet]         = useState("");
-  const [tonelaje,         setTonelaje]           = useState("");
-  const [fleteTon,         setFleteTon]           = useState("");
+  const [tonelaje,         setTonelaje]           = useState(valBorrador("tonelaje", ""));
+  const [fleteTon,         setFleteTon]           = useState(valBorrador("fleteTon", ""));
   const [modoComb,         setModoComb]           = useState("auto");
-  const [rendCargado,      setRendCargado]        = useState("");
-  const [rendVacio,        setRendVacio]          = useState("");
+  const [rendCargado,      setRendCargado]        = useState(valBorrador("rendCargado", ""));
+  const [rendVacio,        setRendVacio]          = useState(valBorrador("rendVacio", ""));
   const [galManual,        setGalManual]          = useState("");
   const ultimoViaje = viajes.length > 0 ? viajes[0] : null;
   const [precioAcpm,       setPrecioAcpm]         = useState(() => {
+    const guardado = valBorrador("precioAcpm", null);
+    if (guardado !== null) return guardado;
     if (ultimoViaje && ultimoViaje.gTot > 0) return Math.round((ultimoViaje.cAcpm || 0) / ultimoViaje.gTot) || "";
     return "";
   });
   const [precioAdblue,     setPrecioAdblue]       = useState(() => {
+    const guardado = valBorrador("precioAdblue", null);
+    if (guardado !== null) return guardado;
     if (ultimoViaje && ultimoViaje.adlt > 0) return Math.round((ultimoViaje.cAdbl || 0) / ultimoViaje.adlt) || "";
     return "";
   });
-  const [categoria,        setCategoria]          = useState("VII");
+  const [categoria,        setCategoria]          = useState(valBorrador("categoria", "VII"));
   const [busquedaP,        setBusquedaP]          = useState("");
   const [selP,             setSelP]               = useState("");
   const [peajesRuta,       setPeajesRuta]         = useState([]);
-  const [porcCond,         setPorcCond]           = useState("");
-  const [carpado,          setCarpado]            = useState("");
-  const [gastosViaje,      setGastosViaje]        = useState("");
+  const [porcCond,         setPorcCond]           = useState(valBorrador("porcCond", ""));
+  const [carpado,          setCarpado]            = useState(valBorrador("carpado", ""));
+  const [gastosViaje,      setGastosViaje]        = useState(valBorrador("gastosViaje", ""));
   const [extras,           setExtras]             = useState([]);
   const [nuevoNom,         setNuevoNom]           = useState("");
   const [nuevoVal,         setNuevoVal]           = useState("");
@@ -100,8 +124,6 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [pctAnticipoFleteRet, setPctAnticipoFleteRet] = useState("60");
   const [montoAnticipoFleteRet, setMontoAnticipoFleteRet] = useState("");
   const [fleteRetorno,     setFleteRetorno]       = useState("");
-  const [prevValorViajeIda,    setPrevValorViajeIda]    = useState(valorViajeIda);
-  const [prevValorViajeRetorno,setPrevValorViajeRetorno] = useState(valorViajeRetorno);
   const [prevPlaca,            setPrevPlaca]            = useState(placa);
   const [tonelajeRetorno,  setTonelajeRetorno]    = useState("");
   const [modoFleteRetorno, setModoFleteRetorno]   = useState("porTon");
@@ -138,7 +160,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   const [pasoActual,       setPasoActual]         = useState(1);
   const [subPasoWizard,    setSubPasoWizard]      = useState(1);
   const TOTAL_SUBPASOS_WIZARD = 5; // 5 pasos agrupados optimizados
-  const borradorGuardadoRef = useRef(false);
+  const borradorGuardadoRef = useRef(borrador !== null);
 
 
   const n   = (v) => parseFloat(v) || 0;
@@ -172,6 +194,9 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       ? n(tonelajeRetorno) * n(fleteRetorno)
       : n(fleteRetorno)
     : 0;
+
+  const [prevValorViajeIda,     setPrevValorViajeIda]     = useState(valorViajeIda);
+  const [prevValorViajeRetorno, setPrevValorViajeRetorno] = useState(valorViajeRetorno);
 
   const valorViaje = valorViajeIda + valorViajeRetorno;
 
@@ -691,37 +716,6 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
     }
   }
 
-  // ── FE-08: Cargar borrador al montar ─────────────────────────────────────────
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(BORRADOR_KEY);
-      if (!raw) return;
-      const b = JSON.parse(raw);
-      if (b.fecha)             setFecha(b.fecha);
-      if (b.placa)             setPlaca(b.placa);
-      if (b.tipoCarga)         setTipoCarga(b.tipoCarga);
-      if (b.ruta)              setRuta(b.ruta);
-      if (b.empresa)           setEmpresa(b.empresa);
-      if (b.nitEmpresa)        setNitEmpresa(b.nitEmpresa);
-      if (b.conductor)         setConductor(b.conductor);
-      if (b.producto)          setProducto(b.producto);
-      if (b.tonelaje)          setTonelaje(b.tonelaje);
-      if (b.fleteTon)          setFleteTon(b.fleteTon);
-      if (b.modoFlete)         setModoFlete(b.modoFlete);
-      if (b.kmCargado)         setKmCargado(b.kmCargado);
-      if (b.kmVacio)           setKmVacio(b.kmVacio);
-      if (b.rendCargado)       setRendCargado(b.rendCargado);
-      if (b.rendVacio)         setRendVacio(b.rendVacio);
-      if (b.precioAcpm)        setPrecioAcpm(b.precioAcpm);
-      if (b.precioAdblue)      setPrecioAdblue(b.precioAdblue);
-      if (b.categoria)         setCategoria(b.categoria);
-      if (b.porcCond)          setPorcCond(b.porcCond);
-      if (b.carpado)           setCarpado(b.carpado);
-      if (b.gastosViaje)       setGastosViaje(b.gastosViaje);
-      borradorGuardadoRef.current = true;
-    } catch { void 0; }
-  }, []);
-
   // ── FE-08: Guardar borrador con debounce 800ms ────────────────────────────────
   const guardarBorradorRef = useRef(null);
   useEffect(() => {
@@ -757,24 +751,6 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
   }, [ruta, placa, tonelaje]);
 
 
-
-  // Encabezado de sección con paso numerado (solo presentación)
-  const SeccionHeader = ({ num, ok, label, abierta, onToggle }) => (
-    <button
-      type="button"
-      aria-expanded={abierta}
-      style={{...styles.seccionHeader, width:"100%", background:"none", border:"none", textAlign:"left", cursor:"pointer", font:"inherit"}}
-      onClick={onToggle}
-    >
-      <span style={styles.seccionHead}>
-        <span style={{...styles.stepBadge, ...(ok ? styles.stepBadgeDone : {})}}>
-          {ok ? <Check size={13} strokeWidth={3} /> : num}
-        </span>
-        <span style={styles.seccionLabel}>{label}</span>
-      </span>
-      {abierta ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
-    </button>
-  );
 
   const MODO_FLETE_OPCIONES = [
     { value:"porTon",   label:"Por tonelada",  icono:"⚖️",  sub:"Flete × Tons" },
@@ -1590,7 +1566,7 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
                 ["Flete total",    fmt(fleteTotal)],
                 ["Combustible",    fmt(costoAcpm + costoAdbl)],
                 [`Peajes (${peajesRuta.length} casetas)`, fmt(totPeajes)],
-                ["Conductor",      fmt(costoConduct)],
+                ["Costo conductor", fmt(costoConduct)],
                 ["Otros costos",   fmt(n(carpado)+n(gastosViaje))],
               ].map(([k,v])=>(
                 <div key={k} style={{ display:"flex",justifyContent:"space-between",
@@ -2926,6 +2902,29 @@ function Calculadora({ vehiculos, viajes, rutas = [], peajes = [], conductores =
       )}
 
     </div>
+  );
+}
+
+// Encabezado de sección con paso numerado (solo presentación)
+// Definido a nivel de módulo: antes se creaba dentro del render, lo que
+// remontaba el header en cada render y hacía que React lo tratara como
+// un componente nuevo (react-hooks/static-components).
+function SeccionHeader({ num, ok, label, abierta, onToggle }) {
+  return (
+    <button
+      type="button"
+      aria-expanded={abierta}
+      style={{...styles.seccionHeader, width:"100%", background:"none", border:"none", textAlign:"left", cursor:"pointer", font:"inherit"}}
+      onClick={onToggle}
+    >
+      <span style={styles.seccionHead}>
+        <span style={{...styles.stepBadge, ...(ok ? styles.stepBadgeDone : {})}}>
+          {ok ? <Check size={13} strokeWidth={3} /> : num}
+        </span>
+        <span style={styles.seccionLabel}>{label}</span>
+      </span>
+      {abierta ? <ChevronUp size={16} color={t.colors.textTertiary}/> : <ChevronDown size={16} color={t.colors.textTertiary}/>}
+    </button>
   );
 }
 

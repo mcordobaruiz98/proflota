@@ -405,11 +405,11 @@ function Empresas({ empresas = [], onAgregar, onEliminar, mostrarToast }) {
 
       {/* Modal accesible de confirmación */}
       <ConfirmarModal
-        visible={Boolean(empresaAEliminar)}
+        abierto={Boolean(empresaAEliminar)}
         titulo="¿Eliminar empresa del directorio?"
         mensaje={empresaAEliminar ? `¿Estás seguro de que deseas eliminar a ${empresaAEliminar.razonSocial}?` : ""}
-        textoBotonConfirmar="Eliminar empresa"
-        esPeligroso={true}
+        textoConfirmar="Eliminar empresa"
+        esPeligro={true}
         onCancelar={() => setEmpresaAEliminar(null)}
         onConfirmar={ejecutarEliminar}
       />

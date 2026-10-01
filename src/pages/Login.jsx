@@ -145,7 +145,10 @@ function Login() {
             ¿Primera vez? Ingresa tu código beta
           </p>
           <input
+            id="a11y-Login-108"
+            name="codigoBeta"
             type="text"
+            aria-label="Código de acceso beta"
             placeholder="Código de acceso beta"
             value={codigoBeta}
             onChange={e=>setCodigoBeta(e.target.value.trim().toUpperCase())}

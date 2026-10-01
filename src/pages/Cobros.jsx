@@ -681,11 +681,11 @@ ${p.banco ? `<p class="banco">Favor consignar a la cuenta <strong>${esc(p.banco)
 
       {/* Modal accesible de confirmación para eliminar */}
       <ConfirmarModal
-        visible={Boolean(cuentaAEliminar)}
+        abierto={Boolean(cuentaAEliminar)}
         titulo="¿Eliminar cuenta de cobro?"
         mensaje={cuentaAEliminar ? `Estás a punto de eliminar la cuenta N° ${String(cuentaAEliminar.numero).padStart(3, "0")}. Esta acción no se puede deshacer.` : ""}
-        textoBotonConfirmar="Eliminar cuenta"
-        esPeligroso={true}
+        textoConfirmar="Eliminar cuenta"
+        esPeligro={true}
         onCancelar={() => setCuentaAEliminar(null)}
         onConfirmar={async () => {
           if (!cuentaAEliminar) return;

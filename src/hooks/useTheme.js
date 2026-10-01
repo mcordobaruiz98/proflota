@@ -8,9 +8,10 @@ import { aplicarTema, obtenerTemaActual } from "../styles/theme";
 export function useTheme() {
   const [tema, setTema] = useState(obtenerTemaActual);
 
+  // El tema inicial ya lo aplica main.jsx al arrancar (aplicarTema(obtenerTemaActual()));
+  // aquí solo nos suscribimos a los cambios de tema que dispara aplicarTema en cualquier
+  // punto de la app, para que todas las instancias del hook queden sincronizadas.
   useEffect(() => {
-    aplicarTema(tema);
-
     const handleCambio = (e) => {
       setTema(e.detail);
     };
