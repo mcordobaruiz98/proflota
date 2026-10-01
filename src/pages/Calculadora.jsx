@@ -149,6 +149,7 @@ const valBorrador = (campo, porDefecto) => {
     return ["porTon", "porKm", "total"].includes(v) ? v : "porTon";
   });
   const [modoConductor,    setModoConductor]      = useState("porcentaje");
+  const [conductorDeLista, setConductorDeLista]  = useState(false);
   const [descRetefuente,   setDescRetefuente]     = useState(false);
   const [pctRetefuente,    setPctRetefuente]      = useState(1);
   const [descReteica,      setDescReteica]        = useState(false);
@@ -212,6 +213,12 @@ const valBorrador = (campo, porDefecto) => {
     .map(v => v.condNom)
     .filter(c => c && c.trim() !=="")
   )]
+
+  // Un conductor tecado a mano es de un solo viaje: no es dato maestro, asi que
+  // no se guarda en el borrador ni en las plantillas de ruta. Si coincide con
+  // alguien del directorio, se trata como conductor de la lista.
+  const conductorMaestro = conductores.some(c => c.nombre === conductor);
+  const conductorPersistido = conductorMaestro ? conductor : "";
 
   // Empresas del directorio (con NIT) + las que aparecen en viajes
   const empresasDirectorio = empresas.map(e => (e.razonSocial || e.nombre || "").trim()).filter(Boolean);
@@ -438,7 +445,7 @@ const valBorrador = (campo, porDefecto) => {
             producto: sanitizar(producto),
             empresa: sanitizar(empresa),
             nitEmpresa: sanitizar(nitEmpresa),
-            conductor: sanitizar(conductor),
+            conductor: conductorPersistido,
             placa: sanitizar(placa),
             modoConductor,
             porcCond: n(porcCond),
@@ -565,7 +572,7 @@ const valBorrador = (campo, porDefecto) => {
       setFecha(new Date().toISOString().slice(0,10)); setFechaDescarga("");
       setMani(""); setRemesa(""); setPesoBascula(""); setLugarCargue(""); setLugarDescargue("");
       setObservaciones(""); setPlaca(""); setTipoCarga(""); setProducto(""); setRuta(""); setModoFlete("");
-      setEmpresa(""); setNitEmpresa(""); setConductor(""); setKmCargado(""); setKmVacio(""); setKmCargadoRet(""); setKmVacioRet(""); setModoComb("");
+      setEmpresa(""); setNitEmpresa(""); setConductor(""); setConductorDeLista(false); setKmCargado(""); setKmVacio(""); setKmCargadoRet(""); setKmVacioRet(""); setModoComb("");
       setTonelaje(""); setFleteTon(""); setTieneRetorno(false); setFleteRetorno("");
       setTonelajeRetorno(""); setRutaRet(""); setempresaRet(""); setNitEmpresaRet(""); setProductoRet("");
       setManiRet(""); setRemesaRet(""); setPesoBasRet("");
@@ -711,7 +718,7 @@ const valBorrador = (campo, porDefecto) => {
       producto: sanitizar(producto),
       empresa: sanitizar(empresa),
       nitEmpresa: sanitizar(nitEmpresa),
-      conductor: sanitizar(conductor),
+      conductor: conductorPersistido,
       placa: sanitizar(placa),
       modoConductor: modoConductor,
       porcCond: n(porcCond),
@@ -765,7 +772,7 @@ const valBorrador = (campo, porDefecto) => {
       try {
         const borrador = {
           fecha, placa, tipoCarga, ruta, empresa, nitEmpresa,
-          conductor, producto, tonelaje, fleteTon, modoFlete,
+          conductor: conductorPersistido, producto, tonelaje, fleteTon, modoFlete,
           kmCargado, kmVacio, rendCargado, rendVacio,
           precioAcpm, precioAdblue, categoria, porcCond, carpado, gastosViaje,
         };
@@ -774,7 +781,7 @@ const valBorrador = (campo, porDefecto) => {
     } catch { void 0; }
     }, 800);
     return () => clearTimeout(guardarBorradorRef.current);
-  }, [fecha, placa, tipoCarga, ruta, empresa, nitEmpresa, conductor, producto,
+  }, [fecha, placa, tipoCarga, ruta, empresa, nitEmpresa, conductorPersistido, producto,
       tonelaje, fleteTon, modoFlete, kmCargado, kmVacio, rendCargado, rendVacio,
       precioAcpm, precioAdblue, categoria, porcCond, carpado, gastosViaje]);
 
@@ -1067,14 +1074,14 @@ const valBorrador = (campo, porDefecto) => {
               </WizardCampo>
             </div>
             <WizardCampo label="¿Quién maneja el camión?" ayuda="Si el conductor no está en la lista, puedes escribir su nombre">
-              <WizardSelect value={conductor} onChange={e => setConductor(e.target.value)}>
+              <WizardSelect value={conductor} onChange={e => { setConductor(e.target.value); setConductorDeLista(e.target.value !== ""); }}>
                 <option value="">Seleccionar conductor...</option>
                 {conductores.map(c => (
                   <option key={c.firestoreId} value={c.nombre}>{c.nombre}</option>
                 ))}
               </WizardSelect>
             </WizardCampo>
-            {!conductor && (
+            {!conductorDeLista && (
               <WizardCampo label="O escribe el nombre del conductor">
                 <WizardInput
                   value={conductor}
